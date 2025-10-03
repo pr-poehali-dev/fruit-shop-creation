@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
-import Header from '@/components/Header';
-import CartSheet from '@/components/CartSheet';
-import ProfileSheet from '@/components/ProfileSheet';
-import AuthDialog from '@/components/AuthDialog';
-import Footer from '@/components/Footer';
-import HomeSection from '@/components/sections/HomeSection';
-import CatalogSection from '@/components/sections/CatalogSection';
-import AboutSection from '@/components/sections/AboutSection';
-import DeliverySection from '@/components/sections/DeliverySection';
-import CareSection from '@/components/sections/CareSection';
-import ContactsSection from '@/components/sections/ContactsSection';
+import Header from '@/components/shop/Header';
+import AuthDialog from '@/components/shop/AuthDialog';
+import Footer from '@/components/shop/Footer';
+import HomeSection from '@/components/shop/sections/HomeSection';
+import CatalogSection from '@/components/shop/sections/CatalogSection';
+import AboutSection from '@/components/shop/sections/AboutSection';
+import DeliverySection from '@/components/shop/sections/DeliverySection';
+import CareSection from '@/components/shop/sections/CareSection';
+import ContactsSection from '@/components/shop/sections/ContactsSection';
 
 interface User {
   id: number;
@@ -54,8 +58,6 @@ const Index = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showCartSheet, setShowCartSheet] = useState(false);
-  const [showProfileSheet, setShowProfileSheet] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
   const { toast } = useToast();
 
@@ -153,7 +155,6 @@ const Index = () => {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    setShowProfileSheet(false);
     toast({ title: 'Вы вышли из системы' });
   };
 
@@ -186,9 +187,12 @@ const Index = () => {
     }
   };
 
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  };
+
   const handleCheckout = async (paymentMethod: string) => {
     if (!user) {
-      setShowCartSheet(false);
       setShowAuthDialog(true);
       return;
     }
@@ -226,7 +230,6 @@ const Index = () => {
           description: `Номер заказа: ${data.order_id}`
         });
         setCart([]);
-        setShowCartSheet(false);
         loadOrders();
       } else {
         toast({
@@ -244,64 +247,131 @@ const Index = () => {
     }
   };
 
+  const renderCartContent = () => (
+    <div className="mt-6 space-y-4">
+      {cart.length === 0 ? (
+        <p className="text-center text-muted-foreground py-8">Корзина пуста</p>
+      ) : (
+        <>
+          {cart.map(item => (
+            <div key={item.product.id} className="flex gap-4 items-center">
+              <img src={item.product.image_url} alt={item.product.name} className="w-16 h-16 object-cover rounded" />
+              <div className="flex-1">
+                <h4 className="font-medium">{item.product.name}</h4>
+                <p className="text-sm text-muted-foreground">{item.product.price} ₽</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="icon" variant="outline" onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}>
+                  <Icon name="Minus" size={16} />
+                </Button>
+                <span className="w-8 text-center">{item.quantity}</span>
+                <Button size="icon" variant="outline" onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}>
+                  <Icon name="Plus" size={16} />
+                </Button>
+              </div>
+            </div>
+          ))}
+          <Separator />
+          <div className="flex justify-between items-center font-bold text-lg">
+            <span>Итого:</span>
+            <span>{getTotalPrice()} ₽</span>
+          </div>
+          <div className="space-y-2">
+            <Button className="w-full" onClick={() => handleCheckout('card')}>
+              <Icon name="CreditCard" size={18} className="mr-2" />
+              Оплатить картой
+            </Button>
+            <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash')}>
+              <Icon name="Wallet" size={18} className="mr-2" />
+              Наличными при получении
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const renderProfileContent = () => (
+    <div className="mt-6 space-y-4">
+      <div>
+        <Label>Телефон</Label>
+        <p className="font-medium">{user?.phone}</p>
+      </div>
+      <div>
+        <Label>Имя</Label>
+        <p className="font-medium">{user?.full_name || 'Не указано'}</p>
+      </div>
+      {user?.is_admin && (
+        <Badge variant="secondary">Администратор</Badge>
+      )}
+      <Separator />
+      <div>
+        <h3 className="font-semibold mb-3">История заказов</h3>
+        {orders.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Заказов пока нет</p>
+        ) : (
+          <div className="space-y-3">
+            {orders.map(order => (
+              <Card key={order.id}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Заказ #{order.id}</CardTitle>
+                  <CardDescription className="text-xs">
+                    {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm font-medium">{order.total_amount} ₽</p>
+                  <Badge variant="outline" className="mt-2">{order.status}</Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+      <Button variant="destructive" className="w-full" onClick={handleLogout}>Выйти</Button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
-        user={user}
         cart={cart}
+        user={user}
         currentSection={currentSection}
         onSectionChange={setCurrentSection}
         onShowAuth={() => setShowAuthDialog(true)}
-        onShowCart={() => setShowCartSheet(true)}
-        onShowProfile={() => setShowProfileSheet(true)}
+        renderCartContent={renderCartContent}
+        renderProfileContent={renderProfileContent}
       />
 
       <main className="container mx-auto px-4 py-8">
         {currentSection === 'home' && (
           <HomeSection 
-            products={products}
-            onSectionChange={setCurrentSection}
-            onAddToCart={addToCart}
+            products={products} 
+            onNavigate={setCurrentSection} 
+            onAddToCart={addToCart} 
           />
         )}
 
         {currentSection === 'catalog' && (
-          <CatalogSection 
-            products={products}
-            onAddToCart={addToCart}
-          />
+          <CatalogSection products={products} onAddToCart={addToCart} />
         )}
 
         {currentSection === 'about' && <AboutSection />}
+
         {currentSection === 'delivery' && <DeliverySection />}
+
         {currentSection === 'care' && <CareSection />}
+
         {currentSection === 'contacts' && <ContactsSection />}
       </main>
 
       <Footer />
 
-      <CartSheet 
-        open={showCartSheet}
-        onOpenChange={setShowCartSheet}
-        cart={cart}
-        onUpdateQuantity={updateCartQuantity}
-        onCheckout={handleCheckout}
-      />
-
-      {user && (
-        <ProfileSheet 
-          open={showProfileSheet}
-          onOpenChange={setShowProfileSheet}
-          user={user}
-          orders={orders}
-          onLogout={handleLogout}
-        />
-      )}
-
       <AuthDialog 
-        open={showAuthDialog}
+        open={showAuthDialog} 
         onOpenChange={setShowAuthDialog}
-        onAuth={handleAuth}
+        onSubmit={handleAuth}
       />
     </div>
   );
