@@ -65,6 +65,7 @@ const Index = () => {
   const [currentSection, setCurrentSection] = useState('home');
   const [siteSettings, setSiteSettings] = useState<any>({});
   const [isRefreshingBalance, setIsRefreshingBalance] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
@@ -83,8 +84,10 @@ const Index = () => {
       setCart(JSON.parse(savedCart));
     }
     
-    loadProducts();
-    loadSettings();
+    setTimeout(async () => {
+      await Promise.all([loadProducts(), loadSettings()]);
+      setIsLoading(false);
+    }, 100);
   }, []);
 
   useEffect(() => {
@@ -123,20 +126,35 @@ const Index = () => {
   const loadProducts = async () => {
     try {
       const response = await fetch(API_PRODUCTS);
+      if (!response.ok) {
+        console.error('Products API error:', response.status);
+        return;
+      }
       const data = await response.json();
       setProducts(data.products || []);
     } catch (error) {
       console.error('Failed to load products:', error);
+      setProducts([]);
     }
   };
 
   const loadSettings = async () => {
     try {
       const response = await fetch(API_SETTINGS);
+      if (!response.ok) {
+        console.error('Settings API error:', response.status);
+        return;
+      }
       const data = await response.json();
       setSiteSettings(data.settings || {});
     } catch (error) {
       console.error('Failed to load settings:', error);
+      setSiteSettings({
+        site_name: 'Питомник растений',
+        site_description: 'Плодовые и декоративные культуры',
+        phone: '+7 (495) 123-45-67',
+        email: 'info@plantsnursery.ru'
+      });
     }
   };
 
@@ -144,10 +162,15 @@ const Index = () => {
     if (!user) return;
     try {
       const response = await fetch(`${API_ORDERS}?user_id=${user.id}`);
+      if (!response.ok) {
+        console.error('Orders API error:', response.status);
+        return;
+      }
       const data = await response.json();
       setOrders(data.orders || []);
     } catch (error) {
       console.error('Failed to load orders:', error);
+      setOrders([]);
     }
   };
 
@@ -446,25 +469,36 @@ const Index = () => {
           />
 
           <main className="container mx-auto px-4 py-8">
-            {currentSection === 'home' && (
-              <HomeSection 
-                products={products} 
-                onNavigate={setCurrentSection} 
-                onAddToCart={addToCart} 
-              />
+            {isLoading ? (
+              <div className="flex justify-center items-center min-h-[400px]">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Загрузка...</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {currentSection === 'home' && (
+                  <HomeSection 
+                    products={products} 
+                    onNavigate={setCurrentSection} 
+                    onAddToCart={addToCart} 
+                  />
+                )}
+
+                {currentSection === 'catalog' && (
+                  <CatalogSection products={products} onAddToCart={addToCart} />
+                )}
+
+                {currentSection === 'about' && <AboutSection />}
+
+                {currentSection === 'delivery' && <DeliverySection />}
+
+                {currentSection === 'care' && <CareSection />}
+
+                {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
+              </>
             )}
-
-            {currentSection === 'catalog' && (
-              <CatalogSection products={products} onAddToCart={addToCart} />
-            )}
-
-            {currentSection === 'about' && <AboutSection />}
-
-            {currentSection === 'delivery' && <DeliverySection />}
-
-            {currentSection === 'care' && <CareSection />}
-
-            {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
           </main>
 
           <Footer />
