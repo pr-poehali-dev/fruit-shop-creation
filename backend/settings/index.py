@@ -1,0 +1,104 @@
+import json
+import os
+from typing import Dict, Any
+
+def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    '''
+    Business: Manage site settings and information
+    Args: event with httpMethod, body
+    Returns: HTTP response with settings data
+    '''
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    
+    method: str = event.get('httpMethod', 'GET')
+    
+    if method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
+                'Access-Control-Max-Age': '86400'
+            },
+            'body': ''
+        }
+    
+    db_url = os.environ.get('DATABASE_URL')
+    conn = psycopg2.connect(db_url)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        if method == 'GET':
+            cur.execute("SELECT * FROM site_settings WHERE id = 1")
+            settings = cur.fetchone()
+            
+            if not settings:
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'settings': {
+                            'site_name': 'Питомник растений',
+                            'site_description': 'Плодовые и декоративные культуры высокого качества',
+                            'phone': '+7 (495) 123-45-67',
+                            'email': 'info@plantsnursery.ru',
+                            'address': 'Московская область, г. Пушкино, ул. Садовая, 15',
+                            'work_hours': 'Пн-Вс: 9:00 - 19:00'
+                        }
+                    }),
+                    'isBase64Encoded': False
+                }
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'settings': dict(settings)}, default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'PUT':
+            body_data = json.loads(event.get('body', '{}'))
+            
+            cur.execute(
+                """INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours)
+                   VALUES (1, %s, %s, %s, %s, %s, %s)
+                   ON CONFLICT (id) DO UPDATE SET
+                   site_name = EXCLUDED.site_name,
+                   site_description = EXCLUDED.site_description,
+                   phone = EXCLUDED.phone,
+                   email = EXCLUDED.email,
+                   address = EXCLUDED.address,
+                   work_hours = EXCLUDED.work_hours,
+                   updated_at = CURRENT_TIMESTAMP
+                   RETURNING *""",
+                (
+                    body_data.get('site_name'),
+                    body_data.get('site_description'),
+                    body_data.get('phone'),
+                    body_data.get('email'),
+                    body_data.get('address'),
+                    body_data.get('work_hours')
+                )
+            )
+            conn.commit()
+            settings = cur.fetchone()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'settings': dict(settings)}, default=str),
+                'isBase64Encoded': False
+            }
+        
+        return {
+            'statusCode': 405,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    finally:
+        cur.close()
+        conn.close()

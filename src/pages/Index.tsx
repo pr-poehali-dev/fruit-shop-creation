@@ -61,11 +61,13 @@ const Index = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
+  const [siteSettings, setSiteSettings] = useState<any>({});
   const { toast } = useToast();
 
   const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
   const API_PRODUCTS = 'https://functions.poehali.dev/5ae817c6-e62e-40c6-8e34-18ffac2d3cfc';
   const API_ORDERS = 'https://functions.poehali.dev/b35bef37-8423-4939-b43b-0fb565cc8853';
+  const API_SETTINGS = 'https://functions.poehali.dev/9b1ac59e-93b6-41de-8974-a7f58d4ffaf9';
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -79,6 +81,7 @@ const Index = () => {
     }
     
     loadProducts();
+    loadSettings();
   }, []);
 
   useEffect(() => {
@@ -98,6 +101,16 @@ const Index = () => {
       setProducts(data.products || []);
     } catch (error) {
       console.error('Failed to load products:', error);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch(API_SETTINGS);
+      const data = await response.json();
+      setSiteSettings(data.settings || {});
+    } catch (error) {
+      console.error('Failed to load settings:', error);
     }
   };
 
@@ -346,6 +359,7 @@ const Index = () => {
         <AdminPanel onClose={() => {
           setShowAdminPanel(false);
           loadProducts();
+          loadSettings();
         }} />
       ) : (
         <>
@@ -378,7 +392,7 @@ const Index = () => {
 
             {currentSection === 'care' && <CareSection />}
 
-            {currentSection === 'contacts' && <ContactsSection />}
+            {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
           </main>
 
           <Footer />

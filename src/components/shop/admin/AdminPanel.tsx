@@ -51,13 +51,17 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [siteSettings, setSiteSettings] = useState<any>({});
   const { toast } = useToast();
 
   const API_PRODUCTS = 'https://functions.poehali.dev/5ae817c6-e62e-40c6-8e34-18ffac2d3cfc';
+  const API_CATEGORIES = 'https://functions.poehali.dev/0a62d37c-9fd0-4ff3-9b5b-2c881073d3ac';
+  const API_SETTINGS = 'https://functions.poehali.dev/9b1ac59e-93b6-41de-8974-a7f58d4ffaf9';
 
   useEffect(() => {
     loadProducts();
     loadCategories();
+    loadSettings();
   }, []);
 
   const loadProducts = async () => {
@@ -71,12 +75,23 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   };
 
   const loadCategories = async () => {
-    setCategories([
-      { id: 1, name: 'Плодовые культуры', slug: 'fruit-plants', description: 'Фруктовые деревья и кустарники' },
-      { id: 2, name: 'Декоративные культуры', slug: 'decorative-plants', description: 'Декоративные растения для сада' },
-      { id: 3, name: 'Цветы', slug: 'flowers', description: 'Садовые и комнатные цветы' },
-      { id: 4, name: 'Саженцы', slug: 'seedlings', description: 'Молодые саженцы растений' }
-    ]);
+    try {
+      const response = await fetch(API_CATEGORIES);
+      const data = await response.json();
+      setCategories(data.categories || []);
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch(API_SETTINGS);
+      const data = await response.json();
+      setSiteSettings(data.settings || {});
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -124,6 +139,90 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   const openProductDialog = (product?: Product) => {
     setEditingProduct(product || null);
     setShowProductDialog(true);
+  };
+
+  const handleSaveCategory = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const categoryData = {
+      id: editingCategory?.id,
+      name: formData.get('name') as string,
+      slug: (formData.get('name') as string).toLowerCase().replace(/\s+/g, '-').replace(/[а-яА-ЯёЁ]/g, (char) => {
+        const translit: Record<string, string> = {
+          'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z',
+          'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
+          'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+          'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+        };
+        return translit[char.toLowerCase()] || char;
+      }),
+      description: formData.get('description') as string
+    };
+
+    try {
+      const response = await fetch(API_CATEGORIES, {
+        method: editingCategory ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: editingCategory ? 'Категория обновлена' : 'Категория добавлена',
+          description: categoryData.name
+        });
+        setShowCategoryDialog(false);
+        setEditingCategory(null);
+        loadCategories();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось сохранить категорию',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const settingsData = {
+      site_name: formData.get('site_name') as string,
+      site_description: formData.get('site_description') as string,
+      phone: formData.get('phone') as string,
+      email: formData.get('email') as string,
+      address: formData.get('address') as string,
+      work_hours: formData.get('work_hours') as string
+    };
+
+    try {
+      const response = await fetch(API_SETTINGS, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Настройки сохранены',
+          description: 'Изменения применены на сайте'
+        });
+        loadSettings();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось сохранить настройки',
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
@@ -222,31 +321,37 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
                 <CardTitle>Информация о сайте</CardTitle>
                 <CardDescription>Настройте основную информацию</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="site-name">Название питомника</Label>
-                  <Input id="site-name" defaultValue="Питомник растений" />
-                </div>
-                <div>
-                  <Label htmlFor="site-description">Описание</Label>
-                  <Textarea id="site-description" defaultValue="Плодовые и декоративные культуры высокого качества" />
-                </div>
-                <div>
-                  <Label htmlFor="site-phone">Телефон</Label>
-                  <Input id="site-phone" defaultValue="+7 (495) 123-45-67" />
-                </div>
-                <div>
-                  <Label htmlFor="site-email">Email</Label>
-                  <Input id="site-email" type="email" defaultValue="info@plantsnursery.ru" />
-                </div>
-                <div>
-                  <Label htmlFor="site-address">Адрес</Label>
-                  <Input id="site-address" defaultValue="Московская область, г. Пушкино, ул. Садовая, 15" />
-                </div>
-                <Button>
-                  <Icon name="Save" size={18} className="mr-2" />
-                  Сохранить изменения
-                </Button>
+              <CardContent>
+                <form onSubmit={handleSaveSettings} className="space-y-4">
+                  <div>
+                    <Label htmlFor="site-name">Название питомника</Label>
+                    <Input id="site-name" name="site_name" defaultValue={siteSettings.site_name || 'Питомник растений'} required />
+                  </div>
+                  <div>
+                    <Label htmlFor="site-description">Описание</Label>
+                    <Textarea id="site-description" name="site_description" defaultValue={siteSettings.site_description || 'Плодовые и декоративные культуры высокого качества'} rows={3} />
+                  </div>
+                  <div>
+                    <Label htmlFor="site-phone">Телефон</Label>
+                    <Input id="site-phone" name="phone" defaultValue={siteSettings.phone || '+7 (495) 123-45-67'} />
+                  </div>
+                  <div>
+                    <Label htmlFor="site-email">Email</Label>
+                    <Input id="site-email" name="email" type="email" defaultValue={siteSettings.email || 'info@plantsnursery.ru'} />
+                  </div>
+                  <div>
+                    <Label htmlFor="site-address">Адрес</Label>
+                    <Input id="site-address" name="address" defaultValue={siteSettings.address || 'Московская область, г. Пушкино, ул. Садовая, 15'} />
+                  </div>
+                  <div>
+                    <Label htmlFor="work-hours">Режим работы</Label>
+                    <Input id="work-hours" name="work_hours" defaultValue={siteSettings.work_hours || 'Пн-Вс: 9:00 - 19:00'} />
+                  </div>
+                  <Button type="submit">
+                    <Icon name="Save" size={18} className="mr-2" />
+                    Сохранить изменения
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>
@@ -351,14 +456,14 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
             <DialogTitle>{editingCategory ? 'Редактировать категорию' : 'Добавить категорию'}</DialogTitle>
             <DialogDescription>Управление категориями товаров</DialogDescription>
           </DialogHeader>
-          <form className="space-y-4">
+          <form onSubmit={handleSaveCategory} className="space-y-4">
             <div>
               <Label htmlFor="category-name">Название категории</Label>
-              <Input id="category-name" defaultValue={editingCategory?.name} placeholder="Плодовые культуры" />
+              <Input id="category-name" name="name" defaultValue={editingCategory?.name} placeholder="Плодовые культуры" required />
             </div>
             <div>
               <Label htmlFor="category-description">Описание</Label>
-              <Textarea id="category-description" defaultValue={editingCategory?.description} />
+              <Textarea id="category-description" name="description" defaultValue={editingCategory?.description} placeholder="Фруктовые деревья и кустарники" />
             </div>
             <div className="flex gap-2 justify-end">
               <Button type="button" variant="outline" onClick={() => {
@@ -367,7 +472,10 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
               }}>
                 Отмена
               </Button>
-              <Button type="submit">Сохранить</Button>
+              <Button type="submit">
+                <Icon name="Save" size={18} className="mr-2" />
+                Сохранить
+              </Button>
             </div>
           </form>
         </DialogContent>
