@@ -1,7 +1,0 @@
-id,name,slug,description,price,image_url,category_id,stock,is_active
-1,Яблоня Антоновка,apple-antonovka,Классический русский сорт с кисло-сладкими плодами,1200,https://avatars.mds.yandex.net/get-marketpic/1779757/market_QTTajLEm9el3MyQMjZieWw/orig,1,15,true
-2,Вишня Владимирская,cherry-vladimirskaya,Морозостойкий сорт с темно-красными ягодами,950,https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400,4,20,true
-3,Роза чайная,rose-tea,Элегантная декоративная роза с нежным ароматом,450,https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400,2,30,true
-4,Туя западная,thuja-occidentalis,Вечнозелёное хвойное растение для живой изгороди,680,https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400,2,25,true
-5,Пион древовидный,peony-tree,Роскошные крупные цветы для украшения сада,1500,https://images.unsplash.com/photo-1591886960571-74d43a9d4166?w=400,3,12,true
-6,Саженец груши,pear-seedling,Молодой саженец груши сорта Конференция,890,https://images.unsplash.com/photo-1568632234157-ce7aecd03d0d?w=400,4,18,true
