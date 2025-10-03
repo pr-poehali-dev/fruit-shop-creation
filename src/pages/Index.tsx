@@ -333,10 +333,10 @@ const Index = () => {
             <span>{getTotalPrice()} ₽</span>
           </div>
           <div className="space-y-2">
-            {user && user.balance !== undefined && user.balance > 0 && (
+            {user && (
               <Button className="w-full" variant="default" onClick={() => handleCheckout('balance')}>
                 <Icon name="Wallet" size={18} className="mr-2" />
-                Оплатить балансом ({user.balance.toFixed(2)}₽)
+                Оплатить балансом ({(user.balance || 0).toFixed(2)}₽)
               </Button>
             )}
             <Button className="w-full" onClick={() => handleCheckout('card')}>
