@@ -22,7 +22,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     db_url = os.environ.get('DATABASE_URL')
@@ -35,13 +36,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             category = params.get('category')
             
             if category:
+                cat_escaped = category.replace("'", "''")
                 cur.execute(
-                    """SELECT p.*, c.name as category_name 
+                    f"""SELECT p.*, c.name as category_name 
                        FROM products p 
                        LEFT JOIN categories c ON p.category_id = c.id 
-                       WHERE c.slug = %s AND p.is_active = TRUE 
-                       ORDER BY p.created_at DESC""",
-                    (category,)
+                       WHERE c.slug = '{cat_escaped}' AND p.is_active = TRUE 
+                       ORDER BY p.created_at DESC"""
                 )
             else:
                 cur.execute(

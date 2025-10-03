@@ -17,9 +17,11 @@ export const useShopData = () => {
       const response = await fetch(API_PRODUCTS);
       if (!response.ok) {
         console.error('Products API error:', response.status);
+        setProducts([]);
         return;
       }
       const data = await response.json();
+      console.log('Products loaded:', data.products?.length || 0);
       setProducts(data.products || []);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -32,9 +34,16 @@ export const useShopData = () => {
       const response = await fetch(API_SETTINGS);
       if (!response.ok) {
         console.error('Settings API error:', response.status);
+        setSiteSettings({
+          site_name: 'Питомник растений',
+          site_description: 'Плодовые и декоративные культуры',
+          phone: '+7 (495) 123-45-67',
+          email: 'info@plantsnursery.ru'
+        });
         return;
       }
       const data = await response.json();
+      console.log('Settings loaded:', data.settings);
       setSiteSettings(data.settings || {});
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -48,14 +57,19 @@ export const useShopData = () => {
   };
 
   const loadOrders = async (user: User | null) => {
-    if (!user) return;
+    if (!user) {
+      setOrders([]);
+      return;
+    }
     try {
       const response = await fetch(`${API_ORDERS}?user_id=${user.id}`);
       if (!response.ok) {
         console.error('Orders API error:', response.status);
+        setOrders([]);
         return;
       }
       const data = await response.json();
+      console.log('Orders loaded:', data.orders?.length || 0);
       setOrders(data.orders || []);
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -92,10 +106,11 @@ export const useShopData = () => {
   };
 
   useEffect(() => {
-    setTimeout(async () => {
+    const loadData = async () => {
       await Promise.all([loadProducts(), loadSettings()]);
       setIsLoading(false);
-    }, 100);
+    };
+    loadData();
   }, []);
 
   return {
