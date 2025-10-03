@@ -212,6 +212,44 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
     }
   };
 
+  const handleAddBalance = async (userId: number, amount: number, description: string) => {
+    try {
+      const response = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_balance',
+          user_id: userId,
+          amount,
+          type: 'deposit',
+          description: description || 'Пополнение баланса администратором'
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Баланс пополнен',
+          description: `Начислено ${amount}₽`
+        });
+        loadUsers();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось начислить баланс',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось начислить баланс',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handleUpdateOrderStatus = async (orderId: number, status: string, rejectionReason?: string) => {
     try {
       const response = await fetch(API_ORDERS, {
@@ -323,7 +361,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
           </TabsContent>
 
           <TabsContent value="users">
-            <UsersTab users={users} />
+            <UsersTab users={users} onAddBalance={handleAddBalance} />
           </TabsContent>
 
           <TabsContent value="orders">
