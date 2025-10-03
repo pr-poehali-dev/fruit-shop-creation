@@ -89,8 +89,28 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       loadOrders();
+      refreshUserBalance();
     }
   }, [user]);
+
+  const refreshUserBalance = async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(`${API_AUTH}?action=balance&user_id=${user.id}`);
+      const data = await response.json();
+      
+      const updatedUser = {
+        ...user,
+        balance: data.balance,
+        cashback: data.cashback
+      };
+      
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error('Failed to refresh balance:', error);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -255,25 +275,6 @@ const Index = () => {
       const data = await response.json();
 
       if (data.success) {
-        if (paymentMethod === 'balance') {
-          const savedUser = localStorage.getItem('user');
-          if (savedUser) {
-            const parsedUser = JSON.parse(savedUser);
-            const newBalance = (parsedUser.balance || 0) - totalAmount;
-            const cashbackEarned = totalAmount * 0.05;
-            const newCashback = (parsedUser.cashback || 0) + cashbackEarned;
-            
-            const updatedUser = {
-              ...parsedUser,
-              balance: newBalance,
-              cashback: newCashback
-            };
-            
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            setUser(updatedUser);
-          }
-        }
-
         toast({
           title: 'Заказ оформлен!',
           description: paymentMethod === 'balance' 
@@ -282,6 +283,10 @@ const Index = () => {
         });
         setCart([]);
         loadOrders();
+        
+        if (paymentMethod === 'balance') {
+          refreshUserBalance();
+        }
       } else {
         toast({
           title: 'Ошибка',
@@ -421,6 +426,7 @@ const Index = () => {
           setShowAdminPanel(false);
           loadProducts();
           loadSettings();
+          refreshUserBalance();
         }} />
       ) : (
         <>
