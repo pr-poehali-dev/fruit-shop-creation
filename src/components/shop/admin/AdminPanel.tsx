@@ -212,6 +212,36 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId: number, status: string, rejectionReason?: string) => {
+    try {
+      const response = await fetch(API_ORDERS, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          order_id: orderId, 
+          status,
+          rejection_reason: rejectionReason 
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Статус обновлён',
+          description: `Заказ #${orderId} теперь: ${status}`
+        });
+        loadOrders();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить статус',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handleSaveSettings = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -297,7 +327,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
           </TabsContent>
 
           <TabsContent value="orders">
-            <OrdersTab orders={orders} />
+            <OrdersTab orders={orders} onUpdateStatus={handleUpdateOrderStatus} />
           </TabsContent>
 
           <TabsContent value="settings">

@@ -18,7 +18,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -151,6 +151,38 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'success': True, 'order_id': order_id}),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'PUT':
+            body_data = json.loads(event.get('body', '{}'))
+            order_id = body_data.get('order_id')
+            status = body_data.get('status', 'pending').replace("'", "''")
+            rejection_reason = body_data.get('rejection_reason', '').replace("'", "''")
+            
+            if not order_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'order_id required'}),
+                    'isBase64Encoded': False
+                }
+            
+            if rejection_reason:
+                cur.execute(
+                    f"UPDATE orders SET status = '{status}', rejection_reason = '{rejection_reason}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
+                )
+            else:
+                cur.execute(
+                    f"UPDATE orders SET status = '{status}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
+                )
+            
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True}),
                 'isBase64Encoded': False
             }
         

@@ -18,6 +18,7 @@ interface Order {
   status: string;
   payment_method: string;
   created_at: string;
+  rejection_reason?: string;
   items: Array<{
     product_name: string;
     quantity: number;
@@ -32,6 +33,25 @@ interface ProfileSheetProps {
   orders: Order[];
   onLogout: () => void;
 }
+
+const statusLabels: Record<string, string> = {
+  'pending': 'Ожидает',
+  'processing': 'В обработке',
+  'shipped': 'Отправлен',
+  'completed': 'Выполнен',
+  'cancelled': 'Отменён',
+  'rejected': 'Отклонён'
+};
+
+const getStatusBadgeVariant = (status: string) => {
+  switch (status) {
+    case 'completed': return 'default';
+    case 'rejected': return 'destructive';
+    case 'cancelled': return 'destructive';
+    case 'shipped': return 'secondary';
+    default: return 'outline';
+  }
+};
 
 const ProfileSheet = ({ open, onOpenChange, user, orders, onLogout }: ProfileSheetProps) => {
   return (
@@ -69,7 +89,15 @@ const ProfileSheet = ({ open, onOpenChange, user, orders, onLogout }: ProfileShe
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm font-medium">{order.total_amount} ₽</p>
-                      <Badge variant="outline" className="mt-2">{order.status}</Badge>
+                      <Badge variant={getStatusBadgeVariant(order.status)} className="mt-2">
+                        {statusLabels[order.status] || order.status}
+                      </Badge>
+                      {order.rejection_reason && (
+                        <div className="mt-3 p-2 bg-destructive/10 rounded text-xs">
+                          <p className="font-medium text-destructive">Причина отказа:</p>
+                          <p className="text-muted-foreground mt-1">{order.rejection_reason}</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
