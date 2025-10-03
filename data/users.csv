@@ -1,0 +1,2 @@
+id,phone,password_hash,full_name,is_admin,balance,cashback
+1,+70000000000,$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5cOPZ2KqIiHRK,Администратор,true,5000.00,0.00
