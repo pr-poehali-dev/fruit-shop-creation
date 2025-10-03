@@ -44,15 +44,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
             
+            name = body_data['name'].replace("'", "''")
+            slug = body_data['slug'].replace("'", "''")
+            desc = body_data.get('description', '').replace("'", "''")
+            
             cur.execute(
-                """INSERT INTO categories (name, slug, description) 
-                   VALUES (%s, %s, %s) 
-                   RETURNING id, name, slug, description""",
-                (
-                    body_data['name'],
-                    body_data['slug'],
-                    body_data.get('description', '')
-                )
+                f"""INSERT INTO categories (name, slug, description) 
+                   VALUES ('{name}', '{slug}', '{desc}') 
+                   RETURNING id, name, slug, description"""
             )
             conn.commit()
             category = cur.fetchone()
@@ -68,17 +67,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = json.loads(event.get('body', '{}'))
             category_id = body_data.get('id')
             
+            name = body_data['name'].replace("'", "''")
+            slug = body_data['slug'].replace("'", "''")
+            desc = body_data.get('description', '').replace("'", "''")
+            
             cur.execute(
-                """UPDATE categories 
-                   SET name = %s, slug = %s, description = %s
-                   WHERE id = %s
-                   RETURNING id, name, slug, description""",
-                (
-                    body_data['name'],
-                    body_data['slug'],
-                    body_data.get('description', ''),
-                    category_id
-                )
+                f"""UPDATE categories 
+                   SET name = '{name}', slug = '{slug}', description = '{desc}'
+                   WHERE id = {category_id}
+                   RETURNING id, name, slug, description"""
             )
             conn.commit()
             category = cur.fetchone()

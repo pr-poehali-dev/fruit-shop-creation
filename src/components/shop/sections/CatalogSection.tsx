@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ProductCard from '../ProductCard';
 
 interface Product {
@@ -17,14 +18,49 @@ interface CatalogSectionProps {
 }
 
 const CatalogSection = ({ products, onAddToCart }: CatalogSectionProps) => {
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  const categories = [
+    { id: 'all', name: 'Все растения' },
+    { id: 'Плодовые культуры', name: 'Плодовые' },
+    { id: 'Декоративные культуры', name: 'Декоративные' },
+  ];
+
+  const filteredProducts = activeCategory === 'all' 
+    ? products 
+    : products.filter(p => p.category_name === activeCategory);
+
   return (
     <div>
       <h2 className="text-4xl font-display font-bold mb-8">Каталог растений</h2>
+      
+      <div className="flex flex-wrap gap-3 mb-8">
+        {categories.map(category => (
+          <button
+            key={category.id}
+            onClick={() => setActiveCategory(category.id)}
+            className={`px-6 py-2 rounded-full font-medium transition-all ${
+              activeCategory === category.id
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map(product => (
+        {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} showStock />
         ))}
       </div>
+
+      {filteredProducts.length === 0 && (
+        <p className="text-center text-muted-foreground py-12">
+          В этой категории пока нет товаров
+        </p>
+      )}
     </div>
   );
 };

@@ -61,9 +61,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'PUT':
             body_data = json.loads(event.get('body', '{}'))
             
+            site_name = body_data.get('site_name', '').replace("'", "''")
+            site_desc = body_data.get('site_description', '').replace("'", "''")
+            phone = body_data.get('phone', '').replace("'", "''")
+            email = body_data.get('email', '').replace("'", "''")
+            address = body_data.get('address', '').replace("'", "''")
+            work_hours = body_data.get('work_hours', '').replace("'", "''")
+            
             cur.execute(
-                """INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours)
-                   VALUES (1, %s, %s, %s, %s, %s, %s)
+                f"""INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours)
+                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}')
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
                    site_description = EXCLUDED.site_description,
@@ -72,15 +79,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    address = EXCLUDED.address,
                    work_hours = EXCLUDED.work_hours,
                    updated_at = CURRENT_TIMESTAMP
-                   RETURNING *""",
-                (
-                    body_data.get('site_name'),
-                    body_data.get('site_description'),
-                    body_data.get('phone'),
-                    body_data.get('email'),
-                    body_data.get('address'),
-                    body_data.get('work_hours')
-                )
+                   RETURNING *"""
             )
             conn.commit()
             settings = cur.fetchone()

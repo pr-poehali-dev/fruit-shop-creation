@@ -66,19 +66,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
             
+            name = body_data['name'].replace("'", "''")
+            slug = body_data['slug'].replace("'", "''")
+            desc = body_data.get('description', '').replace("'", "''")
+            price = body_data['price']
+            img = body_data.get('image_url', '').replace("'", "''")
+            cat_id = body_data.get('category_id', 'NULL')
+            stock = body_data.get('stock', 0)
+            
             cur.execute(
-                """INSERT INTO products (name, slug, description, price, image_url, category_id, stock) 
-                   VALUES (%s, %s, %s, %s, %s, %s, %s) 
-                   RETURNING id, name, slug, description, price, image_url, stock""",
-                (
-                    body_data['name'],
-                    body_data['slug'],
-                    body_data.get('description', ''),
-                    body_data['price'],
-                    body_data.get('image_url', ''),
-                    body_data.get('category_id'),
-                    body_data.get('stock', 0)
-                )
+                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock) 
+                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}) 
+                   RETURNING id, name, slug, description, price, image_url, stock"""
             )
             conn.commit()
             product = cur.fetchone()
@@ -94,21 +93,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = json.loads(event.get('body', '{}'))
             product_id = body_data.get('id')
             
+            name = body_data['name'].replace("'", "''")
+            desc = body_data.get('description', '').replace("'", "''")
+            price = body_data['price']
+            img = body_data.get('image_url', '').replace("'", "''")
+            cat_id = body_data.get('category_id', 'NULL')
+            stock = body_data.get('stock', 0)
+            
             cur.execute(
-                """UPDATE products 
-                   SET name = %s, description = %s, price = %s, image_url = %s, 
-                       category_id = %s, stock = %s, updated_at = CURRENT_TIMESTAMP
-                   WHERE id = %s
-                   RETURNING id, name, slug, description, price, image_url, stock""",
-                (
-                    body_data['name'],
-                    body_data.get('description', ''),
-                    body_data['price'],
-                    body_data.get('image_url', ''),
-                    body_data.get('category_id'),
-                    body_data.get('stock', 0),
-                    product_id
-                )
+                f"""UPDATE products 
+                   SET name = '{name}', description = '{desc}', price = {price}, image_url = '{img}', 
+                       category_id = {cat_id}, stock = {stock}, updated_at = CURRENT_TIMESTAMP
+                   WHERE id = {product_id}
+                   RETURNING id, name, slug, description, price, image_url, stock"""
             )
             conn.commit()
             product = cur.fetchone()
