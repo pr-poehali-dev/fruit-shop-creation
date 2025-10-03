@@ -64,6 +64,7 @@ const Index = () => {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
   const [siteSettings, setSiteSettings] = useState<any>({});
+  const [isRefreshingBalance, setIsRefreshingBalance] = useState(false);
   const { toast } = useToast();
 
   const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
@@ -89,12 +90,13 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       loadOrders();
-      refreshUserBalance();
     }
   }, [user]);
 
   const refreshUserBalance = async () => {
-    if (!user) return;
+    if (!user || isRefreshingBalance) return;
+    
+    setIsRefreshingBalance(true);
     try {
       const response = await fetch(`${API_AUTH}?action=balance&user_id=${user.id}`);
       const data = await response.json();
@@ -109,6 +111,8 @@ const Index = () => {
       localStorage.setItem('user', JSON.stringify(updatedUser));
     } catch (error) {
       console.error('Failed to refresh balance:', error);
+    } finally {
+      setIsRefreshingBalance(false);
     }
   };
 
@@ -285,7 +289,7 @@ const Index = () => {
         loadOrders();
         
         if (paymentMethod === 'balance') {
-          refreshUserBalance();
+          setTimeout(() => refreshUserBalance(), 500);
         }
       } else {
         toast({
@@ -426,7 +430,7 @@ const Index = () => {
           setShowAdminPanel(false);
           loadProducts();
           loadSettings();
-          refreshUserBalance();
+          setTimeout(() => refreshUserBalance(), 300);
         }} />
       ) : (
         <>
