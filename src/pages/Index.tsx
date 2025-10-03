@@ -15,6 +15,7 @@ import AboutSection from '@/components/shop/sections/AboutSection';
 import DeliverySection from '@/components/shop/sections/DeliverySection';
 import CareSection from '@/components/shop/sections/CareSection';
 import ContactsSection from '@/components/shop/sections/ContactsSection';
+import AdminPanel from '@/components/shop/admin/AdminPanel';
 
 interface User {
   id: number;
@@ -58,6 +59,7 @@ const Index = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
   const { toast } = useToast();
 
@@ -302,7 +304,13 @@ const Index = () => {
         <p className="font-medium">{user?.full_name || 'Не указано'}</p>
       </div>
       {user?.is_admin && (
-        <Badge variant="secondary">Администратор</Badge>
+        <>
+          <Badge variant="secondary">Администратор</Badge>
+          <Button className="w-full" variant="default" onClick={() => setShowAdminPanel(true)}>
+            <Icon name="Settings" size={18} className="mr-2" />
+            Панель администратора
+          </Button>
+        </>
       )}
       <Separator />
       <div>
@@ -334,45 +342,54 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        cart={cart}
-        user={user}
-        currentSection={currentSection}
-        onSectionChange={setCurrentSection}
-        onShowAuth={() => setShowAuthDialog(true)}
-        renderCartContent={renderCartContent}
-        renderProfileContent={renderProfileContent}
-      />
-
-      <main className="container mx-auto px-4 py-8">
-        {currentSection === 'home' && (
-          <HomeSection 
-            products={products} 
-            onNavigate={setCurrentSection} 
-            onAddToCart={addToCart} 
+      {showAdminPanel && user?.is_admin ? (
+        <AdminPanel onClose={() => {
+          setShowAdminPanel(false);
+          loadProducts();
+        }} />
+      ) : (
+        <>
+          <Header 
+            cart={cart}
+            user={user}
+            currentSection={currentSection}
+            onSectionChange={setCurrentSection}
+            onShowAuth={() => setShowAuthDialog(true)}
+            renderCartContent={renderCartContent}
+            renderProfileContent={renderProfileContent}
           />
-        )}
 
-        {currentSection === 'catalog' && (
-          <CatalogSection products={products} onAddToCart={addToCart} />
-        )}
+          <main className="container mx-auto px-4 py-8">
+            {currentSection === 'home' && (
+              <HomeSection 
+                products={products} 
+                onNavigate={setCurrentSection} 
+                onAddToCart={addToCart} 
+              />
+            )}
 
-        {currentSection === 'about' && <AboutSection />}
+            {currentSection === 'catalog' && (
+              <CatalogSection products={products} onAddToCart={addToCart} />
+            )}
 
-        {currentSection === 'delivery' && <DeliverySection />}
+            {currentSection === 'about' && <AboutSection />}
 
-        {currentSection === 'care' && <CareSection />}
+            {currentSection === 'delivery' && <DeliverySection />}
 
-        {currentSection === 'contacts' && <ContactsSection />}
-      </main>
+            {currentSection === 'care' && <CareSection />}
 
-      <Footer />
+            {currentSection === 'contacts' && <ContactsSection />}
+          </main>
 
-      <AuthDialog 
-        open={showAuthDialog} 
-        onOpenChange={setShowAuthDialog}
-        onSubmit={handleAuth}
-      />
+          <Footer />
+
+          <AuthDialog 
+            open={showAuthDialog} 
+            onOpenChange={setShowAuthDialog}
+            onSubmit={handleAuth}
+          />
+        </>
+      )}
     </div>
   );
 };
