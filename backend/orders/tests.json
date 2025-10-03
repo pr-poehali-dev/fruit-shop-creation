@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Create order",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "user_id": 1,
+        "items": [
+          {
+            "product_id": 1,
+            "quantity": 2,
+            "price": 500
+          }
+        ],
+        "payment_method": "card",
+        "delivery_address": "Test address"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "order_id": "number"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
