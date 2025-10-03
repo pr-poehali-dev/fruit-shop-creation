@@ -47,6 +47,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -57,11 +58,15 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   const API_PRODUCTS = 'https://functions.poehali.dev/5ae817c6-e62e-40c6-8e34-18ffac2d3cfc';
   const API_CATEGORIES = 'https://functions.poehali.dev/0a62d37c-9fd0-4ff3-9b5b-2c881073d3ac';
   const API_SETTINGS = 'https://functions.poehali.dev/9b1ac59e-93b6-41de-8974-a7f58d4ffaf9';
+  const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
+  const API_ORDERS = 'https://functions.poehali.dev/b35bef37-8423-4939-b43b-0fb565cc8853';
 
   useEffect(() => {
     loadProducts();
     loadCategories();
     loadSettings();
+    loadUsers();
+    loadOrders();
   }, []);
 
   const loadProducts = async () => {
@@ -91,6 +96,26 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
       setSiteSettings(data.settings || {});
     } catch (error) {
       console.error('Failed to load settings:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await fetch(API_AUTH);
+      const data = await response.json();
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      const response = await fetch(`${API_ORDERS}?all=true`);
+      const data = await response.json();
+      setOrders(data.orders || []);
+    } catch (error) {
+      console.error('Failed to load orders:', error);
     }
   };
 
@@ -240,10 +265,12 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
         </div>
 
         <Tabs defaultValue="products">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="products">Товары</TabsTrigger>
             <TabsTrigger value="categories">Категории</TabsTrigger>
-            <TabsTrigger value="settings">Настройки сайта</TabsTrigger>
+            <TabsTrigger value="users">Пользователи</TabsTrigger>
+            <TabsTrigger value="orders">Заказы</TabsTrigger>
+            <TabsTrigger value="settings">Настройки</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products" className="space-y-4">
@@ -352,6 +379,90 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
                     Сохранить изменения
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Пользователи</CardTitle>
+                <CardDescription>Список всех зарегистрированных пользователей</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {users.map(user => (
+                    <div key={user.id} className="flex justify-between items-center p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-medium">{user.full_name}</div>
+                        <div className="text-sm text-muted-foreground">{user.phone}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Баланс: {user.balance || 0}₽ | Кэшбек: {user.cashback || 0}₽
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {user.is_admin && <Badge>Админ</Badge>}
+                        <Badge variant="outline">{new Date(user.created_at).toLocaleDateString()}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="orders" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Заказы</CardTitle>
+                <CardDescription>Все заказы пользователей</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {orders.map(order => (
+                    <div key={order.id} className="p-4 border rounded-lg space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-medium">Заказ #{order.id}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {order.user_name} ({order.user_phone})
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {new Date(order.created_at).toLocaleString()}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-lg">{order.total_amount}₽</div>
+                          <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
+                            {order.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        <div className="font-medium">Способ оплаты:</div>
+                        <div className="text-muted-foreground">
+                          {order.payment_method === 'balance' ? 'Баланс' : order.payment_method === 'card' ? 'Карта' : 'При получении'}
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        <div className="font-medium">Адрес доставки:</div>
+                        <div className="text-muted-foreground">{order.delivery_address}</div>
+                      </div>
+                      {order.items && order.items.length > 0 && (
+                        <div className="text-sm">
+                          <div className="font-medium">Товары:</div>
+                          <ul className="list-disc list-inside text-muted-foreground">
+                            {order.items.filter(i => i.product_name).map((item: any, idx: number) => (
+                              <li key={idx}>
+                                {item.product_name} x{item.quantity} = {item.price * item.quantity}₽
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

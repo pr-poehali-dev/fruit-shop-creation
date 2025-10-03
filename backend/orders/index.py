@@ -33,10 +33,39 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if method == 'GET':
             params = event.get('queryStringParameters') or {}
             user_id = params.get('user_id')
+            get_all = params.get('all')
+            
+            if get_all == 'true':
+                cur.execute(
+                    """SELECT o.*, 
+                       u.full_name as user_name,
+                       u.phone as user_phone,
+                       json_agg(json_build_object(
+                           'id', oi.id,
+                           'product_id', oi.product_id,
+                           'product_name', p.name,
+                           'quantity', oi.quantity,
+                           'price', oi.price
+                       )) as items
+                       FROM orders o
+                       LEFT JOIN users u ON o.user_id = u.id
+                       LEFT JOIN order_items oi ON o.id = oi.order_id
+                       LEFT JOIN products p ON oi.product_id = p.id
+                       GROUP BY o.id, u.full_name, u.phone
+                       ORDER BY o.created_at DESC"""
+                )
+                orders = cur.fetchall()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'orders': [dict(o) for o in orders]}, default=str),
+                    'isBase64Encoded': False
+                }
             
             if user_id:
                 cur.execute(
-                    """SELECT o.*, 
+                    f"""SELECT o.*, 
                        json_agg(json_build_object(
                            'id', oi.id,
                            'product_id', oi.product_id,
@@ -47,10 +76,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                        FROM orders o
                        LEFT JOIN order_items oi ON o.id = oi.order_id
                        LEFT JOIN products p ON oi.product_id = p.id
-                       WHERE o.user_id = %s
+                       WHERE o.user_id = {user_id}
                        GROUP BY o.id
-                       ORDER BY o.created_at DESC""",
-                    (user_id,)
+                       ORDER BY o.created_at DESC"""
                 )
                 orders = cur.fetchall()
                 
@@ -73,23 +101,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             user_id = body_data.get('user_id')
             items = body_data.get('items', [])
             payment_method = body_data.get('payment_method', 'card')
-            delivery_address = body_data.get('delivery_address', '')
+            delivery_address = body_data.get('delivery_address', '').replace("'", "''")
             
             total_amount = sum(item['price'] * item['quantity'] for item in items)
             
+            if payment_method == 'balance':
+                cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or float(user['balance']) < total_amount:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Недостаточно средств на балансе'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"UPDATE users SET balance = balance - {total_amount} WHERE id = {user_id}"
+                )
+                
+                cashback_amount = total_amount * 0.05
+                cur.execute(
+                    f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {user_id}"
+                )
+                
+                cur.execute(
+                    f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {total_amount}, 'Оплата заказа')"
+                )
+                cur.execute(
+                    f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'cashback_earned', {cashback_amount}, 'Кэшбек 5% от заказа')"
+                )
+            
             cur.execute(
-                """INSERT INTO orders (user_id, total_amount, payment_method, delivery_address) 
-                   VALUES (%s, %s, %s, %s) 
-                   RETURNING id""",
-                (user_id, total_amount, payment_method, delivery_address)
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address) VALUES ({user_id}, {total_amount}, '{payment_method}', '{delivery_address}') RETURNING id"
             )
             order_id = cur.fetchone()['id']
             
             for item in items:
+                product_id = item['product_id']
+                quantity = item['quantity']
+                price = item['price']
                 cur.execute(
-                    """INSERT INTO order_items (order_id, product_id, quantity, price) 
-                       VALUES (%s, %s, %s, %s)""",
-                    (order_id, item['product_id'], item['quantity'], item['price'])
+                    f"INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ({order_id}, {product_id}, {quantity}, {price})"
                 )
             
             conn.commit()

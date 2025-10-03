@@ -24,6 +24,7 @@ interface HeaderProps {
   cart: CartItem[];
   user: User | null;
   currentSection: string;
+  siteSettings?: { site_name?: string };
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
@@ -34,6 +35,7 @@ const Header = ({
   cart, 
   user, 
   currentSection, 
+  siteSettings,
   onSectionChange, 
   onShowAuth,
   renderCartContent,
@@ -44,7 +46,7 @@ const Header = ({
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon name="Flower2" size={32} />
-          <h1 className="text-2xl font-display font-bold">Питомник растений</h1>
+          <h1 className="text-2xl font-display font-bold">{siteSettings?.site_name || 'Питомник растений'}</h1>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">

@@ -22,6 +22,8 @@ interface User {
   phone: string;
   full_name: string;
   is_admin: boolean;
+  balance?: number;
+  cashback?: number;
 }
 
 interface Product {
@@ -221,6 +223,19 @@ const Index = () => {
       return;
     }
 
+    const totalAmount = getTotalPrice();
+
+    if (paymentMethod === 'balance') {
+      if (!user.balance || user.balance < totalAmount) {
+        toast({
+          title: 'Недостаточно средств',
+          description: `На балансе ${user.balance?.toFixed(2) || 0}₽, требуется ${totalAmount}₽`,
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
     try {
       const response = await fetch(API_ORDERS, {
         method: 'POST',
@@ -240,16 +255,37 @@ const Index = () => {
       const data = await response.json();
 
       if (data.success) {
+        if (paymentMethod === 'balance') {
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            const newBalance = (parsedUser.balance || 0) - totalAmount;
+            const cashbackEarned = totalAmount * 0.05;
+            const newCashback = (parsedUser.cashback || 0) + cashbackEarned;
+            
+            const updatedUser = {
+              ...parsedUser,
+              balance: newBalance,
+              cashback: newCashback
+            };
+            
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+          }
+        }
+
         toast({
           title: 'Заказ оформлен!',
-          description: `Номер заказа: ${data.order_id}`
+          description: paymentMethod === 'balance' 
+            ? `Заказ #${data.order_id}. Начислен кэшбек 5%!` 
+            : `Номер заказа: ${data.order_id}`
         });
         setCart([]);
         loadOrders();
       } else {
         toast({
           title: 'Ошибка',
-          description: 'Не удалось оформить заказ',
+          description: data.error || 'Не удалось оформить заказ',
           variant: 'destructive'
         });
       }
@@ -292,12 +328,18 @@ const Index = () => {
             <span>{getTotalPrice()} ₽</span>
           </div>
           <div className="space-y-2">
+            {user && user.balance !== undefined && user.balance > 0 && (
+              <Button className="w-full" variant="default" onClick={() => handleCheckout('balance')}>
+                <Icon name="Wallet" size={18} className="mr-2" />
+                Оплатить балансом ({user.balance.toFixed(2)}₽)
+              </Button>
+            )}
             <Button className="w-full" onClick={() => handleCheckout('card')}>
               <Icon name="CreditCard" size={18} className="mr-2" />
               Оплатить картой
             </Button>
             <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash')}>
-              <Icon name="Wallet" size={18} className="mr-2" />
+              <Icon name="Coins" size={18} className="mr-2" />
               Наличными при получении
             </Button>
           </div>
@@ -316,6 +358,25 @@ const Index = () => {
         <Label>Имя</Label>
         <p className="font-medium">{user?.full_name || 'Не указано'}</p>
       </div>
+      
+      <Separator />
+      
+      <div className="bg-muted p-4 rounded-lg space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">Баланс:</span>
+          <span className="text-lg font-bold">{user?.balance?.toFixed(2) || '0.00'}₽</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">Кэшбек:</span>
+          <span className="text-lg font-semibold text-green-600">{user?.cashback?.toFixed(2) || '0.00'}₽</span>
+        </div>
+        {user && user.cashback && user.cashback > 0 && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Кэшбек 5% начисляется при оплате заказа балансом
+          </p>
+        )}
+      </div>
+      
       {user?.is_admin && (
         <>
           <Badge variant="secondary">Администратор</Badge>
@@ -367,6 +428,7 @@ const Index = () => {
             cart={cart}
             user={user}
             currentSection={currentSection}
+            siteSettings={siteSettings}
             onSectionChange={setCurrentSection}
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
