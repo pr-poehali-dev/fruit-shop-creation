@@ -67,7 +67,7 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
         {showPumpkin && (
           <button
             onClick={() => setShowPumpkin(false)}
-            className="absolute top-8 right-8 z-20 text-7xl hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer animate-bounce hover:animate-none"
+            className="hidden md:block absolute top-8 right-8 z-20 text-7xl hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer animate-bounce hover:animate-none"
             aria-label="Новогодний декор"
           >
             🎄
