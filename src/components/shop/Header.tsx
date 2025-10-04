@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import Icon from '@/components/ui/icon';
+import SideMenu from './SideMenu';
 
 interface User {
   id: number;
@@ -46,9 +47,10 @@ const Header = ({
   return (
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon name="Flower2" size={32} />
-          <h1 className="text-2xl font-display font-bold">{siteSettings?.site_name || 'Питомник растений'}</h1>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <SideMenu siteSettings={siteSettings} onSectionChange={onSectionChange} />
+          <Icon name="Flower2" size={32} className="hidden sm:block" />
+          <h1 className="text-lg sm:text-2xl font-display font-bold">{siteSettings?.site_name || 'Питомник растений'}</h1>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
