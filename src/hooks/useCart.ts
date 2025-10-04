@@ -16,26 +16,48 @@ export const useCart = () => {
   }, [cart]);
 
   const addToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.product.id === product.id);
+    const productKey = (product as any).selectedSize 
+      ? `${product.id}-${(product as any).selectedSize}` 
+      : `${product.id}`;
+    
+    const existingItem = cart.find(item => {
+      const itemKey = (item.product as any).selectedSize 
+        ? `${item.product.id}-${(item.product as any).selectedSize}` 
+        : `${item.product.id}`;
+      return itemKey === productKey;
+    });
     
     if (existingItem) {
-      setCart(cart.map(item =>
-        item.product.id === product.id
+      setCart(cart.map(item => {
+        const itemKey = (item.product as any).selectedSize 
+          ? `${item.product.id}-${(item.product as any).selectedSize}` 
+          : `${item.product.id}`;
+        return itemKey === productKey
           ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+          : item;
+      }));
     } else {
       setCart([...cart, { product, quantity: 1 }]);
     }
   };
 
-  const updateCartQuantity = (productId: number, quantity: number) => {
+  const updateCartQuantity = (productId: number, quantity: number, selectedSize?: string) => {
     if (quantity <= 0) {
-      setCart(cart.filter(item => item.product.id !== productId));
+      setCart(cart.filter(item => {
+        if (selectedSize) {
+          return !(item.product.id === productId && (item.product as any).selectedSize === selectedSize);
+        }
+        return item.product.id !== productId;
+      }));
     } else {
-      setCart(cart.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item
-      ));
+      setCart(cart.map(item => {
+        if (selectedSize) {
+          return (item.product.id === productId && (item.product as any).selectedSize === selectedSize) 
+            ? { ...item, quantity } 
+            : item;
+        }
+        return item.product.id === productId ? { ...item, quantity } : item;
+      }));
     }
   };
 

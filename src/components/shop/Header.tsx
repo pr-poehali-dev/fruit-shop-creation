@@ -77,7 +77,7 @@ const Header = ({
       `}</style>
       
       <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3 sm:gap-4">
           <SideMenu siteSettings={siteSettings} onSectionChange={onSectionChange} />
           <button 
             onClick={() => onSectionChange('home')} 
@@ -110,13 +110,14 @@ const Header = ({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="relative text-primary-foreground hover:bg-primary/90"
+                  className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30 border-2 border-orange-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button"
                   title="Требуется оценить тикет"
                 >
-                  <Icon name="Bell" size={24} />
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-orange-500">
+                  <Icon name="Bell" size={28} />
+                  <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold shadow-lg animate-pulse">
                     1
                   </Badge>
+                  <div className="icon-snow-sparkle">🔔</div>
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">

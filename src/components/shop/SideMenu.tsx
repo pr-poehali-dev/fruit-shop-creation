@@ -63,12 +63,12 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
           )}
         </SheetHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 relative z-10">
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
               Навигация
             </h3>
-            <nav className="space-y-1 relative z-10">
+            <nav className="space-y-1">
               <Button
                 variant="ghost"
                 className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
