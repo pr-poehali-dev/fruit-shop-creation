@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get loyalty card info",
+      "method": "GET",
+      "path": "/?user_id=1",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "card_price": "number"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

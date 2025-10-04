@@ -44,6 +44,20 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Input id="work-hours" name="work_hours" defaultValue={siteSettings.work_hours || 'Пн-Вс: 9:00 - 19:00'} />
           </div>
           <div>
+            <Label htmlFor="loyalty-card-price">Стоимость карты лояльности (₽)</Label>
+            <Input 
+              id="loyalty-card-price" 
+              name="loyalty_card_price" 
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={siteSettings.loyalty_card_price || 500} 
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Цена покупки виртуальной карты лояльности с QR-кодом
+            </p>
+          </div>
+          <div>
             <Label htmlFor="price-list-url">Ссылка на прайс-лист</Label>
             <Input 
               id="price-list-url" 

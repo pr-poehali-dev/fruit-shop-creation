@@ -6,15 +6,17 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { User, Order } from '@/types/shop';
 import UserTickets from './UserTickets';
+import LoyaltyCard from './LoyaltyCard';
 
 interface ProfileContentProps {
   user: User | null;
   orders: Order[];
   onShowAdminPanel: () => void;
   onLogout: () => void;
+  onBalanceUpdate: () => void;
 }
 
-const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileContentProps) => {
+const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpdate }: ProfileContentProps) => {
   return (
     <div className="mt-6 space-y-4">
       <div className="text-center pb-4">
@@ -84,6 +86,19 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileCon
               </Card>
             ))}
           </div>
+        )}
+      </div>
+      
+      <Separator />
+      
+      <div>
+        <h3 className="font-semibold mb-3">Карта лояльности</h3>
+        {user && (
+          <LoyaltyCard 
+            userId={user.id} 
+            userBalance={user.balance || 0}
+            onBalanceUpdate={onBalanceUpdate}
+          />
         )}
       </div>
       

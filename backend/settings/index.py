@@ -73,10 +73,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             promotions = body_data.get('promotions', '').replace("'", "''")
             additional_info = body_data.get('additional_info', '').replace("'", "''")
             price_list_url = body_data.get('price_list_url', '').replace("'", "''")
+            loyalty_card_price = body_data.get('loyalty_card_price', 500)
             
             cur.execute(
-                f"""INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url)
-                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}')
+                f"""INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, loyalty_card_price)
+                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', {loyalty_card_price})
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
                    site_description = EXCLUDED.site_description,
@@ -87,6 +88,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    promotions = EXCLUDED.promotions,
                    additional_info = EXCLUDED.additional_info,
                    price_list_url = EXCLUDED.price_list_url,
+                   loyalty_card_price = EXCLUDED.loyalty_card_price,
                    updated_at = CURRENT_TIMESTAMP
                    RETURNING *"""
             )

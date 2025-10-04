@@ -252,7 +252,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       phone: formData.get('phone') as string,
       email: formData.get('email') as string,
       address: formData.get('address') as string,
-      work_hours: formData.get('work_hours') as string
+      work_hours: formData.get('work_hours') as string,
+      loyalty_card_price: parseFloat(formData.get('loyalty_card_price') as string || '500')
     };
 
     try {

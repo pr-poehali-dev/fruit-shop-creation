@@ -172,6 +172,7 @@ const Index = () => {
       orders={orders}
       onShowAdminPanel={() => setShowAdminPanel(true)}
       onLogout={() => handleLogout(onLogout)}
+      onBalanceUpdate={() => refreshUserBalance(user, setUser, setIsRefreshingBalance)}
     />
   );
 
