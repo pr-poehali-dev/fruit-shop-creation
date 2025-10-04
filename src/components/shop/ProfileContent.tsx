@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { User, Order } from '@/types/shop';
 import UserTickets from './UserTickets';
@@ -88,7 +89,14 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
         <h3 className="text-xl font-semibold">{user?.full_name || 'Пользователь'}</h3>
         <p className="text-sm text-muted-foreground">{user?.phone}</p>
         <Badge variant={user?.is_admin ? 'default' : 'secondary'} className="mt-2">
-          {user?.is_admin ? 'Администратор' : 'Пользователь'}
+          {user?.is_admin ? (
+            <span className="flex items-center gap-1">
+              <span className="text-yellow-400">👑</span> 
+              Администратор
+            </span>
+          ) : (
+            'Пользователь'
+          )}
         </Badge>
       </div>
       
@@ -119,107 +127,112 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           <Separator />
         </>
       )}
-      <div>
-        <h3 className="font-semibold mb-3">История заказов</h3>
-        {orders.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Заказов пока нет</p>
-        ) : (
-          <div className="space-y-3">
-            {orders.map(order => (
-              <Card key={order.id}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Заказ #{order.id}</CardTitle>
-                  <CardDescription className="text-xs">
-                    {new Date(order.created_at).toLocaleDateString('ru-RU')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm font-medium">{order.total_amount} ₽</p>
-                  <Badge variant="outline" className="mt-2">
-                    {order.status === 'pending' && '⏳ Ожидает обработки'}
-                    {order.status === 'processing' && '📦 В обработке'}
-                    {order.status === 'delivered' && '✅ Доставлен'}
-                    {order.status === 'rejected' && '❌ Отклонён'}
-                  </Badge>
-                  {order.rejection_reason && (
-                    <p className="text-xs text-red-600 mt-2">Причина: {order.rejection_reason}</p>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+
+      <Tabs defaultValue="orders" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="orders">Заказы</TabsTrigger>
+          <TabsTrigger value="loyalty">Лояльность</TabsTrigger>
+          <TabsTrigger value="transactions">Операции</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="orders" className="space-y-3 mt-4">
+          <h3 className="font-semibold">История заказов</h3>
+          {orders.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Заказов пока нет</p>
+          ) : (
+            <div className="space-y-3">
+              {orders.map(order => (
+                <Card key={order.id}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Заказ #{order.id}</CardTitle>
+                    <CardDescription className="text-xs">
+                      {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm font-medium">{order.total_amount} ₽</p>
+                    <Badge variant="outline" className="mt-2">
+                      {order.status === 'pending' && '⏳ Ожидает обработки'}
+                      {order.status === 'processing' && '📦 В обработке'}
+                      {order.status === 'delivered' && '✅ Доставлен'}
+                      {order.status === 'rejected' && '❌ Отклонён'}
+                    </Badge>
+                    {order.rejection_reason && (
+                      <p className="text-xs text-red-600 mt-2">Причина: {order.rejection_reason}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="loyalty" className="space-y-3 mt-4">
+          <h3 className="font-semibold">Карта лояльности</h3>
+          {user && (
+            <LoyaltyCard 
+              userId={user.id} 
+              userBalance={user.balance || 0}
+              onBalanceUpdate={onBalanceUpdate}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-3 mt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">История операций</h3>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={loadTransactions}
+              disabled={loadingTransactions}
+            >
+              <Icon name="RefreshCw" size={16} className="mr-2" />
+              Обновить
+            </Button>
           </div>
-        )}
-      </div>
-      
-      <Separator />
-      
-      <div>
-        <h3 className="font-semibold mb-3">Карта лояльности</h3>
-        {user && (
-          <LoyaltyCard 
-            userId={user.id} 
-            userBalance={user.balance || 0}
-            onBalanceUpdate={onBalanceUpdate}
-          />
-        )}
-      </div>
-      
-      <Separator />
-      
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold">История операций</h3>
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={loadTransactions}
-            disabled={loadingTransactions}
-          >
-            <Icon name="RefreshCw" size={16} className="mr-2" />
-            Обновить
-          </Button>
-        </div>
-        
-        {loadingTransactions ? (
-          <p className="text-center text-muted-foreground py-4">Загрузка...</p>
-        ) : transactions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">История операций пуста</p>
-        ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {transactions.slice(0, 20).map(transaction => (
-              <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Icon 
-                    name={getTransactionIcon(transaction.type)} 
-                    size={20} 
-                    className={getTransactionColor(transaction.type)}
-                  />
-                  <div>
-                    <p className="text-sm font-medium">{transaction.description || 'Операция'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(transaction.created_at).toLocaleString('ru-RU')}
+          
+          {loadingTransactions ? (
+            <p className="text-center text-muted-foreground py-4">Загрузка...</p>
+          ) : transactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">История операций пуста</p>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {transactions.slice(0, 20).map(transaction => (
+                <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Icon 
+                      name={getTransactionIcon(transaction.type)} 
+                      size={20} 
+                      className={getTransactionColor(transaction.type)}
+                    />
+                    <div>
+                      <p className="text-sm font-medium">{transaction.description || 'Операция'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(transaction.created_at).toLocaleString('ru-RU')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-semibold ${getTransactionColor(transaction.type)}`}>
+                      {(transaction.type.includes('deposit') || transaction.type === 'cashback_used') ? '+' : '-'}
+                      {Number(transaction.amount).toFixed(2)}₽
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {transaction.type === 'deposit' && 'Пополнение'}
+                      {transaction.type === 'withdraw' && 'Списание'}
+                      {transaction.type === 'cashback_deposit' && 'Кэшбек'}
+                      {transaction.type === 'cashback_earned' && 'Кэшбек'}
+                      {transaction.type === 'cashback_used' && 'Использование кэшбека'}
+                      {transaction.type === 'order_payment' && 'Оплата заказа'}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`text-sm font-semibold ${getTransactionColor(transaction.type)}`}>
-                    {(transaction.type.includes('deposit') || transaction.type === 'cashback_used') ? '+' : '-'}
-                    {Number(transaction.amount).toFixed(2)}₽
-                  </p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {transaction.type === 'deposit' && 'Пополнение'}
-                    {transaction.type === 'withdraw' && 'Списание'}
-                    {transaction.type === 'cashback_deposit' && 'Кэшбек'}
-                    {transaction.type === 'cashback_earned' && 'Кэшбек'}
-                    {transaction.type === 'cashback_used' && 'Использование кэшбека'}
-                    {transaction.type === 'order_payment' && 'Оплата заказа'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
       
       <Separator />
       

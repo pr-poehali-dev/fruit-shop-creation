@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface UserTicketsProps {
   user: User | null;
@@ -30,6 +31,9 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [rating, setRating] = useState<string>('');
+  const [ratingComment, setRatingComment] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
   
   // Форма создания
@@ -274,8 +278,30 @@ const UserTickets = ({ user }: UserTicketsProps) => {
               )}
               
               {(activeTicket.status === 'closed' || activeTicket.status === 'resolved') && (
-                <div className="bg-muted p-3 rounded-lg text-sm text-center mt-4">
-                  Тикет {activeTicket.status === 'closed' ? 'закрыт' : 'решён'}
+                <div className="mt-4 space-y-3">
+                  <div className="bg-muted p-3 rounded-lg text-sm text-center">
+                    Тикет {activeTicket.status === 'closed' ? 'закрыт' : 'решён'}
+                  </div>
+                  {activeTicket.rating ? (
+                    <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                        <span className="text-sm font-medium">Ваша оценка: {activeTicket.rating}/5</span>
+                      </div>
+                      {activeTicket.rating_comment && (
+                        <p className="text-xs text-muted-foreground">{activeTicket.rating_comment}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={() => setShowRatingDialog(true)}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Icon name="Star" size={16} className="mr-2" />
+                      Оценить работу поддержки
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -370,6 +396,106 @@ const UserTickets = ({ user }: UserTicketsProps) => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon name="Star" size={24} />
+              Оценить работу поддержки
+            </DialogTitle>
+            <DialogDescription>
+              Ваше мнение поможет нам стать лучше
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Оценка</Label>
+              <RadioGroup value={rating} onValueChange={setRating} className="flex gap-2 mt-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div key={star} className="flex items-center">
+                    <RadioGroupItem value={String(star)} id={`star-${star}`} className="sr-only" />
+                    <Label 
+                      htmlFor={`star-${star}`} 
+                      className="cursor-pointer hover:scale-110 transition"
+                    >
+                      <Icon 
+                        name="Star" 
+                        size={32} 
+                        className={rating >= String(star) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}
+                      />
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
+            <div>
+              <Label htmlFor="rating-comment">Комментарий (необязательно)</Label>
+              <Textarea
+                id="rating-comment"
+                value={ratingComment}
+                onChange={(e) => setRatingComment(e.target.value)}
+                placeholder="Что можно улучшить?"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={() => {
+                setShowRatingDialog(false);
+                setRating('');
+                setRatingComment('');
+              }}>
+                Отмена
+              </Button>
+              <Button 
+                onClick={async () => {
+                  if (!rating || !activeTicket) return;
+                  
+                  try {
+                    const response = await fetch(API_SUPPORT, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'rate_ticket',
+                        ticket_id: activeTicket.id,
+                        rating: parseInt(rating),
+                        rating_comment: ratingComment
+                      })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                      toast({
+                        title: 'Спасибо за оценку!',
+                        description: 'Ваш отзыв очень важен для нас'
+                      });
+                      setShowRatingDialog(false);
+                      setRating('');
+                      setRatingComment('');
+                      await loadActiveTicket();
+                    } else {
+                      throw new Error(data.error);
+                    }
+                  } catch (error) {
+                    toast({
+                      title: 'Ошибка',
+                      description: 'Не удалось сохранить оценку',
+                      variant: 'destructive'
+                    });
+                  }
+                }}
+                disabled={!rating}
+              >
+                <Icon name="Send" size={18} className="mr-2" />
+                Отправить оценку
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

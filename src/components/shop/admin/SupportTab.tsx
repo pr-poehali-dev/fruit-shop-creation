@@ -124,6 +124,12 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
                         <Badge variant={getStatusBadgeVariant(ticket.status)} className="text-xs">
                           {statusLabels[ticket.status] || ticket.status}
                         </Badge>
+                        {ticket.rating && (
+                          <Badge variant="outline" className="text-xs flex items-center gap-1">
+                            <Icon name="Star" size={12} className="text-yellow-500 fill-yellow-500" />
+                            {ticket.rating}/5
+                          </Badge>
+                        )}
                       </div>
                       <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                         {ticket.user_name} ({ticket.user_phone})
@@ -173,13 +179,22 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-center">
               <Badge variant={getStatusBadgeVariant(selectedTicket?.status)}>
                 {statusLabels[selectedTicket?.status] || selectedTicket?.status}
               </Badge>
               <span className={`text-sm font-medium ${getPriorityColor(selectedTicket?.priority)}`}>
                 Приоритет: {priorityLabels[selectedTicket?.priority]}
               </span>
+              {selectedTicket?.rating && (
+                <div className="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-950/20 px-3 py-1 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                  <span className="text-sm font-medium">{selectedTicket.rating}/5</span>
+                  {selectedTicket.rating_comment && (
+                    <span className="text-xs text-muted-foreground ml-2">— {selectedTicket.rating_comment}</span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

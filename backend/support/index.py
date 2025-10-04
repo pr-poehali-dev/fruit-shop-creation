@@ -212,6 +212,34 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'success': True}),
                     'isBase64Encoded': False
                 }
+            
+            elif action == 'rate_ticket':
+                ticket_id = body_data.get('ticket_id')
+                rating = body_data.get('rating')
+                rating_comment = body_data.get('rating_comment', '').replace("'", "''")
+                
+                if not ticket_id or not rating:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'ticket_id and rating required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"""UPDATE support_tickets 
+                       SET rating = {rating}, rating_comment = '{rating_comment}', updated_at = CURRENT_TIMESTAMP 
+                       WHERE id = {ticket_id}"""
+                )
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
         
         elif method == 'PUT':
             body_data = json.loads(event.get('body', '{}'))
