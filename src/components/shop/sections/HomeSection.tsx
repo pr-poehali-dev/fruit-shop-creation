@@ -26,24 +26,64 @@ interface HomeSectionProps {
 
 const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite, siteSettings }: HomeSectionProps) => {
   const showNewYearBanner = siteSettings?.holiday_theme === 'new_year';
+  const holidayTheme = siteSettings?.holiday_theme || 'none';
+  
+  const getHeroContent = () => {
+    switch (holidayTheme) {
+      case 'new_year':
+        return {
+          title: '🎄 Новогодняя распродажа! 🎅',
+          subtitle: 'Успейте купить растения со скидкой до конца года',
+          gradient: 'bg-gradient-to-br from-red-500/20 via-green-500/10 to-blue-500/20',
+          radial: 'from-red-400/15 via-green-400/10',
+          icon: 'Gift' as const
+        };
+      case 'halloween':
+        return {
+          title: '🎃 Жуткие скидки на Хэллоуин! 👻',
+          subtitle: 'Создайте свой мистический сад с нашими растениями',
+          gradient: 'bg-gradient-to-br from-orange-600/25 via-purple-600/15 to-black/30',
+          radial: 'from-orange-500/20 via-purple-500/15',
+          icon: 'Ghost' as const
+        };
+      case 'summer':
+        return {
+          title: '☀️ Летние предложения! 🌺',
+          subtitle: 'Яркие растения для вашего солнечного сада',
+          gradient: 'bg-gradient-to-br from-yellow-400/30 via-orange-400/20 to-pink-400/25',
+          radial: 'from-yellow-300/25 via-orange-300/15',
+          icon: 'Sun' as const
+        };
+      default:
+        return {
+          title: 'Ваш сад мечты начинается здесь',
+          subtitle: 'Плодовые и декоративные культуры высокого качества',
+          gradient: 'bg-gradient-to-br from-primary/20 via-primary/5 to-background',
+          radial: 'from-primary/10',
+          icon: 'Sparkles' as const
+        };
+    }
+  };
+  
+  const heroContent = getHeroContent();
   
   return (
     <div className="space-y-16">
       {showNewYearBanner && <NewYearBanner />}
       
       {/* Hero секция с градиентным фоном */}
-      <section className="relative text-center py-20 px-6 bg-gradient-to-br from-primary/20 via-primary/5 to-background rounded-3xl overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+      <section className={`relative text-center py-20 px-6 rounded-3xl overflow-hidden ${heroContent.gradient}`}>
+        <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] ${heroContent.radial} via-transparent to-transparent`}></div>
         <div className="relative z-10">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 text-primary">
-            Ваш сад мечты начинается здесь
+            {heroContent.title}
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Плодовые и декоративные культуры высокого качества
+            {heroContent.subtitle}
           </p>
           <Button size="lg" onClick={() => onNavigate('catalog')} className="text-lg shadow-xl hover:shadow-2xl transition-shadow">
             Перейти в каталог
-            <Icon name="ArrowRight" size={20} className="ml-2" />
+            <Icon name={heroContent.icon} size={20} className="ml-2" />
           </Button>
         </div>
       </section>
