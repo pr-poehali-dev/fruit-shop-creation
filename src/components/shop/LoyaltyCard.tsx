@@ -24,6 +24,10 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
   const { toast } = useToast();
   const [card, setCard] = useState<LoyaltyCardData | null>(null);
   const [cardPrice, setCardPrice] = useState<number>(500);
+  const [unlockAmount, setUnlockAmount] = useState<number>(5000);
+  const [cashbackPercent, setCashbackPercent] = useState<number>(5);
+  const [totalSpent, setTotalSpent] = useState<number>(0);
+  const [canUnlock, setCanUnlock] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
@@ -33,6 +37,10 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
       const data = await response.json();
       setCard(data.card);
       setCardPrice(data.card_price || 500);
+      setUnlockAmount(data.unlock_amount || 5000);
+      setCashbackPercent(data.cashback_percent || 5);
+      setTotalSpent(data.total_spent || 0);
+      setCanUnlock(data.can_unlock || false);
     } catch (error) {
       console.error('Failed to load loyalty card:', error);
     } finally {
@@ -44,8 +52,8 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
     loadCard();
   }, [userId]);
 
-  const handlePurchase = async () => {
-    if (userBalance < cardPrice) {
+  const handlePurchase = async (unlockFree = false) => {
+    if (!unlockFree && userBalance < cardPrice) {
       toast({
         title: 'Недостаточно средств',
         description: `На балансе ${userBalance.toFixed(2)}₽, требуется ${cardPrice}₽`,
@@ -59,7 +67,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
       const response = await fetch(API_LOYALTY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId })
+        body: JSON.stringify({ user_id: userId, unlock_free: unlockFree })
       });
 
       const data = await response.json();
@@ -68,8 +76,10 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
         setCard(data.card);
         onBalanceUpdate();
         toast({
-          title: 'Карта куплена!',
-          description: 'Виртуальная карта лояльности активирована'
+          title: unlockFree ? 'Карта разблокирована!' : 'Карта куплена!',
+          description: unlockFree 
+            ? 'Карта лояльности разблокирована за сумму покупок'
+            : 'Виртуальная карта лояльности активирована'
         });
       } else {
         toast({
@@ -104,37 +114,96 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
   if (!card) {
     return (
       <Card className="w-full border-2 border-dashed">
-        <CardContent className="p-6 text-center space-y-4">
-          <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-            <Icon name="CreditCard" size={32} className="text-primary" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold">Карта лояльности</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Получите виртуальную карту с QR-кодом
-            </p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-2xl font-bold text-primary">{cardPrice}₽</p>
-            <Button 
-              onClick={handlePurchase} 
-              disabled={isPurchasing || userBalance < cardPrice}
-              className="w-full"
-            >
-              {isPurchasing ? (
-                <>Покупка...</>
-              ) : (
-                <>
-                  <Icon name="ShoppingBag" size={18} className="mr-2" />
-                  Купить карту
-                </>
-              )}
-            </Button>
-            {userBalance < cardPrice && (
-              <p className="text-xs text-destructive">
-                Недостаточно средств на балансе
+        <CardContent className="p-6 space-y-4">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+              <Icon name="CreditCard" size={32} className="text-primary" />
+            </div>
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold">Карта лояльности</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Кэшбек {cashbackPercent}% с каждой покупки по карте
               </p>
-            )}
+            </div>
+          </div>
+
+          <div className="border-t pt-4 space-y-3">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Купить сейчас</span>
+                <span className="text-2xl font-bold text-primary">{cardPrice}₽</span>
+              </div>
+              <Button 
+                onClick={() => handlePurchase(false)} 
+                disabled={isPurchasing || userBalance < cardPrice}
+                className="w-full"
+              >
+                {isPurchasing ? (
+                  <>Покупка...</>
+                ) : (
+                  <>
+                    <Icon name="ShoppingBag" size={18} className="mr-2" />
+                    Купить карту
+                  </>
+                )}
+              </Button>
+              {userBalance < cardPrice && (
+                <p className="text-xs text-destructive text-center">
+                  Недостаточно средств на балансе
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">или</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Разблокировать за покупки</span>
+                <span className="text-lg font-bold text-green-600">{unlockAmount}₽</span>
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Прогресс</span>
+                  <span>{totalSpent.toFixed(0)} / {unlockAmount}₽</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 transition-all duration-500"
+                    style={{ width: `${Math.min((totalSpent / unlockAmount) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <Button 
+                onClick={() => handlePurchase(true)} 
+                disabled={isPurchasing || !canUnlock}
+                variant={canUnlock ? "default" : "outline"}
+                className="w-full"
+              >
+                {canUnlock ? (
+                  <>
+                    <Icon name="Gift" size={18} className="mr-2" />
+                    Получить бесплатно
+                  </>
+                ) : (
+                  <>
+                    <Icon name="Lock" size={18} className="mr-2" />
+                    Заблокирована
+                  </>
+                )}
+              </Button>
+              {!canUnlock && (
+                <p className="text-xs text-center text-muted-foreground">
+                  Осталось купить на {(unlockAmount - totalSpent).toFixed(0)}₽
+                </p>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -191,7 +260,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
             <Icon name="Percent" size={16} className="text-white" />
           </div>
           <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
-            Кэшбек 3% от покупки
+            Кэшбек {cashbackPercent}% от покупки
           </p>
         </div>
         <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">

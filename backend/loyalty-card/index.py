@@ -45,20 +45,35 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             cur.execute(
-                f"SELECT * FROM loyalty_cards WHERE user_id = {user_id} AND is_active = TRUE"
+                f"SELECT * FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id} AND is_active = TRUE"
             )
             card = cur.fetchone()
             
-            cur.execute("SELECT loyalty_card_price FROM site_settings LIMIT 1")
+            cur.execute("SELECT loyalty_card_price, loyalty_unlock_amount, loyalty_cashback_percent FROM t_p77282076_fruit_shop_creation.site_settings LIMIT 1")
             settings = cur.fetchone()
             card_price = float(settings['loyalty_card_price']) if settings else 500.00
+            unlock_amount = float(settings['loyalty_unlock_amount']) if settings else 5000.00
+            cashback_percent = float(settings['loyalty_cashback_percent']) if settings else 5.00
+            
+            cur.execute(
+                f"""SELECT COALESCE(SUM(total), 0) as total_spent
+                   FROM t_p77282076_fruit_shop_creation.orders 
+                   WHERE user_id = {user_id} AND status = 'completed'"""
+            )
+            spent_data = cur.fetchone()
+            total_spent = float(spent_data['total_spent']) if spent_data else 0.0
+            can_unlock = total_spent >= unlock_amount
             
             return {
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'card': dict(card) if card else None,
-                    'card_price': card_price
+                    'card_price': card_price,
+                    'unlock_amount': unlock_amount,
+                    'cashback_percent': cashback_percent,
+                    'total_spent': total_spent,
+                    'can_unlock': can_unlock
                 }, default=str),
                 'isBase64Encoded': False
             }
@@ -66,6 +81,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
             user_id = body_data.get('user_id')
+            unlock_free = body_data.get('unlock_free', False)
             
             if not user_id:
                 return {
@@ -75,7 +91,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            cur.execute(f"SELECT * FROM loyalty_cards WHERE user_id = {user_id}")
+            cur.execute(f"SELECT * FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id}")
             existing_card = cur.fetchone()
             
             if existing_card:
@@ -86,47 +102,88 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            cur.execute("SELECT loyalty_card_price FROM site_settings LIMIT 1")
+            cur.execute("SELECT loyalty_card_price, loyalty_unlock_amount FROM t_p77282076_fruit_shop_creation.site_settings LIMIT 1")
             settings = cur.fetchone()
             card_price = float(settings['loyalty_card_price']) if settings else 500.00
+            unlock_amount = float(settings['loyalty_unlock_amount']) if settings else 5000.00
             
-            cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
-            user = cur.fetchone()
-            
-            if not user or float(user['balance']) < card_price:
+            if unlock_free:
+                cur.execute(
+                    f"""SELECT COALESCE(SUM(total), 0) as total_spent
+                       FROM t_p77282076_fruit_shop_creation.orders 
+                       WHERE user_id = {user_id} AND status = 'completed'"""
+                )
+                spent_data = cur.fetchone()
+                total_spent = float(spent_data['total_spent']) if spent_data else 0.0
+                
+                if total_spent < unlock_amount:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': f'Недостаточная сумма покупок. Требуется {unlock_amount}₽, у вас {total_spent}₽'}),
+                        'isBase64Encoded': False
+                    }
+                
+                card_number = f"LC{secrets.token_hex(8).upper()}"
+                qr_code = f"LOYALTY:{card_number}:{user_id}"
+                
+                cur.execute(
+                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards (user_id, card_number, qr_code) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}') 
+                       RETURNING *"""
+                )
+                new_card = cur.fetchone()
+                
+                cur.execute(
+                    f"INSERT INTO t_p77282076_fruit_shop_creation.transactions (user_id, type, amount, description) VALUES ({user_id}, 'loyalty_unlocked', 0, 'Карта лояльности разблокирована за сумму покупок {total_spent}₽')"
+                )
+                
+                conn.commit()
+                
                 return {
-                    'statusCode': 400,
+                    'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'error': f'Недостаточно средств. Требуется {card_price}₽'}),
+                    'body': json.dumps({'success': True, 'card': dict(new_card), 'unlocked_free': True}, default=str),
                     'isBase64Encoded': False
                 }
-            
-            card_number = f"LC{secrets.token_hex(8).upper()}"
-            qr_code = f"LOYALTY:{card_number}:{user_id}"
-            
-            cur.execute(
-                f"UPDATE users SET balance = balance - {card_price} WHERE id = {user_id}"
-            )
-            
-            cur.execute(
-                f"""INSERT INTO loyalty_cards (user_id, card_number, qr_code) 
-                   VALUES ({user_id}, '{card_number}', '{qr_code}') 
-                   RETURNING *"""
-            )
-            new_card = cur.fetchone()
-            
-            cur.execute(
-                f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {card_price}, 'Покупка карты лояльности')"
-            )
-            
-            conn.commit()
-            
-            return {
-                'statusCode': 200,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'success': True, 'card': dict(new_card)}, default=str),
-                'isBase64Encoded': False
-            }
+            else:
+                cur.execute(f"SELECT balance FROM t_p77282076_fruit_shop_creation.users WHERE id = {user_id}")
+                user = cur.fetchone()
+                
+                if not user or float(user['balance']) < card_price:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': f'Недостаточно средств. Требуется {card_price}₽'}),
+                        'isBase64Encoded': False
+                    }
+                
+                card_number = f"LC{secrets.token_hex(8).upper()}"
+                qr_code = f"LOYALTY:{card_number}:{user_id}"
+                
+                cur.execute(
+                    f"UPDATE t_p77282076_fruit_shop_creation.users SET balance = balance - {card_price} WHERE id = {user_id}"
+                )
+                
+                cur.execute(
+                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards (user_id, card_number, qr_code) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}') 
+                       RETURNING *"""
+                )
+                new_card = cur.fetchone()
+                
+                cur.execute(
+                    f"INSERT INTO t_p77282076_fruit_shop_creation.transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {card_price}, 'Покупка карты лояльности')"
+                )
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'card': dict(new_card)}, default=str),
+                    'isBase64Encoded': False
+                }
         
         elif method == 'PUT':
             body_data = json.loads(event.get('body', '{}'))
@@ -151,8 +208,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             cur.execute(
                 f"""SELECT lc.*, u.full_name, u.phone, u.cashback 
-                   FROM loyalty_cards lc
-                   JOIN users u ON lc.user_id = u.id
+                   FROM t_p77282076_fruit_shop_creation.loyalty_cards lc
+                   JOIN t_p77282076_fruit_shop_creation.users u ON lc.user_id = u.id
                    WHERE lc.card_number = '{card_number}' AND lc.is_active = TRUE"""
             )
             card = cur.fetchone()
@@ -165,16 +222,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            cashback_amount = purchase_amount * 0.03
+            cur.execute("SELECT loyalty_cashback_percent FROM t_p77282076_fruit_shop_creation.site_settings LIMIT 1")
+            settings = cur.fetchone()
+            cashback_percent = float(settings['loyalty_cashback_percent']) if settings else 5.00
+            
+            cashback_amount = purchase_amount * (cashback_percent / 100)
             
             cur.execute(
-                f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {card['user_id']}"
+                f"UPDATE t_p77282076_fruit_shop_creation.users SET cashback = cashback + {cashback_amount} WHERE id = {card['user_id']}"
             )
             
             cur.execute(
-                f"""INSERT INTO transactions (user_id, type, amount, description) 
+                f"""INSERT INTO t_p77282076_fruit_shop_creation.transactions (user_id, type, amount, description) 
                    VALUES ({card['user_id']}, 'cashback_earned', {cashback_amount}, 
-                   'Кэшбек 3% от покупки {purchase_amount}₽ по карте лояльности')"""
+                   'Кэшбек {cashback_percent}% от покупки {purchase_amount}₽ по карте лояльности')"""
             )
             
             conn.commit()

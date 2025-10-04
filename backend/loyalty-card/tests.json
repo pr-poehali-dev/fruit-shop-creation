@@ -3,10 +3,12 @@
     {
       "name": "Get loyalty card info",
       "method": "GET",
-      "path": "/?user_id=1",
+      "path": "/?user_id=2",
       "expectedStatus": 200,
       "expectedBody": {
-        "card_price": "number"
+        "card_price": "number",
+        "unlock_amount": "number",
+        "cashback_percent": "number"
       },
       "bodyMatcher": "partial"
     }

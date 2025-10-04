@@ -43,19 +43,53 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Label htmlFor="work-hours">Режим работы</Label>
             <Input id="work-hours" name="work_hours" defaultValue={siteSettings.work_hours || 'Пн-Вс: 9:00 - 19:00'} />
           </div>
-          <div>
-            <Label htmlFor="loyalty-card-price">Стоимость карты лояльности (₽)</Label>
-            <Input 
-              id="loyalty-card-price" 
-              name="loyalty_card_price" 
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={siteSettings.loyalty_card_price || 500} 
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Цена покупки виртуальной карты лояльности с QR-кодом
-            </p>
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-semibold mb-4">Настройки карты лояльности</h3>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="loyalty-card-price">Стоимость карты лояльности (₽)</Label>
+                <Input 
+                  id="loyalty-card-price" 
+                  name="loyalty_card_price" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={siteSettings.loyalty_card_price || 500} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Цена покупки виртуальной карты лояльности с QR-кодом
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="loyalty-unlock-amount">Сумма покупок для бесплатного получения (₽)</Label>
+                <Input 
+                  id="loyalty-unlock-amount" 
+                  name="loyalty_unlock_amount" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={siteSettings.loyalty_unlock_amount || 5000} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Карта автоматически откроется при достижении этой суммы покупок
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="loyalty-cashback-percent">Процент кэшбека (%)</Label>
+                <Input 
+                  id="loyalty-cashback-percent" 
+                  name="loyalty_cashback_percent" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  defaultValue={siteSettings.loyalty_cashback_percent || 5} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Процент от покупки, который начисляется на баланс владельцам карты
+                </p>
+              </div>
+            </div>
           </div>
           <div>
             <Label htmlFor="price-list-url">Ссылка на прайс-лист</Label>
