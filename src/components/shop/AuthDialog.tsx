@@ -3,14 +3,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import Icon from '@/components/ui/icon';
 
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>, action: 'login' | 'register') => void;
+  onGoogleLogin?: () => void;
 }
 
-const AuthDialog = ({ open, onOpenChange, onSubmit }: AuthDialogProps) => {
+const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin }: AuthDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -34,6 +36,29 @@ const AuthDialog = ({ open, onOpenChange, onSubmit }: AuthDialogProps) => {
                 <Input id="login-password" name="password" type="password" required />
               </div>
               <Button type="submit" className="w-full">Войти</Button>
+              
+              {onGoogleLogin && (
+                <>
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Для администраторов</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={onGoogleLogin}
+                  >
+                    <Icon name="Chrome" size={18} className="mr-2" />
+                    Войти через Google
+                  </Button>
+                </>
+              )}
             </form>
           </TabsContent>
           <TabsContent value="register">
