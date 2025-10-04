@@ -56,6 +56,11 @@ const Index = () => {
 
   const handleCheckout = async (paymentMethod: string) => {
     if (!user) {
+      toast({
+        title: 'Требуется авторизация',
+        description: 'Пожалуйста, войдите в аккаунт для оформления заказа',
+        variant: 'destructive'
+      });
       setShowAuthDialog(true);
       return;
     }
