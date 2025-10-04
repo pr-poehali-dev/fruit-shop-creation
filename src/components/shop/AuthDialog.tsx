@@ -24,6 +24,42 @@ interface AuthDialogProps {
 const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: AuthDialogProps) => {
   const [timeLeft, setTimeLeft] = useState('');
 
+  const formatPhoneInput = (value: string) => {
+    const cleaned = value.replace(/\D/g, '');
+    let formatted = '+7';
+    
+    if (cleaned.length > 1) {
+      formatted += '(' + cleaned.substring(1, 4);
+    }
+    if (cleaned.length >= 5) {
+      formatted += ')' + cleaned.substring(4, 7);
+    }
+    if (cleaned.length >= 8) {
+      formatted += '-' + cleaned.substring(7, 9);
+    }
+    if (cleaned.length >= 10) {
+      formatted += '-' + cleaned.substring(9, 11);
+    }
+    
+    return formatted;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const cursorPosition = input.selectionStart || 0;
+    const oldValue = input.value;
+    const newValue = formatPhoneInput(input.value);
+    
+    input.value = newValue;
+    
+    if (oldValue.length > newValue.length) {
+      input.setSelectionRange(cursorPosition, cursorPosition);
+    } else {
+      const newCursor = cursorPosition + (newValue.length - oldValue.length);
+      input.setSelectionRange(newCursor, newCursor);
+    }
+  };
+
   useEffect(() => {
     if (!banInfo?.banned || !banInfo.ban_until) return;
 
@@ -135,7 +171,18 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
             <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-4">
               <div>
                 <Label htmlFor="login-phone">Телефон</Label>
-                <Input id="login-phone" name="phone" type="tel" placeholder="+7 (999) 123-45-67" required />
+                <Input 
+                  id="login-phone" 
+                  name="phone" 
+                  type="tel" 
+                  placeholder="+7(999)123-45-67" 
+                  defaultValue="+7"
+                  onChange={handlePhoneChange}
+                  onFocus={(e) => {
+                    if (e.target.value === '') e.target.value = '+7';
+                  }}
+                  required 
+                />
               </div>
               <div>
                 <Label htmlFor="login-password">Пароль</Label>
@@ -171,7 +218,18 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
             <form onSubmit={(e) => onSubmit(e, 'register')} className="space-y-4">
               <div>
                 <Label htmlFor="register-phone">Телефон</Label>
-                <Input id="register-phone" name="phone" type="tel" placeholder="+7 (999) 123-45-67" required />
+                <Input 
+                  id="register-phone" 
+                  name="phone" 
+                  type="tel" 
+                  placeholder="+7(999)123-45-67" 
+                  defaultValue="+7"
+                  onChange={handlePhoneChange}
+                  onFocus={(e) => {
+                    if (e.target.value === '') e.target.value = '+7';
+                  }}
+                  required 
+                />
               </div>
               <div>
                 <Label htmlFor="register-name">Имя</Label>
