@@ -191,9 +191,9 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
               </div>
             </div>
 
-            <div className="border-t pt-4">
+            <div className="border-t pt-4 pb-4">
               <h4 className="font-semibold mb-3">История сообщений</h4>
-              <div className="space-y-3">
+              <div className="space-y-3 pb-32">
                 {selectedTicket?.messages?.filter((m: any) => m && m.id && m.message).length > 0 ? (
                   selectedTicket.messages.filter((m: any) => m && m.id && m.message).map((msg: any) => (
                   <div 
@@ -227,7 +227,7 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
 
           </div>
 
-          <div className="border-t pt-4 mt-4 bg-background sticky bottom-0">
+          <div className="border-t pt-4 bg-background absolute bottom-0 left-0 right-0 px-6 pb-6">
             <Label htmlFor="reply">Ваш ответ</Label>
             <Textarea
               id="reply"
