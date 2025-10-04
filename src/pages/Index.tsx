@@ -347,6 +347,7 @@ const Index = () => {
                     onAddToCart={handleAddToCart}
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}
+                    siteSettings={siteSettings}
                   />
                 )}
 
@@ -356,6 +357,7 @@ const Index = () => {
                     onAddToCart={handleAddToCart}
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}
+                    siteSettings={siteSettings}
                   />
                 )}
 

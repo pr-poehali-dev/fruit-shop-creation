@@ -115,6 +115,7 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
               onViewDetails={onViewDetails}
               isFavorite={favoriteIds?.has(product.id)}
               onToggleFavorite={onToggleFavorite}
+              siteSettings={siteSettings}
             />
           ))}
         </div>

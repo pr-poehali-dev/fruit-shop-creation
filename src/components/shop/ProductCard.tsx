@@ -39,14 +39,16 @@ interface ProductCardProps {
   onViewDetails: (product: Product) => void;
   isFavorite?: boolean;
   onToggleFavorite?: (productId: number) => void;
+  siteSettings?: any;
 }
 
-const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite, siteSettings }: ProductCardProps) => {
   const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.image_url;
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
   const showStock = product.show_stock !== false;
   const hideMainPrice = product.hide_main_price && hasVariants && product.variants!.length >= 2;
+  const isNewYear = siteSettings?.holiday_theme === 'new_year';
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -57,7 +59,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow relative">
-      <div className="snow-cap"></div>
+      {isNewYear && <div className="snow-cap"></div>}
       <div className="relative group cursor-pointer" onClick={() => onViewDetails(product)}>
         {onToggleFavorite && (
           <button
@@ -131,24 +133,24 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
       <CardFooter className="gap-2">
         <Button 
           variant="outline" 
-          className="flex-1 relative overflow-hidden snow-button" 
+          className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onViewDetails(product);
           }}
         >
-          <div className="button-snow-cap"></div>
+          {isNewYear && <div className="button-snow-cap"></div>}
           <Icon name="Eye" size={18} className="mr-2" />
           Подробнее
         </Button>
         <Button 
-          className="flex-1 relative overflow-hidden snow-button" 
+          className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart(product);
           }}
         >
-          <div className="button-snow-cap"></div>
+          {isNewYear && <div className="button-snow-cap"></div>}
           <Icon name="ShoppingCart" size={18} className="mr-2" />
           В корзину
         </Button>

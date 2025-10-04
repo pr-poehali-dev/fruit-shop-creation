@@ -26,9 +26,10 @@ interface CatalogSectionProps {
   onAddToCart: (product: Product) => void;
   favoriteIds?: Set<number>;
   onToggleFavorite?: (productId: number) => void;
+  siteSettings?: any;
 }
 
-const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite }: CatalogSectionProps) => {
+const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, siteSettings }: CatalogSectionProps) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -77,6 +78,7 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite }
             onViewDetails={handleViewDetails}
             isFavorite={favoriteIds?.has(product.id)}
             onToggleFavorite={onToggleFavorite}
+            siteSettings={siteSettings}
           />
         ))}
       </div>

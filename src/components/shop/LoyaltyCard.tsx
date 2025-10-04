@@ -18,6 +18,7 @@ interface LoyaltyCardData {
   card_number: string;
   qr_code: string;
   purchased_at: string;
+  expires_at?: string;
 }
 
 const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps) => {
@@ -246,17 +247,30 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
             </div>
           </div>
 
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-xs opacity-90 font-medium">Активирована</p>
-              <p className="text-sm font-bold">
-                {new Date(card.purchased_at).toLocaleDateString('ru-RU')}
-              </p>
+          <div className="space-y-3">
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-xs opacity-90 font-medium">Активирована</p>
+                <p className="text-sm font-bold">
+                  {new Date(card.purchased_at).toLocaleDateString('ru-RU')}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <Icon name="CheckCircle2" size={18} className="text-green-300" />
+                <span className="text-sm font-bold">Активна</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <Icon name="CheckCircle2" size={18} className="text-green-300" />
-              <span className="text-sm font-bold">Активна</span>
-            </div>
+            {card.expires_at && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2">
+                <Icon name="Calendar" size={16} className="text-yellow-300" />
+                <div className="flex-1">
+                  <p className="text-xs opacity-90">Действительна до</p>
+                  <p className="text-sm font-bold">
+                    {new Date(card.expires_at).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

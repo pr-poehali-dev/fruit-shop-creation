@@ -37,9 +37,10 @@ interface FavoritesSectionProps {
   onAddToCart: (product: Product) => void;
   favoriteIds: Set<number>;
   onToggleFavorite: (productId: number) => void;
+  siteSettings?: any;
 }
 
-const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorite }: FavoritesSectionProps) => {
+const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorite, siteSettings }: FavoritesSectionProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -86,6 +87,7 @@ const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorit
                 onViewDetails={handleViewDetails}
                 isFavorite={favoriteIds.has(fav.product_id)}
                 onToggleFavorite={onToggleFavorite}
+                siteSettings={siteSettings}
               />
             );
           })}

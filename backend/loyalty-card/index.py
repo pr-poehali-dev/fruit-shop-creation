@@ -108,8 +108,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 qr_code = f"LOYALTY:{card_number}:{user_id}"
                 
                 cur.execute(
-                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards (user_id, card_number, qr_code) 
-                       VALUES ({user_id}, '{card_number}', '{qr_code}') 
+                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards 
+                       (user_id, card_number, qr_code, expires_at) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW() + INTERVAL '6 months') 
                        RETURNING *"""
                 )
                 new_card = cur.fetchone()
@@ -153,8 +154,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 qr_code = f"LOYALTY:{card_number}:{user_id}"
                 
                 cur.execute(
-                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards (user_id, card_number, qr_code) 
-                       VALUES ({user_id}, '{card_number}', '{qr_code}') 
+                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards 
+                       (user_id, card_number, qr_code, expires_at) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW() + INTERVAL '6 months') 
                        RETURNING *"""
                 )
                 new_card = cur.fetchone()
@@ -191,8 +193,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 
                 cur.execute(
-                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards (user_id, card_number, qr_code) 
-                       VALUES ({user_id}, '{card_number}', '{qr_code}') 
+                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards 
+                       (user_id, card_number, qr_code, expires_at) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW() + INTERVAL '6 months') 
                        RETURNING *"""
                 )
                 new_card = cur.fetchone()
@@ -246,6 +249,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Карта не найдена'}),
                     'isBase64Encoded': False
                 }
+            
+            # Проверка срока действия при начислении кэшбека
+            if card.get('expires_at'):
+                cur.execute(f"SELECT '{card['expires_at']}'::timestamp < NOW() as is_expired")
+                expired_check = cur.fetchone()
+                if expired_check and expired_check['is_expired']:
+                    cur.execute(
+                        f"UPDATE t_p77282076_fruit_shop_creation.loyalty_cards SET is_active = FALSE WHERE id = {card['id']}"
+                    )
+                    conn.commit()
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Срок действия карты истёк'}),
+                        'isBase64Encoded': False
+                    }
             
             cur.execute("SELECT loyalty_cashback_percent FROM t_p77282076_fruit_shop_creation.site_settings LIMIT 1")
             settings = cur.fetchone()
