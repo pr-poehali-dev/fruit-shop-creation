@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Firework {
   x: number;
@@ -17,8 +17,38 @@ interface Particle {
   life: number;
 }
 
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 const NewYearBanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const newYear = new Date('2026-01-01T00:00:00').getTime();
+      const now = new Date().getTime();
+      const difference = newYear - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+        });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -139,74 +169,53 @@ const NewYearBanner = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-              <span className="text-5xl animate-bounce">🎄</span>
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
-                С Новым 2025 Годом!
-              </h2>
-              <span className="text-5xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎁</span>
-            </div>
-            
-            <p className="text-xl md:text-2xl mb-6 text-blue-100">
-              Пусть этот год принесёт вам радость, процветание и множество прекрасных моментов! 
-            </p>
-            
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
-                <span className="text-2xl mr-2">🌟</span>
-                <span className="text-lg">Волшебства</span>
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="text-5xl animate-bounce">🎄</span>
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
+              С Новым 2026 Годом!
+            </h2>
+            <span className="text-5xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎁</span>
+          </div>
+          
+          <p className="text-xl md:text-2xl mb-8 text-blue-100">
+            Пусть этот год принесёт вам радость, процветание и множество прекрасных моментов! 
+          </p>
+
+          <div className="mb-8">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-yellow-300">⏰ До Нового 2026 года осталось:</h3>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl border-2 border-white/30 min-w-[100px]">
+                <div className="text-4xl md:text-5xl font-bold text-yellow-300">{timeLeft.days}</div>
+                <div className="text-sm md:text-base text-blue-200 mt-1">дней</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
-                <span className="text-2xl mr-2">💚</span>
-                <span className="text-lg">Здоровья</span>
+              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl border-2 border-white/30 min-w-[100px]">
+                <div className="text-4xl md:text-5xl font-bold text-pink-300">{timeLeft.hours}</div>
+                <div className="text-sm md:text-base text-blue-200 mt-1">часов</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
-                <span className="text-2xl mr-2">🎉</span>
-                <span className="text-lg">Счастья</span>
+              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl border-2 border-white/30 min-w-[100px]">
+                <div className="text-4xl md:text-5xl font-bold text-purple-300">{timeLeft.minutes}</div>
+                <div className="text-sm md:text-base text-blue-200 mt-1">минут</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl border-2 border-white/30 min-w-[100px]">
+                <div className="text-4xl md:text-5xl font-bold text-green-300">{timeLeft.seconds}</div>
+                <div className="text-sm md:text-base text-blue-200 mt-1">секунд</div>
               </div>
             </div>
           </div>
-
-          <div className="relative">
-            <div className="snowman-container">
-              <div className="speech-bubble">
-                <p className="text-lg font-semibold text-gray-800">
-                  🎅 С наступающим!<br/>
-                  Желаю уюта и тепла! ❄️
-                </p>
-              </div>
-              
-              <div className="snowman">
-                <div className="snowman-head">
-                  <div className="eyes">
-                    <div className="eye left"></div>
-                    <div className="eye right"></div>
-                  </div>
-                  <div className="carrot-nose"></div>
-                  <div className="smile"></div>
-                </div>
-                <div className="snowman-body">
-                  <div className="button"></div>
-                  <div className="button"></div>
-                  <div className="button"></div>
-                </div>
-                <div className="snowman-base"></div>
-                <div className="scarf"></div>
-                <div className="hat">
-                  <div className="hat-top"></div>
-                  <div className="hat-brim"></div>
-                </div>
-                <div className="arm left-arm">
-                  <div className="branch"></div>
-                  <div className="branch"></div>
-                </div>
-                <div className="arm right-arm">
-                  <div className="branch"></div>
-                  <div className="branch"></div>
-                </div>
-              </div>
+          
+          <div className="flex flex-wrap gap-3 justify-center">
+            <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
+              <span className="text-2xl mr-2">🌟</span>
+              <span className="text-lg">Волшебства</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
+              <span className="text-2xl mr-2">💚</span>
+              <span className="text-lg">Здоровья</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20">
+              <span className="text-2xl mr-2">🎉</span>
+              <span className="text-lg">Счастья</span>
             </div>
           </div>
         </div>
@@ -230,237 +239,6 @@ const NewYearBanner = () => {
             top: 100%;
             transform: translateX(100px) rotate(360deg);
           }
-        }
-
-        .snowman-container {
-          position: relative;
-          animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
-        .speech-bubble {
-          position: absolute;
-          top: -80px;
-          right: -20px;
-          background: white;
-          padding: 12px 20px;
-          border-radius: 20px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-          animation: pulse 2s ease-in-out infinite;
-          min-width: 200px;
-        }
-
-        .speech-bubble::after {
-          content: '';
-          position: absolute;
-          bottom: -10px;
-          left: 30px;
-          width: 0;
-          height: 0;
-          border-left: 10px solid transparent;
-          border-right: 10px solid transparent;
-          border-top: 10px solid white;
-        }
-
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-
-        .snowman {
-          position: relative;
-          width: 120px;
-          height: 200px;
-        }
-
-        .snowman-head {
-          position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 50px;
-          height: 50px;
-          background: white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .eyes {
-          position: absolute;
-          top: 15px;
-          width: 100%;
-        }
-
-        .eye {
-          position: absolute;
-          width: 6px;
-          height: 6px;
-          background: #333;
-          border-radius: 50%;
-        }
-
-        .eye.left { left: 12px; }
-        .eye.right { right: 12px; }
-
-        .carrot-nose {
-          position: absolute;
-          top: 22px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 0;
-          border-left: 4px solid transparent;
-          border-right: 4px solid transparent;
-          border-top: 12px solid #ff8c42;
-        }
-
-        .smile {
-          position: absolute;
-          top: 32px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 20px;
-          height: 10px;
-          border: 2px solid #333;
-          border-top: none;
-          border-radius: 0 0 10px 10px;
-        }
-
-        .snowman-body {
-          position: absolute;
-          top: 55px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 70px;
-          height: 70px;
-          background: white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .button {
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 8px;
-          height: 8px;
-          background: #333;
-          border-radius: 50%;
-        }
-
-        .button:nth-child(1) { top: 15px; }
-        .button:nth-child(2) { top: 32px; }
-        .button:nth-child(3) { top: 49px; }
-
-        .snowman-base {
-          position: absolute;
-          top: 130px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 90px;
-          height: 90px;
-          background: white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .scarf {
-          position: absolute;
-          top: 48px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 60px;
-          height: 12px;
-          background: #e74c3c;
-          border-radius: 6px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .scarf::after {
-          content: '';
-          position: absolute;
-          top: 6px;
-          right: -8px;
-          width: 20px;
-          height: 25px;
-          background: #c0392b;
-          border-radius: 3px;
-        }
-
-        .hat {
-          position: absolute;
-          top: -25px;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
-        .hat-top {
-          width: 35px;
-          height: 30px;
-          background: #2c3e50;
-          border-radius: 8px 8px 0 0;
-          margin: 0 auto;
-        }
-
-        .hat-brim {
-          width: 50px;
-          height: 8px;
-          background: #2c3e50;
-          border-radius: 4px;
-          margin-top: -2px;
-        }
-
-        .arm {
-          position: absolute;
-          top: 70px;
-          width: 40px;
-          height: 3px;
-          background: #8b4513;
-        }
-
-        .left-arm {
-          left: -20px;
-          transform: rotate(-30deg);
-        }
-
-        .right-arm {
-          right: -20px;
-          transform: rotate(30deg);
-        }
-
-        .branch {
-          position: absolute;
-          width: 15px;
-          height: 2px;
-          background: #8b4513;
-        }
-
-        .left-arm .branch:nth-child(1) {
-          top: -5px;
-          right: 5px;
-          transform: rotate(-45deg);
-        }
-
-        .left-arm .branch:nth-child(2) {
-          top: 3px;
-          right: 5px;
-          transform: rotate(45deg);
-        }
-
-        .right-arm .branch:nth-child(1) {
-          top: -5px;
-          left: 5px;
-          transform: rotate(45deg);
-        }
-
-        .right-arm .branch:nth-child(2) {
-          top: 3px;
-          left: 5px;
-          transform: rotate(-45deg);
         }
       `}</style>
     </div>
