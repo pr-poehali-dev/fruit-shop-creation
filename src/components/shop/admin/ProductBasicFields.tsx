@@ -73,13 +73,13 @@ const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStock
           />
         </div>
         <div>
-          <Label htmlFor="product-stock" className="text-sm">Количество на складе *</Label>
+          <Label htmlFor="product-stock" className="text-sm">Количество на складе</Label>
           <Input 
             id="product-stock" 
             name="stock" 
             type="number" 
-            defaultValue={editingProduct?.stock || 0} 
-            required
+            defaultValue={editingProduct?.stock || ''} 
+            placeholder="Не указано - всегда в наличии"
             className="mt-1 text-sm"
           />
         </div>

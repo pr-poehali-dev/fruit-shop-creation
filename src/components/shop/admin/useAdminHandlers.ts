@@ -31,6 +31,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     const formData = new FormData(e.currentTarget);
     
     const primaryImage = images.find(img => img.is_primary);
+    const stockValue = formData.get('stock') as string;
     
     const productData = {
       id: props.editingProduct?.id,
@@ -40,7 +41,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       price: parseFloat(formData.get('price') as string),
       image_url: primaryImage?.image_url || images[0]?.image_url || '',
       category_id: parseInt(formData.get('category_id') as string),
-      stock: parseInt(formData.get('stock') as string),
+      stock: stockValue && stockValue.trim() !== '' ? parseInt(stockValue) : null,
       show_stock: showStock,
       hide_main_price: hideMainPrice,
       images: images,

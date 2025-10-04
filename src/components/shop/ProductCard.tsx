@@ -97,7 +97,11 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) 
           ) : (
             <div className="flex items-center justify-between">
               <p className="text-2xl font-bold text-primary">{product.price} ₽</p>
-              {showStock && <Badge variant="secondary">В наличии: {product.stock}</Badge>}
+              {showStock && (
+                <Badge variant="secondary">
+                  {product.stock > 0 ? `В наличии: ${product.stock}` : 'В наличии'}
+                </Badge>
+              )}
             </div>
           )}
         </div>
