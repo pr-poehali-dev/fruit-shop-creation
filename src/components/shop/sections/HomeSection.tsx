@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import ProductCard from '../ProductCard';
+import NewYearBanner from '../NewYearBanner';
 
 interface Product {
   id: number;
@@ -25,6 +26,8 @@ interface HomeSectionProps {
 const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite }: HomeSectionProps) => {
   return (
     <div className="space-y-16">
+      <NewYearBanner />
+      
       {/* Hero секция с градиентным фоном */}
       <section className="relative text-center py-20 px-6 bg-gradient-to-br from-primary/20 via-primary/5 to-background rounded-3xl overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
