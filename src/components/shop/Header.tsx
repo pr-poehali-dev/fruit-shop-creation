@@ -26,7 +26,7 @@ interface HeaderProps {
   cart: CartItem[];
   user: User | null;
   currentSection: string;
-  siteSettings?: { site_name?: string };
+  siteSettings?: { site_name?: string; holiday_theme?: string };
   unreadTickets?: number;
   needsRating?: boolean;
   favoritesCount?: number;
@@ -49,32 +49,38 @@ const Header = ({
   renderCartContent,
   renderProfileContent
 }: HeaderProps) => {
+  const isNewYear = siteSettings?.holiday_theme === 'new_year';
+  
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-800 text-primary-foreground shadow-md overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-      <SnowEffect />
+      {isNewYear && <SnowEffect />}
       
-      <div className="absolute top-2 right-8 sm:right-16 md:right-24 lg:right-32 flex gap-3 opacity-90 animate-pulse">
-        <div className="text-4xl sm:text-5xl" style={{ animation: 'swing 3s ease-in-out infinite' }}>🎄</div>
-        <div className="text-3xl sm:text-4xl" style={{ animation: 'swing 3s ease-in-out 0.5s infinite' }}>✨</div>
-        <div className="text-2xl sm:text-3xl" style={{ animation: 'swing 3s ease-in-out 1s infinite' }}>🎁</div>
-      </div>
-      
-      <div className="absolute top-1 left-1/4 flex gap-2 opacity-60">
-        <div className="text-xl">❄️</div>
-        <div className="text-xl" style={{ animation: 'twinkle 2s ease-in-out infinite' }}>⛄</div>
-      </div>
-      
-      <style>{`
-        @keyframes swing {
-          0%, 100% { transform: rotate(-5deg); }
-          50% { transform: rotate(5deg); }
-        }
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 1; }
-        }
-      `}</style>
+      {isNewYear && (
+        <>
+          <div className="absolute top-2 right-8 sm:right-16 md:right-24 lg:right-32 flex gap-3 opacity-90 animate-pulse">
+            <div className="text-4xl sm:text-5xl" style={{ animation: 'swing 3s ease-in-out infinite' }}>🎄</div>
+            <div className="text-3xl sm:text-4xl" style={{ animation: 'swing 3s ease-in-out 0.5s infinite' }}>✨</div>
+            <div className="text-2xl sm:text-3xl" style={{ animation: 'swing 3s ease-in-out 1s infinite' }}>🎁</div>
+          </div>
+          
+          <div className="absolute top-1 left-1/4 flex gap-2 opacity-60">
+            <div className="text-xl">❄️</div>
+            <div className="text-xl" style={{ animation: 'twinkle 2s ease-in-out infinite' }}>⛄</div>
+          </div>
+          
+          <style>{`
+            @keyframes swing {
+              0%, 100% { transform: rotate(-5deg); }
+              50% { transform: rotate(5deg); }
+            }
+            @keyframes twinkle {
+              0%, 100% { opacity: 0.4; }
+              50% { opacity: 1; }
+            }
+          `}</style>
+        </>
+      )}
       
       <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-3 sm:gap-4">
@@ -110,14 +116,14 @@ const Header = ({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30 border-2 border-orange-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button"
+                  className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30 border-2 border-orange-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
                   title="Требуется оценить тикет"
                 >
                   <Icon name="Bell" size={28} />
                   <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold shadow-lg animate-pulse">
                     1
                   </Badge>
-                  <div className="icon-snow-sparkle">🔔</div>
+                  {isNewYear && <div className="icon-snow-sparkle">🔔</div>}
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">
@@ -133,7 +139,7 @@ const Header = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button"
+              className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
               onClick={() => onSectionChange('favorites')}
             >
               <Icon name="Heart" size={28} />
@@ -142,20 +148,20 @@ const Header = ({
                   {favoritesCount}
                 </Badge>
               )}
-              <div className="icon-snow-sparkle">❄️</div>
+              {isNewYear && <div className="icon-snow-sparkle">❄️</div>}
             </Button>
           )}
 
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 border-2 border-yellow-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button">
+              <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 border-2 border-yellow-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
                 <Icon name="ShoppingCart" size={28} />
                 {cart.length > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg animate-pulse">
                     {cart.length}
                   </Badge>
                 )}
-                <div className="icon-snow-sparkle">✨</div>
+                {isNewYear && <div className="icon-snow-sparkle">✨</div>}
               </Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-lg">
@@ -169,14 +175,14 @@ const Header = ({
           {user ? (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button">
+                <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
                   <Icon name="User" size={28} />
                   {unreadTickets > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
                       {unreadTickets}
                     </Badge>
                   )}
-                  <div className="icon-snow-sparkle">🎅</div>
+                  {isNewYear && <div className="icon-snow-sparkle">🎅</div>}
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">
