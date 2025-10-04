@@ -226,23 +226,24 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
             </div>
 
             <div className="border-t pt-4 mt-4">
-            <Label htmlFor="reply">Ваш ответ</Label>
-            <Textarea
-              id="reply"
-              value={replyMessage}
-              onChange={(e) => setReplyMessage(e.target.value)}
-              placeholder="Введите ответ пользователю"
-              rows={2}
-              className="mt-2"
-            />
-            <Button 
-              onClick={handleSendReply} 
-              className="mt-2 w-full sm:w-auto"
-              disabled={!replyMessage.trim()}
-            >
-              <Icon name="Send" size={18} className="mr-2" />
-              Отправить ответ
-            </Button>
+              <Label htmlFor="reply">Ваш ответ</Label>
+              <Textarea
+                id="reply"
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                placeholder="Введите ответ пользователю"
+                rows={2}
+                className="mt-2"
+              />
+              <Button 
+                onClick={handleSendReply} 
+                className="mt-2 w-full sm:w-auto"
+                disabled={!replyMessage.trim()}
+              >
+                <Icon name="Send" size={18} className="mr-2" />
+                Отправить ответ
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
