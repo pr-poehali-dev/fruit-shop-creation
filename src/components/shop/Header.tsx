@@ -85,8 +85,13 @@ const Header = ({
           {user ? (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/90">
+                <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90">
                   <Icon name="User" size={24} />
+                  {unreadTickets > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-destructive animate-pulse">
+                      {unreadTickets}
+                    </Badge>
+                  )}
                 </Button>
               </SheetTrigger>
               <SheetContent>
@@ -97,7 +102,7 @@ const Header = ({
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="secondary" onClick={onShowAuth} className="hidden sm:inline-flex">
+            <Button variant="secondary" onClick={onShowAuth}>
               Войти
             </Button>
           )}

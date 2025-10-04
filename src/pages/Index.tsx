@@ -146,6 +146,8 @@ const Index = () => {
   };
 
   const onLogout = () => {
+    setCurrentSection('home');
+    clearCart();
     toast({ title: 'Вы вышли из системы' });
   };
 
