@@ -19,7 +19,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -250,6 +250,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'user_phone': card['phone'],
                     'new_cashback': float(card['cashback']) + cashback_amount
                 }, default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'DELETE':
+            body_data = json.loads(event.get('body', '{}'))
+            user_id = body_data.get('user_id')
+            
+            if not user_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'user_id required'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(
+                f"SELECT * FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id} AND is_active = TRUE"
+            )
+            card = cur.fetchone()
+            
+            if not card:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Карта не найдена или уже отозвана'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(
+                f"UPDATE t_p77282076_fruit_shop_creation.loyalty_cards SET is_active = FALSE WHERE user_id = {user_id}"
+            )
+            
+            cur.execute(
+                f"INSERT INTO t_p77282076_fruit_shop_creation.transactions (user_id, type, amount, description) VALUES ({user_id}, 'loyalty_revoked', 0, 'Карта лояльности отозвана администратором')"
+            )
+            
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True, 'message': 'Карта лояльности отозвана'}),
                 'isBase64Encoded': False
             }
         
