@@ -60,7 +60,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.execute(
                     f"""SELECT id, image_url, is_primary, sort_order 
                        FROM product_images 
-                       WHERE product_id = {product['id']} 
+                       WHERE product_id = {product['id']} AND image_url != '' AND image_url IS NOT NULL
                        ORDER BY sort_order"""
                 )
                 product['images'] = [dict(img) for img in cur.fetchall()]
@@ -155,7 +155,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     )
             
             for old_id in existing_ids:
-                cur.execute(f"UPDATE product_images SET image_url = '', is_primary = FALSE WHERE id = {old_id}")
+                cur.execute(f"DELETE FROM product_images WHERE id = {old_id}")
             
             conn.commit()
             

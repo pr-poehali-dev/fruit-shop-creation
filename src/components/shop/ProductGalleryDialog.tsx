@@ -34,7 +34,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
   if (!product) return null;
 
   const images = product.images && product.images.length > 0 
-    ? product.images.sort((a, b) => a.sort_order - b.sort_order)
+    ? product.images.filter(img => img.image_url && img.image_url.trim() !== '').sort((a, b) => a.sort_order - b.sort_order)
     : [];
 
   const currentImage = images[currentImageIndex]?.image_url || '';
