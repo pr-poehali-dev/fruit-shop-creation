@@ -31,6 +31,7 @@ interface ProfileContentProps {
 const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpdate, scrollToSupport = false }: ProfileContentProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const supportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,6 +61,36 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       setTransactions([]);
     } finally {
       setLoadingTransactions(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: number) => {
+    if (!confirm('Вы уверены, что хотите отменить этот заказ?')) return;
+    
+    setCancellingOrderId(orderId);
+    try {
+      const response = await fetch('https://functions.poehali.dev/b35bef37-8423-4939-b43b-0fb565cc8853', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel_order',
+          order_id: orderId
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Заказ успешно отменён. Средства возвращены на баланс.');
+        window.location.reload();
+      } else {
+        alert(data.error || 'Не удалось отменить заказ');
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Произошла ошибка при отмене заказа');
+    } finally {
+      setCancellingOrderId(null);
     }
   };
 
@@ -161,12 +192,26 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm font-medium">{order.total_amount} ₽</p>
-                    <Badge variant="outline" className="mt-2">
-                      {order.status === 'pending' && '⏳ Ожидает обработки'}
-                      {order.status === 'processing' && '📦 В обработке'}
-                      {order.status === 'delivered' && '✅ Доставлен'}
-                      {order.status === 'rejected' && '❌ Отклонён'}
-                    </Badge>
+                    <div className="flex items-center justify-between mt-2">
+                      <Badge variant="outline">
+                        {order.status === 'pending' && '⏳ Ожидает обработки'}
+                        {order.status === 'processing' && '📦 В обработке'}
+                        {order.status === 'delivered' && '✅ Доставлен'}
+                        {order.status === 'rejected' && '❌ Отклонён'}
+                        {order.status === 'cancelled' && '🚫 Отменён'}
+                      </Badge>
+                      {(order.status === 'pending' || order.status === 'processing') && (
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => handleCancelOrder(order.id)}
+                          disabled={cancellingOrderId === order.id}
+                        >
+                          <Icon name="X" size={14} className="mr-1" />
+                          {cancellingOrderId === order.id ? 'Отмена...' : 'Отменить'}
+                        </Button>
+                      )}
+                    </div>
                     {order.rejection_reason && (
                       <p className="text-xs text-red-600 mt-2">Причина: {order.rejection_reason}</p>
                     )}

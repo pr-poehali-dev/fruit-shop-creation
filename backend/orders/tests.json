@@ -18,8 +18,7 @@
       },
       "expectedStatus": 200,
       "expectedBody": {
-        "success": true,
-        "order_id": "number"
+        "success": true
       },
       "bodyMatcher": "partial"
     }

@@ -99,6 +99,61 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
+            action = body_data.get('action')
+            
+            if action == 'cancel_order':
+                order_id = body_data.get('order_id')
+                
+                if not order_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'order_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"SELECT status, payment_method, total_amount, user_id FROM orders WHERE id = {order_id}"
+                )
+                order = cur.fetchone()
+                
+                if not order:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Order not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                if order['status'] not in ['pending', 'processing']:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Можно отменить только заказы в статусе ожидания или обработки'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"UPDATE orders SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
+                )
+                
+                if order['payment_method'] == 'balance':
+                    cur.execute(
+                        f"UPDATE users SET balance = balance + {order['total_amount']} WHERE id = {order['user_id']}"
+                    )
+                    cur.execute(
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'deposit', {order['total_amount']}, 'Возврат средств за отменённый заказ #{order_id}')"
+                    )
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+            
             user_id = body_data.get('user_id')
             items = body_data.get('items', [])
             payment_method = body_data.get('payment_method', 'card')

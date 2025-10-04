@@ -1,7 +1,7 @@
 const SummerTheme = () => {
   return (
     <>
-      <div className="fixed bottom-0 right-0 z-[99] pointer-events-none summer-sun">
+      <div className="hidden md:block fixed bottom-0 right-0 z-[99] pointer-events-none summer-sun">
         <div className="relative">
           <div className="sun-speech">
             <p className="text-sm font-bold text-orange-900">

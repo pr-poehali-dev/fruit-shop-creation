@@ -1,7 +1,7 @@
 const HalloweenTheme = () => {
   return (
     <>
-      <div className="fixed inset-0 pointer-events-none z-[98] overflow-hidden">
+      <div className="hidden md:block fixed inset-0 pointer-events-none z-[98] overflow-hidden">
         <div className="bat bat-1">🦇</div>
         <div className="bat bat-2">🦇</div>
         <div className="bat bat-3">🦇</div>
@@ -21,7 +21,7 @@ const HalloweenTheme = () => {
         </div>
       </div>
 
-      <div className="fixed bottom-0 right-0 z-[99] pointer-events-none halloween-pumpkin">
+      <div className="hidden md:block fixed bottom-0 right-0 z-[99] pointer-events-none halloween-pumpkin">
         <div className="relative">
           <div className="pumpkin-speech">
             <p className="text-sm font-bold text-orange-100">
