@@ -27,10 +27,11 @@ interface HeaderProps {
   currentSection: string;
   siteSettings?: { site_name?: string };
   unreadTickets?: number;
+  needsRating?: boolean;
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
-  renderProfileContent: () => React.ReactNode;
+  renderProfileContent: (scrollToSupport?: boolean) => React.ReactNode;
 }
 
 const Header = ({ 
@@ -39,6 +40,7 @@ const Header = ({
   currentSection, 
   siteSettings,
   unreadTickets = 0,
+  needsRating = false,
   onSectionChange, 
   onShowAuth,
   renderCartContent,
@@ -63,6 +65,30 @@ const Header = ({
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {user && needsRating && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="relative text-primary-foreground hover:bg-primary/90"
+                  title="Требуется оценить тикет"
+                >
+                  <Icon name="Bell" size={24} />
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-orange-500">
+                    1
+                  </Badge>
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Оцените обращение</SheetTitle>
+                </SheetHeader>
+                {renderProfileContent(true)}
+              </SheetContent>
+            </Sheet>
+          )}
+
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90">
@@ -88,7 +114,7 @@ const Header = ({
                 <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90">
                   <Icon name="User" size={24} />
                   {unreadTickets > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-destructive animate-pulse">
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-destructive">
                       {unreadTickets}
                     </Badge>
                   )}

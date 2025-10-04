@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -25,17 +25,27 @@ interface ProfileContentProps {
   onShowAdminPanel: () => void;
   onLogout: () => void;
   onBalanceUpdate: () => void;
+  scrollToSupport?: boolean;
 }
 
-const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpdate }: ProfileContentProps) => {
+const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpdate, scrollToSupport = false }: ProfileContentProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const supportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
       loadTransactions();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (scrollToSupport && supportRef.current) {
+      setTimeout(() => {
+        supportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  }, [scrollToSupport]);
 
   const loadTransactions = async () => {
     if (!user) return;
@@ -236,7 +246,9 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       
       <Separator />
       
-      <UserTickets user={user} />
+      <div ref={supportRef}>
+        <UserTickets user={user} />
+      </div>
       
       <Separator className="my-4" />
       

@@ -34,7 +34,7 @@ const Index = () => {
     refreshUserBalance,
     API_ORDERS
   } = useShopData();
-  const { unreadCount } = useTicketNotifications(user);
+  const { unreadCount, needsRating } = useTicketNotifications(user);
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -166,13 +166,14 @@ const Index = () => {
     />
   );
 
-  const renderProfileContent = () => (
+  const renderProfileContent = (scrollToSupport: boolean = false) => (
     <ProfileContent
       user={user}
       orders={orders}
       onShowAdminPanel={() => setShowAdminPanel(true)}
       onLogout={() => handleLogout(onLogout)}
       onBalanceUpdate={() => refreshUserBalance(user, setUser, setIsRefreshingBalance)}
+      scrollToSupport={scrollToSupport}
     />
   );
 
@@ -196,6 +197,7 @@ const Index = () => {
             currentSection={currentSection}
             siteSettings={siteSettings}
             unreadTickets={unreadCount}
+            needsRating={needsRating}
             onSectionChange={setCurrentSection}
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
