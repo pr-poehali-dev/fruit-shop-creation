@@ -14,12 +14,10 @@ interface OrdersTabProps {
 }
 
 const statusLabels: Record<string, string> = {
-  'pending': 'Ожидает',
-  'processing': 'В обработке',
-  'shipped': 'Отправлен',
-  'completed': 'Выполнен',
-  'cancelled': 'Отменён',
-  'rejected': 'Отклонён'
+  'pending': '⏳ Ожидает',
+  'processing': '📦 В обработке',
+  'delivered': '✅ Доставлен',
+  'rejected': '❌ Отклонён'
 };
 
 const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
@@ -65,26 +63,26 @@ const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
         <CardContent>
           <div className="space-y-4">
             {orders.map(order => (
-              <div key={order.id} className="p-4 border rounded-lg space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-medium">Заказ #{order.id}</div>
-                    <div className="text-sm text-muted-foreground">
+              <div key={order.id} className="p-3 sm:p-4 border rounded-lg space-y-3">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm sm:text-base">Заказ #{order.id}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">
                       {order.user_name} ({order.user_phone})
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(order.created_at).toLocaleString()}
+                      {new Date(order.created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
-                  <div className="text-right space-y-2">
-                    <div className="font-bold text-lg">{order.total_amount}₽</div>
-                    <Badge variant={getStatusBadgeVariant(order.status)}>
+                  <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:text-right">
+                    <div className="font-bold text-base sm:text-lg">{order.total_amount}₽</div>
+                    <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
                       {statusLabels[order.status] || order.status}
                     </Badge>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                   <div>
                     <div className="font-medium">Способ оплаты:</div>
                     <div className="text-muted-foreground">
@@ -93,7 +91,7 @@ const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
                   </div>
                   <div>
                     <div className="font-medium">Адрес доставки:</div>
-                    <div className="text-muted-foreground">{order.delivery_address}</div>
+                    <div className="text-muted-foreground break-words">{order.delivery_address}</div>
                   </div>
                 </div>
 
@@ -105,11 +103,11 @@ const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
                 )}
 
                 {order.items && order.items.length > 0 && (
-                  <div className="text-sm">
+                  <div className="text-xs sm:text-sm">
                     <div className="font-medium">Товары:</div>
-                    <ul className="list-disc list-inside text-muted-foreground">
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
                       {order.items.filter((i: any) => i.product_name).map((item: any, idx: number) => (
-                        <li key={idx}>
+                        <li key={idx} className="break-words">
                           {item.product_name} x{item.quantity} = {item.price * item.quantity}₽
                         </li>
                       ))}
@@ -122,9 +120,11 @@ const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
                     size="sm" 
                     variant="outline"
                     onClick={() => openStatusDialog(order)}
+                    className="text-xs sm:text-sm w-full sm:w-auto"
                   >
-                    <Icon name="Edit" size={16} className="mr-2" />
-                    Изменить статус
+                    <Icon name="Edit" size={14} className="mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Изменить статус</span>
+                    <span className="sm:hidden">Статус</span>
                   </Button>
                 </div>
               </div>
@@ -147,12 +147,10 @@ const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Ожидает</SelectItem>
-                  <SelectItem value="processing">В обработке</SelectItem>
-                  <SelectItem value="shipped">Отправлен</SelectItem>
-                  <SelectItem value="completed">Выполнен</SelectItem>
-                  <SelectItem value="cancelled">Отменён</SelectItem>
-                  <SelectItem value="rejected">Отклонён</SelectItem>
+                  <SelectItem value="pending">⏳ Ожидает обработки</SelectItem>
+                  <SelectItem value="processing">📦 В обработке</SelectItem>
+                  <SelectItem value="delivered">✅ Доставлен</SelectItem>
+                  <SelectItem value="rejected">❌ Отклонён</SelectItem>
                 </SelectContent>
               </Select>
             </div>

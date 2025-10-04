@@ -320,25 +320,40 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Icon name="Shield" size={32} className="text-primary" />
-            <h1 className="text-3xl font-display font-bold">Панель администратора</h1>
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Icon name="Shield" size={24} className="text-primary sm:w-8 sm:h-8" />
+            <h1 className="text-xl sm:text-3xl font-display font-bold">Админ-панель</h1>
           </div>
-          <Button variant="outline" onClick={onClose}>
-            <Icon name="X" size={20} className="mr-2" />
-            Закрыть
+          <Button variant="outline" size="sm" onClick={onClose} className="sm:h-10">
+            <Icon name="X" size={18} className="sm:mr-2" />
+            <span className="hidden sm:inline">Закрыть</span>
           </Button>
         </div>
 
         <Tabs defaultValue="products">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="products">Товары</TabsTrigger>
-            <TabsTrigger value="categories">Категории</TabsTrigger>
-            <TabsTrigger value="users">Пользователи</TabsTrigger>
-            <TabsTrigger value="orders">Заказы</TabsTrigger>
-            <TabsTrigger value="settings">Настройки</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 h-auto">
+            <TabsTrigger value="products" className="text-xs sm:text-sm px-2 py-2">
+              <Icon name="Package" size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">Товары</span>
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="text-xs sm:text-sm px-2 py-2">
+              <Icon name="FolderTree" size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">Категории</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm px-2 py-2">
+              <Icon name="Users" size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">Пользователи</span>
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="text-xs sm:text-sm px-2 py-2">
+              <Icon name="ShoppingCart" size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">Заказы</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs sm:text-sm px-2 py-2">
+              <Icon name="Settings" size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">Настройки</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">

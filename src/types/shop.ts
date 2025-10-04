@@ -29,6 +29,7 @@ export interface Order {
   status: string;
   payment_method: string;
   created_at: string;
+  rejection_reason?: string;
   items: Array<{
     product_name: string;
     quantity: number;

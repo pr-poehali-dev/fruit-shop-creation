@@ -69,7 +69,15 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileCon
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm font-medium">{order.total_amount} ₽</p>
-                  <Badge variant="outline" className="mt-2">{order.status}</Badge>
+                  <Badge variant="outline" className="mt-2">
+                    {order.status === 'pending' && '⏳ Ожидает обработки'}
+                    {order.status === 'processing' && '📦 В обработке'}
+                    {order.status === 'delivered' && '✅ Доставлен'}
+                    {order.status === 'rejected' && '❌ Отклонён'}
+                  </Badge>
+                  {order.rejection_reason && (
+                    <p className="text-xs text-red-600 mt-2">Причина: {order.rejection_reason}</p>
+                  )}
                 </CardContent>
               </Card>
             ))}
