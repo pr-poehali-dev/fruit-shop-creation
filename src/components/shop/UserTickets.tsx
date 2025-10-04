@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
 import CreateTicketDialog from './tickets/CreateTicketDialog';
-import RatingDialog from './tickets/RatingDialog';
 import TicketCard from './tickets/TicketCard';
 
 interface UserTicketsProps {
@@ -28,7 +27,6 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [closedTicket, setClosedTicket] = useState<any>(null);
   const [ratedTicket, setRatedTicket] = useState<any>(null);
@@ -62,16 +60,10 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         console.log('Ticket closed, checking rating status');
         const needsRating = !data.active_ticket.rating;
         const hasRating = !!data.active_ticket.rating;
-        const wasJustClosed = activeTicket?.id === data.active_ticket.id && (activeTicket?.status !== 'closed' && activeTicket?.status !== 'resolved');
         
         if (needsRating) {
-          if (wasJustClosed || !closedTicket) {
-            setClosedTicket(data.active_ticket);
-            setActiveTicket(data.active_ticket);
-            setTimeout(() => setShowRatingDialog(true), 300);
-          } else {
-            setActiveTicket(data.active_ticket);
-          }
+          setClosedTicket(data.active_ticket);
+          setActiveTicket(data.active_ticket);
         } else if (hasRating) {
           setRatedTicket(data.active_ticket);
           setActiveTicket(null);
@@ -150,11 +142,16 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Техподдержка</h3>
-          {unreadCount > 0 && (
+          {unreadCount > 0 ? (
             <Badge variant="destructive" className="animate-pulse">
               {unreadCount} новых
             </Badge>
-          )}
+          ) : (activeTicket && !activeTicket.rating && (activeTicket.status === 'closed' || activeTicket.status === 'resolved')) ? (
+            <Badge variant="outline" className="border-yellow-500 text-yellow-700 dark:text-yellow-400 animate-pulse">
+              <Icon name="Star" size={12} className="mr-1" />
+              Требуется оценка
+            </Badge>
+          ) : null}
         </div>
         
         {isLoading ? (
@@ -167,8 +164,9 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             replyMessage={replyMessage}
             onReplyChange={setReplyMessage}
             onSendReply={handleSendReply}
-            onShowRating={() => setShowRatingDialog(true)}
+            onShowRating={loadActiveTicket}
             onDismiss={ratedTicket ? () => setRatedTicket(null) : undefined}
+            apiUrl={API_SUPPORT}
             messagesEndRef={messagesEndRef}
           />
         ) : (
@@ -200,19 +198,6 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         apiUrl={API_SUPPORT}
         onTicketCreated={loadActiveTicket}
       />
-
-      {(activeTicket || closedTicket) && (
-        <RatingDialog
-          open={showRatingDialog}
-          onOpenChange={setShowRatingDialog}
-          ticketId={activeTicket?.id || closedTicket?.id}
-          apiUrl={API_SUPPORT}
-          onRatingSubmitted={() => {
-            setClosedTicket(null);
-            loadActiveTicket();
-          }}
-        />
-      )}
     </>
   );
 };

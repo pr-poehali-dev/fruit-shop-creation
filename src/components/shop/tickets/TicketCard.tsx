@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+import InlineRatingForm from './InlineRatingForm';
 
 interface TicketCardProps {
   ticket: any;
@@ -15,6 +16,7 @@ interface TicketCardProps {
   onSendReply: () => void;
   onShowRating: () => void;
   onDismiss?: () => void;
+  apiUrl?: string;
   messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -27,6 +29,7 @@ const TicketCard = ({
   onSendReply,
   onShowRating,
   onDismiss,
+  apiUrl,
   messagesEndRef
 }: TicketCardProps) => {
   const isClosed = ticket.status === 'closed' || ticket.status === 'resolved';
@@ -110,8 +113,8 @@ const TicketCard = ({
         )}
         
         {isClosed && (
-          <div className="mt-4 space-y-3">
-            <div className="bg-muted p-3 rounded-lg text-sm text-center">
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <div className="bg-muted p-3 rounded-lg text-sm text-center font-medium">
               Тикет {ticket.status === 'closed' ? 'закрыт' : 'решён'}
             </div>
             {ticket.rating ? (
@@ -138,24 +141,35 @@ const TicketCard = ({
                 )}
               </>
             ) : (
-              <>
-                <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-start gap-2">
-                    <Icon name="MessageCircle" size={16} className="text-blue-600 mt-0.5 shrink-0" />
-                    <p className="text-sm text-blue-900 dark:text-blue-100">
-                      Администратор закрыл ваше обращение. Оцените качество поддержки — это поможет нам стать лучше
-                    </p>
+              apiUrl ? (
+                <InlineRatingForm
+                  ticketId={ticket.id}
+                  apiUrl={apiUrl}
+                  onRatingSubmitted={onShowRating}
+                />
+              ) : (
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 p-4 rounded-lg border-2 border-yellow-300 dark:border-yellow-800">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="p-2 bg-yellow-400 dark:bg-yellow-600 rounded-full">
+                      <Icon name="Star" size={20} className="text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm mb-1">Оцените работу поддержки</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Ваше мнение поможет нам стать лучше. Пожалуйста, поставьте оценку от 1 до 5 звёзд.
+                      </p>
+                    </div>
                   </div>
+                  <Button 
+                    onClick={onShowRating}
+                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
+                    size="lg"
+                  >
+                    <Icon name="Star" size={18} className="mr-2" />
+                    Оценить сейчас
+                  </Button>
                 </div>
-                <Button 
-                  onClick={onShowRating}
-                  className="w-full"
-                  variant="default"
-                >
-                  <Icon name="Star" size={16} className="mr-2" />
-                  Оценить работу поддержки
-                </Button>
-              </>
+              )
             )}
           </div>
         )}
