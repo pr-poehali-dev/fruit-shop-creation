@@ -36,6 +36,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
   const supportRef = useRef<HTMLDivElement>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
   const avatarEmojis = ['👤', '😊', '😎', '🤓', '🥳', '😇', '🤠', '🧑‍💻', '👨‍💼', '👩‍💼', '🦸', '🦹', '🧙', '🧛', '🧜', '🧚'];
 
@@ -272,41 +273,90 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           {orders.length === 0 ? (
             <p className="text-sm text-muted-foreground">Заказов пока нет</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-[600px] overflow-y-auto">
               {orders.map(order => (
-                <Card key={order.id}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Заказ #{order.id}</CardTitle>
-                    <CardDescription className="text-xs">
-                      {new Date(order.created_at).toLocaleDateString('ru-RU')}
-                    </CardDescription>
+                <Card key={order.id} className="border">
+                  <CardHeader 
+                    className="pb-3 cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon 
+                          name={expandedOrderId === order.id ? "ChevronDown" : "ChevronRight"} 
+                          size={18} 
+                          className="text-muted-foreground"
+                        />
+                        <div>
+                          <CardTitle className="text-sm">Заказ #{order.id}</CardTitle>
+                          <CardDescription className="text-xs">
+                            {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{order.total_amount} ₽</span>
+                        <Badge variant="outline" className="text-xs">
+                          {order.status === 'pending' && '⏳'}
+                          {order.status === 'processing' && '📦'}
+                          {order.status === 'delivered' && '✅'}
+                          {order.status === 'rejected' && '❌'}
+                          {order.status === 'cancelled' && '🚫'}
+                        </Badge>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm font-medium">{order.total_amount} ₽</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <Badge variant="outline">
-                        {order.status === 'pending' && '⏳ Ожидает обработки'}
-                        {order.status === 'processing' && '📦 В обработке'}
-                        {order.status === 'delivered' && '✅ Доставлен'}
-                        {order.status === 'rejected' && '❌ Отклонён'}
-                        {order.status === 'cancelled' && '🚫 Отменён'}
-                      </Badge>
+                  
+                  {expandedOrderId === order.id && (
+                    <CardContent className="pt-0 space-y-3">
+                      <Separator />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Статус:</span>
+                          <Badge variant="outline">
+                            {order.status === 'pending' && 'Ожидает обработки'}
+                            {order.status === 'processing' && 'В обработке'}
+                            {order.status === 'delivered' && 'Доставлен'}
+                            {order.status === 'rejected' && 'Отклонён'}
+                            {order.status === 'cancelled' && 'Отменён'}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Способ оплаты:</span>
+                          <span className="font-medium">
+                            {order.payment_method === 'balance' ? 'Баланс' : 'Карта'}
+                          </span>
+                        </div>
+                        {order.delivery_address && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Адрес:</span>
+                            <span className="font-medium text-right max-w-[200px] truncate">
+                              {order.delivery_address}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {order.rejection_reason && (
+                        <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+                          <span className="font-semibold">Причина отклонения:</span> {order.rejection_reason}
+                        </div>
+                      )}
+                      
                       {(order.status === 'pending' || order.status === 'processing') && (
                         <Button 
                           size="sm" 
                           variant="destructive"
+                          className="w-full"
                           onClick={() => handleCancelOrder(order.id)}
                           disabled={cancellingOrderId === order.id}
                         >
                           <Icon name="X" size={14} className="mr-1" />
-                          {cancellingOrderId === order.id ? 'Отмена...' : 'Отменить'}
+                          {cancellingOrderId === order.id ? 'Отмена...' : 'Отменить заказ'}
                         </Button>
                       )}
-                    </div>
-                    {order.rejection_reason && (
-                      <p className="text-xs text-red-600 mt-2">Причина: {order.rejection_reason}</p>
-                    )}
-                  </CardContent>
+                    </CardContent>
+                  )}
                 </Card>
               ))}
             </div>

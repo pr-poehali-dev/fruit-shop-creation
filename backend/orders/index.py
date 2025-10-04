@@ -113,7 +113,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cur.execute(
-                    f"SELECT status, payment_method, total_amount, user_id FROM orders WHERE id = {order_id}"
+                    f"SELECT status, payment_method, user_id, amount_paid, cashback_earned FROM orders WHERE id = {order_id}"
                 )
                 order = cur.fetchone()
                 
@@ -138,17 +138,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 
                 if order['payment_method'] == 'balance':
-                    cashback_amount = order['total_amount'] * 0.05
+                    amount_paid = float(order['amount_paid'] or 0)
+                    cashback_earned = float(order['cashback_earned'] or 0)
+                    
+                    print(f"Cancelling order #{order_id}: returning {amount_paid} to balance, removing {cashback_earned} cashback")
                     
                     cur.execute(
-                        f"UPDATE users SET balance = balance + {order['total_amount']}, cashback = cashback - {cashback_amount} WHERE id = {order['user_id']}"
+                        f"UPDATE users SET balance = balance + {amount_paid}, cashback = cashback - {cashback_earned} WHERE id = {order['user_id']}"
                     )
                     cur.execute(
-                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'deposit', {order['total_amount']}, 'Возврат средств за отменённый заказ #{order_id}')"
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'deposit', {amount_paid}, 'Возврат средств за отменённый заказ #{order_id}')"
                     )
                     cur.execute(
-                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'cashback_cancelled', {cashback_amount}, 'Аннулирование кэшбека за отмену заказа #{order_id}')"
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'cashback_cancelled', {cashback_earned}, 'Аннулирование кэшбека за отмену заказа #{order_id}')"
                     )
+                    
+                    print(f"Order #{order_id} cancelled successfully")
                 
                 conn.commit()
                 
@@ -193,8 +198,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'cashback_earned', {cashback_amount}, 'Кэшбек 5% от заказа')"
                 )
             
+            cashback_earned = 0
+            amount_paid = 0
+            
+            if payment_method == 'balance':
+                cashback_earned = total_amount * 0.05
+                amount_paid = total_amount
+            
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address) VALUES ({user_id}, {total_amount}, '{payment_method}', '{delivery_address}') RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, cashback_earned, amount_paid) VALUES ({user_id}, {total_amount}, '{payment_method}', '{delivery_address}', {cashback_earned}, {amount_paid}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             
