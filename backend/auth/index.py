@@ -37,7 +37,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             user_id = params.get('user_id')
             
             if action == 'balance' and user_id:
-                cur.execute(f"SELECT balance, cashback FROM users WHERE id = {user_id}")
+                cur.execute(f"SELECT balance, cashback, is_admin FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
                 
                 cur.execute(
@@ -51,6 +51,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({
                         'balance': float(user['balance']) if user else 0.00,
                         'cashback': float(user['cashback']) if user else 0.00,
+                        'is_admin': user['is_admin'] if user else False,
                         'transactions': [dict(t) for t in transactions]
                     }, default=str),
                     'isBase64Encoded': False

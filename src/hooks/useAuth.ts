@@ -14,6 +14,37 @@ export const useAuth = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const syncUserData = async () => {
+      try {
+        const response = await fetch(`${API_AUTH}?action=balance&user_id=${user.id}`);
+        const data = await response.json();
+        
+        if (data.balance !== undefined) {
+          setUser(prev => {
+            if (!prev) return prev;
+            const updatedUser = {
+              ...prev,
+              balance: data.balance,
+              cashback: data.cashback,
+              is_admin: data.is_admin
+            };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return updatedUser;
+          });
+        }
+      } catch (error) {
+        console.error('Failed to sync user data:', error);
+      }
+    };
+
+    const interval = setInterval(syncUserData, 10000);
+
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
   const handleAuth = async (
     e: React.FormEvent<HTMLFormElement>, 
     action: 'login' | 'register',
