@@ -264,7 +264,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-2rem)] max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 gap-3 sm:gap-4">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-2xl lg:max-w-4xl xl:max-w-5xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 gap-3 sm:gap-4">
         <DialogHeader className="pr-6">
           <DialogTitle className="text-lg sm:text-xl">{editingProduct ? 'Редактировать товар' : 'Добавить товар'}</DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">Заполните информацию о товаре</DialogDescription>
