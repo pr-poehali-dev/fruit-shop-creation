@@ -56,7 +56,8 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow relative">
+      <div className="snow-cap"></div>
       <div className="relative group cursor-pointer" onClick={() => onViewDetails(product)}>
         {onToggleFavorite && (
           <button
@@ -130,26 +131,90 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
       <CardFooter className="gap-2">
         <Button 
           variant="outline" 
-          className="flex-1" 
+          className="flex-1 relative overflow-hidden snow-button" 
           onClick={(e) => {
             e.stopPropagation();
             onViewDetails(product);
           }}
         >
+          <div className="button-snow-cap"></div>
           <Icon name="Eye" size={18} className="mr-2" />
           Подробнее
         </Button>
         <Button 
-          className="flex-1" 
+          className="flex-1 relative overflow-hidden snow-button" 
           onClick={(e) => {
             e.stopPropagation();
             onAddToCart(product);
           }}
         >
+          <div className="button-snow-cap"></div>
           <Icon name="ShoppingCart" size={18} className="mr-2" />
           В корзину
         </Button>
       </CardFooter>
+      
+      <style>{`
+        .snow-cap {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 20px;
+          background: linear-gradient(to bottom, #ffffff 0%, #f0f9ff 50%, transparent 100%);
+          border-radius: 0 0 50% 50% / 0 0 100% 100%;
+          z-index: 10;
+          pointer-events: none;
+          box-shadow: 0 2px 8px rgba(255, 255, 255, 0.5);
+        }
+        
+        .snow-cap::before {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: 10%;
+          right: 10%;
+          height: 4px;
+          background: white;
+          border-radius: 50%;
+          filter: blur(1px);
+        }
+        
+        .snow-cap::after {
+          content: '❄️';
+          position: absolute;
+          top: 2px;
+          right: 15px;
+          font-size: 12px;
+          animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes sparkle {
+          0%, 100% { opacity: 0.6; transform: rotate(0deg); }
+          50% { opacity: 1; transform: rotate(20deg); }
+        }
+        
+        .button-snow-cap {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 8px;
+          background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(240, 249, 255, 0.2) 50%, transparent 100%);
+          border-radius: 0 0 50% 50% / 0 0 100% 100%;
+          pointer-events: none;
+          z-index: 1;
+        }
+        
+        .snow-button {
+          transition: all 0.3s ease;
+        }
+        
+        .snow-button:hover .button-snow-cap {
+          height: 12px;
+          background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 0%, rgba(240, 249, 255, 0.3) 50%, transparent 100%);
+        }
+      `}</style>
     </Card>
   );
 };
