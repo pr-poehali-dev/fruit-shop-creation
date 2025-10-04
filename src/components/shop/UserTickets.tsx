@@ -55,7 +55,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       const data = await response.json();
       console.log('Support response:', data);
       
-      if (data.active_ticket) {
+      if (data.active_ticket && data.active_ticket.status !== 'closed' && data.active_ticket.status !== 'resolved') {
         console.log('Active ticket found:', data.active_ticket);
         setActiveTicket(data.active_ticket);
         setUnreadCount(data.active_ticket.unread_count || 0);
@@ -63,7 +63,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
           setTimeout(scrollToBottom, 100);
         }
       } else {
-        console.log('No active ticket');
+        console.log('No active ticket (closed or resolved)');
         setActiveTicket(null);
         setUnreadCount(0);
       }
