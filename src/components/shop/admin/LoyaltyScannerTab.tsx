@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+import QrScanner from 'react-qr-scanner';
 
 const API_LOYALTY = 'https://functions.poehali.dev/ed127250-fe9d-4c7e-9a93-fb8b7fdc038a';
 
@@ -14,13 +15,15 @@ const LoyaltyScannerTab = () => {
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string>('');
   const cardInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (cardInputRef.current) {
+    if (cardInputRef.current && !isCameraActive) {
       cardInputRef.current.focus();
     }
-  }, []);
+  }, [isCameraActive]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +71,7 @@ const LoyaltyScannerTab = () => {
         });
         setCardNumber('');
         setPurchaseAmount('');
+        setIsCameraActive(false);
         
         setTimeout(() => {
           if (cardInputRef.current) {
@@ -114,6 +118,47 @@ const LoyaltyScannerTab = () => {
     }
   };
 
+  const handleScan = (data: any) => {
+    if (data?.text) {
+      const cleanValue = extractCardNumber(data.text);
+      setCardNumber(cleanValue);
+      setIsCameraActive(false);
+      
+      toast({
+        title: 'QR-код отсканирован',
+        description: `Карта: ${cleanValue}`
+      });
+
+      setTimeout(() => {
+        const amountInput = document.getElementById('purchase-amount') as HTMLInputElement;
+        if (amountInput) {
+          amountInput.focus();
+        }
+      }, 200);
+    }
+  };
+
+  const handleError = (err: any) => {
+    console.error('Camera error:', err);
+    setCameraError('Не удалось получить доступ к камере');
+    setIsCameraActive(false);
+    toast({
+      title: 'Ошибка камеры',
+      description: 'Проверьте разрешения для доступа к камере',
+      variant: 'destructive'
+    });
+  };
+
+  const toggleCamera = () => {
+    if (isCameraActive) {
+      setIsCameraActive(false);
+      setCameraError('');
+    } else {
+      setCameraError('');
+      setIsCameraActive(true);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -123,15 +168,49 @@ const LoyaltyScannerTab = () => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-primary/5 p-4 rounded-lg border-2 border-dashed border-primary/20">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Icon name="ScanLine" size={24} className="text-primary" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Icon name="ScanLine" size={24} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold">Сканирование QR-кода</p>
+                  <p className="text-xs text-muted-foreground">Камера или ввод вручную</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold">Сканируйте QR-код</p>
-                <p className="text-xs text-muted-foreground">Или введите номер карты вручную</p>
-              </div>
+              <Button
+                type="button"
+                variant={isCameraActive ? "destructive" : "default"}
+                size="sm"
+                onClick={toggleCamera}
+              >
+                <Icon name={isCameraActive ? "CameraOff" : "Camera"} size={18} className="mr-2" />
+                {isCameraActive ? 'Закрыть' : 'Открыть камеру'}
+              </Button>
             </div>
+
+            {isCameraActive && (
+              <div className="mb-4 rounded-lg overflow-hidden border-2 border-primary">
+                <QrScanner
+                  delay={300}
+                  onError={handleError}
+                  onScan={handleScan}
+                  style={{ width: '100%' }}
+                  constraints={{
+                    video: { facingMode: 'environment' }
+                  }}
+                />
+              </div>
+            )}
+
+            {cameraError && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200 flex items-center gap-2">
+                  <Icon name="AlertCircle" size={16} />
+                  {cameraError}
+                </p>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -145,10 +224,10 @@ const LoyaltyScannerTab = () => {
                   required
                   className="font-mono text-base"
                   autoComplete="off"
-                  autoFocus
+                  autoFocus={!isCameraActive}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  💡 Отсканируйте QR-код - номер карты заполнится автоматически
+                  💡 Нажмите "Открыть камеру" для сканирования QR-кода
                 </p>
               </div>
 
@@ -208,8 +287,8 @@ const LoyaltyScannerTab = () => {
               Как это работает
             </h4>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Клиент показывает QR-код карты лояльности</li>
-              <li>• Отсканируйте код или введите номер карты</li>
+              <li>• Нажмите "Открыть камеру" и наведите на QR-код</li>
+              <li>• Или введите номер карты вручную</li>
               <li>• Введите сумму покупки (минимум 100₽)</li>
               <li>• Система начислит 3% кэшбека на счет клиента</li>
             </ul>
