@@ -104,7 +104,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             payment_method = body_data.get('payment_method', 'card')
             delivery_address = body_data.get('delivery_address', '').replace("'", "''")
             
-            total_amount = sum(item['price'] * item['quantity'] for item in items)
+            total_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             
             if payment_method == 'balance':
                 cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
