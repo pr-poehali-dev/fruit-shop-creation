@@ -24,8 +24,6 @@ const statusLabels: Record<string, string> = {
 const UserTickets = ({ user }: UserTicketsProps) => {
   const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [closedTicket, setClosedTicket] = useState<any>(null);
@@ -41,9 +39,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const loadActiveTicket = async (shouldScroll: boolean = true) => {
     if (!user) return;
     
-    setIsLoading(true);
     try {
-      setIsSyncing(true);
       const response = await fetch(`${API_SUPPORT}?user_id=${user.id}`);
       const data = await response.json();
       console.log('Support response:', data);
@@ -78,9 +74,6 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       }
     } catch (error) {
       console.error('Failed to load ticket:', error);
-    } finally {
-      setIsLoading(false);
-      setIsSyncing(false);
     }
   };
 
@@ -135,7 +128,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     return null;
   }
 
-  console.log('UserTickets render - user:', user.id, 'activeTicket:', activeTicket, 'isLoading:', isLoading);
+  console.log('UserTickets render - user:', user.id, 'activeTicket:', activeTicket);
 
   return (
     <>
@@ -143,20 +136,18 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold">Техподдержка</h3>
           {unreadCount > 0 ? (
-            <Badge variant="destructive" className="animate-pulse">
+            <Badge variant="destructive">
               {unreadCount} новых
             </Badge>
           ) : (activeTicket && !activeTicket.rating && (activeTicket.status === 'closed' || activeTicket.status === 'resolved')) ? (
-            <Badge variant="outline" className="border-yellow-500 text-yellow-700 dark:text-yellow-400 animate-pulse">
-              <Icon name="Star" size={12} className="mr-1" />
+            <Badge variant="outline" className="border-orange-500 text-orange-700 dark:text-orange-400">
+              <Icon name="AlertCircle" size={12} className="mr-1" />
               Требуется оценка
             </Badge>
           ) : null}
         </div>
         
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Загрузка...</p>
-        ) : activeTicket || ratedTicket ? (
+        {activeTicket || ratedTicket ? (
           <TicketCard
             ticket={activeTicket || ratedTicket}
             unreadCount={unreadCount}
