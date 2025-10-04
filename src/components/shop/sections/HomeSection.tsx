@@ -21,12 +21,15 @@ interface HomeSectionProps {
   onViewDetails: (product: Product) => void;
   favoriteIds?: Set<number>;
   onToggleFavorite?: (productId: number) => void;
+  siteSettings?: any;
 }
 
-const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite }: HomeSectionProps) => {
+const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite, siteSettings }: HomeSectionProps) => {
+  const showNewYearBanner = siteSettings?.holiday_theme === 'new_year';
+  
   return (
     <div className="space-y-16">
-      <NewYearBanner />
+      {showNewYearBanner && <NewYearBanner />}
       
       {/* Hero секция с градиентным фоном */}
       <section className="relative text-center py-20 px-6 bg-gradient-to-br from-primary/20 via-primary/5 to-background rounded-3xl overflow-hidden">

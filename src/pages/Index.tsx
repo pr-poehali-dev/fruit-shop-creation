@@ -337,6 +337,7 @@ const Index = () => {
                     onViewDetails={handleViewDetails}
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}
+                    siteSettings={siteSettings}
                   />
                 )}
 
