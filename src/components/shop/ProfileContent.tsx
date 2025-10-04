@@ -56,7 +56,8 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
     switch (type) {
       case 'deposit': return 'ArrowDownToLine';
       case 'withdraw': return 'ArrowUpFromLine';
-      case 'cashback_deposit': return 'Gift';
+      case 'cashback_deposit': 
+      case 'cashback_earned': return 'Gift';
       case 'cashback_used': return 'Wallet';
       case 'order_payment': return 'ShoppingCart';
       default: return 'CircleDot';
@@ -67,6 +68,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
     switch (type) {
       case 'deposit': 
       case 'cashback_deposit': 
+      case 'cashback_earned':
       case 'cashback_used': 
         return 'text-green-600';
       case 'withdraw':
@@ -208,6 +210,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                     {transaction.type === 'deposit' && 'Пополнение'}
                     {transaction.type === 'withdraw' && 'Списание'}
                     {transaction.type === 'cashback_deposit' && 'Кэшбек'}
+                    {transaction.type === 'cashback_earned' && 'Кэшбек'}
                     {transaction.type === 'cashback_used' && 'Использование кэшбека'}
                     {transaction.type === 'order_payment' && 'Оплата заказа'}
                   </p>

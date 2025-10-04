@@ -86,7 +86,8 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin }: UsersTa
     switch (type) {
       case 'deposit': return 'ArrowDownToLine';
       case 'withdraw': return 'ArrowUpFromLine';
-      case 'cashback_deposit': return 'Gift';
+      case 'cashback_deposit':
+      case 'cashback_earned': return 'Gift';
       case 'cashback_used': return 'Wallet';
       case 'order_payment': return 'ShoppingCart';
       default: return 'CircleDot';
@@ -97,6 +98,7 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin }: UsersTa
     switch (type) {
       case 'deposit': 
       case 'cashback_deposit': 
+      case 'cashback_earned':
       case 'cashback_used': 
         return 'text-green-600';
       case 'withdraw':
