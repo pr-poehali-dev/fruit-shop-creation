@@ -56,7 +56,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cashback_percent = float(settings['loyalty_cashback_percent']) if settings else 5.00
             
             cur.execute(
-                f"""SELECT COALESCE(SUM(total), 0) as total_spent
+                f"""SELECT COALESCE(SUM(total_amount), 0) as total_spent
                    FROM t_p77282076_fruit_shop_creation.orders 
                    WHERE user_id = {user_id} AND status = 'completed'"""
             )
@@ -134,7 +134,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if unlock_free:
                 cur.execute(
-                    f"""SELECT COALESCE(SUM(total), 0) as total_spent
+                    f"""SELECT COALESCE(SUM(total_amount), 0) as total_spent
                        FROM t_p77282076_fruit_shop_creation.orders 
                        WHERE user_id = {user_id} AND status = 'completed'"""
                 )
