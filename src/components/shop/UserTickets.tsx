@@ -2,15 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import CreateTicketDialog from './tickets/CreateTicketDialog';
+import RatingDialog from './tickets/RatingDialog';
+import TicketCard from './tickets/TicketCard';
 
 interface UserTicketsProps {
   user: User | null;
@@ -32,15 +29,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
-  const [rating, setRating] = useState<string>('');
-  const [ratingComment, setRatingComment] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
-  
-  // Форма создания
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [priority, setPriority] = useState('medium');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -76,59 +65,6 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     } finally {
       setIsLoading(false);
       setIsSyncing(false);
-    }
-  };
-
-  const handleCreateTicket = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!user) {
-      toast({
-        title: 'Ошибка',
-        description: 'Необходимо войти в систему',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(API_SUPPORT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create_ticket',
-          user_id: user.id,
-          subject,
-          message,
-          priority
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Обращение создано',
-          description: 'Администратор свяжется с вами в ближайшее время'
-        });
-        setSubject('');
-        setMessage('');
-        setPriority('medium');
-        setShowCreateForm(false);
-        await loadActiveTicket();
-      } else {
-        throw new Error(data.error || 'Ошибка создания');
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Ошибка',
-        description: error.message || 'Не удалось создать обращение',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -200,112 +136,16 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Загрузка...</p>
         ) : activeTicket ? (
-          <Card 
-            className={`cursor-pointer hover:bg-accent/50 transition ${unreadCount > 0 ? 'border-primary shadow-sm' : ''}`}
-            onClick={() => {}}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-sm">#{activeTicket.id} {activeTicket.subject}</CardTitle>
-                    {unreadCount > 0 && (
-                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">
-                        {unreadCount}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardDescription className="text-xs mt-1">
-                    {new Date(activeTicket.created_at).toLocaleDateString('ru-RU', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </CardDescription>
-                </div>
-                <Badge variant={activeTicket.status === 'resolved' || activeTicket.status === 'closed' ? 'secondary' : 'outline'} className="text-xs shrink-0">
-                  {statusLabels[activeTicket.status] || activeTicket.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {activeTicket?.messages?.filter((m: any) => m && m.id && m.message).map((msg: any) => (
-                  <div 
-                    key={msg.id} 
-                    className={`p-3 rounded-lg ${msg.is_admin ? 'bg-primary/10 ml-4' : 'bg-muted mr-4'}`}
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-xs font-medium">
-                        {msg.is_admin ? '👨‍💼 Администратор' : '👤 Вы'}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(msg.created_at).toLocaleString('ru-RU', { 
-                          day: '2-digit', 
-                          month: '2-digit', 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </span>
-                    </div>
-                    <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-              
-              {activeTicket.status !== 'closed' && activeTicket.status !== 'resolved' && (
-                <div className="mt-4 pt-4 border-t">
-                  <Textarea
-                    value={replyMessage}
-                    onChange={(e) => setReplyMessage(e.target.value)}
-                    placeholder="Введите ваше сообщение"
-                    rows={2}
-                    className="mb-2"
-                  />
-                  <Button 
-                    onClick={handleSendReply} 
-                    size="sm"
-                    className="w-full"
-                    disabled={!replyMessage.trim()}
-                  >
-                    <Icon name="Send" size={16} className="mr-2" />
-                    Отправить
-                  </Button>
-                </div>
-              )}
-              
-              {(activeTicket.status === 'closed' || activeTicket.status === 'resolved') && (
-                <div className="mt-4 space-y-3">
-                  <div className="bg-muted p-3 rounded-lg text-sm text-center">
-                    Тикет {activeTicket.status === 'closed' ? 'закрыт' : 'решён'}
-                  </div>
-                  {activeTicket.rating ? (
-                    <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
-                        <span className="text-sm font-medium">Ваша оценка: {activeTicket.rating}/5</span>
-                      </div>
-                      {activeTicket.rating_comment && (
-                        <p className="text-xs text-muted-foreground">{activeTicket.rating_comment}</p>
-                      )}
-                    </div>
-                  ) : (
-                    <Button 
-                      onClick={() => setShowRatingDialog(true)}
-                      className="w-full"
-                      variant="outline"
-                    >
-                      <Icon name="Star" size={16} className="mr-2" />
-                      Оценить работу поддержки
-                    </Button>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <TicketCard
+            ticket={activeTicket}
+            unreadCount={unreadCount}
+            statusLabels={statusLabels}
+            replyMessage={replyMessage}
+            onReplyChange={setReplyMessage}
+            onSendReply={handleSendReply}
+            onShowRating={() => setShowRatingDialog(true)}
+            messagesEndRef={messagesEndRef}
+          />
         ) : (
           <Card>
             <CardHeader>
@@ -328,176 +168,23 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         )}
       </div>
 
-      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Icon name="MessageCircle" size={24} />
-              Создать обращение
-            </DialogTitle>
-            <DialogDescription>
-              Опишите вашу проблему или вопрос
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateTicket} className="space-y-4">
-            <div>
-              <Label htmlFor="subject">Тема обращения</Label>
-              <Input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Кратко опишите проблему"
-                required
-              />
-            </div>
+      <CreateTicketDialog
+        open={showCreateForm}
+        onOpenChange={setShowCreateForm}
+        userId={user.id}
+        apiUrl={API_SUPPORT}
+        onTicketCreated={loadActiveTicket}
+      />
 
-            <div>
-              <Label htmlFor="priority">Приоритет</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger id="priority">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Низкий</SelectItem>
-                  <SelectItem value="medium">Средний</SelectItem>
-                  <SelectItem value="high">Высокий</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="message">Сообщение</Label>
-              <Textarea
-                id="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Подробно опишите вашу проблему"
-                rows={5}
-                required
-              />
-            </div>
-
-            <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
-                Отмена
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Icon name="Loader2" size={18} className="mr-2 animate-spin" />
-                    Отправка...
-                  </>
-                ) : (
-                  <>
-                    <Icon name="Send" size={18} className="mr-2" />
-                    Отправить
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Icon name="Star" size={24} />
-              Оценить работу поддержки
-            </DialogTitle>
-            <DialogDescription>
-              Ваше мнение поможет нам стать лучше
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Оценка</Label>
-              <RadioGroup value={rating} onValueChange={setRating} className="flex gap-2 mt-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <div key={star} className="flex items-center">
-                    <RadioGroupItem value={String(star)} id={`star-${star}`} className="sr-only" />
-                    <Label 
-                      htmlFor={`star-${star}`} 
-                      className="cursor-pointer hover:scale-110 transition"
-                    >
-                      <Icon 
-                        name="Star" 
-                        size={32} 
-                        className={rating >= String(star) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}
-                      />
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div>
-              <Label htmlFor="rating-comment">Комментарий (необязательно)</Label>
-              <Textarea
-                id="rating-comment"
-                value={ratingComment}
-                onChange={(e) => setRatingComment(e.target.value)}
-                placeholder="Что можно улучшить?"
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => {
-                setShowRatingDialog(false);
-                setRating('');
-                setRatingComment('');
-              }}>
-                Отмена
-              </Button>
-              <Button 
-                onClick={async () => {
-                  if (!rating || !activeTicket) return;
-                  
-                  try {
-                    const response = await fetch(API_SUPPORT, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        action: 'rate_ticket',
-                        ticket_id: activeTicket.id,
-                        rating: parseInt(rating),
-                        rating_comment: ratingComment
-                      })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                      toast({
-                        title: 'Спасибо за оценку!',
-                        description: 'Ваш отзыв очень важен для нас'
-                      });
-                      setShowRatingDialog(false);
-                      setRating('');
-                      setRatingComment('');
-                      await loadActiveTicket();
-                    } else {
-                      throw new Error(data.error);
-                    }
-                  } catch (error) {
-                    toast({
-                      title: 'Ошибка',
-                      description: 'Не удалось сохранить оценку',
-                      variant: 'destructive'
-                    });
-                  }
-                }}
-                disabled={!rating}
-              >
-                <Icon name="Send" size={18} className="mr-2" />
-                Отправить оценку
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {activeTicket && (
+        <RatingDialog
+          open={showRatingDialog}
+          onOpenChange={setShowRatingDialog}
+          ticketId={activeTicket.id}
+          apiUrl={API_SUPPORT}
+          onRatingSubmitted={loadActiveTicket}
+        />
+      )}
     </>
   );
 };
