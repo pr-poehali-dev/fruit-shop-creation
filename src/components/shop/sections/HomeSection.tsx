@@ -18,9 +18,11 @@ interface HomeSectionProps {
   onNavigate: (section: string) => void;
   onAddToCart: (product: Product) => void;
   onViewDetails: (product: Product) => void;
+  favoriteIds?: Set<number>;
+  onToggleFavorite?: (productId: number) => void;
 }
 
-const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails }: HomeSectionProps) => {
+const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite }: HomeSectionProps) => {
   return (
     <div className="space-y-16">
       {/* Hero секция с градиентным фоном */}
@@ -65,6 +67,8 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails }: HomeS
               product={product} 
               onAddToCart={onAddToCart}
               onViewDetails={onViewDetails}
+              isFavorite={favoriteIds?.has(product.id)}
+              onToggleFavorite={onToggleFavorite}
             />
           ))}
         </div>

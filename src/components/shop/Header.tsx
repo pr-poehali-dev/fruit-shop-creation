@@ -28,6 +28,7 @@ interface HeaderProps {
   siteSettings?: { site_name?: string };
   unreadTickets?: number;
   needsRating?: boolean;
+  favoritesCount?: number;
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
@@ -41,6 +42,7 @@ const Header = ({
   siteSettings,
   unreadTickets = 0,
   needsRating = false,
+  favoritesCount = 0,
   onSectionChange, 
   onShowAuth,
   renderCartContent,
@@ -98,6 +100,22 @@ const Header = ({
                 {renderProfileContent(true)}
               </SheetContent>
             </Sheet>
+          )}
+
+          {user && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative text-primary-foreground hover:bg-primary/90"
+              onClick={() => onSectionChange('favorites')}
+            >
+              <Icon name="Heart" size={24} />
+              {favoritesCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500">
+                  {favoritesCount}
+                </Badge>
+              )}
+            </Button>
           )}
 
           <Sheet>

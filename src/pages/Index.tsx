@@ -10,6 +10,7 @@ import AuthDialog from '@/components/shop/AuthDialog';
 import Footer from '@/components/shop/Footer';
 import HomeSection from '@/components/shop/sections/HomeSection';
 import CatalogSection from '@/components/shop/sections/CatalogSection';
+import FavoritesSection from '@/components/shop/sections/FavoritesSection';
 import AboutSection from '@/components/shop/sections/AboutSection';
 import DeliverySection from '@/components/shop/sections/DeliverySection';
 import CareSection from '@/components/shop/sections/CareSection';
@@ -37,7 +38,7 @@ const Index = () => {
     API_ORDERS
   } = useShopData();
   const { unreadCount, needsRating } = useTicketNotifications(user);
-  const { favoriteIds, toggleFavorite } = useFavorites(user?.id || null);
+  const { favorites, favoriteIds, toggleFavorite } = useFavorites(user?.id || null);
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -208,6 +209,7 @@ const Index = () => {
             siteSettings={siteSettings}
             unreadTickets={unreadCount}
             needsRating={needsRating}
+            favoritesCount={favorites.length}
             onSectionChange={setCurrentSection}
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
@@ -230,12 +232,23 @@ const Index = () => {
                     onNavigate={setCurrentSection} 
                     onAddToCart={handleAddToCart}
                     onViewDetails={handleViewDetails}
+                    favoriteIds={favoriteIds}
+                    onToggleFavorite={toggleFavorite}
                   />
                 )}
 
                 {currentSection === 'catalog' && (
                   <CatalogSection 
                     products={products} 
+                    onAddToCart={handleAddToCart}
+                    favoriteIds={favoriteIds}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                )}
+
+                {currentSection === 'favorites' && (
+                  <FavoritesSection 
+                    favorites={favorites} 
                     onAddToCart={handleAddToCart}
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}

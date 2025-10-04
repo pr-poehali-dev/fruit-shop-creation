@@ -52,6 +52,13 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
     loadCard();
   }, [userId]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadCard();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [userId]);
+
   const handlePurchase = async (unlockFree = false) => {
     if (!unlockFree && userBalance < cardPrice) {
       toast({
