@@ -369,7 +369,11 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       email: formData.get('email') as string,
       address: formData.get('address') as string,
       work_hours: formData.get('work_hours') as string,
-      loyalty_card_price: parseFloat(formData.get('loyalty_card_price') as string || '500')
+      loyalty_card_price: parseFloat(formData.get('loyalty_card_price') as string || '500'),
+      holiday_theme: formData.get('holiday_theme') as string,
+      price_list_url: formData.get('price_list_url') as string,
+      promotions: formData.get('promotions') as string,
+      additional_info: formData.get('additional_info') as string
     };
 
     try {
