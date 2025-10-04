@@ -15,6 +15,7 @@ interface UseAdminHandlersProps {
   loadOrders: () => void;
   loadTickets: () => void;
   loadSettings: () => void;
+  onSettingsUpdate?: () => void;
   editingProduct: Product | null;
   editingCategory: Category | null;
   setShowProductDialog: (show: boolean) => void;
@@ -391,6 +392,9 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
           description: 'Изменения применены на сайте'
         });
         props.loadSettings();
+        if (props.onSettingsUpdate) {
+          props.onSettingsUpdate();
+        }
       }
     } catch (error) {
       toast({

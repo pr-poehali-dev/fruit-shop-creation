@@ -10,9 +10,10 @@ import { Product, Category } from './types';
 interface AdminPanelProps {
   user: any;
   onClose: () => void;
+  onSettingsUpdate?: () => void;
 }
 
-const AdminPanel = ({ user, onClose }: AdminPanelProps) => {
+const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -67,6 +68,7 @@ const AdminPanel = ({ user, onClose }: AdminPanelProps) => {
     loadOrders,
     loadTickets,
     loadSettings,
+    onSettingsUpdate,
     editingProduct,
     editingCategory,
     setShowProductDialog,

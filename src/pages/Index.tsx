@@ -231,7 +231,8 @@ const Index = () => {
             loadProducts();
             loadSettings();
             setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 300);
-          }} 
+          }}
+          onSettingsUpdate={loadSettings}
         />
       ) : (
         <>
