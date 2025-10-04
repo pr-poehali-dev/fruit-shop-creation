@@ -64,6 +64,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                        ORDER BY sort_order"""
                 )
                 product['images'] = [dict(img) for img in cur.fetchall()]
+                
+                cur.execute(
+                    f"""SELECT id, size, price, stock, sort_order 
+                       FROM product_variants 
+                       WHERE product_id = {product['id']} 
+                       ORDER BY sort_order"""
+                )
+                product['variants'] = [dict(v) for v in cur.fetchall()]
             
             return {
                 'statusCode': 200,
@@ -84,12 +92,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             img = body_data.get('image_url', '').replace("'", "''")
             cat_id = body_data.get('category_id', 'NULL')
             stock = body_data.get('stock', 0)
+            show_stock = 'TRUE' if body_data.get('show_stock', True) else 'FALSE'
             images = body_data.get('images', [])
+            variants = body_data.get('variants', [])
             
             cur.execute(
-                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock) 
-                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}) 
-                   RETURNING id, name, slug, description, price, image_url, stock"""
+                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock, show_stock) 
+                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}, {show_stock}) 
+                   RETURNING id, name, slug, description, price, image_url, stock, show_stock"""
             )
             product = cur.fetchone()
             product_id = product['id']
@@ -101,6 +111,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.execute(
                     f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order) 
                        VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order})"""
+                )
+            
+            for variant in variants:
+                size = variant['size'].replace("'", "''")
+                var_price = variant['price']
+                var_stock = variant.get('stock', 0)
+                var_sort = variant.get('sort_order', 0)
+                cur.execute(
+                    f"""INSERT INTO product_variants (product_id, size, price, stock, sort_order) 
+                       VALUES ({product_id}, '{size}', {var_price}, {var_stock}, {var_sort})"""
                 )
             
             conn.commit()
@@ -122,14 +142,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             img = body_data.get('image_url', '').replace("'", "''")
             cat_id = body_data.get('category_id', 'NULL')
             stock = body_data.get('stock', 0)
+            show_stock = 'TRUE' if body_data.get('show_stock', True) else 'FALSE'
             images = body_data.get('images', [])
+            variants = body_data.get('variants', [])
             
             cur.execute(
                 f"""UPDATE products 
                    SET name = '{name}', description = '{desc}', price = {price}, image_url = '{img}', 
-                       category_id = {cat_id}, stock = {stock}, updated_at = CURRENT_TIMESTAMP
+                       category_id = {cat_id}, stock = {stock}, show_stock = {show_stock}, updated_at = CURRENT_TIMESTAMP
                    WHERE id = {product_id}
-                   RETURNING id, name, slug, description, price, image_url, stock"""
+                   RETURNING id, name, slug, description, price, image_url, stock, show_stock"""
             )
             product = cur.fetchone()
             
@@ -156,6 +178,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             for old_id in existing_ids:
                 cur.execute(f"DELETE FROM product_images WHERE id = {old_id}")
+            
+            cur.execute(f"SELECT id FROM product_variants WHERE product_id = {product_id}")
+            existing_variant_ids = [row['id'] for row in cur.fetchall()]
+            
+            for variant in variants:
+                size = variant['size'].replace("'", "''")
+                var_price = variant['price']
+                var_stock = variant.get('stock', 0)
+                var_sort = variant.get('sort_order', 0)
+                
+                if variant.get('id') and variant['id'] in existing_variant_ids:
+                    cur.execute(
+                        f"""UPDATE product_variants 
+                           SET size = '{size}', price = {var_price}, stock = {var_stock}, sort_order = {var_sort}
+                           WHERE id = {variant['id']}"""
+                    )
+                    existing_variant_ids.remove(variant['id'])
+                else:
+                    cur.execute(
+                        f"""INSERT INTO product_variants (product_id, size, price, stock, sort_order) 
+                           VALUES ({product_id}, '{size}', {var_price}, {var_stock}, {var_sort})"""
+                    )
+            
+            for old_var_id in existing_variant_ids:
+                cur.execute(f"DELETE FROM product_variants WHERE id = {old_var_id}")
             
             conn.commit()
             

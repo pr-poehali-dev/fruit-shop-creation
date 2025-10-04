@@ -26,7 +26,7 @@ interface UseAdminHandlersProps {
 export const useAdminHandlers = (props: UseAdminHandlersProps) => {
   const { toast } = useToast();
 
-  const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>, images: any[]) => {
+  const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>, images: any[], variants: any[], showStock: boolean) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
@@ -41,7 +41,9 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       image_url: primaryImage?.image_url || images[0]?.image_url || '',
       category_id: parseInt(formData.get('category_id') as string),
       stock: parseInt(formData.get('stock') as string),
-      images: images
+      show_stock: showStock,
+      images: images,
+      variants: variants
     };
 
     try {

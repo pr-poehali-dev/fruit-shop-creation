@@ -5,6 +5,14 @@ export interface ProductImage {
   sort_order: number;
 }
 
+export interface ProductVariant {
+  id?: number;
+  size: string;
+  price: number;
+  stock: number;
+  sort_order: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -16,7 +24,9 @@ export interface Product {
   category_name: string;
   stock: number;
   is_active: boolean;
+  show_stock?: boolean;
   images?: ProductImage[];
+  variants?: ProductVariant[];
 }
 
 export interface Category {

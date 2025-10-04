@@ -16,6 +16,14 @@ interface ProductImage {
   sort_order: number;
 }
 
+interface ProductVariant {
+  id?: number;
+  size: string;
+  price: number;
+  stock: number;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -27,7 +35,9 @@ interface Product {
   category_name: string;
   stock: number;
   is_active: boolean;
+  show_stock?: boolean;
   images?: ProductImage[];
+  variants?: ProductVariant[];
 }
 
 interface Category {
@@ -42,12 +52,17 @@ interface ProductDialogProps {
   onOpenChange: (open: boolean) => void;
   editingProduct: Product | null;
   categories: Category[];
-  onSubmit: (e: React.FormEvent<HTMLFormElement>, images: ProductImage[]) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>, images: ProductImage[], variants: ProductVariant[], showStock: boolean) => void;
 }
 
 const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmit }: ProductDialogProps) => {
   const [images, setImages] = useState<ProductImage[]>([]);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [newVariantSize, setNewVariantSize] = useState('');
+  const [newVariantPrice, setNewVariantPrice] = useState('');
+  const [newVariantStock, setNewVariantStock] = useState('');
+  const [showStock, setShowStock] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -56,7 +71,18 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     } else {
       setImages([]);
     }
+    
+    if (editingProduct?.variants && editingProduct.variants.length > 0) {
+      setVariants(editingProduct.variants);
+    } else {
+      setVariants([]);
+    }
+    
+    setShowStock(editingProduct?.show_stock ?? true);
     setNewImageUrl('');
+    setNewVariantSize('');
+    setNewVariantPrice('');
+    setNewVariantStock('');
   }, [editingProduct, open]);
 
   const handleAddImage = () => {
@@ -198,13 +224,45 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     e.target.value = '';
   };
 
+  const handleAddVariant = () => {
+    if (!newVariantSize.trim() || !newVariantPrice.trim()) return;
+    
+    const newVariant: ProductVariant = {
+      size: newVariantSize.trim(),
+      price: parseFloat(newVariantPrice),
+      stock: parseInt(newVariantStock) || 0,
+      sort_order: variants.length
+    };
+    
+    setVariants([...variants, newVariant]);
+    setNewVariantSize('');
+    setNewVariantPrice('');
+    setNewVariantStock('');
+  };
+
+  const handleRemoveVariant = (index: number) => {
+    const newVariants = variants.filter((_, i) => i !== index);
+    newVariants.forEach((v, i) => v.sort_order = i);
+    setVariants(newVariants);
+  };
+
+  const handleMoveVariant = (index: number, direction: 'up' | 'down') => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === variants.length - 1)) return;
+    
+    const newVariants = [...variants];
+    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    [newVariants[index], newVariants[swapIndex]] = [newVariants[swapIndex], newVariants[index]];
+    newVariants.forEach((v, i) => v.sort_order = i);
+    setVariants(newVariants);
+  };
+
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (images.length === 0) {
       alert('Добавьте хотя бы одно изображение товара');
       return;
     }
-    onSubmit(e, images);
+    onSubmit(e, images, variants, showStock);
   };
 
   return (
@@ -397,6 +455,105 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
               )}
             </div>
           </div>
+
+          <div>
+            <Label className="text-sm">Размеры и цены (необязательно)</Label>
+            <div className="space-y-2 sm:space-y-3 mt-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input 
+                  type="text"
+                  value={newVariantSize}
+                  onChange={(e) => setNewVariantSize(e.target.value)}
+                  placeholder="Размер (например: 50-70 см)"
+                  className="text-sm flex-1"
+                />
+                <Input 
+                  type="number"
+                  value={newVariantPrice}
+                  onChange={(e) => setNewVariantPrice(e.target.value)}
+                  placeholder="Цена"
+                  className="text-sm w-full sm:w-32"
+                />
+                <Input 
+                  type="number"
+                  value={newVariantStock}
+                  onChange={(e) => setNewVariantStock(e.target.value)}
+                  placeholder="Склад"
+                  className="text-sm w-full sm:w-24"
+                />
+                <Button 
+                  type="button" 
+                  onClick={handleAddVariant}
+                  className="w-full sm:w-auto"
+                >
+                  <Icon name="Plus" size={16} className="mr-2" />
+                  Добавить
+                </Button>
+              </div>
+              
+              {variants.length > 0 && (
+                <div className="grid gap-2 max-h-[200px] overflow-y-auto">
+                  {variants.map((variant, index) => (
+                    <Card key={index} className="p-2 sm:p-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{variant.size}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {variant.price}₽ • Склад: {variant.stock} шт
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleMoveVariant(index, 'up')}
+                            disabled={index === 0}
+                            className="h-8 w-8"
+                          >
+                            <Icon name="ChevronUp" size={14} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleMoveVariant(index, 'down')}
+                            disabled={index === variants.length - 1}
+                            className="h-8 w-8"
+                          >
+                            <Icon name="ChevronDown" size={14} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleRemoveVariant(index)}
+                            className="h-8 w-8"
+                          >
+                            <Icon name="Trash2" size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="show-stock"
+              checked={showStock}
+              onChange={(e) => setShowStock(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <Label htmlFor="show-stock" className="text-sm cursor-pointer">
+              Показывать количество на складе покупателям
+            </Label>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-2 justify-end pt-2">
             <Button 
               type="button" 

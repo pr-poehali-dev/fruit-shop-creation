@@ -73,7 +73,6 @@ const CatalogSection = ({ products, onAddToCart }: CatalogSectionProps) => {
             product={product} 
             onAddToCart={onAddToCart}
             onViewDetails={handleViewDetails}
-            showStock 
           />
         ))}
       </div>

@@ -11,6 +11,14 @@ interface ProductImage {
   sort_order: number;
 }
 
+interface ProductVariant {
+  id?: number;
+  size: string;
+  price: number;
+  stock: number;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -18,7 +26,9 @@ interface Product {
   price: number;
   category_name: string;
   stock: number;
+  show_stock?: boolean;
   images?: ProductImage[];
+  variants?: ProductVariant[];
 }
 
 interface ProductGalleryDialogProps {
@@ -30,6 +40,7 @@ interface ProductGalleryDialogProps {
 
 const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: ProductGalleryDialogProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
   if (!product) return null;
 
@@ -39,6 +50,11 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
 
   const currentImage = images[currentImageIndex]?.image_url || '';
   const hasMultipleImages = images.length > 1;
+  const hasVariants = product.variants && product.variants.length > 0;
+  const showStock = product.show_stock !== false;
+  
+  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+  const displayStock = selectedVariant ? selectedVariant.stock : product.stock;
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -51,6 +67,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setCurrentImageIndex(0);
+      setSelectedVariant(null);
     }
     onOpenChange(newOpen);
   };
@@ -126,12 +143,41 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
               <p className="text-muted-foreground whitespace-pre-line">{product.description}</p>
             </div>
 
+            {hasVariants && (
+              <div>
+                <p className="text-sm font-medium mb-2">Выберите размер:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {product.variants!.map((variant, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`p-3 rounded-lg border-2 transition-all text-left ${
+                        selectedVariant?.size === variant.size
+                          ? 'border-primary bg-primary/5'
+                          : 'border-gray-200 hover:border-primary/50'
+                      }`}
+                    >
+                      <p className="font-medium text-sm">{variant.size}</p>
+                      <p className="text-lg font-bold text-primary">{variant.price} ₽</p>
+                      {showStock && (
+                        <p className="text-xs text-muted-foreground">
+                          {variant.stock > 0 ? `${variant.stock} шт.` : 'Нет в наличии'}
+                        </p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-3xl font-bold text-primary">{product.price} ₽</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {product.stock > 0 ? `В наличии: ${product.stock} шт.` : 'Нет в наличии'}
-                </p>
+                <p className="text-3xl font-bold text-primary">{displayPrice} ₽</p>
+                {showStock && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {displayStock > 0 ? `В наличии: ${displayStock} шт.` : 'Нет в наличии'}
+                  </p>
+                )}
               </div>
               
               <Button 
@@ -140,7 +186,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
                   onAddToCart(product);
                   handleOpenChange(false);
                 }}
-                disabled={product.stock === 0}
+                disabled={displayStock === 0}
               >
                 <Icon name="ShoppingCart" size={20} className="mr-2" />
                 В корзину

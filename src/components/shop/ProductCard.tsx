@@ -10,6 +10,14 @@ interface ProductImage {
   sort_order: number;
 }
 
+interface ProductVariant {
+  id?: number;
+  size: string;
+  price: number;
+  stock: number;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -19,19 +27,22 @@ interface Product {
   image_url: string;
   category_name: string;
   stock: number;
+  show_stock?: boolean;
   images?: ProductImage[];
+  variants?: ProductVariant[];
 }
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
   onViewDetails: (product: Product) => void;
-  showStock?: boolean;
 }
 
-const ProductCard = ({ product, onAddToCart, onViewDetails, showStock = false }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) => {
   const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.image_url;
   const hasMultipleImages = product.images && product.images.length > 1;
+  const hasVariants = product.variants && product.variants.length > 0;
+  const showStock = product.show_stock !== false;
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -52,9 +63,28 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, showStock = false }:
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-2xl font-bold text-primary">{product.price} ₽</p>
-          {showStock && <Badge variant="secondary">В наличии: {product.stock}</Badge>}
+        <div className="mt-4">
+          {hasVariants ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Цены от:</p>
+              <p className="text-2xl font-bold text-primary">{Math.min(...product.variants!.map(v => v.price))} ₽</p>
+              <div className="flex flex-wrap gap-1">
+                {product.variants!.slice(0, 3).map((variant, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {variant.size}
+                  </Badge>
+                ))}
+                {product.variants!.length > 3 && (
+                  <Badge variant="outline" className="text-xs">+{product.variants!.length - 3}</Badge>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-2xl font-bold text-primary">{product.price} ₽</p>
+              {showStock && <Badge variant="secondary">В наличии: {product.stock}</Badge>}
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter className="gap-2">
