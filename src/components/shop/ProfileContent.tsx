@@ -201,7 +201,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-semibold ${getTransactionColor(transaction.type)}`}>
-                    {transaction.type.includes('deposit') || transaction.type === 'cashback_used' ? '+' : '-'}
+                    {(transaction.type.includes('deposit') || transaction.type === 'cashback_used') ? '+' : '-'}
                     {Number(transaction.amount).toFixed(2)}₽
                   </p>
                   <p className="text-xs text-muted-foreground capitalize">
