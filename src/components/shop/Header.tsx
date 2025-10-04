@@ -29,7 +29,6 @@ interface HeaderProps {
   unreadTickets?: number;
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
-  onShowSupport: () => void;
   renderCartContent: () => React.ReactNode;
   renderProfileContent: () => React.ReactNode;
 }
@@ -42,7 +41,6 @@ const Header = ({
   unreadTickets = 0,
   onSectionChange, 
   onShowAuth,
-  onShowSupport,
   renderCartContent,
   renderProfileContent
 }: HeaderProps) => {

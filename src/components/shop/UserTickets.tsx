@@ -4,7 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
@@ -23,12 +25,19 @@ const statusLabels: Record<string, string> = {
 };
 
 const UserTickets = ({ user }: UserTicketsProps) => {
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [activeTicket, setActiveTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [totalUnread, setTotalUnread] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Форма создания
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -36,48 +45,88 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadTickets = async () => {
+  const loadActiveTicket = async (shouldScroll: boolean = true) => {
     if (!user) return;
     
     setIsLoading(true);
     try {
+      setIsSyncing(true);
       const response = await fetch(`${API_SUPPORT}?user_id=${user.id}`);
       const data = await response.json();
-      setTickets(data.tickets || []);
-      setTotalUnread(data.total_unread || 0);
-    } catch (error) {
-      console.error('Failed to load tickets:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadTicketDetails = async (ticketId: number, shouldScroll: boolean = true) => {
-    try {
-      setIsSyncing(true);
-      const response = await fetch(`${API_SUPPORT}?ticket_id=${ticketId}&mark_as_read=true`);
-      const data = await response.json();
-      console.log('Loaded ticket details:', data.ticket);
-      console.log('Messages:', data.ticket?.messages);
-      setSelectedTicket(data.ticket);
-      await loadTickets();
-      if (shouldScroll) {
-        setTimeout(scrollToBottom, 100);
+      
+      if (data.active_ticket) {
+        setActiveTicket(data.active_ticket);
+        setUnreadCount(data.active_ticket.unread_count || 0);
+        if (shouldScroll) {
+          setTimeout(scrollToBottom, 100);
+        }
+      } else {
+        setActiveTicket(null);
+        setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Error loading ticket:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось загрузить тикет',
-        variant: 'destructive'
-      });
+      console.error('Failed to load ticket:', error);
     } finally {
+      setIsLoading(false);
       setIsSyncing(false);
     }
   };
 
+  const handleCreateTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast({
+        title: 'Ошибка',
+        description: 'Необходимо войти в систему',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(API_SUPPORT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_ticket',
+          user_id: user.id,
+          subject,
+          message,
+          priority
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Обращение создано',
+          description: 'Администратор свяжется с вами в ближайшее время'
+        });
+        setSubject('');
+        setMessage('');
+        setPriority('medium');
+        setShowCreateForm(false);
+        await loadActiveTicket();
+      } else {
+        throw new Error(data.error || 'Ошибка создания');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Ошибка',
+        description: error.message || 'Не удалось создать обращение',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSendReply = async () => {
-    if (!replyMessage.trim() || !selectedTicket) return;
+    if (!replyMessage.trim() || !activeTicket) return;
 
     try {
       const response = await fetch(API_SUPPORT, {
@@ -85,7 +134,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'add_message',
-          ticket_id: selectedTicket.id,
+          ticket_id: activeTicket.id,
           user_id: user?.id,
           message: replyMessage,
           is_admin: false
@@ -100,7 +149,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
           description: 'Ваш ответ добавлен в тикет'
         });
         setReplyMessage('');
-        await loadTicketDetails(selectedTicket.id);
+        await loadActiveTicket();
         setTimeout(scrollToBottom, 100);
       } else {
         throw new Error(data.error);
@@ -115,31 +164,12 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   };
 
   useEffect(() => {
-    loadTickets();
+    loadActiveTicket();
     
-    const interval = setInterval(loadTickets, 30000);
+    const interval = setInterval(() => loadActiveTicket(false), 10000);
     
     return () => clearInterval(interval);
   }, [user]);
-
-  useEffect(() => {
-    if (!selectedTicket) return;
-    
-    const interval = setInterval(() => {
-      loadTicketDetails(selectedTicket.id, false);
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, [selectedTicket?.id]);
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'resolved': return 'default';
-      case 'closed': return 'secondary';
-      case 'in_progress': return 'outline';
-      default: return 'outline';
-    }
-  };
 
   if (!user) return null;
 
@@ -147,83 +177,50 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     <>
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold">Мои обращения в поддержку</h3>
-          {totalUnread > 0 && (
+          <h3 className="font-semibold">Техподдержка</h3>
+          {unreadCount > 0 && (
             <Badge variant="destructive" className="animate-pulse">
-              {totalUnread} новых
+              {unreadCount} новых
             </Badge>
           )}
         </div>
+        
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Загрузка...</p>
-        ) : tickets.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Обращений пока нет</p>
-        ) : (
-          <div className="space-y-3">
-            {tickets.map(ticket => (
-              <Card 
-                key={ticket.id}
-                className={`cursor-pointer hover:bg-accent/50 transition ${ticket.unread_count > 0 ? 'border-primary shadow-sm' : ''}`}
-                onClick={() => loadTicketDetails(ticket.id)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-sm">#{ticket.id} {ticket.subject}</CardTitle>
-                        {ticket.unread_count > 0 && (
-                          <Badge variant="destructive" className="h-5 px-1.5 text-xs">
-                            {ticket.unread_count}
-                          </Badge>
-                        )}
-                      </div>
-                      <CardDescription className="text-xs mt-1">
-                        {new Date(ticket.created_at).toLocaleDateString('ru-RU', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </CardDescription>
-                    </div>
-                    <Badge variant={getStatusBadgeVariant(ticket.status)} className="text-xs shrink-0">
-                      {statusLabels[ticket.status] || ticket.status}
-                    </Badge>
+        ) : activeTicket ? (
+          <Card 
+            className={`cursor-pointer hover:bg-accent/50 transition ${unreadCount > 0 ? 'border-primary shadow-sm' : ''}`}
+            onClick={() => {}}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-sm">#{activeTicket.id} {activeTicket.subject}</CardTitle>
+                    {unreadCount > 0 && (
+                      <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                        {unreadCount}
+                      </Badge>
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{ticket.message}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <DialogContent className="max-w-2xl h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Icon name="MessageCircle" size={24} />
-              Тикет #{selectedTicket?.id}: {selectedTicket?.subject}
-              {isSyncing && (
-                <Icon name="RefreshCw" size={16} className="ml-2 animate-spin text-muted-foreground" />
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              <Badge variant={getStatusBadgeVariant(selectedTicket?.status)} className="mt-2">
-                {statusLabels[selectedTicket?.status] || selectedTicket?.status}
-              </Badge>
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 flex-1 overflow-y-auto">
-            <div className="border-t pt-4">
-              <h4 className="font-semibold mb-3">История переписки</h4>
-              <div className="space-y-3">
-                {selectedTicket?.messages?.filter((m: any) => m && m.id && m.message).length > 0 ? (
-                  selectedTicket.messages.filter((m: any) => m && m.id && m.message).map((msg: any) => (
+                  <CardDescription className="text-xs mt-1">
+                    {new Date(activeTicket.created_at).toLocaleDateString('ru-RU', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </CardDescription>
+                </div>
+                <Badge variant={activeTicket.status === 'resolved' || activeTicket.status === 'closed' ? 'secondary' : 'outline'} className="text-xs shrink-0">
+                  {statusLabels[activeTicket.status] || activeTicket.status}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {activeTicket?.messages?.filter((m: any) => m && m.id && m.message).map((msg: any) => (
                   <div 
                     key={msg.id} 
                     className={`p-3 rounded-lg ${msg.is_admin ? 'bg-primary/10 ml-4' : 'bg-muted mr-4'}`}
@@ -243,45 +240,128 @@ const UserTickets = ({ user }: UserTicketsProps) => {
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                   </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    Нет сообщений
-                  </p>
-                )}
+                ))}
                 <div ref={messagesEndRef} />
               </div>
+              
+              {activeTicket.status !== 'closed' && activeTicket.status !== 'resolved' && (
+                <div className="mt-4 pt-4 border-t">
+                  <Textarea
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    placeholder="Введите ваше сообщение"
+                    rows={2}
+                    className="mb-2"
+                  />
+                  <Button 
+                    onClick={handleSendReply} 
+                    size="sm"
+                    className="w-full"
+                    disabled={!replyMessage.trim()}
+                  >
+                    <Icon name="Send" size={16} className="mr-2" />
+                    Отправить
+                  </Button>
+                </div>
+              )}
+              
+              {(activeTicket.status === 'closed' || activeTicket.status === 'resolved') && (
+                <div className="bg-muted p-3 rounded-lg text-sm text-center mt-4">
+                  Тикет {activeTicket.status === 'closed' ? 'закрыт' : 'решён'}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Нужна помощь?</CardTitle>
+              <CardDescription className="text-xs">
+                Создайте обращение в техподдержку
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => setShowCreateForm(true)}
+                className="w-full"
+                variant="outline"
+              >
+                <Icon name="MessageCircle" size={18} className="mr-2" />
+                Создать обращение
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon name="MessageCircle" size={24} />
+              Создать обращение
+            </DialogTitle>
+            <DialogDescription>
+              Опишите вашу проблему или вопрос
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateTicket} className="space-y-4">
+            <div>
+              <Label htmlFor="subject">Тема обращения</Label>
+              <Input
+                id="subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Кратко опишите проблему"
+                required
+              />
             </div>
 
-          </div>
+            <div>
+              <Label htmlFor="priority">Приоритет</Label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger id="priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Низкий</SelectItem>
+                  <SelectItem value="medium">Средний</SelectItem>
+                  <SelectItem value="high">Высокий</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {selectedTicket?.status !== 'closed' && selectedTicket?.status !== 'resolved' && (
-            <div className="border-t pt-4 mt-4 bg-background sticky bottom-0">
-              <Label htmlFor="user-reply">Ваш ответ</Label>
+            <div>
+              <Label htmlFor="message">Сообщение</Label>
               <Textarea
-                id="user-reply"
-                value={replyMessage}
-                onChange={(e) => setReplyMessage(e.target.value)}
-                placeholder="Введите ваше сообщение"
-                rows={2}
-                className="mt-2"
+                id="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Подробно опишите вашу проблему"
+                rows={5}
+                required
               />
-              <Button 
-                onClick={handleSendReply} 
-                className="mt-2 w-full sm:w-auto"
-                disabled={!replyMessage.trim()}
-              >
-                <Icon name="Send" size={18} className="mr-2" />
-                Отправить
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
+                Отмена
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Icon name="Loader2" size={18} className="mr-2 animate-spin" />
+                    Отправка...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="Send" size={18} className="mr-2" />
+                    Отправить
+                  </>
+                )}
               </Button>
             </div>
-          )}
-
-          {(selectedTicket?.status === 'closed' || selectedTicket?.status === 'resolved') && (
-            <div className="bg-muted p-3 rounded-lg text-sm text-center border-t mt-4">
-              Этот тикет {selectedTicket?.status === 'closed' ? 'закрыт' : 'решён'}
-            </div>
-          )}
+          </form>
         </DialogContent>
       </Dialog>
     </>

@@ -90,23 +90,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if user_id:
                 cur.execute(
-                    f"""SELECT t.*, 
-                       (SELECT COUNT(*) FROM support_messages m 
-                        WHERE m.ticket_id = t.id AND m.is_admin = TRUE AND m.is_read = FALSE) as unread_count
+                    f"""SELECT t.*, u.full_name as user_name, u.phone as user_phone,
+                       json_agg(json_build_object(
+                           'id', m.id,
+                           'message', m.message,
+                           'is_admin', m.is_admin,
+                           'is_read', m.is_read,
+                           'created_at', m.created_at
+                       ) ORDER BY m.created_at ASC) as messages
                        FROM support_tickets t
-                       WHERE user_id = {user_id}
-                       ORDER BY created_at DESC"""
+                       LEFT JOIN users u ON t.user_id = u.id
+                       LEFT JOIN support_messages m ON t.id = m.ticket_id
+                       WHERE t.user_id = {user_id} AND t.status IN ('open', 'in_progress')
+                       GROUP BY t.id, u.full_name, u.phone
+                       ORDER BY t.created_at DESC
+                       LIMIT 1"""
                 )
-                tickets = cur.fetchall()
+                active_ticket = cur.fetchone()
                 
-                total_unread = sum(t.get('unread_count', 0) for t in tickets)
+                if active_ticket:
+                    cur.execute(
+                        f"""UPDATE support_messages 
+                           SET is_read = TRUE 
+                           WHERE ticket_id = {active_ticket['id']} AND is_admin = TRUE AND is_read = FALSE"""
+                    )
+                    conn.commit()
+                    
+                    cur.execute(
+                        f"""SELECT COUNT(*) FROM support_messages 
+                           WHERE ticket_id = {active_ticket['id']} AND is_admin = TRUE AND is_read = FALSE"""
+                    )
+                    unread_result = cur.fetchone()
+                    unread_count = unread_result['count'] if unread_result else 0
+                    active_ticket_dict = dict(active_ticket)
+                    active_ticket_dict['unread_count'] = unread_count
+                else:
+                    active_ticket_dict = None
                 
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({
-                        'tickets': [dict(t) for t in tickets],
-                        'total_unread': total_unread
+                        'active_ticket': active_ticket_dict
                     }, default=str),
                     'isBase64Encoded': False
                 }
@@ -127,6 +152,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 subject = body_data.get('subject', '').replace("'", "''")
                 message = body_data.get('message', '').replace("'", "''")
                 priority = body_data.get('priority', 'medium').replace("'", "''")
+                
+                cur.execute(
+                    f"""SELECT id FROM support_tickets 
+                       WHERE user_id = {user_id} AND status IN ('open', 'in_progress')
+                       LIMIT 1"""
+                )
+                existing = cur.fetchone()
+                
+                if existing:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'У вас уже есть открытое обращение'}),
+                        'isBase64Encoded': False
+                    }
                 
                 cur.execute(
                     f"""INSERT INTO support_tickets (user_id, subject, message, priority) 
