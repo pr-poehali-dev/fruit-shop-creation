@@ -24,34 +24,43 @@ interface ProductsTabProps {
 
 const ProductsTab = ({ products, onAddProduct, onEditProduct }: ProductsTabProps) => {
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Управление товарами</h2>
-        <Button onClick={onAddProduct}>
-          <Icon name="Plus" size={18} className="mr-2" />
-          Добавить товар
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h2 className="text-xl sm:text-2xl font-semibold">Управление товарами</h2>
+        <Button onClick={onAddProduct} className="w-full sm:w-auto" size="default">
+          <Icon name="Plus" size={16} className="sm:mr-2" />
+          <span className="hidden sm:inline">Добавить товар</span>
+          <span className="sm:hidden">Добавить</span>
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {products.map(product => (
           <Card key={product.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex gap-4">
-                  <img src={product.image_url} alt={product.name} className="w-20 h-20 object-cover rounded" />
-                  <div>
-                    <CardTitle>{product.name}</CardTitle>
-                    <CardDescription>{product.category_name}</CardDescription>
-                    <div className="flex gap-2 mt-2">
-                      <Badge variant="secondary">{product.price} ₽</Badge>
-                      <Badge variant="outline">Склад: {product.stock}</Badge>
-                    </div>
+            <CardHeader className="p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                <img 
+                  src={product.image_url} 
+                  alt={product.name} 
+                  className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded flex-shrink-0" 
+                />
+                <div className="flex-1 min-w-0 w-full">
+                  <CardTitle className="text-base sm:text-lg">{product.name}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-1">{product.category_name}</CardDescription>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">{product.price} ₽</Badge>
+                    <Badge variant="outline" className="text-xs">Склад: {product.stock}</Badge>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => onEditProduct(product)}>
-                  <Icon name="Pencil" size={16} className="mr-2" />
-                  Изменить
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onEditProduct(product)}
+                  className="w-full sm:w-auto flex-shrink-0"
+                >
+                  <Icon name="Pencil" size={14} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Изменить</span>
+                  <span className="sm:hidden ml-2">Редактировать</span>
                 </Button>
               </div>
             </CardHeader>
