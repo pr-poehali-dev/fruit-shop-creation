@@ -53,8 +53,6 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
   useEffect(() => {
     if (editingProduct?.images && editingProduct.images.length > 0) {
       setImages(editingProduct.images);
-    } else if (editingProduct?.image_url) {
-      setImages([{ image_url: editingProduct.image_url, is_primary: true, sort_order: 0 }]);
     } else {
       setImages([]);
     }
