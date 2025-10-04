@@ -46,6 +46,7 @@ const AdminPanel = ({ user, onClose }: AdminPanelProps) => {
     handleAddBalance,
     handleAddCashback,
     handleToggleAdmin,
+    handleIssueLoyaltyCard,
     handleUpdateOrderStatus,
     handleReplyToTicket,
     handleUpdateTicketStatus,
@@ -101,6 +102,7 @@ const AdminPanel = ({ user, onClose }: AdminPanelProps) => {
           onAddBalance={handleAddBalance}
           onAddCashback={handleAddCashback}
           onToggleAdmin={handleToggleAdmin}
+          onIssueLoyaltyCard={handleIssueLoyaltyCard}
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onReplyToTicket={handleReplyToTicket}
           onUpdateTicketStatus={handleUpdateTicketStatus}

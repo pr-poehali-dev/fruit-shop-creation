@@ -42,9 +42,10 @@ interface UsersTabProps {
   onAddBalance: (userId: number, amount: number, description: string) => void;
   onAddCashback: (userId: number, amount: number, description: string) => void;
   onToggleAdmin: (userId: number, isAdmin: boolean) => void;
+  onIssueLoyaltyCard: (userId: number) => Promise<void>;
 }
 
-const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin }: UsersTabProps) => {
+const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLoyaltyCard }: UsersTabProps) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -107,6 +108,23 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin }: UsersTa
     } catch (error) {
       console.error('Error revoking loyalty card:', error);
       alert('Ошибка при отзыве карты');
+    }
+  };
+
+  const handleIssueLoyaltyCard = async () => {
+    if (!selectedUser) return;
+    
+    if (!confirm(`Выдать карту лояльности пользователю ${selectedUser.full_name} без выполнения условий?`)) {
+      return;
+    }
+
+    try {
+      await onIssueLoyaltyCard(selectedUser.id);
+      await loadLoyaltyCard(selectedUser.id);
+      alert('Карта лояльности успешно выдана!');
+    } catch (error) {
+      console.error('Error issuing loyalty card:', error);
+      alert('Ошибка при выдаче карты');
     }
   };
 
@@ -360,9 +378,13 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin }: UsersTa
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg space-y-4">
                     <Icon name="CreditCard" size={48} className="mx-auto text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">У пользователя нет карты лояльности</p>
+                    <Button onClick={handleIssueLoyaltyCard} className="bg-purple-600 hover:bg-purple-700">
+                      <Icon name="Plus" size={18} className="mr-2" />
+                      Выдать карту администратором
+                    </Button>
                   </div>
                 )}
               </div>

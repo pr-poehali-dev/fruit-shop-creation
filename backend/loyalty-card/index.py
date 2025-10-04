@@ -82,6 +82,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = json.loads(event.get('body', '{}'))
             user_id = body_data.get('user_id')
             unlock_free = body_data.get('unlock_free', False)
+            admin_issue = body_data.get('admin_issue', False)
             
             if not user_id:
                 return {
@@ -99,6 +100,30 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'statusCode': 400,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({'error': 'Карта уже куплена'}),
+                    'isBase64Encoded': False
+                }
+            
+            if admin_issue:
+                card_number = f"LC{secrets.token_hex(8).upper()}"
+                qr_code = f"LOYALTY:{card_number}:{user_id}"
+                
+                cur.execute(
+                    f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards (user_id, card_number, qr_code) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}') 
+                       RETURNING *"""
+                )
+                new_card = cur.fetchone()
+                
+                cur.execute(
+                    f"INSERT INTO t_p77282076_fruit_shop_creation.transactions (user_id, type, amount, description) VALUES ({user_id}, 'loyalty_admin_issue', 0, 'Карта лояльности выдана администратором')"
+                )
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'card': dict(new_card), 'admin_issued': True}, default=str),
                     'isBase64Encoded': False
                 }
             

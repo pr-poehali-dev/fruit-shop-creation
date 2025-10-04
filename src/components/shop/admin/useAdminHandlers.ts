@@ -233,6 +233,43 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleIssueLoyaltyCard = async (userId: number) => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/ed127250-fe9d-4c7e-9a93-fb8b7fdc038a', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          user_id: userId,
+          admin_issue: true 
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Карта выдана',
+          description: 'Карта лояльности успешно выдана администратором'
+        });
+        props.loadUsers();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось выдать карту',
+          variant: 'destructive'
+        });
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось выдать карту лояльности',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
   const handleUpdateOrderStatus = async (orderId: number, status: string, rejectionReason?: string) => {
     try {
       const response = await fetch(props.API_ORDERS, {
@@ -422,6 +459,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleAddBalance,
     handleAddCashback,
     handleToggleAdmin,
+    handleIssueLoyaltyCard,
     handleUpdateOrderStatus,
     handleReplyToTicket,
     handleUpdateTicketStatus,
