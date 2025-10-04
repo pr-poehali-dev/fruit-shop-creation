@@ -69,16 +69,18 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     }
     
     const url = newImageUrl.trim();
+    const currentLength = images.length;
     
     const img = new Image();
     img.onload = () => {
-      const newImage: ProductImage = {
-        image_url: url,
-        is_primary: images.length === 0,
-        sort_order: images.length
-      };
-      
-      setImages([...images, newImage]);
+      setImages(prevImages => {
+        const newImage: ProductImage = {
+          image_url: url,
+          is_primary: prevImages.length === 0,
+          sort_order: prevImages.length
+        };
+        return [...prevImages, newImage];
+      });
       setNewImageUrl('');
     };
     
@@ -156,13 +158,14 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
           const data = await response.json();
           
           if (data.success && data.url) {
-            const newImage: ProductImage = {
-              image_url: data.url,
-              is_primary: images.length === 0,
-              sort_order: images.length
-            };
-            
-            setImages([...images, newImage]);
+            setImages(prevImages => {
+              const newImage: ProductImage = {
+                image_url: data.url,
+                is_primary: prevImages.length === 0,
+                sort_order: prevImages.length
+              };
+              return [...prevImages, newImage];
+            });
           } else {
             console.error('Upload error:', data);
             alert(`Ошибка загрузки: ${data.error || 'Неизвестная ошибка'}`);

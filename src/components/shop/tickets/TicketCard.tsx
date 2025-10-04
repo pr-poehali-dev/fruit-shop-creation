@@ -33,20 +33,33 @@ const TicketCard = ({
   messagesEndRef
 }: TicketCardProps) => {
   const isClosed = ticket.status === 'closed' || ticket.status === 'resolved';
+  const canReply = !isClosed || (isClosed && !ticket.rating);
 
   return (
     <Card 
-      className={`cursor-pointer hover:bg-accent/50 transition ${unreadCount > 0 ? 'border-primary shadow-sm' : ''}`}
+      className={`cursor-pointer hover:bg-accent/50 transition ${
+        unreadCount > 0 
+          ? 'border-primary shadow-sm' 
+          : (isClosed && !ticket.rating) 
+            ? 'border-orange-400 dark:border-orange-600 shadow-md' 
+            : ''
+      }`}
       onClick={() => {}}
     >
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <CardTitle className="text-sm">#{ticket.id} {ticket.subject}</CardTitle>
               {unreadCount > 0 && (
                 <Badge variant="destructive" className="h-5 px-1.5 text-xs">
                   {unreadCount}
+                </Badge>
+              )}
+              {isClosed && !ticket.rating && (
+                <Badge variant="outline" className="h-5 px-1.5 text-xs border-orange-400 text-orange-600 dark:text-orange-400">
+                  <Icon name="AlertCircle" size={10} className="mr-1" />
+                  Ожидает оценки
                 </Badge>
               )}
             </div>
@@ -60,8 +73,8 @@ const TicketCard = ({
               })}
             </CardDescription>
           </div>
-          <Badge variant={isClosed ? 'secondary' : 'outline'} className="text-xs shrink-0">
-            {statusLabels[ticket.status] || ticket.status}
+          <Badge variant={isClosed && ticket.rating ? 'default' : isClosed ? 'secondary' : 'outline'} className="text-xs shrink-0">
+            {isClosed && ticket.rating ? '✅ Завершён' : statusLabels[ticket.status] || ticket.status}
           </Badge>
         </div>
       </CardHeader>
@@ -91,12 +104,20 @@ const TicketCard = ({
           <div ref={messagesEndRef} />
         </div>
         
-        {!isClosed && (
+        {canReply && (
           <div className="mt-4 pt-4 border-t">
+            {isClosed && !ticket.rating && (
+              <div className="mb-3 p-2 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-300 dark:border-yellow-800">
+                <p className="text-xs text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                  <Icon name="Info" size={14} />
+                  Тикет закрыт, но вы можете добавить комментарий перед оценкой
+                </p>
+              </div>
+            )}
             <Textarea
               value={replyMessage}
               onChange={(e) => onReplyChange(e.target.value)}
-              placeholder="Введите ваше сообщение"
+              placeholder={isClosed ? "Добавьте комментарий (необязательно)" : "Введите ваше сообщение"}
               rows={2}
               className="mb-2"
             />
@@ -114,8 +135,14 @@ const TicketCard = ({
         
         {isClosed && (
           <div className="mt-4 space-y-3 border-t pt-4">
-            <div className="bg-muted p-3 rounded-lg text-sm text-center font-medium">
-              Тикет {ticket.status === 'closed' ? 'закрыт' : 'решён'}
+            <div className={`p-3 rounded-lg text-sm text-center font-medium ${
+              ticket.rating 
+                ? 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-200' 
+                : 'bg-orange-100 dark:bg-orange-950/30 text-orange-800 dark:text-orange-200'
+            }`}>
+              {ticket.rating 
+                ? `Тикет ${ticket.status === 'closed' ? 'закрыт' : 'решён'} и оценён` 
+                : `Администратор ${ticket.status === 'closed' ? 'закрыл' : 'решил'} тикет`}
             </div>
             {ticket.rating ? (
               <>
