@@ -65,7 +65,8 @@ export default {
 			},
 			fontFamily: {
 				sans: ['Open Sans', 'system-ui', 'sans-serif'],
-				display: ['Montserrat', 'system-ui', 'sans-serif']
+				display: ['Playfair Display', 'serif'],
+				heading: ['Montserrat', 'system-ui', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

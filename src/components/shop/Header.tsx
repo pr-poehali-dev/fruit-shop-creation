@@ -52,7 +52,7 @@ const Header = ({
         <div className="flex items-center gap-2 sm:gap-3">
           <SideMenu siteSettings={siteSettings} onSectionChange={onSectionChange} />
           <Icon name="Flower2" size={32} className="hidden sm:block" />
-          <h1 className="text-lg sm:text-2xl font-display font-bold">{siteSettings?.site_name || 'Питомник растений'}</h1>
+          <h1 className="text-lg sm:text-2xl font-display font-extrabold tracking-tight drop-shadow-md">{siteSettings?.site_name || 'Питомник растений'}</h1>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
