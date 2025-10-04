@@ -26,6 +26,7 @@ interface HeaderProps {
   user: User | null;
   currentSection: string;
   siteSettings?: { site_name?: string };
+  unreadTickets?: number;
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
   onShowSupport: () => void;
@@ -38,6 +39,7 @@ const Header = ({
   user, 
   currentSection, 
   siteSettings,
+  unreadTickets = 0,
   onSectionChange, 
   onShowAuth,
   onShowSupport,
@@ -66,11 +68,16 @@ const Header = ({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-primary-foreground hover:bg-primary/90"
+            className="relative text-primary-foreground hover:bg-primary/90"
             onClick={onShowSupport}
             title="Поддержка"
           >
             <Icon name="MessageCircle" size={22} />
+            {unreadTickets > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500 text-white animate-pulse">
+                {unreadTickets}
+              </Badge>
+            )}
           </Button>
 
           <Sheet>

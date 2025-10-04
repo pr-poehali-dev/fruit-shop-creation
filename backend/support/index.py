@@ -38,12 +38,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             ticket_id = params.get('ticket_id')
             
             if ticket_id:
+                mark_as_read = params.get('mark_as_read')
+                
+                if mark_as_read == 'true':
+                    cur.execute(
+                        f"""UPDATE support_messages 
+                           SET is_read = TRUE 
+                           WHERE ticket_id = {ticket_id} AND is_admin = TRUE AND is_read = FALSE"""
+                    )
+                    conn.commit()
+                
                 cur.execute(
                     f"""SELECT t.*, u.full_name as user_name, u.phone as user_phone,
                        json_agg(json_build_object(
                            'id', m.id,
                            'message', m.message,
                            'is_admin', m.is_admin,
+                           'is_read', m.is_read,
                            'created_at', m.created_at
                        ) ORDER BY m.created_at ASC) as messages
                        FROM support_tickets t
@@ -79,16 +90,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if user_id:
                 cur.execute(
-                    f"""SELECT * FROM support_tickets 
+                    f"""SELECT t.*, 
+                       (SELECT COUNT(*) FROM support_messages m 
+                        WHERE m.ticket_id = t.id AND m.is_admin = TRUE AND m.is_read = FALSE) as unread_count
+                       FROM support_tickets t
                        WHERE user_id = {user_id}
                        ORDER BY created_at DESC"""
                 )
                 tickets = cur.fetchall()
                 
+                total_unread = sum(t.get('unread_count', 0) for t in tickets)
+                
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'tickets': [dict(t) for t in tickets]}, default=str),
+                    'body': json.dumps({
+                        'tickets': [dict(t) for t in tickets],
+                        'total_unread': total_unread
+                    }, default=str),
                     'isBase64Encoded': False
                 }
             else:

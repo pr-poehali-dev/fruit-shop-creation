@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { useShopData } from '@/hooks/useShopData';
+import { useTicketNotifications } from '@/hooks/useTicketNotifications';
 import Header from '@/components/shop/Header';
 import AuthDialog from '@/components/shop/AuthDialog';
 import Footer from '@/components/shop/Footer';
@@ -33,6 +34,7 @@ const Index = () => {
     refreshUserBalance,
     API_ORDERS
   } = useShopData();
+  const { unreadCount } = useTicketNotifications(user);
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -183,6 +185,7 @@ const Index = () => {
             user={user}
             currentSection={currentSection}
             siteSettings={siteSettings}
+            unreadTickets={unreadCount}
             onSectionChange={setCurrentSection}
             onShowAuth={() => setShowAuthDialog(true)}
             onShowSupport={() => setShowSupportDialog(true)}

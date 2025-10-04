@@ -27,6 +27,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
   const { toast } = useToast();
 
   const loadTickets = async () => {
@@ -37,6 +38,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       const response = await fetch(`${API_SUPPORT}?user_id=${user.id}`);
       const data = await response.json();
       setTickets(data.tickets || []);
+      setTotalUnread(data.total_unread || 0);
     } catch (error) {
       console.error('Failed to load tickets:', error);
     } finally {
@@ -46,9 +48,10 @@ const UserTickets = ({ user }: UserTicketsProps) => {
 
   const loadTicketDetails = async (ticketId: number) => {
     try {
-      const response = await fetch(`${API_SUPPORT}?ticket_id=${ticketId}`);
+      const response = await fetch(`${API_SUPPORT}?ticket_id=${ticketId}&mark_as_read=true`);
       const data = await response.json();
       setSelectedTicket(data.ticket);
+      await loadTickets();
     } catch (error) {
       toast({
         title: 'Ошибка',
@@ -97,6 +100,10 @@ const UserTickets = ({ user }: UserTicketsProps) => {
 
   useEffect(() => {
     loadTickets();
+    
+    const interval = setInterval(loadTickets, 30000);
+    
+    return () => clearInterval(interval);
   }, [user]);
 
   const getStatusBadgeVariant = (status: string) => {
@@ -113,7 +120,14 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   return (
     <>
       <div>
-        <h3 className="font-semibold mb-3">Мои обращения в поддержку</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold">Мои обращения в поддержку</h3>
+          {totalUnread > 0 && (
+            <Badge variant="destructive" className="animate-pulse">
+              {totalUnread} новых
+            </Badge>
+          )}
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Загрузка...</p>
         ) : tickets.length === 0 ? (
@@ -123,13 +137,20 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             {tickets.map(ticket => (
               <Card 
                 key={ticket.id}
-                className="cursor-pointer hover:bg-accent/50 transition"
+                className={`cursor-pointer hover:bg-accent/50 transition ${ticket.unread_count > 0 ? 'border-primary shadow-sm' : ''}`}
                 onClick={() => loadTicketDetails(ticket.id)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">
-                      <CardTitle className="text-sm">#{ticket.id} {ticket.subject}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-sm">#{ticket.id} {ticket.subject}</CardTitle>
+                        {ticket.unread_count > 0 && (
+                          <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                            {ticket.unread_count}
+                          </Badge>
+                        )}
+                      </div>
                       <CardDescription className="text-xs mt-1">
                         {new Date(ticket.created_at).toLocaleDateString('ru-RU', {
                           day: '2-digit',
