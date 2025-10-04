@@ -44,7 +44,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) 
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
   const showStock = product.show_stock !== false;
-  const hideMainPrice = product.hide_main_price === true && hasVariants && product.variants!.length >= 2;
+  const hideMainPrice = product.hide_main_price && hasVariants && product.variants!.length >= 2;
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -66,7 +66,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) 
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
         <div className="mt-4">
-          {hasVariants && hideMainPrice ? (
+          {hideMainPrice ? (
             <div className="space-y-2">
               <div className="flex flex-wrap gap-1">
                 {product.variants!.map((variant, idx) => (
