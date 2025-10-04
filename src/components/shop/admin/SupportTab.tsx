@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,18 +32,27 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleOpenTicket = async (ticket: any) => {
     const fullTicket = await onLoadTicket(ticket.id);
     setSelectedTicket(fullTicket);
     setNewStatus(fullTicket.status);
+    setTimeout(scrollToBottom, 100);
   };
 
   const handleSendReply = () => {
     if (replyMessage.trim() && selectedTicket) {
       onReply(selectedTicket.id, replyMessage);
       setReplyMessage('');
-      setTimeout(() => handleOpenTicket(selectedTicket), 500);
+      setTimeout(() => {
+        handleOpenTicket(selectedTicket);
+        setTimeout(scrollToBottom, 100);
+      }, 500);
     }
   };
 
@@ -119,7 +128,7 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
       </Card>
 
       <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Icon name="MessageCircle" size={24} />
@@ -130,7 +139,7 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 overflow-y-auto">
             <div className="flex gap-2 flex-wrap">
               <Badge variant={getStatusBadgeVariant(selectedTicket?.status)}>
                 {statusLabels[selectedTicket?.status] || selectedTicket?.status}
@@ -163,8 +172,9 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
 
             <div className="border-t pt-4">
               <h4 className="font-semibold mb-3">История сообщений</h4>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {selectedTicket?.messages?.filter((m: any) => m.message).map((msg: any) => (
+              <div className="space-y-3">
+                {selectedTicket?.messages?.filter((m: any) => m && m.id && m.message).length > 0 ? (
+                  selectedTicket.messages.filter((m: any) => m && m.id && m.message).map((msg: any) => (
                   <div 
                     key={msg.id} 
                     className={`p-3 rounded-lg ${msg.is_admin ? 'bg-primary/10 ml-4' : 'bg-muted mr-4'}`}
@@ -182,31 +192,38 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
                         })}
                       </span>
                     </div>
-                    <p className="text-sm">{msg.message}</p>
+                    <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                   </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Нет сообщений
+                  </p>
+                )}
+                <div ref={messagesEndRef} />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="reply">Ваш ответ</Label>
-              <Textarea
-                id="reply"
-                value={replyMessage}
-                onChange={(e) => setReplyMessage(e.target.value)}
-                placeholder="Введите ответ пользователю"
-                rows={4}
-                className="mt-2"
-              />
-              <Button 
-                onClick={handleSendReply} 
-                className="mt-2 w-full sm:w-auto"
-                disabled={!replyMessage.trim()}
-              >
-                <Icon name="Send" size={18} className="mr-2" />
-                Отправить ответ
-              </Button>
-            </div>
+          </div>
+
+          <div className="border-t pt-4 mt-4 bg-background sticky bottom-0">
+            <Label htmlFor="reply">Ваш ответ</Label>
+            <Textarea
+              id="reply"
+              value={replyMessage}
+              onChange={(e) => setReplyMessage(e.target.value)}
+              placeholder="Введите ответ пользователю"
+              rows={2}
+              className="mt-2"
+            />
+            <Button 
+              onClick={handleSendReply} 
+              className="mt-2 w-full sm:w-auto"
+              disabled={!replyMessage.trim()}
+            >
+              <Icon name="Send" size={18} className="mr-2" />
+              Отправить ответ
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

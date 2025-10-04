@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,12 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [replyMessage, setReplyMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const loadTickets = async () => {
     if (!user) return;
@@ -50,9 +55,13 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     try {
       const response = await fetch(`${API_SUPPORT}?ticket_id=${ticketId}&mark_as_read=true`);
       const data = await response.json();
+      console.log('Loaded ticket details:', data.ticket);
+      console.log('Messages:', data.ticket?.messages);
       setSelectedTicket(data.ticket);
       await loadTickets();
+      setTimeout(scrollToBottom, 100);
     } catch (error) {
+      console.error('Error loading ticket:', error);
       toast({
         title: 'Ошибка',
         description: 'Не удалось загрузить тикет',
@@ -86,6 +95,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         });
         setReplyMessage('');
         await loadTicketDetails(selectedTicket.id);
+        setTimeout(scrollToBottom, 100);
       } else {
         throw new Error(data.error);
       }
@@ -176,7 +186,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       </div>
 
       <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Icon name="MessageCircle" size={24} />
@@ -189,11 +199,12 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 overflow-y-auto">
             <div className="border-t pt-4">
               <h4 className="font-semibold mb-3">История переписки</h4>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {selectedTicket?.messages?.filter((m: any) => m.message).map((msg: any) => (
+              <div className="space-y-3">
+                {selectedTicket?.messages?.filter((m: any) => m && m.id && m.message).length > 0 ? (
+                  selectedTicket.messages.filter((m: any) => m && m.id && m.message).map((msg: any) => (
                   <div 
                     key={msg.id} 
                     className={`p-3 rounded-lg ${msg.is_admin ? 'bg-primary/10 ml-4' : 'bg-muted mr-4'}`}
@@ -213,38 +224,45 @@ const UserTickets = ({ user }: UserTicketsProps) => {
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                   </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Нет сообщений
+                  </p>
+                )}
+                <div ref={messagesEndRef} />
               </div>
             </div>
 
-            {selectedTicket?.status !== 'closed' && selectedTicket?.status !== 'resolved' && (
-              <div>
-                <Label htmlFor="user-reply">Ваш ответ</Label>
-                <Textarea
-                  id="user-reply"
-                  value={replyMessage}
-                  onChange={(e) => setReplyMessage(e.target.value)}
-                  placeholder="Введите ваше сообщение"
-                  rows={3}
-                  className="mt-2"
-                />
-                <Button 
-                  onClick={handleSendReply} 
-                  className="mt-2 w-full sm:w-auto"
-                  disabled={!replyMessage.trim()}
-                >
-                  <Icon name="Send" size={18} className="mr-2" />
-                  Отправить
-                </Button>
-              </div>
-            )}
-
-            {(selectedTicket?.status === 'closed' || selectedTicket?.status === 'resolved') && (
-              <div className="bg-muted p-3 rounded-lg text-sm text-center">
-                Этот тикет {selectedTicket?.status === 'closed' ? 'закрыт' : 'решён'}
-              </div>
-            )}
           </div>
+
+          {selectedTicket?.status !== 'closed' && selectedTicket?.status !== 'resolved' && (
+            <div className="border-t pt-4 mt-4 bg-background sticky bottom-0">
+              <Label htmlFor="user-reply">Ваш ответ</Label>
+              <Textarea
+                id="user-reply"
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                placeholder="Введите ваше сообщение"
+                rows={2}
+                className="mt-2"
+              />
+              <Button 
+                onClick={handleSendReply} 
+                className="mt-2 w-full sm:w-auto"
+                disabled={!replyMessage.trim()}
+              >
+                <Icon name="Send" size={18} className="mr-2" />
+                Отправить
+              </Button>
+            </div>
+          )}
+
+          {(selectedTicket?.status === 'closed' || selectedTicket?.status === 'resolved') && (
+            <div className="bg-muted p-3 rounded-lg text-sm text-center border-t mt-4">
+              Этот тикет {selectedTicket?.status === 'closed' ? 'закрыт' : 'решён'}
+            </div>
+          )
         </DialogContent>
       </Dialog>
     </>
