@@ -34,17 +34,27 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-primary-foreground hover:bg-primary/90"
+          className="text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border-2 border-green-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-menu-button relative"
           title="Меню"
         >
-          <Icon name="Menu" size={24} />
+          <Icon name="Menu" size={28} />
+          <div className="menu-snow-sparkle">🎄</div>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader className="mb-6">
+      <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-purple-50 relative">
+        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-blue-100/50 to-transparent pointer-events-none"></div>
+        <div className="menu-snowflakes">
+          <div className="menu-snowflake" style={{ left: '10%', animationDelay: '0s' }}>❄️</div>
+          <div className="menu-snowflake" style={{ left: '30%', animationDelay: '1s' }}>❄️</div>
+          <div className="menu-snowflake" style={{ left: '50%', animationDelay: '2s' }}>❄️</div>
+          <div className="menu-snowflake" style={{ left: '70%', animationDelay: '0.5s' }}>❄️</div>
+          <div className="menu-snowflake" style={{ left: '90%', animationDelay: '1.5s' }}>❄️</div>
+        </div>
+        <SheetHeader className="mb-6 relative z-10">
           <SheetTitle className="flex items-center gap-2 text-2xl">
-            <Icon name="Flower2" size={32} className="text-primary" />
+            <span className="text-3xl">🎄</span>
             {siteSettings?.site_name || 'Питомник растений'}
+            <span className="text-2xl">✨</span>
           </SheetTitle>
           {siteSettings?.site_description && (
             <p className="text-sm text-muted-foreground text-left">
@@ -58,10 +68,10 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
             <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
               Навигация
             </h3>
-            <nav className="space-y-1">
+            <nav className="space-y-1 relative z-10">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-base h-12"
+                className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
                 onClick={() => handleNavigate('home')}
               >
                 <Icon name="Home" size={20} className="mr-3" />
@@ -69,7 +79,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-base h-12"
+                className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
                 onClick={() => handleNavigate('catalog')}
               >
                 <Icon name="ShoppingBag" size={20} className="mr-3" />
@@ -77,7 +87,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-base h-12"
+                className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
                 onClick={() => handleNavigate('about')}
               >
                 <Icon name="Info" size={20} className="mr-3" />
@@ -85,7 +95,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-base h-12"
+                className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
                 onClick={() => handleNavigate('delivery')}
               >
                 <Icon name="Truck" size={20} className="mr-3" />
@@ -93,7 +103,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-base h-12"
+                className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
                 onClick={() => handleNavigate('care')}
               >
                 <Icon name="Sprout" size={20} className="mr-3" />
@@ -101,7 +111,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-base h-12"
+                className="w-full justify-start text-base h-12 bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-sm menu-nav-button"
                 onClick={() => handleNavigate('contacts')}
               >
                 <Icon name="Phone" size={20} className="mr-3" />
@@ -263,6 +273,109 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
             </>
           )}
         </div>
+        
+        <style>{`
+          .snow-menu-button {
+            position: relative;
+            overflow: visible;
+          }
+          
+          .menu-snow-sparkle {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            font-size: 16px;
+            animation: sparkle-rotate 3s ease-in-out infinite;
+            pointer-events: none;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+          }
+          
+          .snow-menu-button::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(to bottom, 
+              rgba(255, 255, 255, 0.6) 0%, 
+              rgba(240, 249, 255, 0.3) 50%, 
+              transparent 100%
+            );
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+          }
+          
+          .snow-menu-button:hover::before {
+            height: 14px;
+            background: linear-gradient(to bottom, 
+              rgba(255, 255, 255, 0.8) 0%, 
+              rgba(240, 249, 255, 0.5) 50%, 
+              transparent 100%
+            );
+          }
+          
+          .menu-snowflakes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+          }
+          
+          .menu-snowflake {
+            position: absolute;
+            top: -20px;
+            font-size: 1.2rem;
+            animation: menu-fall 8s linear infinite;
+            opacity: 0.6;
+          }
+          
+          @keyframes menu-fall {
+            0% {
+              top: -20px;
+              transform: translateX(0) rotate(0deg);
+            }
+            100% {
+              top: 100%;
+              transform: translateX(50px) rotate(360deg);
+            }
+          }
+          
+          .menu-nav-button {
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .menu-nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(to bottom, 
+              rgba(255, 255, 255, 0.5) 0%, 
+              rgba(240, 249, 255, 0.2) 50%, 
+              transparent 100%
+            );
+            border-radius: 0 0 50% 50% / 0 0 100% 100%;
+            pointer-events: none;
+          }
+          
+          .menu-nav-button:hover::before {
+            height: 8px;
+            background: linear-gradient(to bottom, 
+              rgba(255, 255, 255, 0.7) 0%, 
+              rgba(240, 249, 255, 0.4) 50%, 
+              transparent 100%
+            );
+          }
+        `}</style>
       </SheetContent>
     </Sheet>
   );
