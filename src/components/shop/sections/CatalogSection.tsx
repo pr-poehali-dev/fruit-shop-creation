@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ProductCard from '../ProductCard';
 import ProductGalleryDialog from '../ProductGalleryDialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 
 interface ProductImage {
@@ -38,6 +39,7 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [showPumpkin, setShowPumpkin] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
@@ -50,9 +52,18 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
     { id: 'Декоративные культуры', name: 'Декоративные' },
   ];
 
-  const filteredProducts = activeCategory === 'all' 
+  let filteredProducts = activeCategory === 'all' 
     ? products 
     : products.filter(p => p.category_name === activeCategory);
+
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase();
+    filteredProducts = filteredProducts.filter(p => 
+      p.name.toLowerCase().includes(query) ||
+      p.description.toLowerCase().includes(query) ||
+      p.category_name.toLowerCase().includes(query)
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -141,6 +152,27 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
     <div>
       <h2 className="text-4xl font-display font-bold mb-8">Каталог растений</h2>
       
+      <div className="mb-6">
+        <div className="relative max-w-2xl">
+          <Icon name="Search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Поиск товаров по названию, описанию или категории..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 pr-10 py-6 text-lg rounded-full shadow-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Icon name="X" size={20} />
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="flex flex-wrap gap-3 mb-8">
         {categories.map(category => (
           <button
@@ -172,9 +204,17 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
       </div>
 
       {filteredProducts.length === 0 && (
-        <p className="text-center text-muted-foreground py-12">
-          В этой категории пока нет товаров
-        </p>
+        <div className="text-center py-12">
+          <Icon name="SearchX" size={64} className="mx-auto mb-4 text-muted-foreground" />
+          <p className="text-xl font-medium text-muted-foreground mb-2">
+            {searchQuery ? 'Ничего не найдено' : 'В этой категории пока нет товаров'}
+          </p>
+          {searchQuery && (
+            <p className="text-sm text-muted-foreground">
+              Попробуйте изменить запрос или <button onClick={() => setSearchQuery('')} className="text-primary hover:underline">очистить поиск</button>
+            </p>
+          )}
+        </div>
       )}
 
       <ProductGalleryDialog
