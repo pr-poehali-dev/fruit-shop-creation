@@ -262,7 +262,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             <div className="bg-muted p-3 rounded-lg text-sm text-center border-t mt-4">
               Этот тикет {selectedTicket?.status === 'closed' ? 'закрыт' : 'решён'}
             </div>
-          )
+          )}
         </DialogContent>
       </Dialog>
     </>
