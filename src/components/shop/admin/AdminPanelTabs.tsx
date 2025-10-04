@@ -6,6 +6,7 @@ import UsersTab from './UsersTab';
 import OrdersTab from './OrdersTab';
 import SettingsTab from './SettingsTab';
 import SupportTab from './SupportTab';
+import LoyaltyScannerTab from './LoyaltyScannerTab';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -51,7 +52,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-6 h-auto">
+      <TabsList className="grid w-full grid-cols-7 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -67,6 +68,10 @@ const AdminPanelTabs = ({
         <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="ShoppingCart" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Заказы</span>
+        </TabsTrigger>
+        <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="ScanLine" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">QR-Сканер</span>
         </TabsTrigger>
         <TabsTrigger value="support" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="MessageCircle" size={16} className="sm:mr-1" />
@@ -100,6 +105,10 @@ const AdminPanelTabs = ({
 
       <TabsContent value="orders">
         <OrdersTab orders={orders} onUpdateStatus={onUpdateOrderStatus} onDeleteOrder={onDeleteOrder} />
+      </TabsContent>
+
+      <TabsContent value="loyalty">
+        <LoyaltyScannerTab />
       </TabsContent>
 
       <TabsContent value="support">

@@ -177,9 +177,15 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
         </div>
       </div>
       
-      <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-        <p className="text-xs text-muted-foreground text-center">
-          Предъявите QR-код при покупке для получения специальных предложений
+      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg border border-green-200 dark:border-green-800">
+        <div className="flex items-center gap-2 mb-2">
+          <Icon name="Percent" size={16} className="text-green-600 dark:text-green-400" />
+          <p className="text-sm font-semibold text-green-900 dark:text-green-100">
+            Кэшбек 3% от покупки
+          </p>
+        </div>
+        <p className="text-xs text-green-700 dark:text-green-300">
+          Предъявите QR-код при покупке от 100₽ и получайте кэшбек на счет
         </p>
       </div>
     </div>

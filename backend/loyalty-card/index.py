@@ -19,7 +19,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -125,6 +125,70 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'success': True, 'card': dict(new_card)}, default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'PUT':
+            body_data = json.loads(event.get('body', '{}'))
+            card_number = body_data.get('card_number', '').replace("'", "''")
+            purchase_amount = float(body_data.get('purchase_amount', 0))
+            
+            if not card_number:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'card_number required'}),
+                    'isBase64Encoded': False
+                }
+            
+            if purchase_amount < 100:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Минимальная сумма для начисления кэшбека - 100₽'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(
+                f"""SELECT lc.*, u.full_name, u.phone, u.cashback 
+                   FROM loyalty_cards lc
+                   JOIN users u ON lc.user_id = u.id
+                   WHERE lc.card_number = '{card_number}' AND lc.is_active = TRUE"""
+            )
+            card = cur.fetchone()
+            
+            if not card:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Карта не найдена'}),
+                    'isBase64Encoded': False
+                }
+            
+            cashback_amount = purchase_amount * 0.03
+            
+            cur.execute(
+                f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {card['user_id']}"
+            )
+            
+            cur.execute(
+                f"""INSERT INTO transactions (user_id, type, amount, description) 
+                   VALUES ({card['user_id']}, 'cashback_earned', {cashback_amount}, 
+                   'Кэшбек 3% от покупки {purchase_amount}₽ по карте лояльности')"""
+            )
+            
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'success': True,
+                    'cashback_earned': cashback_amount,
+                    'user_name': card['full_name'],
+                    'user_phone': card['phone'],
+                    'new_cashback': float(card['cashback']) + cashback_amount
+                }, default=str),
                 'isBase64Encoded': False
             }
         
