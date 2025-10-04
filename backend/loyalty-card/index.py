@@ -9,6 +9,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     Args: event with httpMethod, body, queryStringParameters
     Returns: HTTP response with loyalty card data
     '''
+    
     import psycopg2
     from psycopg2.extras import RealDictCursor
     
