@@ -20,17 +20,33 @@ export const useAuth = () => {
 
     const syncUserData = async () => {
       try {
-        const response = await fetch(`${API_AUTH}?action=balance&user_id=${user.id}`);
-        const data = await response.json();
+        const [balanceResponse, banResponse] = await Promise.all([
+          fetch(`${API_AUTH}?action=balance&user_id=${user.id}`),
+          fetch(`${API_AUTH}?action=ban_status&user_id=${user.id}`)
+        ]);
         
-        if (data.balance !== undefined) {
+        const balanceData = await balanceResponse.json();
+        const banData = await banResponse.json();
+        
+        if (banData.banned) {
+          setBanInfo({
+            banned: true,
+            ban_reason: banData.ban_reason,
+            ban_until: banData.ban_until
+          });
+          setUser(null);
+          localStorage.removeItem('user');
+          return;
+        }
+        
+        if (balanceData.balance !== undefined) {
           setUser(prev => {
             if (!prev) return prev;
             const updatedUser = {
               ...prev,
-              balance: data.balance,
-              cashback: data.cashback,
-              is_admin: data.is_admin
+              balance: balanceData.balance,
+              cashback: balanceData.cashback,
+              is_admin: balanceData.is_admin
             };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             return updatedUser;
@@ -41,7 +57,8 @@ export const useAuth = () => {
       }
     };
 
-    const interval = setInterval(syncUserData, 10000);
+    syncUserData();
+    const interval = setInterval(syncUserData, 5000);
 
     return () => clearInterval(interval);
   }, [user?.id]);
