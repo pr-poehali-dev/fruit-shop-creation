@@ -123,14 +123,24 @@ const TicketCard = ({
                 )}
               </div>
             ) : (
-              <Button 
-                onClick={onShowRating}
-                className="w-full"
-                variant="outline"
-              >
-                <Icon name="Star" size={16} className="mr-2" />
-                Оценить работу поддержки
-              </Button>
+              <>
+                <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-start gap-2">
+                    <Icon name="MessageCircle" size={16} className="text-blue-600 mt-0.5 shrink-0" />
+                    <p className="text-sm text-blue-900 dark:text-blue-100">
+                      Администратор закрыл ваше обращение. Оцените качество поддержки — это поможет нам стать лучше
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={onShowRating}
+                  className="w-full"
+                  variant="default"
+                >
+                  <Icon name="Star" size={16} className="mr-2" />
+                  Оценить работу поддержки
+                </Button>
+              </>
             )}
           </div>
         )}

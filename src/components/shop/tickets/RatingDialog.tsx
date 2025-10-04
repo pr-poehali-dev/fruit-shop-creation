@@ -59,13 +59,27 @@ const RatingDialog = ({ open, onOpenChange, ticketId, apiUrl, onRatingSubmitted 
   };
 
   const handleClose = () => {
-    setRating('');
-    setRatingComment('');
-    onOpenChange(false);
+    if (!rating) {
+      if (confirm('Вы уверены, что не хотите оценить качество поддержки? Ваше мнение поможет нам стать лучше.')) {
+        setRating('');
+        setRatingComment('');
+        onOpenChange(false);
+      }
+    } else {
+      setRating('');
+      setRatingComment('');
+      onOpenChange(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(openState) => {
+      if (!openState) {
+        handleClose();
+      } else {
+        onOpenChange(openState);
+      }
+    }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -73,7 +87,7 @@ const RatingDialog = ({ open, onOpenChange, ticketId, apiUrl, onRatingSubmitted 
             Оценить работу поддержки
           </DialogTitle>
           <DialogDescription>
-            Ваше мнение поможет нам стать лучше
+            Администратор закрыл тикет. Пожалуйста, оцените качество поддержки — это поможет нам стать лучше
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

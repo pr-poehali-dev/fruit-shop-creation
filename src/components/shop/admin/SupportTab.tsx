@@ -77,8 +77,15 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
 
   const handleUpdateStatus = () => {
     if (selectedTicket && newStatus) {
-      onUpdateStatus(selectedTicket.id, newStatus);
-      setSelectedTicket({ ...selectedTicket, status: newStatus });
+      if ((newStatus === 'closed' || newStatus === 'resolved') && selectedTicket.status !== 'closed' && selectedTicket.status !== 'resolved') {
+        if (confirm('Вы уверены, что хотите закрыть тикет? Пользователю будет предложено оценить работу поддержки.')) {
+          onUpdateStatus(selectedTicket.id, newStatus);
+          setSelectedTicket({ ...selectedTicket, status: newStatus });
+        }
+      } else {
+        onUpdateStatus(selectedTicket.id, newStatus);
+        setSelectedTicket({ ...selectedTicket, status: newStatus });
+      }
     }
   };
 
@@ -124,10 +131,15 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
                         <Badge variant={getStatusBadgeVariant(ticket.status)} className="text-xs">
                           {statusLabels[ticket.status] || ticket.status}
                         </Badge>
-                        {ticket.rating && (
+                        {ticket.rating ? (
                           <Badge variant="outline" className="text-xs flex items-center gap-1">
                             <Icon name="Star" size={12} className="text-yellow-500 fill-yellow-500" />
                             {ticket.rating}/5
+                          </Badge>
+                        ) : (ticket.status === 'closed' || ticket.status === 'resolved') && (
+                          <Badge variant="outline" className="text-xs flex items-center gap-1 border-orange-300 text-orange-600">
+                            <Icon name="Clock" size={12} />
+                            Ждёт оценки
                           </Badge>
                         )}
                       </div>
@@ -216,6 +228,16 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
                   Сохранить
                 </Button>
               </div>
+              {(newStatus === 'closed' || newStatus === 'resolved') && selectedTicket?.status !== 'closed' && selectedTicket?.status !== 'resolved' && (
+                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Icon name="Info" size={16} className="text-blue-600 mt-0.5 shrink-0" />
+                    <p className="text-sm text-blue-900 dark:text-blue-100">
+                      После закрытия тикета пользователь увидит предложение оценить работу поддержки
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="border-t pt-4">

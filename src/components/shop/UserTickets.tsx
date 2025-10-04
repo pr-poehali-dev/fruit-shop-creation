@@ -30,6 +30,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [closedTicket, setClosedTicket] = useState<any>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -55,8 +56,19 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         if (shouldScroll) {
           setTimeout(scrollToBottom, 100);
         }
+      } else if (data.active_ticket && (data.active_ticket.status === 'closed' || data.active_ticket.status === 'resolved')) {
+        console.log('Ticket just closed, checking if needs rating');
+        const wasActive = activeTicket?.id === data.active_ticket.id;
+        const needsRating = !data.active_ticket.rating;
+        
+        if (needsRating && wasActive && !showRatingDialog) {
+          setClosedTicket(data.active_ticket);
+          setShowRatingDialog(true);
+        }
+        setActiveTicket(null);
+        setUnreadCount(0);
       } else {
-        console.log('No active ticket (closed or resolved)');
+        console.log('No active ticket');
         setActiveTicket(null);
         setUnreadCount(0);
       }
@@ -176,13 +188,16 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         onTicketCreated={loadActiveTicket}
       />
 
-      {activeTicket && (
+      {(activeTicket || closedTicket) && (
         <RatingDialog
           open={showRatingDialog}
           onOpenChange={setShowRatingDialog}
-          ticketId={activeTicket.id}
+          ticketId={activeTicket?.id || closedTicket?.id}
           apiUrl={API_SUPPORT}
-          onRatingSubmitted={loadActiveTicket}
+          onRatingSubmitted={() => {
+            loadActiveTicket();
+            setClosedTicket(null);
+          }}
         />
       )}
     </>
