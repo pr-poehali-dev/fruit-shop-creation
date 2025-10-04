@@ -50,14 +50,16 @@ const UsersTab = ({ users, onAddBalance }: UsersTabProps) => {
             {users.map(user => (
               <div key={user.id} className="flex justify-between items-center p-4 border rounded-lg">
                 <div className="flex-1">
-                  <div className="font-medium">{user.full_name}</div>
+                  <div className="font-medium flex items-center gap-2">
+                    {user.full_name}
+                    {user.is_admin && <Icon name="Crown" size={18} className="text-yellow-500" />}
+                  </div>
                   <div className="text-sm text-muted-foreground">{user.phone}</div>
                   <div className="text-xs text-muted-foreground mt-1">
                     Баланс: {(user.balance || 0).toFixed(2)}₽ | Кэшбек: {Math.round(user.cashback || 0)}₽
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {user.is_admin && <Badge>Админ</Badge>}
                   <Badge variant="outline">{new Date(user.created_at).toLocaleDateString()}</Badge>
                   <Button
                     size="sm"

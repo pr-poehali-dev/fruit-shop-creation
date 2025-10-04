@@ -25,6 +25,8 @@ interface AdminPanelTabsProps {
   onUpdateTicketStatus: (ticketId: number, status: string) => void;
   onLoadTicket: (ticketId: number) => Promise<any>;
   onSaveSettings: (e: React.FormEvent<HTMLFormElement>) => void;
+  onDeleteOrder: (orderId: number) => void;
+  onDeleteTicket: (ticketId: number) => void;
 }
 
 const AdminPanelTabs = ({
@@ -43,7 +45,9 @@ const AdminPanelTabs = ({
   onReplyToTicket,
   onUpdateTicketStatus,
   onLoadTicket,
-  onSaveSettings
+  onSaveSettings,
+  onDeleteOrder,
+  onDeleteTicket
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
@@ -95,7 +99,7 @@ const AdminPanelTabs = ({
       </TabsContent>
 
       <TabsContent value="orders">
-        <OrdersTab orders={orders} onUpdateStatus={onUpdateOrderStatus} />
+        <OrdersTab orders={orders} onUpdateStatus={onUpdateOrderStatus} onDeleteOrder={onDeleteOrder} />
       </TabsContent>
 
       <TabsContent value="support">
@@ -104,6 +108,7 @@ const AdminPanelTabs = ({
           onReply={onReplyToTicket}
           onUpdateStatus={onUpdateTicketStatus}
           onLoadTicket={onLoadTicket}
+          onDeleteTicket={onDeleteTicket}
         />
       </TabsContent>
 

@@ -18,7 +18,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -230,6 +230,29 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"UPDATE support_tickets SET status = '{status}', updated_at = CURRENT_TIMESTAMP WHERE id = {ticket_id}"
             )
             
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'DELETE':
+            body_data = json.loads(event.get('body', '{}'))
+            ticket_id = body_data.get('ticket_id')
+            
+            if not ticket_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'ticket_id required'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(f"DELETE FROM support_messages WHERE ticket_id = {ticket_id}")
+            cur.execute(f"DELETE FROM support_tickets WHERE id = {ticket_id}")
             conn.commit()
             
             return {

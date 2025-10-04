@@ -280,6 +280,62 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleDeleteOrder = async (orderId: number) => {
+    if (!confirm('Удалить заказ? Это действие нельзя отменить.')) return;
+    
+    try {
+      const response = await fetch(props.API_ORDERS, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Заказ удалён',
+          description: `Заказ #${orderId} был удалён`
+        });
+        props.loadOrders();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить заказ',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: number) => {
+    if (!confirm('Удалить обращение? Это действие нельзя отменить.')) return;
+    
+    try {
+      const response = await fetch(props.API_SUPPORT, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Обращение удалено',
+          description: `Тикет #${ticketId} был удалён`
+        });
+        props.loadTickets();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить обращение',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return {
     handleSaveProduct,
     handleSaveCategory,
@@ -287,6 +343,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleUpdateOrderStatus,
     handleReplyToTicket,
     handleUpdateTicketStatus,
-    handleSaveSettings
+    handleSaveSettings,
+    handleDeleteOrder,
+    handleDeleteTicket
   };
 };

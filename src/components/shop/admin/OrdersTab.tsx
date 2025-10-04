@@ -11,6 +11,7 @@ import Icon from '@/components/ui/icon';
 interface OrdersTabProps {
   orders: any[];
   onUpdateStatus: (orderId: number, status: string, rejectionReason?: string) => void;
+  onDeleteOrder: (orderId: number) => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -20,7 +21,7 @@ const statusLabels: Record<string, string> = {
   'rejected': '❌ Отклонён'
 };
 
-const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
+const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder }: OrdersTabProps) => {
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [newStatus, setNewStatus] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
@@ -120,11 +121,19 @@ const OrdersTab = ({ orders, onUpdateStatus }: OrdersTabProps) => {
                     size="sm" 
                     variant="outline"
                     onClick={() => openStatusDialog(order)}
-                    className="text-xs sm:text-sm w-full sm:w-auto"
+                    className="text-xs sm:text-sm flex-1 sm:flex-none"
                   >
                     <Icon name="Edit" size={14} className="mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">Изменить статус</span>
                     <span className="sm:hidden">Статус</span>
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => onDeleteOrder(order.id)}
+                    className="text-xs sm:text-sm"
+                  >
+                    <Icon name="Trash2" size={14} />
                   </Button>
                 </div>
               </div>

@@ -46,7 +46,9 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
     handleUpdateOrderStatus,
     handleReplyToTicket,
     handleUpdateTicketStatus,
-    handleSaveSettings
+    handleSaveSettings,
+    handleDeleteOrder,
+    handleDeleteTicket
   } = useAdminHandlers({
     API_PRODUCTS,
     API_CATEGORIES,
@@ -98,6 +100,8 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
           onUpdateTicketStatus={handleUpdateTicketStatus}
           onLoadTicket={loadSingleTicket}
           onSaveSettings={handleSaveSettings}
+          onDeleteOrder={handleDeleteOrder}
+          onDeleteTicket={handleDeleteTicket}
         />
       </div>
 

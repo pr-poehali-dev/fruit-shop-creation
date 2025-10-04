@@ -13,6 +13,7 @@ interface SupportTabProps {
   onReply: (ticketId: number, message: string) => void;
   onUpdateStatus: (ticketId: number, status: string) => void;
   onLoadTicket: (ticketId: number) => Promise<any>;
+  onDeleteTicket: (ticketId: number) => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -28,7 +29,7 @@ const priorityLabels: Record<string, string> = {
   'high': 'Высокий'
 };
 
-const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportTabProps) => {
+const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTicket }: SupportTabProps) => {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
@@ -135,6 +136,17 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
                       <span className="text-xs text-muted-foreground">
                         {new Date(ticket.created_at).toLocaleDateString('ru-RU')}
                       </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteTicket(ticket.id);
+                        }}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Icon name="Trash2" size={16} className="text-destructive" />
+                      </Button>
                     </div>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{ticket.message}</p>
