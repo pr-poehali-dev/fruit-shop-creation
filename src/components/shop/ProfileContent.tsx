@@ -92,7 +92,10 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileCon
       
       <Separator className="my-4" />
       
-      <Button variant="destructive" className="w-full" onClick={onLogout}>Выйти</Button>
+      <Button variant="destructive" className="w-full" onClick={onLogout}>
+        <Icon name="LogOut" size={18} className="mr-2" />
+        Выйти
+      </Button>
     </div>
   );
 };

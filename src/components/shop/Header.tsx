@@ -94,7 +94,7 @@ const Header = ({
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent>
+              <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>Профиль</SheetTitle>
                 </SheetHeader>
