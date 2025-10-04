@@ -216,52 +216,56 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>{editingProduct ? 'Редактировать товар' : 'Добавить товар'}</DialogTitle>
-          <DialogDescription>Заполните информацию о товаре</DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">{editingProduct ? 'Редактировать товар' : 'Добавить товар'}</DialogTitle>
+          <DialogDescription className="text-sm">Заполните информацию о товаре</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleFormSubmit} className="space-y-4">
+        <form onSubmit={handleFormSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="product-name">Название товара *</Label>
+            <Label htmlFor="product-name" className="text-sm">Название товара *</Label>
             <Input 
               id="product-name" 
               name="name" 
               defaultValue={editingProduct?.name} 
               required 
               placeholder="Например: Яблоня Антоновка"
+              className="mt-1 text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="product-description">Описание</Label>
+            <Label htmlFor="product-description" className="text-sm">Описание</Label>
             <Textarea 
               id="product-description" 
               name="description" 
               defaultValue={editingProduct?.description}
               placeholder="Подробное описание товара"
               rows={3}
+              className="mt-1 text-sm resize-none"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="product-price">Цена (₽) *</Label>
+              <Label htmlFor="product-price" className="text-sm">Цена (₽) *</Label>
               <Input 
                 id="product-price" 
                 name="price" 
                 type="number" 
                 step="0.01"
                 defaultValue={editingProduct?.price} 
-                required 
+                required
+                className="mt-1 text-sm"
               />
             </div>
             <div>
-              <Label htmlFor="product-stock">Количество на складе *</Label>
+              <Label htmlFor="product-stock" className="text-sm">Количество на складе *</Label>
               <Input 
                 id="product-stock" 
                 name="stock" 
                 type="number" 
                 defaultValue={editingProduct?.stock || 0} 
-                required 
+                required
+                className="mt-1 text-sm"
               />
             </div>
           </div>
