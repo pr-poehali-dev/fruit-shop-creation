@@ -17,13 +17,15 @@ interface ProfileContentProps {
 const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileContentProps) => {
   return (
     <div className="mt-6 space-y-4">
-      <div>
-        <Label>Телефон</Label>
-        <p className="font-medium">{user?.phone}</p>
-      </div>
-      <div>
-        <Label>Имя</Label>
-        <p className="font-medium">{user?.full_name || 'Не указано'}</p>
+      <div className="text-center pb-4">
+        <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3 flex items-center justify-center">
+          <Icon name="User" size={40} className="text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold">{user?.full_name || 'Пользователь'}</h3>
+        <p className="text-sm text-muted-foreground">{user?.phone}</p>
+        <Badge variant={user?.is_admin ? 'default' : 'secondary'} className="mt-2">
+          {user?.is_admin ? 'Администратор' : 'Пользователь'}
+        </Badge>
       </div>
       
       <Separator />
@@ -46,14 +48,13 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileCon
       
       {user?.is_admin && (
         <>
-          <Badge variant="secondary">Администратор</Badge>
           <Button className="w-full" variant="default" onClick={onShowAdminPanel}>
             <Icon name="Settings" size={18} className="mr-2" />
             Панель администратора
           </Button>
+          <Separator />
         </>
       )}
-      <Separator />
       <div>
         <h3 className="font-semibold mb-3">История заказов</h3>
         {orders.length === 0 ? (
