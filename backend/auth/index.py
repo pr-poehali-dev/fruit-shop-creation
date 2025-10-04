@@ -36,6 +36,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             action = params.get('action', 'users')
             user_id = params.get('user_id')
             
+            if action == 'ban_status' and user_id:
+                cur.execute(f"SELECT banned, ban_reason, ban_until FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'banned': user['banned'] if user else False,
+                        'ban_reason': user['ban_reason'] if user else None,
+                        'ban_until': str(user['ban_until']) if user and user['ban_until'] else None
+                    }, default=str),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'balance' and user_id:
                 cur.execute(f"SELECT balance, cashback, is_admin FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
@@ -87,7 +102,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     phone = body_data.get('phone', '').strip()
     password = body_data.get('password', '')
     
-    if action in ['update_balance', 'update_cashback', 'toggle_admin']:
+    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(db_url)
@@ -119,6 +134,64 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'success': True,
                         'user': dict(user)
                     }, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'ban_user':
+                user_id = body_data.get('user_id')
+                ban_reason = body_data.get('ban_reason', '').replace("'", "''")
+                duration_hours = body_data.get('duration_hours')
+                
+                if not user_id or not ban_reason:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id and ban_reason are required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                from datetime import datetime, timedelta
+                
+                if duration_hours == 'permanent':
+                    ban_until = None
+                    cur.execute(
+                        f"UPDATE users SET banned = true, ban_reason = '{ban_reason}', ban_until = NULL WHERE id = {user_id}"
+                    )
+                else:
+                    ban_until = datetime.now() + timedelta(hours=int(duration_hours))
+                    cur.execute(
+                        f"UPDATE users SET banned = true, ban_reason = '{ban_reason}', ban_until = '{ban_until.isoformat()}' WHERE id = {user_id}"
+                    )
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'unban_user':
+                user_id = body_data.get('user_id')
+                
+                if not user_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id is required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"UPDATE users SET banned = false, ban_reason = NULL, ban_until = NULL WHERE id = {user_id}"
+                )
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
                     'isBase64Encoded': False
                 }
             
@@ -238,7 +311,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             password_escaped = password.replace("'", "''")
             
             cur.execute(
-                f"SELECT id, phone, full_name, is_admin, balance, cashback FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
+                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
             )
             user = cur.fetchone()
             
@@ -249,6 +322,37 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Неверный телефон или пароль'}),
                     'isBase64Encoded': False
                 }
+            
+            if user[6]:
+                from datetime import datetime
+                ban_until = user[8]
+                if ban_until:
+                    ban_until_dt = datetime.fromisoformat(str(ban_until).replace('Z', '+00:00'))
+                    if ban_until_dt > datetime.now(ban_until_dt.tzinfo):
+                        return {
+                            'statusCode': 200,
+                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                            'body': json.dumps({
+                                'banned': True,
+                                'ban_reason': user[7],
+                                'ban_until': str(ban_until)
+                            }),
+                            'isBase64Encoded': False
+                        }
+                    else:
+                        cur.execute(f"UPDATE users SET banned = false, ban_reason = NULL, ban_until = NULL WHERE id = {user[0]}")
+                        conn.commit()
+                else:
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({
+                            'banned': True,
+                            'ban_reason': user[7],
+                            'ban_until': None
+                        }),
+                        'isBase64Encoded': False
+                    }
             
             return {
                 'statusCode': 200,

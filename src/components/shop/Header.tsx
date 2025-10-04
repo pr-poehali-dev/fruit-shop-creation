@@ -128,7 +128,7 @@ const Header = ({
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
-                  <SheetTitle>Оцените обращение</SheetTitle>
+                  <SheetTitle>Профиль</SheetTitle>
                 </SheetHeader>
                 {renderProfileContent(true)}
               </SheetContent>

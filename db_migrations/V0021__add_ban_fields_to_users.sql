@@ -1,0 +1,5 @@
+-- Add ban fields to users table
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS banned BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS ban_reason TEXT,
+ADD COLUMN IF NOT EXISTS ban_until TIMESTAMP WITH TIME ZONE;

@@ -6,6 +6,7 @@ const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198d
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isRefreshingBalance, setIsRefreshingBalance] = useState(false);
+  const [banInfo, setBanInfo] = useState<{banned: boolean; ban_reason?: string; ban_until?: string} | null>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -68,11 +69,21 @@ export const useAuth = () => {
       
       const data = await response.json();
       
+      if (data.banned) {
+        setBanInfo({
+          banned: true,
+          ban_reason: data.ban_reason,
+          ban_until: data.ban_until
+        });
+        return;
+      }
+      
       if (data.success) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
         const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
         onSuccess(data.user, message);
+        setBanInfo(null);
       } else {
         onError(data.error);
       }
@@ -93,6 +104,7 @@ export const useAuth = () => {
     isRefreshingBalance,
     setIsRefreshingBalance,
     handleAuth,
-    handleLogout
+    handleLogout,
+    banInfo
   };
 };

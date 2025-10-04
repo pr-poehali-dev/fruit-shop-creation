@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import Icon from '@/components/ui/icon';
+import BanUserTab from './BanUserTab';
 
 interface User {
   id: number;
@@ -243,10 +244,11 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
           </DialogHeader>
 
           <Tabs value={operationType} onValueChange={(v) => setOperationType(v as 'balance' | 'cashback' | 'loyalty')}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="balance">Баланс</TabsTrigger>
               <TabsTrigger value="cashback">Кэшбек</TabsTrigger>
               <TabsTrigger value="loyalty">Карта</TabsTrigger>
+              <TabsTrigger value="ban">Бан</TabsTrigger>
               <TabsTrigger value="history">История</TabsTrigger>
             </TabsList>
 
@@ -396,6 +398,10 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
                   </div>
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="ban">
+              <BanUserTab userId={selectedUser?.id || 0} userName={selectedUser?.full_name || ''} />
             </TabsContent>
 
             <TabsContent value="history">

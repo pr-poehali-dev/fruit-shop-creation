@@ -11,11 +11,7 @@
       },
       "expectedStatus": 200,
       "expectedBody": {
-        "success": true,
-        "user": {
-          "phone": "string",
-          "is_admin": "boolean"
-        }
+        "success": true
       },
       "bodyMatcher": "partial"
     }

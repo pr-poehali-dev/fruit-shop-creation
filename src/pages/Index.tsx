@@ -27,7 +27,7 @@ import { Product } from '@/types/shop';
 
 const Index = () => {
   const { toast } = useToast();
-  const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleLogout } = useAuth();
+  const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleLogout, banInfo } = useAuth();
   const { cart, addToCart, updateCartQuantity, getTotalPrice, clearCart } = useCart();
   const {
     products,
@@ -388,6 +388,7 @@ const Index = () => {
             onOpenChange={setShowAuthDialog}
             onSubmit={(e, action) => handleAuth(e, action, onAuthSuccess, onAuthError)}
             onGoogleLogin={handleGoogleLogin}
+            banInfo={banInfo}
           />
         </>
       )}
