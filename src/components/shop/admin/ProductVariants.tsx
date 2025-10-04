@@ -60,8 +60,8 @@ const ProductVariants = ({
             type="number"
             value={newVariantStock}
             onChange={(e) => onNewVariantStockChange(e.target.value)}
-            placeholder="Склад"
-            className="text-sm w-full sm:w-24"
+            placeholder="Склад (не указано = в наличии)"
+            className="text-sm w-full sm:w-32"
           />
           <Button 
             type="button" 
@@ -81,7 +81,7 @@ const ProductVariants = ({
                   <div className="flex-1">
                     <p className="text-sm font-medium">{variant.size}</p>
                     <p className="text-xs text-muted-foreground">
-                      {variant.price}₽ • Склад: {variant.stock} шт
+                      {variant.price}₽ • Склад: {variant.stock != null ? `${variant.stock} шт` : 'в наличии'}
                     </p>
                   </div>
                   <div className="flex gap-1">

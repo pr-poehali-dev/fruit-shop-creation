@@ -227,10 +227,11 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
   const handleAddVariant = () => {
     if (!newVariantSize.trim() || !newVariantPrice.trim()) return;
     
+    const stockValue = newVariantStock.trim();
     const newVariant: ProductVariant = {
       size: newVariantSize.trim(),
       price: parseFloat(newVariantPrice),
-      stock: parseInt(newVariantStock) || 0,
+      stock: stockValue !== '' ? parseInt(stockValue) : 0,
       sort_order: variants.length
     };
     

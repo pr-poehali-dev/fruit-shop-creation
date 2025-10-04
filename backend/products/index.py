@@ -118,7 +118,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             for variant in variants:
                 size = variant['size'].replace("'", "''")
                 var_price = variant['price']
-                var_stock = variant.get('stock', 0)
+                var_stock_val = variant.get('stock')
+                var_stock = var_stock_val if var_stock_val not in [None, ''] else 'NULL'
                 var_sort = variant.get('sort_order', 0)
                 cur.execute(
                     f"""INSERT INTO product_variants (product_id, size, price, stock, sort_order) 
@@ -189,7 +190,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             for variant in variants:
                 size = variant['size'].replace("'", "''")
                 var_price = variant['price']
-                var_stock = variant.get('stock', 0)
+                var_stock_val = variant.get('stock')
+                var_stock = var_stock_val if var_stock_val not in [None, ''] else 'NULL'
                 var_sort = variant.get('sort_order', 0)
                 
                 if variant.get('id') and variant['id'] in existing_variant_ids:

@@ -55,9 +55,9 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
   
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
   const displayStock = selectedVariant 
-    ? (selectedVariant.stock || selectedVariant.stock === 0 ? selectedVariant.stock : 999) 
-    : (product.stock || product.stock === 0 ? product.stock : 999);
-  const isInStock = displayStock > 0;
+    ? (selectedVariant.stock != null ? selectedVariant.stock : 999) 
+    : (product.stock != null ? product.stock : 999);
+  const isInStock = true;
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -164,7 +164,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
                       <p className="text-lg font-bold text-primary">{variant.price} ₽</p>
                       {showStock && (
                         <p className="text-xs text-muted-foreground">
-                          {variant.stock > 0 ? `${variant.stock} шт.` : 'В наличии'}
+                          {variant.stock != null && variant.stock > 0 ? `${variant.stock} шт.` : 'В наличии'}
                         </p>
                       )}
                     </button>
@@ -178,7 +178,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
                 <p className="text-3xl font-bold text-primary">{displayPrice} ₽</p>
                 {showStock && (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {isInStock ? (displayStock === 999 ? 'В наличии' : `В наличии: ${displayStock} шт.`) : 'Нет в наличии'}
+                    {displayStock === 999 ? 'В наличии' : `В наличии: ${displayStock} шт.`}
                   </p>
                 )}
               </div>
@@ -189,7 +189,6 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
                   onAddToCart(product);
                   handleOpenChange(false);
                 }}
-                disabled={!isInStock}
               >
                 <Icon name="ShoppingCart" size={20} className="mr-2" />
                 В корзину
