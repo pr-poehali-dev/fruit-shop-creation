@@ -52,7 +52,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             if action == 'balance' and user_id:
-                cur.execute(f"SELECT balance, cashback, is_admin FROM users WHERE id = {user_id}")
+                cur.execute(f"SELECT balance, cashback, is_admin, avatar FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
                 
                 cur.execute(
@@ -67,13 +67,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'balance': float(user['balance']) if user else 0.00,
                         'cashback': float(user['cashback']) if user else 0.00,
                         'is_admin': user['is_admin'] if user else False,
+                        'avatar': user['avatar'] if user else '👤',
                         'transactions': [dict(t) for t in transactions]
                     }, default=str),
                     'isBase64Encoded': False
                 }
             
             cur.execute(
-                """SELECT id, phone, full_name, is_admin, balance, cashback, created_at 
+                """SELECT id, phone, full_name, is_admin, balance, cashback, avatar, created_at 
                    FROM users 
                    ORDER BY created_at DESC"""
             )
@@ -114,7 +115,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     else:
         phone = phone_raw
     
-    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user']:
+    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(db_url)
@@ -207,6 +208,34 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'update_avatar':
+                user_id = body_data.get('user_id')
+                avatar = body_data.get('avatar', '').replace("'", "''")
+                
+                if not user_id or not avatar:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id and avatar are required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"UPDATE users SET avatar = '{avatar}' WHERE id = {user_id} RETURNING avatar"
+                )
+                conn.commit()
+                updated_user = cur.fetchone()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'success': True,
+                        'avatar': updated_user['avatar']
+                    }),
+                    'isBase64Encoded': False
+                }
+            
             user_id = body_data.get('user_id')
             amount = body_data.get('amount')
             transaction_type = body_data.get('type')
@@ -296,7 +325,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             full_name_escaped = full_name.replace("'", "''")
             
             cur.execute(
-                f"INSERT INTO users (phone, password, full_name, balance, cashback) VALUES ('{phone_escaped}', '{password_escaped}', '{full_name_escaped}', 0.00, 0.00) RETURNING id, phone, full_name, is_admin, balance, cashback"
+                f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar) VALUES ('{phone_escaped}', '{password_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
             )
             conn.commit()
             user = cur.fetchone()
@@ -312,7 +341,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'full_name': user[2],
                         'is_admin': user[3],
                         'balance': float(user[4]) if user[4] else 0.00,
-                        'cashback': float(user[5]) if user[5] else 0.00
+                        'cashback': float(user[5]) if user[5] else 0.00,
+                        'avatar': user[6] if user[6] else '👤'
                     }
                 }),
                 'isBase64Encoded': False
@@ -323,7 +353,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             password_escaped = password.replace("'", "''")
             
             cur.execute(
-                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
+                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
             )
             user = cur.fetchone()
             
@@ -377,7 +407,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'full_name': user[2],
                         'is_admin': user[3],
                         'balance': float(user[4]) if user[4] else 0.00,
-                        'cashback': float(user[5]) if user[5] else 0.00
+                        'cashback': float(user[5]) if user[5] else 0.00,
+                        'avatar': user[9] if user[9] else '👤'
                     }
                 }),
                 'isBase64Encoded': False

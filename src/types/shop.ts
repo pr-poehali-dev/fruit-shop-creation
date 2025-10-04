@@ -5,6 +5,7 @@ export interface User {
   is_admin: boolean;
   balance?: number;
   cashback?: number;
+  avatar?: string;
 }
 
 export interface Product {
