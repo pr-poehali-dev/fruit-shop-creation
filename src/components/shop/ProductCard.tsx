@@ -160,33 +160,53 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           top: 0;
           left: 0;
           right: 0;
-          height: 20px;
-          background: linear-gradient(to bottom, #ffffff 0%, #f0f9ff 50%, transparent 100%);
-          border-radius: 0 0 50% 50% / 0 0 100% 100%;
+          height: 25px;
+          background: linear-gradient(to bottom, 
+            #ffffff 0%, 
+            #f0f9ff 30%, 
+            #e0f2fe 60%, 
+            rgba(224, 242, 254, 0.3) 100%
+          );
+          border-radius: 0 0 60% 40% / 0 0 120% 80%;
           z-index: 10;
           pointer-events: none;
-          box-shadow: 0 2px 8px rgba(255, 255, 255, 0.5);
+          box-shadow: 
+            0 4px 12px rgba(147, 197, 253, 0.4),
+            inset 0 -2px 4px rgba(255, 255, 255, 0.8),
+            inset 0 2px 3px rgba(255, 255, 255, 1);
+          filter: drop-shadow(0 2px 4px rgba(191, 219, 254, 0.6));
         }
         
         .snow-cap::before {
           content: '';
           position: absolute;
-          top: -2px;
-          left: 10%;
-          right: 10%;
-          height: 4px;
-          background: white;
-          border-radius: 50%;
-          filter: blur(1px);
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 100%;
+          background: 
+            radial-gradient(ellipse 15px 8px at 20% 40%, rgba(255, 255, 255, 0.9) 0%, transparent 70%),
+            radial-gradient(ellipse 12px 6px at 45% 50%, rgba(255, 255, 255, 0.7) 0%, transparent 70%),
+            radial-gradient(ellipse 18px 9px at 70% 35%, rgba(255, 255, 255, 0.8) 0%, transparent 70%),
+            radial-gradient(ellipse 10px 5px at 85% 45%, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+          border-radius: inherit;
         }
         
         .snow-cap::after {
-          content: '❄️';
+          content: '';
           position: absolute;
-          top: 2px;
-          right: 15px;
-          font-size: 12px;
-          animation: sparkle 2s ease-in-out infinite;
+          top: 18px;
+          left: 0;
+          right: 0;
+          height: 8px;
+          background: 
+            radial-gradient(circle 3px at 15% 50%, #e0f2fe 0%, transparent 100%),
+            radial-gradient(circle 4px at 35% 50%, #dbeafe 0%, transparent 100%),
+            radial-gradient(circle 3px at 55% 50%, #e0f2fe 0%, transparent 100%),
+            radial-gradient(circle 5px at 75% 50%, #dbeafe 0%, transparent 100%),
+            radial-gradient(circle 3px at 90% 50%, #e0f2fe 0%, transparent 100%);
+          filter: blur(1px);
+          opacity: 0.7;
         }
         
         @keyframes sparkle {
