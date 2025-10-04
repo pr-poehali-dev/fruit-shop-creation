@@ -25,9 +25,11 @@ interface UseAdminHandlersProps {
 export const useAdminHandlers = (props: UseAdminHandlersProps) => {
   const { toast } = useToast();
 
-  const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>, images: any[]) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    
+    const primaryImage = images.find(img => img.is_primary);
     
     const productData = {
       id: props.editingProduct?.id,
@@ -35,9 +37,10 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       slug: (formData.get('name') as string).toLowerCase().replace(/\s+/g, '-'),
       description: formData.get('description') as string,
       price: parseFloat(formData.get('price') as string),
-      image_url: formData.get('image_url') as string,
+      image_url: primaryImage?.image_url || images[0]?.image_url || '',
       category_id: parseInt(formData.get('category_id') as string),
-      stock: parseInt(formData.get('stock') as string)
+      stock: parseInt(formData.get('stock') as string),
+      images: images
     };
 
     try {

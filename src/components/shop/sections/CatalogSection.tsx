@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import ProductCard from '../ProductCard';
+import ProductGalleryDialog from '../ProductGalleryDialog';
+
+interface ProductImage {
+  id?: number;
+  image_url: string;
+  is_primary: boolean;
+  sort_order: number;
+}
 
 interface Product {
   id: number;
@@ -10,6 +18,7 @@ interface Product {
   image_url: string;
   category_name: string;
   stock: number;
+  images?: ProductImage[];
 }
 
 interface CatalogSectionProps {
@@ -19,6 +28,13 @@ interface CatalogSectionProps {
 
 const CatalogSection = ({ products, onAddToCart }: CatalogSectionProps) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  const handleViewDetails = (product: Product) => {
+    setSelectedProduct(product);
+    setIsGalleryOpen(true);
+  };
 
   const categories = [
     { id: 'all', name: 'Все растения' },
@@ -52,7 +68,13 @@ const CatalogSection = ({ products, onAddToCart }: CatalogSectionProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map(product => (
-          <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} showStock />
+          <ProductCard 
+            key={product.id} 
+            product={product} 
+            onAddToCart={onAddToCart}
+            onViewDetails={handleViewDetails}
+            showStock 
+          />
         ))}
       </div>
 
@@ -61,6 +83,13 @@ const CatalogSection = ({ products, onAddToCart }: CatalogSectionProps) => {
           В этой категории пока нет товаров
         </p>
       )}
+
+      <ProductGalleryDialog
+        product={selectedProduct}
+        open={isGalleryOpen}
+        onOpenChange={setIsGalleryOpen}
+        onAddToCart={onAddToCart}
+      />
     </div>
   );
 };

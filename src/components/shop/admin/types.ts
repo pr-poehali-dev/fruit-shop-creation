@@ -1,3 +1,10 @@
+export interface ProductImage {
+  id?: number;
+  image_url: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -9,6 +16,7 @@ export interface Product {
   category_name: string;
   stock: number;
   is_active: boolean;
+  images?: ProductImage[];
 }
 
 export interface Category {

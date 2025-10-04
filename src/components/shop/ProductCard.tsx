@@ -3,6 +3,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 
+interface ProductImage {
+  id?: number;
+  image_url: string;
+  is_primary: boolean;
+  sort_order: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -12,18 +19,33 @@ interface Product {
   image_url: string;
   category_name: string;
   stock: number;
+  images?: ProductImage[];
 }
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
+  onViewDetails: (product: Product) => void;
   showStock?: boolean;
 }
 
-const ProductCard = ({ product, onAddToCart, showStock = false }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, showStock = false }: ProductCardProps) => {
+  const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.image_url;
+  const hasMultipleImages = product.images && product.images.length > 1;
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <img src={product.image_url} alt={product.name} className="w-full h-48 object-cover" />
+      <div className="relative group cursor-pointer" onClick={() => onViewDetails(product)}>
+        <img src={primaryImage} alt={product.name} className="w-full h-48 object-cover" />
+        {hasMultipleImages && (
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="text-white text-center">
+              <Icon name="Images" size={32} className="mx-auto mb-2" />
+              <p className="text-sm font-medium">Ещё {product.images!.length - 1} фото</p>
+            </div>
+          </div>
+        )}
+      </div>
       <CardHeader>
         <CardTitle className="font-display">{product.name}</CardTitle>
         <CardDescription>{product.category_name}</CardDescription>
@@ -35,8 +57,12 @@ const ProductCard = ({ product, onAddToCart, showStock = false }: ProductCardPro
           {showStock && <Badge variant="secondary">В наличии: {product.stock}</Badge>}
         </div>
       </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={() => onAddToCart(product)}>
+      <CardFooter className="gap-2">
+        <Button variant="outline" className="flex-1" onClick={() => onViewDetails(product)}>
+          <Icon name="Eye" size={18} className="mr-2" />
+          Подробнее
+        </Button>
+        <Button className="flex-1" onClick={() => onAddToCart(product)}>
           <Icon name="ShoppingCart" size={18} className="mr-2" />
           В корзину
         </Button>

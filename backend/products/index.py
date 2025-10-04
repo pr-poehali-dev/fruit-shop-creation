@@ -54,12 +54,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
             
             products = cur.fetchall()
+            products_list = [dict(p) for p in products]
+            
+            for product in products_list:
+                cur.execute(
+                    f"""SELECT id, image_url, is_primary, sort_order 
+                       FROM product_images 
+                       WHERE product_id = {product['id']} 
+                       ORDER BY sort_order"""
+                )
+                product['images'] = [dict(img) for img in cur.fetchall()]
             
             return {
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
-                    'products': [dict(p) for p in products]
+                    'products': products_list
                 }, default=str),
                 'isBase64Encoded': False
             }
@@ -74,14 +84,26 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             img = body_data.get('image_url', '').replace("'", "''")
             cat_id = body_data.get('category_id', 'NULL')
             stock = body_data.get('stock', 0)
+            images = body_data.get('images', [])
             
             cur.execute(
                 f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock) 
                    VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}) 
                    RETURNING id, name, slug, description, price, image_url, stock"""
             )
-            conn.commit()
             product = cur.fetchone()
+            product_id = product['id']
+            
+            for image in images:
+                img_url = image['image_url'].replace("'", "''")
+                is_primary = 'TRUE' if image.get('is_primary', False) else 'FALSE'
+                sort_order = image.get('sort_order', 0)
+                cur.execute(
+                    f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order) 
+                       VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order})"""
+                )
+            
+            conn.commit()
             
             return {
                 'statusCode': 200,
@@ -100,6 +122,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             img = body_data.get('image_url', '').replace("'", "''")
             cat_id = body_data.get('category_id', 'NULL')
             stock = body_data.get('stock', 0)
+            images = body_data.get('images', [])
             
             cur.execute(
                 f"""UPDATE products 
@@ -108,8 +131,33 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    WHERE id = {product_id}
                    RETURNING id, name, slug, description, price, image_url, stock"""
             )
-            conn.commit()
             product = cur.fetchone()
+            
+            cur.execute(f"SELECT id FROM product_images WHERE product_id = {product_id}")
+            existing_ids = [row['id'] for row in cur.fetchall()]
+            
+            for image in images:
+                img_url = image['image_url'].replace("'", "''")
+                is_primary = 'TRUE' if image.get('is_primary', False) else 'FALSE'
+                sort_order = image.get('sort_order', 0)
+                
+                if image.get('id') and image['id'] in existing_ids:
+                    cur.execute(
+                        f"""UPDATE product_images 
+                           SET image_url = '{img_url}', is_primary = {is_primary}, sort_order = {sort_order}
+                           WHERE id = {image['id']}"""
+                    )
+                    existing_ids.remove(image['id'])
+                else:
+                    cur.execute(
+                        f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order) 
+                           VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order})"""
+                    )
+            
+            for old_id in existing_ids:
+                cur.execute(f"UPDATE product_images SET image_url = '', is_primary = FALSE WHERE id = {old_id}")
+            
+            conn.commit()
             
             return {
                 'statusCode': 200,

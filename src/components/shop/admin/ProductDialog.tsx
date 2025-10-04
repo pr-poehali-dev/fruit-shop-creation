@@ -4,7 +4,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+
+interface ProductImage {
+  id?: number;
+  image_url: string;
+  is_primary: boolean;
+  sort_order: number;
+}
 
 interface Product {
   id: number;
@@ -17,6 +27,7 @@ interface Product {
   category_name: string;
   stock: number;
   is_active: boolean;
+  images?: ProductImage[];
 }
 
 interface Category {
@@ -31,10 +42,77 @@ interface ProductDialogProps {
   onOpenChange: (open: boolean) => void;
   editingProduct: Product | null;
   categories: Category[];
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>, images: ProductImage[]) => void;
 }
 
 const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmit }: ProductDialogProps) => {
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [newImageUrl, setNewImageUrl] = useState('');
+
+  useEffect(() => {
+    if (editingProduct?.images && editingProduct.images.length > 0) {
+      setImages(editingProduct.images);
+    } else if (editingProduct?.image_url) {
+      setImages([{ image_url: editingProduct.image_url, is_primary: true, sort_order: 0 }]);
+    } else {
+      setImages([]);
+    }
+    setNewImageUrl('');
+  }, [editingProduct, open]);
+
+  const handleAddImage = () => {
+    if (!newImageUrl.trim()) return;
+    if (images.length >= 10) {
+      alert('Можно добавить максимум 10 изображений');
+      return;
+    }
+    
+    const newImage: ProductImage = {
+      image_url: newImageUrl.trim(),
+      is_primary: images.length === 0,
+      sort_order: images.length
+    };
+    
+    setImages([...images, newImage]);
+    setNewImageUrl('');
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = images.filter((_, i) => i !== index);
+    if (newImages.length > 0 && images[index].is_primary) {
+      newImages[0].is_primary = true;
+    }
+    newImages.forEach((img, i) => img.sort_order = i);
+    setImages(newImages);
+  };
+
+  const handleSetPrimary = (index: number) => {
+    const newImages = images.map((img, i) => ({
+      ...img,
+      is_primary: i === index
+    }));
+    setImages(newImages);
+  };
+
+  const handleMoveImage = (index: number, direction: 'up' | 'down') => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === images.length - 1)) return;
+    
+    const newImages = [...images];
+    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    [newImages[index], newImages[swapIndex]] = [newImages[swapIndex], newImages[index]];
+    newImages.forEach((img, i) => img.sort_order = i);
+    setImages(newImages);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (images.length === 0) {
+      alert('Добавьте хотя бы одно изображение товара');
+      return;
+    }
+    onSubmit(e, images);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -42,7 +120,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
           <DialogTitle>{editingProduct ? 'Редактировать товар' : 'Добавить товар'}</DialogTitle>
           <DialogDescription>Заполните информацию о товаре</DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <Label htmlFor="product-name">Название товара *</Label>
             <Input 
@@ -102,18 +180,85 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
             </Select>
           </div>
           <div>
-            <Label htmlFor="product-image">URL изображения *</Label>
-            <Input 
-              id="product-image" 
-              name="image_url" 
-              type="url"
-              defaultValue={editingProduct?.image_url} 
-              required 
-              placeholder="https://example.com/image.jpg"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Вставьте ссылку на изображение (например, с Unsplash или вашего хостинга)
-            </p>
+            <Label>Галерея изображений (до 10 фото) *</Label>
+            <div className="space-y-3 mt-2">
+              <div className="flex gap-2">
+                <Input 
+                  type="url"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
+                />
+                <Button type="button" onClick={handleAddImage} disabled={images.length >= 10}>
+                  <Icon name="Plus" size={18} className="mr-2" />
+                  Добавить
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Добавлено: {images.length}/10 изображений. Первое изображение — главное.
+              </p>
+              
+              {images.length > 0 && (
+                <div className="grid gap-2 max-h-[300px] overflow-y-auto">
+                  {images.map((img, index) => (
+                    <Card key={index} className="p-3">
+                      <div className="flex items-center gap-3">
+                        <img src={img.image_url} alt="" className="w-16 h-16 object-cover rounded" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{img.image_url}</p>
+                          {img.is_primary && (
+                            <Badge variant="default" className="mt-1">Главное фото</Badge>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleMoveImage(index, 'up')}
+                            disabled={index === 0}
+                            title="Вверх"
+                          >
+                            <Icon name="ChevronUp" size={16} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleMoveImage(index, 'down')}
+                            disabled={index === images.length - 1}
+                            title="Вниз"
+                          >
+                            <Icon name="ChevronDown" size={16} />
+                          </Button>
+                          {!img.is_primary && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleSetPrimary(index)}
+                              title="Сделать главным"
+                            >
+                              <Icon name="Star" size={16} />
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleRemoveImage(index)}
+                            title="Удалить"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
