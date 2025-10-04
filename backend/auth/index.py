@@ -86,13 +86,41 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     phone = body_data.get('phone', '').strip()
     password = body_data.get('password', '')
     
-    if action in ['update_balance']:
+    if action in ['update_balance', 'update_cashback', 'toggle_admin']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(db_url)
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         try:
+            if action == 'toggle_admin':
+                user_id = body_data.get('user_id')
+                is_admin = body_data.get('is_admin')
+                
+                if not user_id or is_admin is None:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id and is_admin are required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"UPDATE users SET is_admin = {str(is_admin).lower()} WHERE id = {user_id} RETURNING id, is_admin"
+                )
+                conn.commit()
+                user = cur.fetchone()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'success': True,
+                        'user': dict(user)
+                    }, default=str),
+                    'isBase64Encoded': False
+                }
+            
             user_id = body_data.get('user_id')
             amount = body_data.get('amount')
             transaction_type = body_data.get('type')
@@ -122,6 +150,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 cur.execute(
                     f"UPDATE users SET balance = balance - {amount} WHERE id = {user_id} RETURNING balance"
+                )
+            elif transaction_type == 'cashback_deposit':
+                cur.execute(
+                    f"UPDATE users SET cashback = cashback + {amount} WHERE id = {user_id} RETURNING cashback"
                 )
             elif transaction_type == 'cashback_used':
                 cur.execute(

@@ -154,6 +154,80 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleAddCashback = async (userId: number, amount: number, description: string) => {
+    try {
+      const response = await fetch(props.API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_cashback',
+          user_id: userId,
+          amount,
+          type: 'cashback_deposit',
+          description: description || 'Начисление кэшбека администратором'
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Кэшбек начислен',
+          description: `Начислено ${amount}₽`
+        });
+        props.loadUsers();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось начислить кэшбек',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось начислить кэшбек',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleToggleAdmin = async (userId: number, isAdmin: boolean) => {
+    try {
+      const response = await fetch(props.API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_admin',
+          user_id: userId,
+          is_admin: isAdmin
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Права изменены',
+          description: isAdmin ? 'Пользователь теперь администратор' : 'Права администратора удалены'
+        });
+        props.loadUsers();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось изменить права',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось изменить права',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handleUpdateOrderStatus = async (orderId: number, status: string, rejectionReason?: string) => {
     try {
       const response = await fetch(props.API_ORDERS, {
@@ -341,6 +415,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleSaveProduct,
     handleSaveCategory,
     handleAddBalance,
+    handleAddCashback,
+    handleToggleAdmin,
     handleUpdateOrderStatus,
     handleReplyToTicket,
     handleUpdateTicketStatus,

@@ -43,6 +43,8 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
     handleSaveProduct,
     handleSaveCategory,
     handleAddBalance,
+    handleAddCashback,
+    handleToggleAdmin,
     handleUpdateOrderStatus,
     handleReplyToTicket,
     handleUpdateTicketStatus,
@@ -95,6 +97,8 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
             setShowCategoryDialog(true);
           }}
           onAddBalance={handleAddBalance}
+          onAddCashback={handleAddCashback}
+          onToggleAdmin={handleToggleAdmin}
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onReplyToTicket={handleReplyToTicket}
           onUpdateTicketStatus={handleUpdateTicketStatus}

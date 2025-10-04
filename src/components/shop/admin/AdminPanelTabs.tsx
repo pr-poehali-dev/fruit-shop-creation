@@ -21,6 +21,8 @@ interface AdminPanelTabsProps {
   onAddCategory: () => void;
   onEditCategory: (category: Category) => void;
   onAddBalance: (userId: number, amount: number, description: string) => void;
+  onAddCashback: (userId: number, amount: number, description: string) => void;
+  onToggleAdmin: (userId: number, isAdmin: boolean) => void;
   onUpdateOrderStatus: (orderId: number, status: string, rejectionReason?: string) => void;
   onReplyToTicket: (ticketId: number, message: string) => void;
   onUpdateTicketStatus: (ticketId: number, status: string) => void;
@@ -42,6 +44,8 @@ const AdminPanelTabs = ({
   onAddCategory,
   onEditCategory,
   onAddBalance,
+  onAddCashback,
+  onToggleAdmin,
   onUpdateOrderStatus,
   onReplyToTicket,
   onUpdateTicketStatus,
@@ -100,7 +104,12 @@ const AdminPanelTabs = ({
       </TabsContent>
 
       <TabsContent value="users">
-        <UsersTab users={users} onAddBalance={onAddBalance} />
+        <UsersTab 
+          users={users} 
+          onAddBalance={onAddBalance} 
+          onAddCashback={onAddCashback}
+          onToggleAdmin={onToggleAdmin}
+        />
       </TabsContent>
 
       <TabsContent value="orders">
