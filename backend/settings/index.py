@@ -65,6 +65,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = json.loads(event.get('body', '{}'))
             
             site_name = body_data.get('site_name', '').replace("'", "''")
+            logo_url = body_data.get('logo_url', '').replace("'", "''")
             site_desc = body_data.get('site_description', '').replace("'", "''")
             phone = body_data.get('phone', '').replace("'", "''")
             email = body_data.get('email', '').replace("'", "''")
@@ -105,14 +106,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             cur.execute(
                 f"""INSERT INTO site_settings (
-                    id, site_name, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, 
+                    id, site_name, logo_url, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, 
                     holiday_theme, loyalty_card_price, loyalty_unlock_amount, loyalty_cashback_percent,
                     about_title, about_text, care_title, care_watering_title, care_watering_text, care_lighting_title, care_lighting_text,
                     care_pruning_title, care_pruning_text, delivery_title, delivery_courier_title, delivery_courier_text,
                     delivery_transport_title, delivery_transport_text, delivery_pickup_title, delivery_pickup_text,
                     payment_title, payment_methods
                    )
-                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
+                   VALUES (1, '{site_name}', '{logo_url}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
                     '{holiday_theme}', {loyalty_card_price}, {loyalty_unlock_amount}, {loyalty_cashback_percent},
                     '{about_title}', '{about_text}', '{care_title}', '{care_watering_title}', '{care_watering_text}', '{care_lighting_title}', '{care_lighting_text}',
                     '{care_pruning_title}', '{care_pruning_text}', '{delivery_title}', '{delivery_courier_title}', '{delivery_courier_text}',
@@ -121,6 +122,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    )
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
+                   logo_url = EXCLUDED.logo_url,
                    site_description = EXCLUDED.site_description,
                    phone = EXCLUDED.phone,
                    email = EXCLUDED.email,

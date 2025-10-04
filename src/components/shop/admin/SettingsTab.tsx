@@ -71,6 +71,19 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Input id="site-name" name="site_name" defaultValue={siteSettings.site_name || 'Питомник растений'} required />
           </div>
           <div>
+            <Label htmlFor="logo-url">URL логотипа</Label>
+            <Input 
+              id="logo-url" 
+              name="logo_url" 
+              type="url"
+              defaultValue={siteSettings.logo_url || ''} 
+              placeholder="https://example.com/logo.jpg"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Введите ссылку на изображение логотипа (будет отображаться в шапке сайта)
+            </p>
+          </div>
+          <div>
             <Label htmlFor="site-description">Описание</Label>
             <Textarea id="site-description" name="site_description" defaultValue={siteSettings.site_description || 'Плодовые и декоративные культуры высокого качества'} rows={3} />
           </div>

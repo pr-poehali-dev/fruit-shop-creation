@@ -92,7 +92,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            cur.execute(f"SELECT * FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id}")
+            cur.execute(f"SELECT * FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id} AND is_active = TRUE")
             existing_card = cur.fetchone()
             
             if existing_card:

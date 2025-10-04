@@ -363,18 +363,41 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    const paymentMethods = formData.get('payment_methods') as string;
+    
     const settingsData = {
       site_name: formData.get('site_name') as string,
+      logo_url: formData.get('logo_url') as string,
       site_description: formData.get('site_description') as string,
       phone: formData.get('phone') as string,
       email: formData.get('email') as string,
       address: formData.get('address') as string,
       work_hours: formData.get('work_hours') as string,
       loyalty_card_price: parseFloat(formData.get('loyalty_card_price') as string || '500'),
+      loyalty_unlock_amount: parseFloat(formData.get('loyalty_unlock_amount') as string || '5000'),
+      loyalty_cashback_percent: parseFloat(formData.get('loyalty_cashback_percent') as string || '5'),
       holiday_theme: formData.get('holiday_theme') as string,
       price_list_url: formData.get('price_list_url') as string,
       promotions: formData.get('promotions') as string,
-      additional_info: formData.get('additional_info') as string
+      additional_info: formData.get('additional_info') as string,
+      about_title: formData.get('about_title') as string,
+      about_text: formData.get('about_text') as string,
+      care_title: formData.get('care_title') as string,
+      care_watering_title: formData.get('care_watering_title') as string,
+      care_watering_text: formData.get('care_watering_text') as string,
+      care_lighting_title: formData.get('care_lighting_title') as string,
+      care_lighting_text: formData.get('care_lighting_text') as string,
+      care_pruning_title: formData.get('care_pruning_title') as string,
+      care_pruning_text: formData.get('care_pruning_text') as string,
+      delivery_title: formData.get('delivery_title') as string,
+      delivery_courier_title: formData.get('delivery_courier_title') as string,
+      delivery_courier_text: formData.get('delivery_courier_text') as string,
+      delivery_transport_title: formData.get('delivery_transport_title') as string,
+      delivery_transport_text: formData.get('delivery_transport_text') as string,
+      delivery_pickup_title: formData.get('delivery_pickup_title') as string,
+      delivery_pickup_text: formData.get('delivery_pickup_text') as string,
+      payment_title: formData.get('payment_title') as string,
+      payment_methods: paymentMethods ? paymentMethods.split('\n').filter(m => m.trim()) : []
     };
 
     try {

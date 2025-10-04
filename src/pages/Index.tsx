@@ -363,11 +363,11 @@ const Index = () => {
                   />
                 )}
 
-                {currentSection === 'about' && <AboutSection />}
+                {currentSection === 'about' && <AboutSection siteSettings={siteSettings} />}
 
-                {currentSection === 'delivery' && <DeliverySection />}
+                {currentSection === 'delivery' && <DeliverySection siteSettings={siteSettings} />}
 
-                {currentSection === 'care' && <CareSection />}
+                {currentSection === 'care' && <CareSection siteSettings={siteSettings} />}
 
                 {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
               </>
