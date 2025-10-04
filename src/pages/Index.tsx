@@ -20,6 +20,8 @@ import CartContent from '@/components/shop/CartContent';
 import ProfileContent from '@/components/shop/ProfileContent';
 import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
 import NewYearBackground from '@/components/NewYearBackground';
+import HalloweenTheme from '@/components/HalloweenTheme';
+import SummerTheme from '@/components/SummerTheme';
 
 import { Product } from '@/types/shop';
 
@@ -189,9 +191,37 @@ const Index = () => {
     />
   );
 
+  const getBackgroundStyle = () => {
+    const theme = siteSettings?.holiday_theme || 'none';
+    switch (theme) {
+      case 'new_year':
+        return 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50';
+      case 'halloween':
+        return 'bg-gradient-to-br from-purple-900 via-gray-900 to-orange-900';
+      case 'summer':
+        return 'bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50';
+      default:
+        return 'bg-background';
+    }
+  };
+
+  const renderHolidayTheme = () => {
+    const theme = siteSettings?.holiday_theme || 'none';
+    switch (theme) {
+      case 'new_year':
+        return <NewYearBackground />;
+      case 'halloween':
+        return <HalloweenTheme />;
+      case 'summer':
+        return <SummerTheme />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative">
-      <NewYearBackground />
+    <div className={`min-h-screen ${getBackgroundStyle()} relative`}>
+      {renderHolidayTheme()}
       
       {showAdminPanel && user?.is_admin ? (
         <AdminPanel 
