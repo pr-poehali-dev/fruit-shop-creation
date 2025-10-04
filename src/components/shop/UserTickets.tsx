@@ -53,14 +53,17 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       setIsSyncing(true);
       const response = await fetch(`${API_SUPPORT}?user_id=${user.id}`);
       const data = await response.json();
+      console.log('Support response:', data);
       
       if (data.active_ticket) {
+        console.log('Active ticket found:', data.active_ticket);
         setActiveTicket(data.active_ticket);
         setUnreadCount(data.active_ticket.unread_count || 0);
         if (shouldScroll) {
           setTimeout(scrollToBottom, 100);
         }
       } else {
+        console.log('No active ticket');
         setActiveTicket(null);
         setUnreadCount(0);
       }
@@ -171,7 +174,12 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     return () => clearInterval(interval);
   }, [user]);
 
-  if (!user) return null;
+  if (!user) {
+    console.log('UserTickets: No user');
+    return null;
+  }
+
+  console.log('UserTickets render - user:', user.id, 'activeTicket:', activeTicket, 'isLoading:', isLoading);
 
   return (
     <>
