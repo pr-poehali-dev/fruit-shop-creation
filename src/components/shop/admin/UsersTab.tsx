@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,15 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loyaltyCard, setLoyaltyCard] = useState<LoyaltyCard | null>(null);
   const [loadingLoyalty, setLoadingLoyalty] = useState(false);
+
+  useEffect(() => {
+    if (selectedUser) {
+      const updatedUser = users.find(u => u.id === selectedUser.id);
+      if (updatedUser) {
+        setSelectedUser(updatedUser);
+      }
+    }
+  }, [users]);
 
   const loadTransactions = async (userId: number) => {
     setLoadingTransactions(true);
@@ -135,15 +144,14 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
     loadLoyaltyCard(user.id);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedUser && amount) {
       if (operationType === 'balance') {
-        onAddBalance(selectedUser.id, parseFloat(amount), description);
+        await onAddBalance(selectedUser.id, parseFloat(amount), description);
       } else {
-        onAddCashback(selectedUser.id, parseFloat(amount), description);
+        await onAddCashback(selectedUser.id, parseFloat(amount), description);
       }
-      setSelectedUser(null);
       setAmount('');
       setDescription('');
     }

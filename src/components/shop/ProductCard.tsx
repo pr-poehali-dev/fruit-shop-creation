@@ -37,18 +37,39 @@ interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
   onViewDetails: (product: Product) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (productId: number) => void;
 }
 
-const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite }: ProductCardProps) => {
   const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.image_url;
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
   const showStock = product.show_stock !== false;
   const hideMainPrice = product.hide_main_price && hasVariants && product.variants!.length >= 2;
 
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleFavorite) {
+      onToggleFavorite(product.id);
+    }
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative group cursor-pointer" onClick={() => onViewDetails(product)}>
+        {onToggleFavorite && (
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-2 right-2 z-10 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110"
+          >
+            <Icon 
+              name="Heart" 
+              size={20} 
+              className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}
+            />
+          </button>
+        )}
         <img src={primaryImage} alt={product.name} className="w-full h-48 object-cover" />
         {hasMultipleImages && (
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

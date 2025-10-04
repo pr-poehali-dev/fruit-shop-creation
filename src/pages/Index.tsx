@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { useShopData } from '@/hooks/useShopData';
 import { useTicketNotifications } from '@/hooks/useTicketNotifications';
+import { useFavorites } from '@/hooks/useFavorites';
 import Header from '@/components/shop/Header';
 import AuthDialog from '@/components/shop/AuthDialog';
 import Footer from '@/components/shop/Footer';
@@ -36,6 +37,7 @@ const Index = () => {
     API_ORDERS
   } = useShopData();
   const { unreadCount, needsRating } = useTicketNotifications(user);
+  const { favoriteIds, toggleFavorite } = useFavorites(user?.id || null);
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -232,7 +234,12 @@ const Index = () => {
                 )}
 
                 {currentSection === 'catalog' && (
-                  <CatalogSection products={products} onAddToCart={handleAddToCart} />
+                  <CatalogSection 
+                    products={products} 
+                    onAddToCart={handleAddToCart}
+                    favoriteIds={favoriteIds}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 )}
 
                 {currentSection === 'about' && <AboutSection />}
