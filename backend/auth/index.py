@@ -99,8 +99,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     body_data = json.loads(event.get('body', '{}'))
     action = body_data.get('action')
-    phone = body_data.get('phone', '').strip()
+    phone_raw = body_data.get('phone', '').strip()
     password = body_data.get('password', '')
+    
+    import re
+    cleaned_phone = re.sub(r'\D', '', phone_raw)
+    if cleaned_phone.startswith('8'):
+        cleaned_phone = '7' + cleaned_phone[1:]
+    elif not cleaned_phone.startswith('7'):
+        cleaned_phone = '7' + cleaned_phone
+    
+    if len(cleaned_phone) >= 11:
+        phone = f"+7({cleaned_phone[1:4]}){cleaned_phone[4:7]}-{cleaned_phone[7:9]}-{cleaned_phone[9:11]}"
+    else:
+        phone = phone_raw
     
     if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user']:
         from psycopg2.extras import RealDictCursor
