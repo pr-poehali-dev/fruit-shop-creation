@@ -139,13 +139,13 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       )}
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="orders">Заказы</TabsTrigger>
-          <TabsTrigger value="loyalty">Лояльность</TabsTrigger>
-          <TabsTrigger value="transactions">Операции</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 gap-1">
+          <TabsTrigger value="orders" className="text-xs sm:text-sm px-2">Заказы</TabsTrigger>
+          <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-2">Лояльность</TabsTrigger>
+          <TabsTrigger value="transactions" className="text-xs sm:text-sm px-2">Операции</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="orders" className="space-y-3 mt-4">
+        <TabsContent value="orders" className="space-y-3 mt-6">
           <h3 className="font-semibold">История заказов</h3>
           {orders.length === 0 ? (
             <p className="text-sm text-muted-foreground">Заказов пока нет</p>
@@ -177,7 +177,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           )}
         </TabsContent>
 
-        <TabsContent value="loyalty" className="space-y-3 mt-4">
+        <TabsContent value="loyalty" className="space-y-3 mt-6">
           <h3 className="font-semibold">Карта лояльности</h3>
           {user && (
             <LoyaltyCard 
@@ -188,7 +188,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           )}
         </TabsContent>
 
-        <TabsContent value="transactions" className="space-y-3 mt-4">
+        <TabsContent value="transactions" className="space-y-3 mt-6">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">История операций</h3>
             <Button 
