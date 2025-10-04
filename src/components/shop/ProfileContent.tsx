@@ -152,11 +152,9 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           <span className="text-sm text-muted-foreground">Кэшбек:</span>
           <span className="text-lg font-semibold text-green-600">{user?.cashback ? user.cashback.toFixed(0) : '0'}₽</span>
         </div>
-        {user && user.cashback && user.cashback > 0 && (
-          <p className="text-xs text-muted-foreground mt-2">
-            Кэшбек 5% начисляется при оплате заказа балансом
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground mt-2">
+          Кэшбек 5% начисляется при оплате заказа балансом
+        </p>
       </div>
       
       {user?.is_admin && (
