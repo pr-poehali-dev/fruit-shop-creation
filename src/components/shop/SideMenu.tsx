@@ -13,6 +13,8 @@ interface SideMenuProps {
     email?: string;
     address?: string;
     work_hours?: string;
+    promotions?: string;
+    additional_info?: string;
   };
   onSectionChange: (section: string) => void;
 }
@@ -108,6 +110,42 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
           </div>
 
           <Separator />
+
+          {siteSettings?.promotions && (
+            <div>
+              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Icon name="Sparkles" size={20} className="text-primary" />
+                    Акции
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm whitespace-pre-line">{siteSettings.promotions}</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {siteSettings?.promotions && <Separator />}
+
+          {siteSettings?.additional_info && (
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Icon name="Info" size={20} className="text-primary" />
+                    Важная информация
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm whitespace-pre-line">{siteSettings.additional_info}</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {siteSettings?.additional_info && <Separator />}
 
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">

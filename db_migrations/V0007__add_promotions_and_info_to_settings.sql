@@ -1,0 +1,3 @@
+ALTER TABLE site_settings 
+ADD COLUMN IF NOT EXISTS promotions TEXT DEFAULT '',
+ADD COLUMN IF NOT EXISTS additional_info TEXT DEFAULT '';

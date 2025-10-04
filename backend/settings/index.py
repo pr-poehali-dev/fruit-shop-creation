@@ -46,7 +46,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             'phone': '+7 (495) 123-45-67',
                             'email': 'info@plantsnursery.ru',
                             'address': 'Московская область, г. Пушкино, ул. Садовая, 15',
-                            'work_hours': 'Пн-Вс: 9:00 - 19:00'
+                            'work_hours': 'Пн-Вс: 9:00 - 19:00',
+                            'promotions': '',
+                            'additional_info': ''
                         }
                     }),
                     'isBase64Encoded': False
@@ -68,10 +70,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             email = body_data.get('email', '').replace("'", "''")
             address = body_data.get('address', '').replace("'", "''")
             work_hours = body_data.get('work_hours', '').replace("'", "''")
+            promotions = body_data.get('promotions', '').replace("'", "''")
+            additional_info = body_data.get('additional_info', '').replace("'", "''")
             
             cur.execute(
-                f"""INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours)
-                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}')
+                f"""INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours, promotions, additional_info)
+                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}')
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
                    site_description = EXCLUDED.site_description,
@@ -79,6 +83,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    email = EXCLUDED.email,
                    address = EXCLUDED.address,
                    work_hours = EXCLUDED.work_hours,
+                   promotions = EXCLUDED.promotions,
+                   additional_info = EXCLUDED.additional_info,
                    updated_at = CURRENT_TIMESTAMP
                    RETURNING *"""
             )

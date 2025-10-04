@@ -43,6 +43,37 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Label htmlFor="work-hours">Режим работы</Label>
             <Input id="work-hours" name="work_hours" defaultValue={siteSettings.work_hours || 'Пн-Вс: 9:00 - 19:00'} />
           </div>
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-semibold mb-4">Дополнительная информация для меню</h3>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="promotions">Акции</Label>
+                <Textarea 
+                  id="promotions" 
+                  name="promotions" 
+                  defaultValue={siteSettings.promotions || ''} 
+                  placeholder="Например: Скидка 20% на все саженцы!"
+                  rows={3} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Эта информация будет отображаться в боковом меню
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="additional-info">Дополнительная информация</Label>
+                <Textarea 
+                  id="additional-info" 
+                  name="additional_info" 
+                  defaultValue={siteSettings.additional_info || ''} 
+                  placeholder="Любая важная информация для клиентов"
+                  rows={4} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Дополнительные сведения, которые будут показаны в меню
+                </p>
+              </div>
+            </div>
+          </div>
           <Button type="submit">
             <Icon name="Save" size={18} className="mr-2" />
             Сохранить изменения
