@@ -179,12 +179,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {showAdminPanel && user?.is_admin ? (
-        <AdminPanel onClose={() => {
-          setShowAdminPanel(false);
-          loadProducts();
-          loadSettings();
-          setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 300);
-        }} />
+        <AdminPanel 
+          user={user}
+          onClose={() => {
+            setShowAdminPanel(false);
+            loadProducts();
+            loadSettings();
+            setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 300);
+          }} 
+        />
       ) : (
         <>
           <Header 

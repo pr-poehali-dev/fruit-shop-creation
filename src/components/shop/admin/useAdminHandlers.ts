@@ -2,6 +2,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Product, Category } from './types';
 
 interface UseAdminHandlersProps {
+  user: any;
   API_PRODUCTS: string;
   API_CATEGORIES: string;
   API_AUTH: string;
@@ -266,7 +267,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
         body: JSON.stringify({
           action: 'add_message',
           ticket_id: ticketId,
-          user_id: 1,
+          user_id: props.user?.id || 1,
           message,
           is_admin: true
         })

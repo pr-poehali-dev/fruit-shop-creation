@@ -8,10 +8,11 @@ import CategoryDialog from './CategoryDialog';
 import { Product, Category } from './types';
 
 interface AdminPanelProps {
+  user: any;
   onClose: () => void;
 }
 
-const AdminPanel = ({ onClose }: AdminPanelProps) => {
+const AdminPanel = ({ user, onClose }: AdminPanelProps) => {
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -52,6 +53,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
     handleDeleteOrder,
     handleDeleteTicket
   } = useAdminHandlers({
+    user,
     API_PRODUCTS,
     API_CATEGORIES,
     API_AUTH,

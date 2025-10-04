@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,13 @@ const LoyaltyScannerTab = () => {
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastResult, setLastResult] = useState<any>(null);
+  const cardInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (cardInputRef.current) {
+      cardInputRef.current.focus();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +68,12 @@ const LoyaltyScannerTab = () => {
         });
         setCardNumber('');
         setPurchaseAmount('');
+        
+        setTimeout(() => {
+          if (cardInputRef.current) {
+            cardInputRef.current.focus();
+          }
+        }, 100);
       } else {
         toast({
           title: 'Ошибка',
@@ -88,8 +101,17 @@ const LoyaltyScannerTab = () => {
   };
 
   const handleCardNumberChange = (value: string) => {
-    const cleanValue = extractCardNumber(value);
+    const cleanValue = extractCardNumber(value.trim());
     setCardNumber(cleanValue);
+    
+    if (cleanValue.startsWith('LC') && cleanValue.length >= 10 && purchaseAmount) {
+      setTimeout(() => {
+        const amountInput = document.getElementById('purchase-amount') as HTMLInputElement;
+        if (amountInput) {
+          amountInput.focus();
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -115,15 +137,18 @@ const LoyaltyScannerTab = () => {
               <div>
                 <Label htmlFor="card-number">Номер карты</Label>
                 <Input
+                  ref={cardInputRef}
                   id="card-number"
                   value={cardNumber}
                   onChange={(e) => handleCardNumberChange(e.target.value)}
-                  placeholder="LC..."
+                  placeholder="Отсканируйте QR или введите LC..."
                   required
-                  className="font-mono"
+                  className="font-mono text-base"
+                  autoComplete="off"
+                  autoFocus
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  При сканировании QR номер карты введется автоматически
+                  💡 Отсканируйте QR-код - номер карты заполнится автоматически
                 </p>
               </div>
 
