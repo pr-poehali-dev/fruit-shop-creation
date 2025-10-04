@@ -105,6 +105,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             if admin_issue:
+                # Удаляем все старые неактивные карты перед выдачей новой
+                cur.execute(
+                    f"DELETE FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id} AND is_active = FALSE"
+                )
+                
                 card_number = f"LC{secrets.token_hex(8).upper()}"
                 qr_code = f"LOYALTY:{card_number}:{user_id}"
                 
@@ -151,6 +156,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
+                # Удаляем все старые неактивные карты перед выдачей новой
+                cur.execute(
+                    f"DELETE FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id} AND is_active = FALSE"
+                )
+                
                 card_number = f"LC{secrets.token_hex(8).upper()}"
                 qr_code = f"LOYALTY:{card_number}:{user_id}"
                 
@@ -185,6 +195,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'body': json.dumps({'error': f'Недостаточно средств. Требуется {card_price}₽'}),
                         'isBase64Encoded': False
                     }
+                
+                # Удаляем все старые неактивные карты перед выдачей новой
+                cur.execute(
+                    f"DELETE FROM t_p77282076_fruit_shop_creation.loyalty_cards WHERE user_id = {user_id} AND is_active = FALSE"
+                )
                 
                 card_number = f"LC{secrets.token_hex(8).upper()}"
                 qr_code = f"LOYALTY:{card_number}:{user_id}"
