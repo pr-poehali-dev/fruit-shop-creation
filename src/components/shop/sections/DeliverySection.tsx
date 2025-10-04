@@ -3,9 +3,9 @@ import Icon from '@/components/ui/icon';
 
 const DeliverySection = () => {
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-4xl font-display font-bold mb-6">Доставка и оплата</h2>
-      <div className="space-y-6">
+    <div className="max-w-3xl mx-auto px-2">
+      <h2 className="text-2xl sm:text-4xl font-display font-bold mb-4 sm:mb-6">Доставка и оплата</h2>
+      <div className="space-y-4 sm:space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

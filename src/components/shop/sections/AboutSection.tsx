@@ -3,11 +3,11 @@ import Icon from '@/components/ui/icon';
 
 const AboutSection = () => {
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <h2 className="text-4xl font-display font-bold mb-6">О нас</h2>
-      <p className="text-lg">Мы — семейный питомник растений с многолетним опытом выращивания плодовых и декоративных культур.</p>
-      <p className="text-lg">Наша миссия — помочь вам создать сад вашей мечты с качественными и здоровыми растениями.</p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-2">
+      <h2 className="text-2xl sm:text-4xl font-display font-bold mb-4 sm:mb-6">О нас</h2>
+      <p className="text-base sm:text-lg">Мы — семейный питомник растений с многолетним опытом выращивания плодовых и декоративных культур.</p>
+      <p className="text-base sm:text-lg">Наша миссия — помочь вам создать сад вашей мечты с качественными и здоровыми растениями.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
         <Card className="text-center">
           <CardHeader>
             <Icon name="Award" size={48} className="mx-auto text-primary" />

@@ -8,6 +8,7 @@ import CategoriesTab from './CategoriesTab';
 import UsersTab from './UsersTab';
 import OrdersTab from './OrdersTab';
 import SettingsTab from './SettingsTab';
+import SupportTab from './SupportTab';
 import ProductDialog from './ProductDialog';
 import CategoryDialog from './CategoryDialog';
 
@@ -48,6 +49,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -60,6 +62,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
   const API_SETTINGS = 'https://functions.poehali.dev/9b1ac59e-93b6-41de-8974-a7f58d4ffaf9';
   const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
   const API_ORDERS = 'https://functions.poehali.dev/b35bef37-8423-4939-b43b-0fb565cc8853';
+  const API_SUPPORT = 'https://functions.poehali.dev/a833bb69-e590-4a5f-a513-450a69314192';
 
   useEffect(() => {
     loadProducts();
@@ -67,6 +70,7 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
     loadSettings();
     loadUsers();
     loadOrders();
+    loadTickets();
   }, []);
 
   const loadProducts = async () => {
@@ -116,6 +120,85 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
       setOrders(data.orders || []);
     } catch (error) {
       console.error('Failed to load orders:', error);
+    }
+  };
+
+  const loadTickets = async () => {
+    try {
+      const response = await fetch(`${API_SUPPORT}?all=true`);
+      const data = await response.json();
+      setTickets(data.tickets || []);
+    } catch (error) {
+      console.error('Failed to load tickets:', error);
+    }
+  };
+
+  const loadSingleTicket = async (ticketId: number) => {
+    try {
+      const response = await fetch(`${API_SUPPORT}?ticket_id=${ticketId}`);
+      const data = await response.json();
+      return data.ticket;
+    } catch (error) {
+      console.error('Failed to load ticket:', error);
+      return null;
+    }
+  };
+
+  const handleReplyToTicket = async (ticketId: number, message: string) => {
+    try {
+      const response = await fetch(API_SUPPORT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_message',
+          ticket_id: ticketId,
+          user_id: 1,
+          message,
+          is_admin: true
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Ответ отправлен',
+          description: 'Пользователь получит уведомление'
+        });
+        loadTickets();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить ответ',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleUpdateTicketStatus = async (ticketId: number, status: string) => {
+    try {
+      const response = await fetch(API_SUPPORT, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket_id: ticketId, status })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Статус обновлён',
+          description: `Тикет #${ticketId} теперь: ${status}`
+        });
+        loadTickets();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить статус',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -333,24 +416,28 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
         </div>
 
         <Tabs defaultValue="products">
-          <TabsList className="grid w-full grid-cols-5 h-auto">
-            <TabsTrigger value="products" className="text-xs sm:text-sm px-2 py-2">
+          <TabsList className="grid w-full grid-cols-6 h-auto">
+            <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
               <Icon name="Package" size={16} className="sm:mr-1" />
               <span className="hidden sm:inline">Товары</span>
             </TabsTrigger>
-            <TabsTrigger value="categories" className="text-xs sm:text-sm px-2 py-2">
+            <TabsTrigger value="categories" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
               <Icon name="FolderTree" size={16} className="sm:mr-1" />
               <span className="hidden sm:inline">Категории</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="text-xs sm:text-sm px-2 py-2">
+            <TabsTrigger value="users" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
               <Icon name="Users" size={16} className="sm:mr-1" />
               <span className="hidden sm:inline">Пользователи</span>
             </TabsTrigger>
-            <TabsTrigger value="orders" className="text-xs sm:text-sm px-2 py-2">
+            <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
               <Icon name="ShoppingCart" size={16} className="sm:mr-1" />
               <span className="hidden sm:inline">Заказы</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs sm:text-sm px-2 py-2">
+            <TabsTrigger value="support" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+              <Icon name="MessageCircle" size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">Поддержка</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
               <Icon name="Settings" size={16} className="sm:mr-1" />
               <span className="hidden sm:inline">Настройки</span>
             </TabsTrigger>
@@ -381,6 +468,15 @@ const AdminPanel = ({ onClose }: AdminPanelProps) => {
 
           <TabsContent value="orders">
             <OrdersTab orders={orders} onUpdateStatus={handleUpdateOrderStatus} />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <SupportTab 
+              tickets={tickets}
+              onReply={handleReplyToTicket}
+              onUpdateStatus={handleUpdateTicketStatus}
+              onLoadTicket={loadSingleTicket}
+            />
           </TabsContent>
 
           <TabsContent value="settings">

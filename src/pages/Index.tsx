@@ -15,6 +15,7 @@ import ContactsSection from '@/components/shop/sections/ContactsSection';
 import AdminPanel from '@/components/shop/admin/AdminPanel';
 import CartContent from '@/components/shop/CartContent';
 import ProfileContent from '@/components/shop/ProfileContent';
+import SupportDialog from '@/components/shop/SupportDialog';
 import { Product } from '@/types/shop';
 
 const Index = () => {
@@ -35,6 +36,7 @@ const Index = () => {
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showSupportDialog, setShowSupportDialog] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
 
   useEffect(() => {
@@ -183,6 +185,7 @@ const Index = () => {
             siteSettings={siteSettings}
             onSectionChange={setCurrentSection}
             onShowAuth={() => setShowAuthDialog(true)}
+            onShowSupport={() => setShowSupportDialog(true)}
             renderCartContent={renderCartContent}
             renderProfileContent={renderProfileContent}
           />
@@ -226,6 +229,12 @@ const Index = () => {
             open={showAuthDialog} 
             onOpenChange={setShowAuthDialog}
             onSubmit={(e, action) => handleAuth(e, action, onAuthSuccess, onAuthError)}
+          />
+
+          <SupportDialog
+            open={showSupportDialog}
+            onOpenChange={setShowSupportDialog}
+            user={user}
           />
         </>
       )}

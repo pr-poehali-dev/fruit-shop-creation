@@ -27,6 +27,7 @@ interface HeaderProps {
   siteSettings?: { site_name?: string };
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
+  onShowSupport: () => void;
   renderCartContent: () => React.ReactNode;
   renderProfileContent: () => React.ReactNode;
 }
@@ -38,6 +39,7 @@ const Header = ({
   siteSettings,
   onSectionChange, 
   onShowAuth,
+  onShowSupport,
   renderCartContent,
   renderProfileContent
 }: HeaderProps) => {
@@ -58,7 +60,17 @@ const Header = ({
           <button onClick={() => onSectionChange('contacts')} className="hover:opacity-80 transition">Контакты</button>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-primary-foreground hover:bg-primary/90"
+            onClick={onShowSupport}
+            title="Поддержка"
+          >
+            <Icon name="MessageCircle" size={22} />
+          </Button>
+
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90">
@@ -93,7 +105,7 @@ const Header = ({
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="secondary" onClick={onShowAuth}>
+            <Button variant="secondary" onClick={onShowAuth} className="hidden sm:inline-flex">
               Войти
             </Button>
           )}
