@@ -48,6 +48,7 @@ interface ProductDialogProps {
 const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmit }: ProductDialogProps) => {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (editingProduct?.images && editingProduct.images.length > 0) {
@@ -102,6 +103,64 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     [newImages[index], newImages[swapIndex]] = [newImages[swapIndex], newImages[index]];
     newImages.forEach((img, i) => img.sort_order = i);
     setImages(newImages);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('Пожалуйста, выберите изображение');
+      return;
+    }
+    
+    if (images.length >= 10) {
+      alert('Можно добавить максимум 10 изображений');
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Image = event.target?.result as string;
+        
+        const response = await fetch('https://functions.poehali.dev/44df414c-694f-4079-aa96-764afeaf23e3', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image,
+            filename: file.name
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.url) {
+          const newImage: ProductImage = {
+            image_url: data.url,
+            is_primary: images.length === 0,
+            sort_order: images.length
+          };
+          
+          setImages([...images, newImage]);
+        } else {
+          alert('Ошибка загрузки изображения');
+        }
+        
+        setIsUploading(false);
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      alert('Ошибка загрузки изображения');
+      setIsUploading(false);
+    }
+    
+    e.target.value = '';
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -191,8 +250,32 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
                 />
                 <Button type="button" onClick={handleAddImage} disabled={images.length >= 10}>
-                  <Icon name="Plus" size={18} className="mr-2" />
-                  Добавить
+                  <Icon name="Link" size={18} className="mr-2" />
+                  URL
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-border"></div>
+                <span className="text-xs text-muted-foreground">или</span>
+                <div className="flex-1 h-px bg-border"></div>
+              </div>
+              <div>
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={images.length >= 10 || isUploading}
+                >
+                  <Icon name={isUploading ? "Loader2" : "Upload"} size={18} className={`mr-2 ${isUploading ? 'animate-spin' : ''}`} />
+                  {isUploading ? 'Загрузка...' : 'Загрузить с компьютера'}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">

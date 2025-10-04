@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "Upload image endpoint exists",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedHeaders": {
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+      }
+    }
+  ]
+}
