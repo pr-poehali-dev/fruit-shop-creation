@@ -25,6 +25,7 @@ export interface Product {
   stock: number;
   is_active: boolean;
   show_stock?: boolean;
+  hide_main_price?: boolean;
   images?: ProductImage[];
   variants?: ProductVariant[];
 }

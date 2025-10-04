@@ -28,6 +28,7 @@ interface Product {
   category_name: string;
   stock: number;
   show_stock?: boolean;
+  hide_main_price?: boolean;
   images?: ProductImage[];
   variants?: ProductVariant[];
 }
@@ -43,6 +44,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) 
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
   const showStock = product.show_stock !== false;
+  const hideMainPrice = product.hide_main_price === true && hasVariants && product.variants!.length >= 2;
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -64,7 +66,20 @@ const ProductCard = ({ product, onAddToCart, onViewDetails }: ProductCardProps) 
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
         <div className="mt-4">
-          {hasVariants ? (
+          {hasVariants && hideMainPrice ? (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1">
+                {product.variants!.map((variant, idx) => (
+                  <div key={idx} className="flex items-baseline gap-1">
+                    <Badge variant="outline" className="text-xs">
+                      {variant.size}
+                    </Badge>
+                    <span className="text-sm font-semibold">{variant.price} ₽</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : hasVariants ? (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Цены от:</p>
               <p className="text-2xl font-bold text-primary">{Math.min(...product.variants!.map(v => v.price))} ₽</p>

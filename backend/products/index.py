@@ -93,13 +93,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cat_id = body_data.get('category_id', 'NULL')
             stock = body_data.get('stock', 0)
             show_stock = 'TRUE' if body_data.get('show_stock', True) else 'FALSE'
+            hide_main_price = 'TRUE' if body_data.get('hide_main_price', False) else 'FALSE'
             images = body_data.get('images', [])
             variants = body_data.get('variants', [])
             
             cur.execute(
-                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock, show_stock) 
-                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}, {show_stock}) 
-                   RETURNING id, name, slug, description, price, image_url, stock, show_stock"""
+                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock, show_stock, hide_main_price) 
+                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}, {show_stock}, {hide_main_price}) 
+                   RETURNING id, name, slug, description, price, image_url, stock, show_stock, hide_main_price"""
             )
             product = cur.fetchone()
             product_id = product['id']
@@ -143,15 +144,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cat_id = body_data.get('category_id', 'NULL')
             stock = body_data.get('stock', 0)
             show_stock = 'TRUE' if body_data.get('show_stock', True) else 'FALSE'
+            hide_main_price = 'TRUE' if body_data.get('hide_main_price', False) else 'FALSE'
             images = body_data.get('images', [])
             variants = body_data.get('variants', [])
             
             cur.execute(
                 f"""UPDATE products 
                    SET name = '{name}', description = '{desc}', price = {price}, image_url = '{img}', 
-                       category_id = {cat_id}, stock = {stock}, show_stock = {show_stock}, updated_at = CURRENT_TIMESTAMP
+                       category_id = {cat_id}, stock = {stock}, show_stock = {show_stock}, hide_main_price = {hide_main_price}, updated_at = CURRENT_TIMESTAMP
                    WHERE id = {product_id}
-                   RETURNING id, name, slug, description, price, image_url, stock, show_stock"""
+                   RETURNING id, name, slug, description, price, image_url, stock, show_stock, hide_main_price"""
             )
             product = cur.fetchone()
             

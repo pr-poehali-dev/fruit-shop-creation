@@ -29,9 +29,12 @@ interface ProductBasicFieldsProps {
   categories: Category[];
   showStock: boolean;
   onShowStockChange: (checked: boolean) => void;
+  variantsCount: number;
+  hideMainPrice: boolean;
+  onHideMainPriceChange: (checked: boolean) => void;
 }
 
-const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStockChange }: ProductBasicFieldsProps) => {
+const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStockChange, variantsCount, hideMainPrice, onHideMainPriceChange }: ProductBasicFieldsProps) => {
   return (
     <>
       <div>
@@ -97,17 +100,34 @@ const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStock
         </Select>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="show-stock"
-          checked={showStock}
-          onChange={(e) => onShowStockChange(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300"
-        />
-        <Label htmlFor="show-stock" className="text-sm cursor-pointer">
-          Показывать количество на складе покупателям
-        </Label>
+      <div className="space-y-2">
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="show-stock"
+            checked={showStock}
+            onChange={(e) => onShowStockChange(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300"
+          />
+          <Label htmlFor="show-stock" className="text-sm cursor-pointer">
+            Показывать количество на складе покупателям
+          </Label>
+        </div>
+        
+        {variantsCount >= 2 && (
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="hide-main-price"
+              checked={hideMainPrice}
+              onChange={(e) => onHideMainPriceChange(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <Label htmlFor="hide-main-price" className="text-sm cursor-pointer">
+              Скрыть основную цену (показывать только цены вариантов)
+            </Label>
+          </div>
+        )}
       </div>
     </>
   );
