@@ -16,6 +16,7 @@ import ContactsSection from '@/components/shop/sections/ContactsSection';
 import AdminPanel from '@/components/shop/admin/AdminPanel';
 import CartContent from '@/components/shop/CartContent';
 import ProfileContent from '@/components/shop/ProfileContent';
+import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
 
 import { Product } from '@/types/shop';
 
@@ -39,6 +40,8 @@ const Index = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isProductGalleryOpen, setIsProductGalleryOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -52,6 +55,11 @@ const Index = () => {
       title: 'Добавлено в корзину',
       description: product.name
     });
+  };
+
+  const handleViewDetails = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductGalleryOpen(true);
   };
 
   const handleCheckout = async (paymentMethod: string) => {
@@ -218,7 +226,8 @@ const Index = () => {
                   <HomeSection 
                     products={products} 
                     onNavigate={setCurrentSection} 
-                    onAddToCart={handleAddToCart} 
+                    onAddToCart={handleAddToCart}
+                    onViewDetails={handleViewDetails}
                   />
                 )}
 
@@ -238,6 +247,13 @@ const Index = () => {
           </main>
 
           <Footer />
+
+          <ProductGalleryDialog
+            product={selectedProduct}
+            open={isProductGalleryOpen}
+            onOpenChange={setIsProductGalleryOpen}
+            onAddToCart={handleAddToCart}
+          />
 
           <AuthDialog 
             open={showAuthDialog} 

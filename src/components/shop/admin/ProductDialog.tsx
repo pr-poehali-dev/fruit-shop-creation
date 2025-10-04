@@ -80,17 +80,12 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     
     const img = new Image();
     img.onload = () => {
-      setImages(prevImages => {
-        if (prevImages.some(img => img.image_url === url)) {
-          return prevImages;
-        }
-        const newImage: ProductImage = {
-          image_url: url,
-          is_primary: prevImages.length === 0,
-          sort_order: prevImages.length
-        };
-        return [...prevImages, newImage];
-      });
+      const newImage: ProductImage = {
+        image_url: url,
+        is_primary: images.length === 0,
+        sort_order: images.length
+      };
+      setImages([...images, newImage]);
       setNewImageUrl('');
       setIsUploading(false);
     };

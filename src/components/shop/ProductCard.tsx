@@ -58,11 +58,24 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, showStock = false }:
         </div>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button variant="outline" className="flex-1" onClick={() => onViewDetails(product)}>
+        <Button 
+          variant="outline" 
+          className="flex-1" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetails(product);
+          }}
+        >
           <Icon name="Eye" size={18} className="mr-2" />
           Подробнее
         </Button>
-        <Button className="flex-1" onClick={() => onAddToCart(product)}>
+        <Button 
+          className="flex-1" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart(product);
+          }}
+        >
           <Icon name="ShoppingCart" size={18} className="mr-2" />
           В корзину
         </Button>

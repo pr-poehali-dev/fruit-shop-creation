@@ -17,9 +17,10 @@ interface HomeSectionProps {
   products: Product[];
   onNavigate: (section: string) => void;
   onAddToCart: (product: Product) => void;
+  onViewDetails: (product: Product) => void;
 }
 
-const HomeSection = ({ products, onNavigate, onAddToCart }: HomeSectionProps) => {
+const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails }: HomeSectionProps) => {
   return (
     <div className="space-y-12">
       <section className="text-center py-16 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl">
@@ -35,7 +36,12 @@ const HomeSection = ({ products, onNavigate, onAddToCart }: HomeSectionProps) =>
         <h3 className="text-3xl font-display font-bold mb-6 text-center">Популярные товары</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.slice(0, 6).map(product => (
-            <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              onAddToCart={onAddToCart}
+              onViewDetails={onViewDetails}
+            />
           ))}
         </div>
       </section>
