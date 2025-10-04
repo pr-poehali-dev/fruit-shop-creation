@@ -112,7 +112,15 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       const data = await response.json();
       
       if (data.success) {
-        alert('Заказ успешно отменён. Средства возвращены на баланс.');
+        const userResponse = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=user&user_id=${user.id}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const userData = await userResponse.json();
+        if (userData.user) {
+          localStorage.setItem('user', JSON.stringify(userData.user));
+        }
+        alert('Заказ успешно отменён. Средства и кэшбек обновлены.');
         window.location.reload();
       } else {
         alert(data.error || 'Не удалось отменить заказ');
@@ -132,6 +140,8 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       case 'cashback_deposit': 
       case 'cashback_earned': return 'Gift';
       case 'cashback_used': return 'Wallet';
+      case 'cashback_cancelled': return 'XCircle';
+      case 'purchase':
       case 'order_payment': return 'ShoppingCart';
       default: return 'CircleDot';
     }
@@ -146,6 +156,8 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
         return 'text-green-600';
       case 'withdraw':
       case 'order_payment':
+      case 'purchase':
+      case 'cashback_cancelled':
         return 'text-red-600';
       default: 
         return 'text-muted-foreground';

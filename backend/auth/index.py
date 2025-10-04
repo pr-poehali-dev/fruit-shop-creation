@@ -51,6 +51,35 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'user' and user_id:
+                cur.execute(f"SELECT id, phone, full_name, is_admin, balance, cashback, avatar FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                
+                if not user:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'User not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'user': {
+                            'id': user['id'],
+                            'phone': user['phone'],
+                            'full_name': user['full_name'],
+                            'is_admin': user['is_admin'],
+                            'balance': float(user['balance']) if user['balance'] else 0.00,
+                            'cashback': float(user['cashback']) if user['cashback'] else 0.00,
+                            'avatar': user['avatar'] if user['avatar'] else '👤'
+                        }
+                    }, default=str),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'balance' and user_id:
                 cur.execute(f"SELECT balance, cashback, is_admin, avatar FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
