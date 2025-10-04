@@ -27,6 +27,7 @@ interface Product {
   category_name: string;
   stock: number;
   show_stock?: boolean;
+  hide_main_price?: boolean;
   images?: ProductImage[];
   variants?: ProductVariant[];
 }
@@ -52,6 +53,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
   const hasMultipleImages = images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
   const showStock = product.show_stock !== false;
+  const hideMainPrice = product.hide_main_price && hasVariants && product.variants!.length >= 2;
   
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
   const displayStock = selectedVariant 
@@ -175,8 +177,10 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-3xl font-bold text-primary">{displayPrice} ₽</p>
-                {showStock && (
+                {!hideMainPrice && (
+                  <p className="text-3xl font-bold text-primary">{displayPrice} ₽</p>
+                )}
+                {showStock && !hideMainPrice && (
                   <p className="text-sm text-muted-foreground mt-1">
                     {displayStock === 999 ? 'В наличии' : `В наличии: ${displayStock} шт.`}
                   </p>
