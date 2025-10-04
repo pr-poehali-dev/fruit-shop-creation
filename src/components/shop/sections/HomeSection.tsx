@@ -22,18 +22,42 @@ interface HomeSectionProps {
 
 const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails }: HomeSectionProps) => {
   return (
-    <div className="space-y-12">
-      <section className="text-center py-16 bg-gradient-to-b from-primary/10 to-transparent rounded-2xl">
-        <h2 className="text-5xl font-display font-bold mb-4 text-primary">Ваш сад мечты начинается здесь</h2>
-        <p className="text-xl text-muted-foreground mb-8">Плодовые и декоративные культуры высокого качества</p>
-        <Button size="lg" onClick={() => onNavigate('catalog')} className="text-lg">
-          Перейти в каталог
-          <Icon name="ArrowRight" size={20} className="ml-2" />
-        </Button>
+    <div className="space-y-16">
+      {/* Hero секция с градиентным фоном */}
+      <section className="relative text-center py-20 px-6 bg-gradient-to-br from-primary/20 via-primary/5 to-background rounded-3xl overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+        <div className="relative z-10">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 text-primary">
+            Ваш сад мечты начинается здесь
+          </h2>
+          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+            Плодовые и декоративные культуры высокого качества
+          </p>
+          <Button size="lg" onClick={() => onNavigate('catalog')} className="text-lg shadow-xl hover:shadow-2xl transition-shadow">
+            Перейти в каталог
+            <Icon name="ArrowRight" size={20} className="ml-2" />
+          </Button>
+        </div>
       </section>
 
-      <section>
-        <h3 className="text-3xl font-display font-bold mb-6 text-center">Популярные товары</h3>
+      {/* Декоративное разделение */}
+      <div className="relative py-8">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="w-full border-t-2 border-primary/20"></div>
+        </div>
+        <div className="relative flex justify-center">
+          <div className="bg-background px-6 py-2 rounded-full border-2 border-primary/20">
+            <Icon name="Sparkles" size={24} className="text-primary" />
+          </div>
+        </div>
+      </div>
+
+      {/* Секция товаров */}
+      <section className="bg-gradient-to-b from-transparent via-primary/5 to-transparent py-12 -mx-4 px-4 rounded-3xl">
+        <div className="text-center mb-12">
+          <h3 className="text-3xl md:text-4xl font-display font-bold mb-3 text-primary">Популярные товары</h3>
+          <p className="text-muted-foreground">Выбор наших покупателей</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.slice(0, 6).map(product => (
             <ProductCard 
