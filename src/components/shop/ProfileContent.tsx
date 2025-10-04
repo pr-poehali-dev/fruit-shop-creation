@@ -119,7 +119,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Кэшбек:</span>
-          <span className="text-lg font-semibold text-green-600">{user?.cashback?.toFixed(0) || '0'}₽</span>
+          <span className="text-lg font-semibold text-green-600">{user?.cashback ? user.cashback.toFixed(0) : '0'}₽</span>
         </div>
         {user && user.cashback && user.cashback > 0 && (
           <p className="text-xs text-muted-foreground mt-2">

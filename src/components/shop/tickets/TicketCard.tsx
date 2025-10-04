@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
-import InlineRatingForm from './InlineRatingForm';
+import QuickRatingBar from './QuickRatingBar';
 
 interface TicketCardProps {
   ticket: any;
@@ -133,74 +133,42 @@ const TicketCard = ({
           </div>
         )}
         
-        {isClosed && (
+        {isClosed && ticket.rating && (
           <div className="mt-4 space-y-3 border-t pt-4">
-            <div className={`p-3 rounded-lg text-sm text-center font-medium ${
-              ticket.rating 
-                ? 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-200' 
-                : 'bg-orange-100 dark:bg-orange-950/30 text-orange-800 dark:text-orange-200'
-            }`}>
-              {ticket.rating 
-                ? `Тикет ${ticket.status === 'closed' ? 'закрыт' : 'решён'} и оценён` 
-                : `Администратор ${ticket.status === 'closed' ? 'закрыл' : 'решил'} тикет`}
+            <div className="p-3 rounded-lg text-sm text-center font-medium bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-200">
+              Тикет {ticket.status === 'closed' ? 'закрыт' : 'решён'} и оценён
             </div>
-            {ticket.rating ? (
-              <>
-                <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-medium">Ваша оценка: {ticket.rating}/5</span>
-                  </div>
-                  {ticket.rating_comment && (
-                    <p className="text-xs text-muted-foreground">{ticket.rating_comment}</p>
-                  )}
-                </div>
-                {onDismiss && (
-                  <Button 
-                    onClick={onDismiss}
-                    className="w-full"
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Icon name="X" size={16} className="mr-2" />
-                    Убрать тикет
-                  </Button>
-                )}
-              </>
-            ) : (
-              apiUrl ? (
-                <InlineRatingForm
-                  ticketId={ticket.id}
-                  apiUrl={apiUrl}
-                  onRatingSubmitted={onShowRating}
-                />
-              ) : (
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 p-4 rounded-lg border-2 border-yellow-300 dark:border-yellow-800">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="p-2 bg-yellow-400 dark:bg-yellow-600 rounded-full">
-                      <Icon name="Star" size={20} className="text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm mb-1">Оцените работу поддержки</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Ваше мнение поможет нам стать лучше. Пожалуйста, поставьте оценку от 1 до 5 звёзд.
-                      </p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={onShowRating}
-                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
-                    size="lg"
-                  >
-                    <Icon name="Star" size={18} className="mr-2" />
-                    Оценить сейчас
-                  </Button>
-                </div>
-              )
+            <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                <span className="text-sm font-medium">Ваша оценка: {ticket.rating}/5</span>
+              </div>
+              {ticket.rating_comment && (
+                <p className="text-xs text-muted-foreground">{ticket.rating_comment}</p>
+              )}
+            </div>
+            {onDismiss && (
+              <Button 
+                onClick={onDismiss}
+                className="w-full"
+                variant="outline"
+                size="sm"
+              >
+                <Icon name="X" size={16} className="mr-2" />
+                Убрать тикет
+              </Button>
             )}
           </div>
         )}
       </CardContent>
+      
+      {isClosed && !ticket.rating && apiUrl && (
+        <QuickRatingBar
+          ticketId={ticket.id}
+          apiUrl={apiUrl}
+          onRatingSubmitted={onShowRating}
+        />
+      )}
     </Card>
   );
 };

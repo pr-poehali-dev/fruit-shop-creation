@@ -63,17 +63,27 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
 
   const handleAddImage = () => {
     if (!newImageUrl.trim()) return;
+    if (isUploading) return;
     if (images.length >= 10) {
       alert('Можно добавить максимум 10 изображений');
       return;
     }
     
     const url = newImageUrl.trim();
-    const currentLength = images.length;
+    
+    if (images.some(img => img.image_url === url)) {
+      alert('Это изображение уже добавлено');
+      return;
+    }
+    
+    setIsUploading(true);
     
     const img = new Image();
     img.onload = () => {
       setImages(prevImages => {
+        if (prevImages.some(img => img.image_url === url)) {
+          return prevImages;
+        }
         const newImage: ProductImage = {
           image_url: url,
           is_primary: prevImages.length === 0,
@@ -82,10 +92,12 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
         return [...prevImages, newImage];
       });
       setNewImageUrl('');
+      setIsUploading(false);
     };
     
     img.onerror = () => {
       alert('Не удалось загрузить изображение по этому URL. Проверьте правильность ссылки.');
+      setIsUploading(false);
     };
     
     img.src = url;
