@@ -68,14 +68,25 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       return;
     }
     
-    const newImage: ProductImage = {
-      image_url: newImageUrl.trim(),
-      is_primary: images.length === 0,
-      sort_order: images.length
+    const url = newImageUrl.trim();
+    
+    const img = new Image();
+    img.onload = () => {
+      const newImage: ProductImage = {
+        image_url: url,
+        is_primary: images.length === 0,
+        sort_order: images.length
+      };
+      
+      setImages([...images, newImage]);
+      setNewImageUrl('');
     };
     
-    setImages([...images, newImage]);
-    setNewImageUrl('');
+    img.onerror = () => {
+      alert('Не удалось загрузить изображение по этому URL. Проверьте правильность ссылки.');
+    };
+    
+    img.src = url;
   };
 
   const handleRemoveImage = (index: number) => {
@@ -126,37 +137,53 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       reader.onload = async (event) => {
         const base64Image = event.target?.result as string;
         
-        const response = await fetch('https://functions.poehali.dev/44df414c-694f-4079-aa96-764afeaf23e3', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            image: base64Image,
-            filename: file.name
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success && data.url) {
-          const newImage: ProductImage = {
-            image_url: data.url,
-            is_primary: images.length === 0,
-            sort_order: images.length
-          };
+        try {
+          const response = await fetch('https://functions.poehali.dev/44df414c-694f-4079-aa96-764afeaf23e3', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              image: base64Image,
+              filename: file.name
+            })
+          });
           
-          setImages([...images, newImage]);
-        } else {
-          alert('Ошибка загрузки изображения');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.success && data.url) {
+            const newImage: ProductImage = {
+              image_url: data.url,
+              is_primary: images.length === 0,
+              sort_order: images.length
+            };
+            
+            setImages([...images, newImage]);
+          } else {
+            console.error('Upload error:', data);
+            alert(`Ошибка загрузки: ${data.error || 'Неизвестная ошибка'}`);
+          }
+        } catch (fetchError) {
+          console.error('Fetch error:', fetchError);
+          alert(`Ошибка запроса: ${fetchError instanceof Error ? fetchError.message : 'Неизвестная ошибка'}`);
         }
         
         setIsUploading(false);
       };
       
+      reader.onerror = () => {
+        alert('Ошибка чтения файла');
+        setIsUploading(false);
+      };
+      
       reader.readAsDataURL(file);
     } catch (error) {
-      alert('Ошибка загрузки изображения');
+      console.error('Reader error:', error);
+      alert('Ошибка обработки файла');
       setIsUploading(false);
     }
     
