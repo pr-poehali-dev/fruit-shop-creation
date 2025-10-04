@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { User, Order } from '@/types/shop';
+import UserTickets from './UserTickets';
 
 interface ProfileContentProps {
   user: User | null;
@@ -84,6 +85,13 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout }: ProfileCon
           </div>
         )}
       </div>
+      
+      <Separator />
+      
+      <UserTickets user={user} />
+      
+      <Separator className="my-4" />
+      
       <Button variant="destructive" className="w-full" onClick={onLogout}>Выйти</Button>
     </div>
   );
