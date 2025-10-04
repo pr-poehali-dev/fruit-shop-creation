@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import SupportStatsCard from './SupportStatsCard';
 
 interface SupportTabProps {
   tickets: any[];
@@ -108,6 +109,8 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
 
   return (
     <>
+      <SupportStatsCard tickets={tickets} />
+      
       <Card>
         <CardHeader>
           <CardTitle>Обращения в поддержку</CardTitle>

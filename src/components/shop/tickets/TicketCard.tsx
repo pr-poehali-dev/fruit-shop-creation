@@ -14,6 +14,7 @@ interface TicketCardProps {
   onReplyChange: (value: string) => void;
   onSendReply: () => void;
   onShowRating: () => void;
+  onDismiss?: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -25,6 +26,7 @@ const TicketCard = ({
   onReplyChange,
   onSendReply,
   onShowRating,
+  onDismiss,
   messagesEndRef
 }: TicketCardProps) => {
   const isClosed = ticket.status === 'closed' || ticket.status === 'resolved';
@@ -113,15 +115,28 @@ const TicketCard = ({
               Тикет {ticket.status === 'closed' ? 'закрыт' : 'решён'}
             </div>
             {ticket.rating ? (
-              <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
-                  <span className="text-sm font-medium">Ваша оценка: {ticket.rating}/5</span>
+              <>
+                <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                    <span className="text-sm font-medium">Ваша оценка: {ticket.rating}/5</span>
+                  </div>
+                  {ticket.rating_comment && (
+                    <p className="text-xs text-muted-foreground">{ticket.rating_comment}</p>
+                  )}
                 </div>
-                {ticket.rating_comment && (
-                  <p className="text-xs text-muted-foreground">{ticket.rating_comment}</p>
+                {onDismiss && (
+                  <Button 
+                    onClick={onDismiss}
+                    className="w-full"
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Icon name="X" size={16} className="mr-2" />
+                    Убрать тикет
+                  </Button>
                 )}
-              </div>
+              </>
             ) : (
               <>
                 <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">

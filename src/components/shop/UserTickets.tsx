@@ -31,6 +31,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [closedTicket, setClosedTicket] = useState<any>(null);
+  const [ratedTicket, setRatedTicket] = useState<any>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -52,24 +53,35 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       if (data.active_ticket && data.active_ticket.status !== 'closed' && data.active_ticket.status !== 'resolved') {
         console.log('Active ticket found:', data.active_ticket);
         setActiveTicket(data.active_ticket);
+        setRatedTicket(null);
         setUnreadCount(data.active_ticket.unread_count || 0);
         if (shouldScroll) {
           setTimeout(scrollToBottom, 100);
         }
       } else if (data.active_ticket && (data.active_ticket.status === 'closed' || data.active_ticket.status === 'resolved')) {
-        console.log('Ticket just closed, checking if needs rating');
-        const wasActive = activeTicket?.id === data.active_ticket.id;
+        console.log('Ticket closed, checking rating status');
         const needsRating = !data.active_ticket.rating;
+        const hasRating = !!data.active_ticket.rating;
+        const wasJustClosed = activeTicket?.id === data.active_ticket.id && (activeTicket?.status !== 'closed' && activeTicket?.status !== 'resolved');
         
-        if (needsRating && wasActive && !showRatingDialog) {
-          setClosedTicket(data.active_ticket);
-          setShowRatingDialog(true);
+        if (needsRating) {
+          if (wasJustClosed || !closedTicket) {
+            setClosedTicket(data.active_ticket);
+            setActiveTicket(data.active_ticket);
+            setTimeout(() => setShowRatingDialog(true), 300);
+          } else {
+            setActiveTicket(data.active_ticket);
+          }
+        } else if (hasRating) {
+          setRatedTicket(data.active_ticket);
+          setActiveTicket(null);
+          setClosedTicket(null);
         }
-        setActiveTicket(null);
         setUnreadCount(0);
       } else {
         console.log('No active ticket');
         setActiveTicket(null);
+        setRatedTicket(null);
         setUnreadCount(0);
       }
     } catch (error) {
@@ -147,15 +159,16 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Загрузка...</p>
-        ) : activeTicket ? (
+        ) : activeTicket || ratedTicket ? (
           <TicketCard
-            ticket={activeTicket}
+            ticket={activeTicket || ratedTicket}
             unreadCount={unreadCount}
             statusLabels={statusLabels}
             replyMessage={replyMessage}
             onReplyChange={setReplyMessage}
             onSendReply={handleSendReply}
             onShowRating={() => setShowRatingDialog(true)}
+            onDismiss={ratedTicket ? () => setRatedTicket(null) : undefined}
             messagesEndRef={messagesEndRef}
           />
         ) : (
@@ -195,8 +208,8 @@ const UserTickets = ({ user }: UserTicketsProps) => {
           ticketId={activeTicket?.id || closedTicket?.id}
           apiUrl={API_SUPPORT}
           onRatingSubmitted={() => {
-            loadActiveTicket();
             setClosedTicket(null);
+            loadActiveTicket();
           }}
         />
       )}
