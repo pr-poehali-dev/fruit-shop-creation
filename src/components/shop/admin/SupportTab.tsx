@@ -32,17 +32,35 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleOpenTicket = async (ticket: any) => {
-    const fullTicket = await onLoadTicket(ticket.id);
-    setSelectedTicket(fullTicket);
-    setNewStatus(fullTicket.status);
-    setTimeout(scrollToBottom, 100);
+  useEffect(() => {
+    if (!selectedTicket) return;
+    
+    const interval = setInterval(() => {
+      handleOpenTicket(selectedTicket, false);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [selectedTicket?.id]);
+
+  const handleOpenTicket = async (ticket: any, shouldScroll: boolean = true) => {
+    try {
+      setIsSyncing(true);
+      const fullTicket = await onLoadTicket(ticket.id);
+      setSelectedTicket(fullTicket);
+      setNewStatus(fullTicket.status);
+      if (shouldScroll) {
+        setTimeout(scrollToBottom, 100);
+      }
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleSendReply = () => {
@@ -133,6 +151,9 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket }: SupportT
             <DialogTitle className="flex items-center gap-2">
               <Icon name="MessageCircle" size={24} />
               Тикет #{selectedTicket?.id}: {selectedTicket?.subject}
+              {isSyncing && (
+                <Icon name="RefreshCw" size={16} className="ml-2 animate-spin text-muted-foreground" />
+              )}
             </DialogTitle>
             <DialogDescription>
               От {selectedTicket?.user_name} ({selectedTicket?.user_phone})

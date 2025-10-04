@@ -28,6 +28,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [replyMessage, setReplyMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -51,15 +52,18 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     }
   };
 
-  const loadTicketDetails = async (ticketId: number) => {
+  const loadTicketDetails = async (ticketId: number, shouldScroll: boolean = true) => {
     try {
+      setIsSyncing(true);
       const response = await fetch(`${API_SUPPORT}?ticket_id=${ticketId}&mark_as_read=true`);
       const data = await response.json();
       console.log('Loaded ticket details:', data.ticket);
       console.log('Messages:', data.ticket?.messages);
       setSelectedTicket(data.ticket);
       await loadTickets();
-      setTimeout(scrollToBottom, 100);
+      if (shouldScroll) {
+        setTimeout(scrollToBottom, 100);
+      }
     } catch (error) {
       console.error('Error loading ticket:', error);
       toast({
@@ -67,6 +71,8 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         description: 'Не удалось загрузить тикет',
         variant: 'destructive'
       });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -115,6 +121,16 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     
     return () => clearInterval(interval);
   }, [user]);
+
+  useEffect(() => {
+    if (!selectedTicket) return;
+    
+    const interval = setInterval(() => {
+      loadTicketDetails(selectedTicket.id, false);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [selectedTicket?.id]);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -191,6 +207,9 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             <DialogTitle className="flex items-center gap-2">
               <Icon name="MessageCircle" size={24} />
               Тикет #{selectedTicket?.id}: {selectedTicket?.subject}
+              {isSyncing && (
+                <Icon name="RefreshCw" size={16} className="ml-2 animate-spin text-muted-foreground" />
+              )}
             </DialogTitle>
             <DialogDescription>
               <Badge variant={getStatusBadgeVariant(selectedTicket?.status)} className="mt-2">
