@@ -48,11 +48,22 @@ const Header = ({
 }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
           <SideMenu siteSettings={siteSettings} onSectionChange={onSectionChange} />
-          <Icon name="Flower2" size={32} className="hidden sm:block" />
-          <h1 className="text-lg sm:text-2xl font-display font-extrabold tracking-tight drop-shadow-md">{siteSettings?.site_name || 'Питомник растений'}</h1>
+          <button 
+            onClick={() => onSectionChange('home')} 
+            className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition"
+          >
+            <img 
+              src="https://cdn.poehali.dev/files/9bed5f24-da93-4601-95e2-818c0e5e31a4.jpg" 
+              alt="Логотип Славный Сад" 
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover"
+            />
+            <h1 className="text-lg sm:text-2xl font-display font-extrabold tracking-tight drop-shadow-md">
+              {siteSettings?.site_name || 'Питомник растений'}
+            </h1>
+          </button>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
