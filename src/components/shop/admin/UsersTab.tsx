@@ -296,11 +296,11 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
             <TabsContent value="cashback">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label>Текущий кэшбек</Label>
+                  <Label>Текущий кэшбэк</Label>
                   <p className="text-2xl font-bold text-green-600">{Math.round(Number(selectedUser?.cashback || 0))}₽</p>
                 </div>
                 <div>
-                  <Label htmlFor="cashback-amount">Сумма кэшбека (₽) *</Label>
+                  <Label htmlFor="cashback-amount">Сумма кэшбэка (₽) *</Label>
                   <Input
                     id="cashback-amount"
                     type="number"
@@ -318,7 +318,7 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
                     id="cashback-description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Начисление кэшбека администратором"
+                    placeholder="Начисление кэшбэка администратором"
                     rows={2}
                   />
                 </div>
@@ -374,7 +374,7 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
                           Опасная зона
                         </h4>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Отзыв карты лояльности деактивирует её. Пользователь потеряет доступ к кэшбеку по этой карте.
+                          Отзыв карты лояльности деактивирует её. Пользователь потеряет доступ к кэшбэку по этой карте.
                         </p>
                         <Button 
                           variant="destructive" 

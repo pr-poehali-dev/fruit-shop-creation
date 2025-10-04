@@ -276,7 +276,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                       {transaction.type === 'withdraw' && 'Списание'}
                       {transaction.type === 'cashback_deposit' && 'Кэшбек'}
                       {transaction.type === 'cashback_earned' && 'Кэшбек'}
-                      {transaction.type === 'cashback_used' && 'Использование кэшбека'}
+                      {transaction.type === 'cashback_used' && 'Использование кэшбэка'}
                       {transaction.type === 'order_payment' && 'Оплата заказа'}
                     </p>
                   </div>

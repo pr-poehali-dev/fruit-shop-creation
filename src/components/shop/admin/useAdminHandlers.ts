@@ -170,7 +170,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
           user_id: userId,
           amount,
           type: 'cashback_deposit',
-          description: description || 'Начисление кэшбека администратором'
+          description: description || 'Начисление кэшбэка администратором'
         })
       });
 
@@ -185,14 +185,14 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       } else {
         toast({
           title: 'Ошибка',
-          description: data.error || 'Не удалось начислить кэшбек',
+          description: data.error || 'Не удалось начислить кэшбэк',
           variant: 'destructive'
         });
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось начислить кэшбек',
+        description: 'Не удалось начислить кэшбэк',
         variant: 'destructive'
       });
     }

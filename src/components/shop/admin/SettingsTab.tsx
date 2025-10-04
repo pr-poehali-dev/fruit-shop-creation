@@ -122,7 +122,7 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                 </p>
               </div>
               <div>
-                <Label htmlFor="loyalty-cashback-percent">Процент кэшбека (%)</Label>
+                <Label htmlFor="loyalty-cashback-percent">Процент кэшбэка (%)</Label>
                 <Input 
                   id="loyalty-cashback-percent" 
                   name="loyalty_cashback_percent" 

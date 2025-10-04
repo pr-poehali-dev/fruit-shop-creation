@@ -285,7 +285,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
           </p>
         </div>
         <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
-          Предъявите QR-код при покупке от 100₽ и получайте кэшбек на счет
+          Предъявите QR-код при покупке от 100₽ и получайте кэшбэк на счет
         </p>
       </div>
     </div>

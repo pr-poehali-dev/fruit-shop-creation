@@ -81,14 +81,14 @@ const LoyaltyScannerTab = () => {
       } else {
         toast({
           title: 'Ошибка',
-          description: data.error || 'Не удалось начислить кэшбек',
+          description: data.error || 'Не удалось начислить кэшбэк',
           variant: 'destructive'
         });
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось начислить кэшбек',
+        description: 'Не удалось начислить кэшбэк',
         variant: 'destructive'
       });
     } finally {
@@ -163,7 +163,7 @@ const LoyaltyScannerTab = () => {
     <Card>
       <CardHeader>
         <CardTitle>Сканер карт лояльности</CardTitle>
-        <CardDescription>Начисление кэшбека по QR-коду карты</CardDescription>
+        <CardDescription>Начисление кэшбэка по QR-коду карты</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -256,7 +256,7 @@ const LoyaltyScannerTab = () => {
             ) : (
               <>
                 <Icon name="Percent" size={18} className="mr-2" />
-                Начислить кэшбек
+                Начислить кэшбэк
               </>
             )}
           </Button>
@@ -273,8 +273,8 @@ const LoyaltyScannerTab = () => {
                   </h4>
                   <div className="mt-2 space-y-1 text-sm text-green-800 dark:text-green-200">
                     <p>Клиент: <strong>{lastResult.user_name}</strong> ({lastResult.user_phone})</p>
-                    <p>Начислено кэшбека: <strong className="text-lg">+{lastResult.cashback_earned.toFixed(2)}₽</strong></p>
-                    <p>Новый баланс кэшбека: <strong>{lastResult.new_cashback.toFixed(2)}₽</strong></p>
+                    <p>Начислено кэшбэка: <strong className="text-lg">+{lastResult.cashback_earned.toFixed(2)}₽</strong></p>
+                    <p>Новый баланс кэшбэка: <strong>{lastResult.new_cashback.toFixed(2)}₽</strong></p>
                   </div>
                 </div>
               </div>
@@ -290,7 +290,7 @@ const LoyaltyScannerTab = () => {
               <li>• Нажмите "Открыть камеру" и наведите на QR-код</li>
               <li>• Или введите номер карты вручную</li>
               <li>• Введите сумму покупки (минимум 100₽)</li>
-              <li>• Система начислит 3% кэшбека на счет клиента</li>
+              <li>• Система начислит 3% кэшбэка на счет клиента</li>
             </ul>
           </div>
         </form>
