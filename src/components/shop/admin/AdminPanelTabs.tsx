@@ -7,6 +7,7 @@ import OrdersTab from './OrdersTab';
 import SettingsTab from './SettingsTab';
 import SupportTab from './SupportTab';
 import LoyaltyScannerTab from './LoyaltyScannerTab';
+import PagesTab from './PagesTab';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -56,7 +57,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-7 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -80,6 +81,10 @@ const AdminPanelTabs = ({
         <TabsTrigger value="support" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="MessageCircle" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Поддержка</span>
+        </TabsTrigger>
+        <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="FileText" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">Страницы</span>
         </TabsTrigger>
         <TabsTrigger value="settings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Settings" size={16} className="sm:mr-1" />
@@ -127,6 +132,13 @@ const AdminPanelTabs = ({
           onUpdateStatus={onUpdateTicketStatus}
           onLoadTicket={onLoadTicket}
           onDeleteTicket={onDeleteTicket}
+        />
+      </TabsContent>
+
+      <TabsContent value="pages">
+        <PagesTab 
+          siteSettings={siteSettings}
+          onSaveSettings={onSaveSettings}
         />
       </TabsContent>
 

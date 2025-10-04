@@ -1,0 +1,20 @@
+-- Добавляем поля для страниц "О нас", "Уход за растениями" и "Доставка" в site_settings
+ALTER TABLE t_p77282076_fruit_shop_creation.site_settings 
+ADD COLUMN IF NOT EXISTS about_title TEXT DEFAULT 'О нас',
+ADD COLUMN IF NOT EXISTS about_text TEXT DEFAULT 'Мы — семейный питомник растений с многолетним опытом выращивания плодовых и декоративных культур. Наша миссия — помочь вам создать сад вашей мечты с качественными и здоровыми растениями.',
+ADD COLUMN IF NOT EXISTS care_title TEXT DEFAULT 'Уход за растениями',
+ADD COLUMN IF NOT EXISTS care_watering_title TEXT DEFAULT 'Полив',
+ADD COLUMN IF NOT EXISTS care_watering_text TEXT DEFAULT 'Регулярный полив особенно важен в первый год после посадки. Летом поливайте растения обильно, но не допускайте застоя воды.',
+ADD COLUMN IF NOT EXISTS care_lighting_title TEXT DEFAULT 'Освещение',
+ADD COLUMN IF NOT EXISTS care_lighting_text TEXT DEFAULT 'Большинство плодовых культур предпочитают солнечные места. Декоративные растения могут расти в полутени.',
+ADD COLUMN IF NOT EXISTS care_pruning_title TEXT DEFAULT 'Обрезка',
+ADD COLUMN IF NOT EXISTS care_pruning_text TEXT DEFAULT 'Регулярная обрезка помогает формировать крону и стимулирует рост. Проводите обрезку ранней весной или поздней осенью.',
+ADD COLUMN IF NOT EXISTS delivery_title TEXT DEFAULT 'Доставка и оплата',
+ADD COLUMN IF NOT EXISTS delivery_courier_title TEXT DEFAULT 'Курьерская доставка',
+ADD COLUMN IF NOT EXISTS delivery_courier_text TEXT DEFAULT 'По Москве и области — 500 ₽',
+ADD COLUMN IF NOT EXISTS delivery_transport_title TEXT DEFAULT 'Транспортная компания',
+ADD COLUMN IF NOT EXISTS delivery_transport_text TEXT DEFAULT 'По России — рассчитывается индивидуально',
+ADD COLUMN IF NOT EXISTS delivery_pickup_title TEXT DEFAULT 'Самовывоз',
+ADD COLUMN IF NOT EXISTS delivery_pickup_text TEXT DEFAULT 'Бесплатно из питомника',
+ADD COLUMN IF NOT EXISTS payment_title TEXT DEFAULT 'Способы оплаты',
+ADD COLUMN IF NOT EXISTS payment_methods JSONB DEFAULT '["Банковская карта онлайн", "Наличные при получении", "Банковский перевод"]'::jsonb;

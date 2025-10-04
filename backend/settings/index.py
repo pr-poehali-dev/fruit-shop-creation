@@ -75,9 +75,45 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             price_list_url = body_data.get('price_list_url', '').replace("'", "''")
             loyalty_card_price = body_data.get('loyalty_card_price', 500)
             
+            about_title = body_data.get('about_title', '').replace("'", "''")
+            about_text = body_data.get('about_text', '').replace("'", "''")
+            care_title = body_data.get('care_title', '').replace("'", "''")
+            care_watering_title = body_data.get('care_watering_title', '').replace("'", "''")
+            care_watering_text = body_data.get('care_watering_text', '').replace("'", "''")
+            care_lighting_title = body_data.get('care_lighting_title', '').replace("'", "''")
+            care_lighting_text = body_data.get('care_lighting_text', '').replace("'", "''")
+            care_pruning_title = body_data.get('care_pruning_title', '').replace("'", "''")
+            care_pruning_text = body_data.get('care_pruning_text', '').replace("'", "''")
+            delivery_title = body_data.get('delivery_title', '').replace("'", "''")
+            delivery_courier_title = body_data.get('delivery_courier_title', '').replace("'", "''")
+            delivery_courier_text = body_data.get('delivery_courier_text', '').replace("'", "''")
+            delivery_transport_title = body_data.get('delivery_transport_title', '').replace("'", "''")
+            delivery_transport_text = body_data.get('delivery_transport_text', '').replace("'", "''")
+            delivery_pickup_title = body_data.get('delivery_pickup_title', '').replace("'", "''")
+            delivery_pickup_text = body_data.get('delivery_pickup_text', '').replace("'", "''")
+            payment_title = body_data.get('payment_title', '').replace("'", "''")
+            
+            payment_methods = body_data.get('payment_methods', '')
+            if isinstance(payment_methods, str):
+                payment_methods_json = json.dumps([m.strip() for m in payment_methods.split('\n') if m.strip()])
+            else:
+                payment_methods_json = json.dumps(payment_methods)
+            payment_methods_json = payment_methods_json.replace("'", "''")
+            
             cur.execute(
-                f"""INSERT INTO site_settings (id, site_name, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, loyalty_card_price)
-                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', {loyalty_card_price})
+                f"""INSERT INTO site_settings (
+                    id, site_name, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, loyalty_card_price,
+                    about_title, about_text, care_title, care_watering_title, care_watering_text, care_lighting_title, care_lighting_text,
+                    care_pruning_title, care_pruning_text, delivery_title, delivery_courier_title, delivery_courier_text,
+                    delivery_transport_title, delivery_transport_text, delivery_pickup_title, delivery_pickup_text,
+                    payment_title, payment_methods
+                   )
+                   VALUES (1, '{site_name}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', {loyalty_card_price},
+                    '{about_title}', '{about_text}', '{care_title}', '{care_watering_title}', '{care_watering_text}', '{care_lighting_title}', '{care_lighting_text}',
+                    '{care_pruning_title}', '{care_pruning_text}', '{delivery_title}', '{delivery_courier_title}', '{delivery_courier_text}',
+                    '{delivery_transport_title}', '{delivery_transport_text}', '{delivery_pickup_title}', '{delivery_pickup_text}',
+                    '{payment_title}', '{payment_methods_json}'::jsonb
+                   )
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
                    site_description = EXCLUDED.site_description,
@@ -89,6 +125,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    additional_info = EXCLUDED.additional_info,
                    price_list_url = EXCLUDED.price_list_url,
                    loyalty_card_price = EXCLUDED.loyalty_card_price,
+                   about_title = EXCLUDED.about_title,
+                   about_text = EXCLUDED.about_text,
+                   care_title = EXCLUDED.care_title,
+                   care_watering_title = EXCLUDED.care_watering_title,
+                   care_watering_text = EXCLUDED.care_watering_text,
+                   care_lighting_title = EXCLUDED.care_lighting_title,
+                   care_lighting_text = EXCLUDED.care_lighting_text,
+                   care_pruning_title = EXCLUDED.care_pruning_title,
+                   care_pruning_text = EXCLUDED.care_pruning_text,
+                   delivery_title = EXCLUDED.delivery_title,
+                   delivery_courier_title = EXCLUDED.delivery_courier_title,
+                   delivery_courier_text = EXCLUDED.delivery_courier_text,
+                   delivery_transport_title = EXCLUDED.delivery_transport_title,
+                   delivery_transport_text = EXCLUDED.delivery_transport_text,
+                   delivery_pickup_title = EXCLUDED.delivery_pickup_title,
+                   delivery_pickup_text = EXCLUDED.delivery_pickup_text,
+                   payment_title = EXCLUDED.payment_title,
+                   payment_methods = EXCLUDED.payment_methods,
                    updated_at = CURRENT_TIMESTAMP
                    RETURNING *"""
             )
