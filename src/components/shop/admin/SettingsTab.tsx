@@ -43,6 +43,19 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Label htmlFor="work-hours">Режим работы</Label>
             <Input id="work-hours" name="work_hours" defaultValue={siteSettings.work_hours || 'Пн-Вс: 9:00 - 19:00'} />
           </div>
+          <div>
+            <Label htmlFor="price-list-url">Ссылка на прайс-лист</Label>
+            <Input 
+              id="price-list-url" 
+              name="price_list_url" 
+              type="url"
+              defaultValue={siteSettings.price_list_url || ''} 
+              placeholder="https://example.com/price.pdf"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Ссылка на скачивание прайс-листа (PDF, Excel и т.д.)
+            </p>
+          </div>
           <div className="border-t pt-4 mt-4">
             <h3 className="text-lg font-semibold mb-4">Дополнительная информация для меню</h3>
             <div className="space-y-4">

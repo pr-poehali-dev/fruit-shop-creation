@@ -15,6 +15,7 @@ interface SideMenuProps {
     work_hours?: string;
     promotions?: string;
     additional_info?: string;
+    price_list_url?: string;
   };
   onSectionChange: (section: string) => void;
 }
@@ -110,6 +111,29 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
           </div>
 
           <Separator />
+
+          {siteSettings?.price_list_url && (
+            <>
+              <div>
+                <a 
+                  href={siteSettings.price_list_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button 
+                    variant="default" 
+                    className="w-full h-12 text-base"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Icon name="Download" size={20} className="mr-3" />
+                    Скачать прайс-лист
+                  </Button>
+                </a>
+              </div>
+              <Separator />
+            </>
+          )}
 
           {siteSettings?.promotions && (
             <div>

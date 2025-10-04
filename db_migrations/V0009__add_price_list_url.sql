@@ -1,0 +1,1 @@
+ALTER TABLE site_settings ADD COLUMN price_list_url VARCHAR(500);
