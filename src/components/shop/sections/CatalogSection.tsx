@@ -37,6 +37,7 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [showPumpkin, setShowPumpkin] = useState(true);
 
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
@@ -62,6 +63,16 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/80 transition-all duration-700" />
         </div>
+        
+        {showPumpkin && (
+          <button
+            onClick={() => setShowPumpkin(false)}
+            className="absolute top-8 left-8 z-20 text-8xl hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer animate-bounce hover:animate-none"
+            aria-label="Тыква"
+          >
+            🎃
+          </button>
+        )}
         
         <div className="relative z-10 flex flex-col items-center justify-center min-h-[600px] text-center px-6 py-12">
           <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 group-hover:scale-105 transition-transform duration-500">
