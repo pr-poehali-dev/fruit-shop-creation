@@ -132,27 +132,29 @@ const Header = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="relative text-primary-foreground hover:bg-primary/90"
+              className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button"
               onClick={() => onSectionChange('favorites')}
             >
-              <Icon name="Heart" size={24} />
+              <Icon name="Heart" size={28} />
               {favoritesCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500">
+                <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
                   {favoritesCount}
                 </Badge>
               )}
+              <div className="icon-snow-sparkle">❄️</div>
             </Button>
           )}
 
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90">
-                <Icon name="ShoppingCart" size={24} />
+              <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 border-2 border-yellow-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button">
+                <Icon name="ShoppingCart" size={28} />
                 {cart.length > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent">
+                  <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg animate-pulse">
                     {cart.length}
                   </Badge>
                 )}
+                <div className="icon-snow-sparkle">✨</div>
               </Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-lg">
@@ -166,13 +168,14 @@ const Header = ({
           {user ? (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90">
-                  <Icon name="User" size={24} />
+                <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-200/30 backdrop-blur-sm transition-all hover:scale-110 snow-icon-button">
+                  <Icon name="User" size={28} />
                   {unreadTickets > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-destructive">
+                    <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
                       {unreadTickets}
                     </Badge>
                   )}
+                  <div className="icon-snow-sparkle">🎅</div>
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">
@@ -189,6 +192,60 @@ const Header = ({
           )}
         </div>
       </div>
+      
+      <style>{`
+        .snow-icon-button {
+          position: relative;
+          overflow: visible;
+        }
+        
+        .icon-snow-sparkle {
+          position: absolute;
+          top: -8px;
+          left: -8px;
+          font-size: 14px;
+          animation: sparkle-rotate 3s ease-in-out infinite;
+          pointer-events: none;
+          filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+        }
+        
+        @keyframes sparkle-rotate {
+          0%, 100% { 
+            transform: rotate(0deg) scale(1); 
+            opacity: 0.8;
+          }
+          50% { 
+            transform: rotate(20deg) scale(1.2); 
+            opacity: 1;
+          }
+        }
+        
+        .snow-icon-button::before {
+          content: '';
+          position: absolute;
+          top: -3px;
+          left: 0;
+          right: 0;
+          height: 10px;
+          background: linear-gradient(to bottom, 
+            rgba(255, 255, 255, 0.6) 0%, 
+            rgba(240, 249, 255, 0.3) 50%, 
+            transparent 100%
+          );
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 10;
+        }
+        
+        .snow-icon-button:hover::before {
+          height: 14px;
+          background: linear-gradient(to bottom, 
+            rgba(255, 255, 255, 0.8) 0%, 
+            rgba(240, 249, 255, 0.5) 50%, 
+            transparent 100%
+          );
+        }
+      `}</style>
     </header>
   );
 };
