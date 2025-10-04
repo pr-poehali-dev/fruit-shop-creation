@@ -190,7 +190,10 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
               <Button 
                 size="lg"
                 onClick={() => {
-                  onAddToCart(product);
+                  const productToAdd = selectedVariant 
+                    ? { ...product, price: selectedVariant.price, stock: selectedVariant.stock, selectedSize: selectedVariant.size }
+                    : product;
+                  onAddToCart(productToAdd);
                   handleOpenChange(false);
                 }}
               >
