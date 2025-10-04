@@ -138,11 +138,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 
                 if order['payment_method'] == 'balance':
+                    cashback_amount = order['total_amount'] * 0.05
+                    
                     cur.execute(
-                        f"UPDATE users SET balance = balance + {order['total_amount']} WHERE id = {order['user_id']}"
+                        f"UPDATE users SET balance = balance + {order['total_amount']}, cashback = cashback - {cashback_amount} WHERE id = {order['user_id']}"
                     )
                     cur.execute(
                         f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'deposit', {order['total_amount']}, 'Возврат средств за отменённый заказ #{order_id}')"
+                    )
+                    cur.execute(
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({order['user_id']}, 'cashback_cancelled', {cashback_amount}, 'Аннулирование кэшбека за отмену заказа #{order_id}')"
                     )
                 
                 conn.commit()
