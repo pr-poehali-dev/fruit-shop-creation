@@ -19,6 +19,7 @@ import AdminPanel from '@/components/shop/admin/AdminPanel';
 import CartContent from '@/components/shop/CartContent';
 import ProfileContent from '@/components/shop/ProfileContent';
 import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
+import NewYearBackground from '@/components/NewYearBackground';
 
 import { Product } from '@/types/shop';
 
@@ -189,7 +190,9 @@ const Index = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative">
+      <NewYearBackground />
+      
       {showAdminPanel && user?.is_admin ? (
         <AdminPanel 
           user={user}
