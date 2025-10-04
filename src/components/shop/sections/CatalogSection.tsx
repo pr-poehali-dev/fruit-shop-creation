@@ -55,16 +55,16 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
 
   if (!isAuthenticated) {
     return (
-      <div className="relative min-h-[600px] rounded-3xl overflow-hidden">
+      <div className="relative min-h-[600px] rounded-3xl overflow-hidden group">
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-105 group-hover:blur-sm"
           style={{ backgroundImage: 'url(/img/d64bcbd2-3424-4fbc-8e3a-56f22a820104.jpg)' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/80 transition-all duration-700" />
         </div>
         
         <div className="relative z-10 flex flex-col items-center justify-center min-h-[600px] text-center px-6 py-12">
-          <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 group-hover:scale-105 transition-transform duration-500">
             <div className="inline-block">
               <div className="bg-white/10 backdrop-blur-md rounded-full p-6 mb-6">
                 <Icon name="Lock" size={64} className="text-white" />
