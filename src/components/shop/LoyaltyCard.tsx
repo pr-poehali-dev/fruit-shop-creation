@@ -17,7 +17,7 @@ interface LoyaltyCardData {
   id: number;
   card_number: string;
   qr_code: string;
-  purchased_at: string;
+  activated_at: string;
   expires_at?: string;
 }
 
@@ -252,7 +252,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
               <div>
                 <p className="text-xs opacity-90 font-medium">Активирована</p>
                 <p className="text-sm font-bold">
-                  {new Date(card.purchased_at).toLocaleDateString('ru-RU')}
+                  {new Date(card.activated_at).toLocaleDateString('ru-RU')}
                 </p>
               </div>
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
