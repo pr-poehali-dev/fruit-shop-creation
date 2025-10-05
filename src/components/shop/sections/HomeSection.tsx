@@ -22,9 +22,11 @@ interface HomeSectionProps {
   favoriteIds?: Set<number>;
   onToggleFavorite?: (productId: number) => void;
   siteSettings?: any;
+  isAuthenticated?: boolean;
+  onShowAuth?: () => void;
 }
 
-const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite, siteSettings }: HomeSectionProps) => {
+const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated, onShowAuth }: HomeSectionProps) => {
   const showNewYearBanner = siteSettings?.holiday_theme === 'new_year';
   const holidayTheme = siteSettings?.holiday_theme || 'none';
   
@@ -81,7 +83,7 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
             {heroContent.subtitle}
           </p>
-          <Button size="lg" onClick={() => onNavigate('catalog')} className="text-lg shadow-xl hover:shadow-2xl transition-shadow">
+          <Button size="lg" onClick={() => isAuthenticated ? onNavigate('catalog') : onShowAuth?.()} className="text-lg shadow-xl hover:shadow-2xl transition-shadow">
             Перейти в каталог
             <Icon name={heroContent.icon} size={20} className="ml-2" />
           </Button>
@@ -100,26 +102,28 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
         </div>
       </div>
 
-      {/* Секция товаров */}
-      <section className="bg-gradient-to-b from-transparent via-primary/5 to-transparent py-12 -mx-4 px-4 rounded-3xl">
-        <div className="text-center mb-12">
-          <h3 className="text-3xl md:text-4xl font-display font-bold mb-3 text-primary">Популярные товары</h3>
-          <p className="text-muted-foreground">Выбор наших покупателей</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.slice(0, 6).map(product => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              onAddToCart={onAddToCart}
-              onViewDetails={onViewDetails}
-              isFavorite={favoriteIds?.has(product.id)}
-              onToggleFavorite={onToggleFavorite}
-              siteSettings={siteSettings}
-            />
-          ))}
-        </div>
-      </section>
+      {/* Секция товаров - только для авторизованных */}
+      {isAuthenticated && (
+        <section className="bg-gradient-to-b from-transparent via-primary/5 to-transparent py-12 -mx-4 px-4 rounded-3xl">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl md:text-4xl font-display font-bold mb-3 text-primary">Популярные товары</h3>
+            <p className="text-muted-foreground">Выбор наших покупателей</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.slice(0, 6).map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onAddToCart={onAddToCart}
+                onViewDetails={onViewDetails}
+                isFavorite={favoriteIds?.has(product.id)}
+                onToggleFavorite={onToggleFavorite}
+                siteSettings={siteSettings}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };
