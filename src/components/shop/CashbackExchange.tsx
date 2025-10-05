@@ -23,11 +23,6 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
 
   const handleExchange = async () => {
     if (cashbackValue <= 0 || cashbackValue > userCashback) {
-      alert('Некорректная сумма кэшбека');
-      return;
-    }
-
-    if (!confirm(`Обменять ${cashbackValue}₽ кэшбека на ${rubleValue.toFixed(2)}₽?`)) {
       return;
     }
 
@@ -48,15 +43,11 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
       const data = await response.json();
 
       if (data.success) {
-        alert(`Успешно! Вы получили ${rubleValue.toFixed(2)}₽ на баланс`);
         setCashbackAmount('');
         onExchangeSuccess();
-      } else {
-        alert(data.error || 'Ошибка при обмене кэшбека');
       }
     } catch (error) {
       console.error('Error exchanging cashback:', error);
-      alert('Произошла ошибка при обмене');
     } finally {
       setIsExchanging(false);
     }
@@ -79,9 +70,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
-        <form autoComplete="off" onSubmit={(e) => { e.preventDefault(); handleExchange(); }} data-form-type="other">
-          <input type="text" name="prevent_autofill" autoComplete="off" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} tabIndex={-1} aria-hidden="true" />
-          <input type="password" name="prevent_autofill_pass" autoComplete="new-password" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} tabIndex={-1} aria-hidden="true" />
+        <div>
           
           <div className="p-3 sm:p-4 bg-white/50 dark:bg-black/20 rounded-lg space-y-2 sm:space-y-3">
             <div className="flex justify-between items-center">
@@ -129,25 +118,18 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
           </div>
 
           <div className="space-y-1.5 sm:space-y-2 mt-3 sm:mt-4">
-            <Label htmlFor="cashback-input" className="text-xs sm:text-sm">Сумма кэшбека</Label>
+            <Label className="text-xs sm:text-sm">Сумма кэшбека</Label>
             <div className="relative">
-              <Input
-                id="cashback-input"
-                name="cashback_exchange_amount_field"
+              <input
                 type="text"
                 inputMode="numeric"
-                pattern="[0-9]*"
                 value={cashbackAmount}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^0-9]/g, '');
                   setCashbackAmount(value);
                 }}
                 placeholder="0"
-                autoComplete="off"
-                data-form-type="other"
-                data-lpignore="true"
-                data-1p-ignore="true"
-                className="pr-8 text-base sm:text-lg h-11 sm:h-12"
+                className="flex h-11 sm:h-12 w-full rounded-md border border-input bg-background pr-8 pl-3 text-base sm:text-lg ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base">₽</span>
             </div>
@@ -168,7 +150,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
 
           <div className="flex gap-2 pt-1 sm:pt-2 mt-3 sm:mt-4">
             <Button
-              type="submit"
+              onClick={handleExchange}
               disabled={!cashbackValue || cashbackValue > userCashback || isExchanging}
               className="flex-1 bg-green-600 hover:bg-green-700 h-11 sm:h-12 text-sm sm:text-base"
             >
@@ -187,7 +169,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
               <span>Мгновенное зачисление</span>
             </p>
           </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );
