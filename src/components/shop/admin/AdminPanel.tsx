@@ -151,6 +151,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           onDeleteTicket={handleDeleteTicket}
           onUpdateItemStock={handleUpdateItemStock}
           onUpdateItemAvailability={handleUpdateItemAvailability}
+          onRefreshUsers={loadUsers}
         />
       </div>
 

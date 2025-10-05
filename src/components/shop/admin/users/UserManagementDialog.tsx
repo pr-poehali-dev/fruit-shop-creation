@@ -6,6 +6,7 @@ import CashbackTab from './CashbackTab';
 import LoyaltyTab from './LoyaltyTab';
 import TransactionHistoryTab from './TransactionHistoryTab';
 import BanUserTab from '../BanUserTab';
+import ProfileTab from './ProfileTab';
 
 interface User {
   id: number;
@@ -51,6 +52,7 @@ interface UserManagementDialogProps {
   onRefreshTransactions: () => void;
   onRevokeLoyaltyCard: () => void;
   onIssueLoyaltyCard: () => void;
+  onUpdateUser: () => void;
 }
 
 const UserManagementDialog = ({
@@ -69,7 +71,8 @@ const UserManagementDialog = ({
   onSubmit,
   onRefreshTransactions,
   onRevokeLoyaltyCard,
-  onIssueLoyaltyCard
+  onIssueLoyaltyCard,
+  onUpdateUser
 }: UserManagementDialogProps) => {
   return (
     <Dialog open={!!selectedUser} onOpenChange={(open) => !open && onClose()}>
@@ -82,7 +85,11 @@ const UserManagementDialog = ({
         </DialogHeader>
 
         <Tabs value={operationType} onValueChange={onOperationTypeChange}>
-          <TabsList className="grid w-full grid-cols-5 h-auto">
+          <TabsList className="grid w-full grid-cols-6 h-auto">
+            <TabsTrigger value="profile" className="flex flex-col items-center gap-1 py-2 text-xs">
+              <Icon name="User" size={16} />
+              <span className="hidden sm:inline">Профиль</span>
+            </TabsTrigger>
             <TabsTrigger value="balance" className="flex flex-col items-center gap-1 py-2 text-xs">
               <Icon name="Wallet" size={16} />
               <span className="hidden sm:inline">Баланс</span>
@@ -104,6 +111,14 @@ const UserManagementDialog = ({
               <span className="hidden sm:inline">История</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profile">
+            <ProfileTab
+              selectedUser={selectedUser}
+              onCancel={onClose}
+              onUpdate={onUpdateUser}
+            />
+          </TabsContent>
 
           <TabsContent value="balance">
             <BalanceTab

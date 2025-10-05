@@ -34,6 +34,7 @@ interface AdminPanelTabsProps {
   onDeleteTicket: (ticketId: number) => void;
   onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
   onUpdateItemAvailability?: (itemId: number, availableQuantity: number, availablePrice?: number) => void;
+  onRefreshUsers?: () => void;
 }
 
 const AdminPanelTabs = ({
@@ -59,7 +60,8 @@ const AdminPanelTabs = ({
   onDeleteOrder,
   onDeleteTicket,
   onUpdateItemStock,
-  onUpdateItemAvailability
+  onUpdateItemAvailability,
+  onRefreshUsers
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
@@ -121,6 +123,7 @@ const AdminPanelTabs = ({
           onAddCashback={onAddCashback}
           onToggleAdmin={onToggleAdmin}
           onIssueLoyaltyCard={onIssueLoyaltyCard}
+          onRefreshUsers={onRefreshUsers}
         />
       </TabsContent>
 

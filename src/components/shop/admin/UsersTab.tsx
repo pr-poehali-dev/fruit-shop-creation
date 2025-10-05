@@ -36,13 +36,14 @@ interface UsersTabProps {
   onAddCashback: (userId: number, amount: number, description: string) => void;
   onToggleAdmin: (userId: number, isAdmin: boolean) => void;
   onIssueLoyaltyCard: (userId: number) => Promise<void>;
+  onRefreshUsers?: () => void;
 }
 
-const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLoyaltyCard }: UsersTabProps) => {
+const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLoyaltyCard, onRefreshUsers }: UsersTabProps) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [operationType, setOperationType] = useState<'balance' | 'cashback' | 'loyalty'>('balance');
+  const [operationType, setOperationType] = useState<'profile' | 'balance' | 'cashback' | 'loyalty'>('profile');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loyaltyCard, setLoyaltyCard] = useState<LoyaltyCard | null>(null);
@@ -211,13 +212,19 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
         loyaltyCard={loyaltyCard}
         loadingLoyalty={loadingLoyalty}
         onClose={() => setSelectedUser(null)}
-        onOperationTypeChange={(v) => setOperationType(v as 'balance' | 'cashback' | 'loyalty')}
+        onOperationTypeChange={(v) => setOperationType(v as 'profile' | 'balance' | 'cashback' | 'loyalty')}
         onAmountChange={setAmount}
         onDescriptionChange={setDescription}
         onSubmit={handleSubmit}
         onRefreshTransactions={() => selectedUser && loadTransactions(selectedUser.id)}
         onRevokeLoyaltyCard={handleRevokeLoyaltyCard}
         onIssueLoyaltyCard={handleIssueLoyaltyCard}
+        onUpdateUser={() => {
+          if (selectedUser) {
+            loadTransactions(selectedUser.id);
+            onRefreshUsers?.();
+          }
+        }}
       />
     </>
   );

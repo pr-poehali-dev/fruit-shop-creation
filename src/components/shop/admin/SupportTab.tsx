@@ -55,7 +55,12 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
     try {
       setIsSyncing(true);
       const fullTicket = await onLoadTicket(ticket.id);
-      setSelectedTicket(fullTicket);
+      setSelectedTicket(prev => {
+        if (prev && prev.id === fullTicket.id && JSON.stringify(prev.messages) === JSON.stringify(fullTicket.messages)) {
+          return prev;
+        }
+        return fullTicket;
+      });
       setNewStatus(fullTicket.status);
       if (shouldScroll) {
         setTimeout(scrollToBottom, 100);
