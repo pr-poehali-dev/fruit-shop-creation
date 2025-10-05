@@ -32,6 +32,7 @@ interface AdminPanelTabsProps {
   onSaveSettings: (e: React.FormEvent<HTMLFormElement>) => void;
   onDeleteOrder: (orderId: number) => void;
   onDeleteTicket: (ticketId: number) => void;
+  onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
 }
 
 const AdminPanelTabs = ({
@@ -55,7 +56,8 @@ const AdminPanelTabs = ({
   onLoadTicket,
   onSaveSettings,
   onDeleteOrder,
-  onDeleteTicket
+  onDeleteTicket,
+  onUpdateItemStock
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
@@ -121,7 +123,12 @@ const AdminPanelTabs = ({
       </TabsContent>
 
       <TabsContent value="orders">
-        <OrdersTab orders={orders} onUpdateStatus={onUpdateOrderStatus} onDeleteOrder={onDeleteOrder} />
+        <OrdersTab 
+          orders={orders} 
+          onUpdateStatus={onUpdateOrderStatus} 
+          onDeleteOrder={onDeleteOrder}
+          onUpdateItemStock={onUpdateItemStock}
+        />
       </TabsContent>
 
       <TabsContent value="loyalty">

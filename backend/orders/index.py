@@ -18,7 +18,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -46,7 +46,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                            'product_id', oi.product_id,
                            'product_name', p.name,
                            'quantity', oi.quantity,
-                           'price', oi.price
+                           'price', oi.price,
+                           'is_out_of_stock', oi.is_out_of_stock
                        )) as items
                        FROM orders o
                        LEFT JOIN users u ON o.user_id = u.id
@@ -72,7 +73,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                            'product_id', oi.product_id,
                            'product_name', p.name,
                            'quantity', oi.quantity,
-                           'price', oi.price
+                           'price', oi.price,
+                           'is_out_of_stock', oi.is_out_of_stock
                        )) as items
                        FROM orders o
                        LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -251,6 +253,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE orders SET status = '{status}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
                 )
             
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True}),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'PATCH':
+            body_data = json.loads(event.get('body', '{}'))
+            item_id = body_data.get('item_id')
+            is_out_of_stock = body_data.get('is_out_of_stock', False)
+            
+            if not item_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'item_id required'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(
+                f"UPDATE order_items SET is_out_of_stock = {is_out_of_stock} WHERE id = {item_id}"
+            )
             conn.commit()
             
             return {

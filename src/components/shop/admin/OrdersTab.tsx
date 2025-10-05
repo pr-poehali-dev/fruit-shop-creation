@@ -12,6 +12,7 @@ interface OrdersTabProps {
   orders: any[];
   onUpdateStatus: (orderId: number, status: string, rejectionReason?: string) => void;
   onDeleteOrder: (orderId: number) => void;
+  onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -21,8 +22,9 @@ const statusLabels: Record<string, string> = {
   'rejected': '❌ Отклонён'
 };
 
-const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder }: OrdersTabProps) => {
+const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }: OrdersTabProps) => {
   const [editingOrder, setEditingOrder] = useState<any>(null);
+  const [viewingOrder, setViewingOrder] = useState<any>(null);
   const [newStatus, setNewStatus] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
 
@@ -111,14 +113,24 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder }: OrdersTabProps) =>
 
                 {order.items && order.items.length > 0 && (
                   <div className="text-xs sm:text-sm">
-                    <div className="font-medium">Товары:</div>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      {order.items.filter((i: any) => i.product_name).map((item: any, idx: number) => (
-                        <li key={idx} className="break-words">
-                          {item.product_name} x{item.quantity} = {item.price * item.quantity}₽
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="font-medium mb-1">
+                      Товары ({order.items.filter((i: any) => i.product_name).length})
+                      {order.items.some((i: any) => i.is_out_of_stock) && (
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          <Icon name="AlertCircle" size={12} className="mr-1" />
+                          Есть недоступные
+                        </Badge>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setViewingOrder(order)}
+                      className="text-xs h-7 px-2"
+                    >
+                      <Icon name="Package" size={14} className="mr-1" />
+                      Показать детали
+                    </Button>
                   </div>
                 )}
 
@@ -193,6 +205,89 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder }: OrdersTabProps) =>
               >
                 <Icon name="Save" size={18} className="mr-2" />
                 Сохранить
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingOrder} onOpenChange={(open) => !open && setViewingOrder(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Заказ #{viewingOrder?.id} - Детали</DialogTitle>
+            <DialogDescription>
+              Управление наличием товаров в заказе
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <div className="font-medium text-muted-foreground">Клиент</div>
+                <div>{viewingOrder?.user_name}</div>
+              </div>
+              <div>
+                <div className="font-medium text-muted-foreground">Телефон</div>
+                <div>{viewingOrder?.user_phone}</div>
+              </div>
+              <div>
+                <div className="font-medium text-muted-foreground">Сумма</div>
+                <div className="font-bold text-lg">{viewingOrder?.total_amount}₽</div>
+              </div>
+              <div>
+                <div className="font-medium text-muted-foreground">Статус</div>
+                <Badge variant={getStatusBadgeVariant(viewingOrder?.status)}>
+                  {statusLabels[viewingOrder?.status] || viewingOrder?.status}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="font-medium mb-3">Товары в заказе:</div>
+              <div className="space-y-2">
+                {viewingOrder?.items?.filter((i: any) => i.product_name).map((item: any, idx: number) => (
+                  <div 
+                    key={idx} 
+                    className={`p-3 border rounded-lg flex items-start gap-3 ${item.is_out_of_stock ? 'bg-destructive/5 border-destructive/20' : ''}`}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{item.product_name}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Количество: {item.quantity} шт. × {item.price}₽ = {item.price * item.quantity}₽
+                      </div>
+                      {item.is_out_of_stock && (
+                        <div className="text-xs text-destructive mt-1 flex items-center gap-1">
+                          <Icon name="AlertCircle" size={12} />
+                          Нет в наличии
+                        </div>
+                      )}
+                    </div>
+                    {onUpdateItemStock && (
+                      <Button
+                        size="sm"
+                        variant={item.is_out_of_stock ? "outline" : "destructive"}
+                        onClick={() => {
+                          onUpdateItemStock(viewingOrder.id, item.id, !item.is_out_of_stock);
+                          setViewingOrder({
+                            ...viewingOrder,
+                            items: viewingOrder.items.map((i: any) => 
+                              i.id === item.id ? {...i, is_out_of_stock: !i.is_out_of_stock} : i
+                            )
+                          });
+                        }}
+                        className="text-xs"
+                      >
+                        <Icon name={item.is_out_of_stock ? "Check" : "X"} size={14} className="mr-1" />
+                        {item.is_out_of_stock ? 'Есть' : 'Нет'}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t">
+              <Button onClick={() => setViewingOrder(null)}>
+                Закрыть
               </Button>
             </div>
           </div>

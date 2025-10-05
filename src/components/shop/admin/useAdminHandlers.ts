@@ -486,6 +486,35 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleUpdateItemStock = async (orderId: number, itemId: number, isOutOfStock: boolean) => {
+    try {
+      const response = await fetch(props.API_ORDERS, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          item_id: itemId,
+          is_out_of_stock: isOutOfStock
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: isOutOfStock ? 'Товар отмечен как отсутствующий' : 'Товар отмечен как доступный',
+          description: `Статус наличия обновлён в заказе #${orderId}`
+        });
+        props.loadOrders();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить наличие товара',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return {
     handleSaveProduct,
     handleSaveCategory,
@@ -498,6 +527,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleUpdateTicketStatus,
     handleSaveSettings,
     handleDeleteOrder,
-    handleDeleteTicket
+    handleDeleteTicket,
+    handleUpdateItemStock
   };
 };
