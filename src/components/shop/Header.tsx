@@ -93,7 +93,7 @@ const Header = ({
               <img 
                 src={siteSettings.logo_url} 
                 alt={`Логотип ${siteSettings?.site_name || 'Питомник растений'}`}
-                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover"
+                className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-full object-cover border-2 border-white/20 shadow-lg"
               />
             )}
             <h1 className="text-lg sm:text-2xl font-display font-extrabold tracking-tight drop-shadow-md">
