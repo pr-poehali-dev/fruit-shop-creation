@@ -350,6 +350,8 @@ const Index = () => {
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}
                     siteSettings={siteSettings}
+                    isAuthenticated={!!user}
+                    onShowAuth={() => setShowAuthDialog(true)}
                   />
                 )}
 
