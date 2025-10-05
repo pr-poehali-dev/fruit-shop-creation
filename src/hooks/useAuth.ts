@@ -16,9 +16,9 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    if (!user?.id) return;
-
     const syncUserData = async () => {
+      if (!user?.id) return;
+      
       try {
         const [balanceResponse, banResponse] = await Promise.all([
           fetch(`${API_AUTH}?action=balance&user_id=${user.id}`),
@@ -57,8 +57,10 @@ export const useAuth = () => {
       }
     };
 
-    syncUserData();
-    const interval = setInterval(syncUserData, 5000);
+    const interval = setInterval(syncUserData, 10000);
+    if (user?.id) {
+      syncUserData();
+    }
 
     return () => clearInterval(interval);
   }, [user?.id]);
