@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import Icon from '@/components/ui/icon';
+import NotificationsDropdown from './NotificationsDropdown';
 
 interface User {
   id: number;
@@ -28,9 +29,10 @@ interface HeaderProps {
   onShowAuth: () => void;
   onShowCart: () => void;
   onShowProfile: () => void;
+  onRatingRequest?: (entityType: string, entityId: number) => void;
 }
 
-const Header = ({ user, cart, currentSection, onSectionChange, onShowAuth, onShowCart, onShowProfile }: HeaderProps) => {
+const Header = ({ user, cart, currentSection, onSectionChange, onShowAuth, onShowCart, onShowProfile, onRatingRequest }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -49,6 +51,10 @@ const Header = ({ user, cart, currentSection, onSectionChange, onShowAuth, onSho
         </nav>
 
         <div className="flex items-center gap-3">
+          {user && onRatingRequest && (
+            <NotificationsDropdown userId={user.id} onRatingRequest={onRatingRequest} />
+          )}
+          
           <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary/90" onClick={onShowCart}>
             <Icon name="ShoppingCart" size={24} />
             {cart.length > 0 && (

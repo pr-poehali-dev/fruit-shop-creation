@@ -1,4 +1,6 @@
 {
+  "notifications": "https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35",
+  "ratings": "https://functions.poehali.dev/91674d2e-1306-4ae6-9c23-ab0938e8ce5c",
   "admin-update-profile": "https://functions.poehali.dev/4986919b-8daf-4d91-b11a-b3bde148f13f",
   "google-auth": "https://functions.poehali.dev/4a59ecd1-c528-41e9-a77d-003da941bcf4",
   "favorites": "https://functions.poehali.dev/77f82e21-01e9-4f2b-98c5-de4ef28792ad",

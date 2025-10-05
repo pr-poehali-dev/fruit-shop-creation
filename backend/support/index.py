@@ -258,6 +258,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"UPDATE support_tickets SET status = '{status}', updated_at = CURRENT_TIMESTAMP WHERE id = {ticket_id}"
             )
             
+            if status == 'closed':
+                cur.execute(f"SELECT user_id FROM support_tickets WHERE id = {ticket_id}")
+                ticket_user = cur.fetchone()
+                if ticket_user:
+                    user_id_for_notif = ticket_user['user_id']
+                    title = 'Тикет закрыт'
+                    message = 'Ваш тикет был закрыт. Оцените качество поддержки'
+                    
+                    cur.execute(
+                        f"INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, requires_rating) VALUES ({user_id_for_notif}, 'ticket_closed', '{title}', '{message}', 'ticket', {ticket_id}, TRUE)"
+                    )
+            
             conn.commit()
             
             return {

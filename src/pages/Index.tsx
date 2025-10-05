@@ -22,6 +22,7 @@ import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
 import NewYearBackground from '@/components/NewYearBackground';
 import HalloweenTheme from '@/components/HalloweenTheme';
 import SummerTheme from '@/components/SummerTheme';
+import RatingModal from '@/components/RatingModal';
 
 import { Product } from '@/types/shop';
 
@@ -48,6 +49,9 @@ const Index = () => {
   const [currentSection, setCurrentSection] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductGalleryOpen, setIsProductGalleryOpen] = useState(false);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [ratingEntityType, setRatingEntityType] = useState('');
+  const [ratingEntityId, setRatingEntityId] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -330,6 +334,11 @@ const Index = () => {
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
             renderProfileContent={renderProfileContent}
+            onRatingRequest={(entityType: string, entityId: number) => {
+              setRatingEntityType(entityType);
+              setRatingEntityId(entityId);
+              setRatingModalOpen(true);
+            }}
           />
 
           <main className="container mx-auto px-4 py-8">
@@ -406,6 +415,16 @@ const Index = () => {
             onGoogleLogin={handleGoogleLogin}
             banInfo={banInfo}
           />
+
+          {user && (
+            <RatingModal
+              isOpen={ratingModalOpen}
+              onClose={() => setRatingModalOpen(false)}
+              userId={user.id}
+              entityType={ratingEntityType}
+              entityId={ratingEntityId}
+            />
+          )}
         </>
       )}
     </div>

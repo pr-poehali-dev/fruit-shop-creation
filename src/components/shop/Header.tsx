@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import Icon from '@/components/ui/icon';
 import SideMenu from './SideMenu';
 import SnowEffect from './SnowEffect';
+import NotificationsDropdown from '../NotificationsDropdown';
 
 interface User {
   id: number;
@@ -34,6 +35,7 @@ interface HeaderProps {
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
   renderProfileContent: (scrollToSupport?: boolean) => React.ReactNode;
+  onRatingRequest?: (entityType: string, entityId: number) => void;
 }
 
 const Header = ({ 
@@ -47,7 +49,8 @@ const Header = ({
   onSectionChange, 
   onShowAuth,
   renderCartContent,
-  renderProfileContent
+  renderProfileContent,
+  onRatingRequest
 }: HeaderProps) => {
   const isNewYear = siteSettings?.holiday_theme === 'new_year';
   
@@ -112,29 +115,8 @@ const Header = ({
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {user && needsRating && (
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30 border-2 border-orange-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
-                  title="Требуется оценить тикет"
-                >
-                  <Icon name="Bell" size={28} />
-                  <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold shadow-lg animate-pulse">
-                    1
-                  </Badge>
-                  {isNewYear && <div className="icon-snow-sparkle">🔔</div>}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>Профиль</SheetTitle>
-                </SheetHeader>
-                {renderProfileContent(true)}
-              </SheetContent>
-            </Sheet>
+          {user && onRatingRequest && (
+            <NotificationsDropdown userId={user.id} onRatingRequest={onRatingRequest} />
           )}
 
           {user && (

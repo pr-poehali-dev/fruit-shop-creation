@@ -267,6 +267,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE orders SET status = '{status}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
                 )
             
+            cur.execute(f"SELECT user_id FROM orders WHERE id = {order_id}")
+            order_user = cur.fetchone()
+            if order_user and status in ['delivered', 'cancelled', 'confirmed']:
+                user_id_for_notif = order_user['user_id']
+                status_messages = {
+                    'delivered': 'Ваш заказ доставлен! Оцените качество обслуживания',
+                    'cancelled': 'Ваш заказ отменён',
+                    'confirmed': 'Ваш заказ подтвержден и готовится к отправке'
+                }
+                title = 'Статус заказа изменён'
+                message = status_messages.get(status, f'Статус заказа изменён на {status}')
+                requires_rating = status == 'delivered'
+                
+                cur.execute(
+                    f"INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, requires_rating) VALUES ({user_id_for_notif}, 'order_status', '{title}', '{message}', 'order', {order_id}, {requires_rating})"
+                )
+            
             conn.commit()
             
             return {
