@@ -252,7 +252,10 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
               <div>
                 <p className="text-xs opacity-90 font-medium">Активирована</p>
                 <p className="text-sm font-bold">
-                  {new Date(card.activated_at).toLocaleDateString('ru-RU')}
+                  {card.activated_at 
+                    ? new Date(card.activated_at).toLocaleDateString('ru-RU')
+                    : 'Дата не указана'
+                  }
                 </p>
               </div>
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
