@@ -166,8 +166,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 cur.execute(
                     f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards 
-                       (user_id, card_number, qr_code, expires_at) 
-                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW() + INTERVAL '6 months') 
+                       (user_id, card_number, qr_code, activated_at, expires_at) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW(), NOW() + INTERVAL '6 months') 
                        RETURNING *"""
                 )
                 new_card = cur.fetchone()
@@ -210,8 +210,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 cur.execute(
                     f"""INSERT INTO t_p77282076_fruit_shop_creation.loyalty_cards 
-                       (user_id, card_number, qr_code, expires_at) 
-                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW() + INTERVAL '6 months') 
+                       (user_id, card_number, qr_code, activated_at, expires_at) 
+                       VALUES ({user_id}, '{card_number}', '{qr_code}', NOW(), NOW() + INTERVAL '6 months') 
                        RETURNING *"""
                 )
                 new_card = cur.fetchone()
