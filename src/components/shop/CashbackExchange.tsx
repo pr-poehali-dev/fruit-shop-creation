@@ -125,12 +125,18 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
           <div className="relative">
             <Input
               id="cashback-input"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               min="1"
               max={maxCashback}
               value={cashbackAmount}
-              onChange={(e) => setCashbackAmount(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                setCashbackAmount(value);
+              }}
               placeholder="0"
+              autoComplete="off"
               className="pr-8 text-base sm:text-lg h-11 sm:h-12"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base">₽</span>

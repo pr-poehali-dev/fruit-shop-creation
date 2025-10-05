@@ -42,14 +42,15 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
                   .reduce((sum: number, i: any) => {
                     if (i.is_out_of_stock) {
                       if (i.available_quantity > 0) {
-                        const price = i.available_price || i.price;
-                        return sum + (price * i.available_quantity);
+                        const price = parseFloat(i.available_price) || parseFloat(i.price);
+                        const qty = parseInt(i.available_quantity);
+                        return sum + (price * qty);
                       }
                       return sum;
                     }
-                    return sum + (i.price * i.quantity);
-                  }, 0)
-                : order.total_amount
+                    return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                  }, 0).toFixed(2)
+                : parseFloat(order.total_amount).toFixed(2)
               } ₽
             </span>
             <Badge variant="outline" className="text-base sm:text-xs px-1 py-0 sm:px-2 sm:py-1">
@@ -149,13 +150,14 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
                     .reduce((sum: number, i: any) => {
                       if (i.is_out_of_stock) {
                         if (i.available_quantity > 0) {
-                          const price = i.available_price || i.price;
-                          return sum + (price * i.available_quantity);
+                          const price = parseFloat(i.available_price) || parseFloat(i.price);
+                          const qty = parseInt(i.available_quantity);
+                          return sum + (price * qty);
                         }
                         return sum;
                       }
-                      return sum + (i.price * i.quantity);
-                    }, 0)
+                      return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                    }, 0).toFixed(2)
                   }₽
                 </span>
               </div>
