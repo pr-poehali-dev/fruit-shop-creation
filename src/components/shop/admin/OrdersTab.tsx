@@ -85,9 +85,19 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                     <div className="font-bold text-base sm:text-lg">
                       {order.items ? 
                         order.items
-                          .filter((i: any) => i.product_name && !i.is_out_of_stock)
-                          .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
-                        : order.total_amount
+                          .filter((i: any) => i.product_name)
+                          .reduce((sum: number, i: any) => {
+                            if (i.is_out_of_stock) {
+                              if (i.available_quantity > 0) {
+                                const price = parseFloat(i.available_price) || parseFloat(i.price);
+                                const qty = parseInt(i.available_quantity);
+                                return sum + (price * qty);
+                              }
+                              return sum;
+                            }
+                            return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                          }, 0).toFixed(2)
+                        : parseFloat(order.total_amount).toFixed(2)
                       }₽
                     </div>
                     <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
@@ -255,9 +265,19 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                 <div className="font-bold text-lg">
                   {viewingOrder?.items ? 
                     viewingOrder.items
-                      .filter((i: any) => i.product_name && !i.is_out_of_stock)
-                      .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
-                    : viewingOrder?.total_amount
+                      .filter((i: any) => i.product_name)
+                      .reduce((sum: number, i: any) => {
+                        if (i.is_out_of_stock) {
+                          if (i.available_quantity > 0) {
+                            const price = parseFloat(i.available_price) || parseFloat(i.price);
+                            const qty = parseInt(i.available_quantity);
+                            return sum + (price * qty);
+                          }
+                          return sum;
+                        }
+                        return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                      }, 0).toFixed(2)
+                    : parseFloat(viewingOrder?.total_amount).toFixed(2)
                   }₽
                 </div>
               </div>
@@ -396,9 +416,19 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                 <span className="text-lg">
                   {viewingOrder?.items ? 
                     viewingOrder.items
-                      .filter((i: any) => i.product_name && !i.is_out_of_stock)
-                      .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
-                    : viewingOrder?.total_amount
+                      .filter((i: any) => i.product_name)
+                      .reduce((sum: number, i: any) => {
+                        if (i.is_out_of_stock) {
+                          if (i.available_quantity > 0) {
+                            const price = parseFloat(i.available_price) || parseFloat(i.price);
+                            const qty = parseInt(i.available_quantity);
+                            return sum + (price * qty);
+                          }
+                          return sum;
+                        }
+                        return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                      }, 0).toFixed(2)
+                    : parseFloat(viewingOrder?.total_amount).toFixed(2)
                   }₽
                 </span>
               </div>
