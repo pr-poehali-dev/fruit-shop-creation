@@ -217,6 +217,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 ticket_id = body_data.get('ticket_id')
                 rating = body_data.get('rating')
                 rating_comment = body_data.get('rating_comment', '').replace("'", "''")
+                user_id = body_data.get('user_id')
                 
                 if not ticket_id or not rating:
                     return {
@@ -231,6 +232,25 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                        SET rating = {rating}, rating_comment = '{rating_comment}', updated_at = CURRENT_TIMESTAMP 
                        WHERE id = {ticket_id}"""
                 )
+                
+                if user_id:
+                    cur.execute(
+                        f"SELECT id FROM ratings WHERE user_id = {user_id} AND entity_type = 'ticket' AND entity_id = {ticket_id}"
+                    )
+                    existing_rating = cur.fetchone()
+                    
+                    if existing_rating:
+                        cur.execute(
+                            f"UPDATE ratings SET rating = {rating}, comment = '{rating_comment}' WHERE id = {existing_rating['id']}"
+                        )
+                    else:
+                        cur.execute(
+                            f"INSERT INTO ratings (user_id, entity_type, entity_id, rating, comment) VALUES ({user_id}, 'ticket', {ticket_id}, {rating}, '{rating_comment}')"
+                        )
+                    
+                    cur.execute(
+                        f"UPDATE notifications SET rating_given = TRUE WHERE user_id = {user_id} AND entity_type = 'ticket' AND entity_id = {ticket_id}"
+                    )
                 
                 conn.commit()
                 

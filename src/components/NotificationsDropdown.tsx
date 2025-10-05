@@ -45,7 +45,13 @@ const NotificationsDropdown = ({ userId, onRatingRequest }: NotificationsDropdow
       
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications || []);
+        const filteredNotifications = (data.notifications || []).filter((n: Notification) => {
+          if (n.requires_rating && n.rating_given) {
+            return false;
+          }
+          return true;
+        });
+        setNotifications(filteredNotifications);
         setUnreadCount(data.unread_count || 0);
       }
     } catch (error) {
@@ -91,6 +97,24 @@ const NotificationsDropdown = ({ userId, onRatingRequest }: NotificationsDropdow
     }
   };
 
+  const clearAllNotifications = async () => {
+    if (!confirm('Вы уверены, что хотите удалить все уведомления?')) return;
+    
+    try {
+      await fetch('https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': userId.toString(),
+        },
+        body: JSON.stringify({ action: 'clear_all' }),
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Failed to clear notifications:', error);
+    }
+  };
+
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
     
@@ -125,11 +149,24 @@ const NotificationsDropdown = ({ userId, onRatingRequest }: NotificationsDropdow
       <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
         <div className="flex items-center justify-between px-3 py-2">
           <h3 className="font-semibold">Уведомления</h3>
-          {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead} className="h-auto p-1 text-xs">
-              Прочитать все
-            </Button>
-          )}
+          <div className="flex gap-1">
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="h-auto p-1 text-xs">
+                Прочитать все
+              </Button>
+            )}
+            {notifications.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={clearAllNotifications} 
+                className="h-7 w-7"
+                title="Очистить все уведомления"
+              >
+                <Icon name="Trash2" size={16} />
+              </Button>
+            )}
+          </div>
         </div>
         <DropdownMenuSeparator />
         

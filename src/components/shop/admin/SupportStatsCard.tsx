@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
@@ -7,21 +8,69 @@ interface SupportStatsCardProps {
 }
 
 const SupportStatsCard = ({ tickets }: SupportStatsCardProps) => {
-  const ratedTickets = tickets.filter(t => t.rating);
-  const closedTickets = tickets.filter(t => t.status === 'closed' || t.status === 'resolved');
-  const waitingRating = closedTickets.filter(t => !t.rating);
-  
-  const avgRating = ratedTickets.length > 0
-    ? (ratedTickets.reduce((sum, t) => sum + t.rating, 0) / ratedTickets.length).toFixed(1)
+  const [ratingsData, setRatingsData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchRatings = async () => {
+      const ticketRatings = await Promise.all(
+        tickets.map(async (ticket) => {
+          try {
+            const response = await fetch(
+              `https://functions.poehali.dev/91674d2e-1306-4ae6-9c23-ab0938e8ce5c?entity_type=ticket&entity_id=${ticket.id}`,
+              {
+                headers: {
+                  'X-User-Id': ticket.user_id?.toString() || '1',
+                },
+              }
+            );
+            if (response.ok) {
+              const data = await response.json();
+              return { ...ticket, ratingsStats: data };
+            }
+          } catch (error) {
+            console.error('Failed to fetch rating:', error);
+          }
+          return { ...ticket, ratingsStats: null };
+        })
+      );
+      setRatingsData(ticketRatings);
+    };
+
+    if (tickets.length > 0) {
+      fetchRatings();
+    }
+  }, [tickets]);
+
+  const allRatings = ratingsData.reduce((acc, ticket) => {
+    if (ticket.ratingsStats && ticket.ratingsStats.total_ratings > 0) {
+      for (let i = 1; i <= 5; i++) {
+        acc.push(...Array(ticket.ratingsStats[`rating_${i}`] || 0).fill(i));
+      }
+    }
+    return acc;
+  }, []);
+
+  const avgRating = allRatings.length > 0
+    ? (allRatings.reduce((sum: number, r: number) => sum + r, 0) / allRatings.length).toFixed(1)
     : '0.0';
-  
-  const ratingDistribution = [5, 4, 3, 2, 1].map(star => ({
-    star,
-    count: ratedTickets.filter(t => t.rating === star).length,
-    percentage: ratedTickets.length > 0 
-      ? Math.round((ratedTickets.filter(t => t.rating === star).length / ratedTickets.length) * 100)
-      : 0
-  }));
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map(star => {
+    const count = allRatings.filter((r: number) => r === star).length;
+    return {
+      star,
+      count,
+      percentage: allRatings.length > 0 
+        ? Math.round((count / allRatings.length) * 100)
+        : 0
+    };
+  });
+
+  const ratedTicketsCount = ratingsData.filter(t => t.ratingsStats?.total_ratings > 0).length;
+  const closedTickets = tickets.filter(t => t.status === 'closed' || t.status === 'resolved');
+  const waitingRating = closedTickets.filter(t => {
+    const ticketRating = ratingsData.find(r => r.id === t.id);
+    return !ticketRating?.ratingsStats || ticketRating.ratingsStats.total_ratings === 0;
+  });
 
   const totalTickets = tickets.length;
   const activeTickets = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
@@ -53,7 +102,7 @@ const SupportStatsCard = ({ tickets }: SupportStatsCardProps) => {
               <Icon name="Star" size={18} className="text-yellow-500 fill-yellow-500" />
             </div>
             <div className="text-xs text-muted-foreground">
-              Средняя оценка {ratedTickets.length > 0 && `(${ratedTickets.length} оценок)`}
+              Средняя оценка {allRatings.length > 0 && `(${allRatings.length} оценок)`}
             </div>
           </div>
           
@@ -70,7 +119,7 @@ const SupportStatsCard = ({ tickets }: SupportStatsCardProps) => {
           </div>
         </div>
 
-        {ratedTickets.length > 0 && (
+        {allRatings.length > 0 && (
           <div>
             <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
               <Icon name="Star" size={16} />
@@ -99,18 +148,18 @@ const SupportStatsCard = ({ tickets }: SupportStatsCardProps) => {
           </div>
         )}
 
-        {ratedTickets.filter(t => t.rating_comment).length > 0 && (
+        {tickets.filter(t => t.rating_comment).length > 0 && (
           <div>
             <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
               <Icon name="MessageSquare" size={16} />
-              Последние отзывы ({ratedTickets.filter(t => t.rating_comment).length})
+              Последние отзывы ({tickets.filter(t => t.rating_comment).length})
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {ratedTickets
+              {tickets
                 .filter(t => t.rating_comment)
-                .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
                 .slice(0, 5)
-                .map(ticket => (
+                .map((ticket: any) => (
                   <div key={ticket.id} className="p-3 bg-muted rounded-lg border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
