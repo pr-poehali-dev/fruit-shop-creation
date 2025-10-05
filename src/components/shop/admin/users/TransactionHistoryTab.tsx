@@ -28,6 +28,7 @@ const TransactionHistoryTab = ({
       case 'cashback_deposit':
       case 'cashback_earned': return 'Gift';
       case 'cashback_used': return 'Wallet';
+      case 'cashback_exchange': return 'ArrowLeftRight';
       case 'order_payment': return 'ShoppingCart';
       default: return 'CircleDot';
     }
@@ -39,6 +40,7 @@ const TransactionHistoryTab = ({
       case 'cashback_deposit': 
       case 'cashback_earned':
       case 'cashback_used': 
+      case 'cashback_exchange':
         return 'text-green-600';
       case 'withdraw':
       case 'order_payment':

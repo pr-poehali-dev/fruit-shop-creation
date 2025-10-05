@@ -303,6 +303,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.execute(
                     f"UPDATE users SET cashback = cashback - {amount}, balance = balance + {amount} WHERE id = {user_id} RETURNING balance, cashback"
                 )
+            elif transaction_type == 'cashback_exchange':
+                cashback_amount = body_data.get('cashback_amount', 0)
+                
+                cur.execute(f"SELECT cashback FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or float(user['cashback']) < float(cashback_amount):
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Недостаточно кэшбека'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"UPDATE users SET cashback = cashback - {cashback_amount}, balance = balance + {amount} WHERE id = {user_id} RETURNING balance, cashback"
+                )
             
             cur.execute(
                 f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, '{transaction_type}', {amount}, '{description}') RETURNING *"

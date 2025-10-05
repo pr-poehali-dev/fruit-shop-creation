@@ -10,6 +10,7 @@ import Icon from '@/components/ui/icon';
 import { User, Order } from '@/types/shop';
 import UserTickets from './UserTickets';
 import LoyaltyCard from './LoyaltyCard';
+import CashbackExchange from './CashbackExchange';
 
 interface Transaction {
   id: number;
@@ -141,6 +142,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       case 'cashback_deposit': 
       case 'cashback_earned': return 'Gift';
       case 'cashback_used': return 'Wallet';
+      case 'cashback_exchange': return 'ArrowLeftRight';
       case 'cashback_cancelled': return 'XCircle';
       case 'purchase':
       case 'order_payment': return 'ShoppingCart';
@@ -154,6 +156,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       case 'cashback_deposit': 
       case 'cashback_earned':
       case 'cashback_used': 
+      case 'cashback_exchange':
         return 'text-green-600';
       case 'withdraw':
       case 'order_payment':
@@ -262,10 +265,11 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
       )}
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 gap-1">
-          <TabsTrigger value="orders" className="text-xs sm:text-sm px-2">Заказы</TabsTrigger>
-          <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-2">Лояльность</TabsTrigger>
-          <TabsTrigger value="transactions" className="text-xs sm:text-sm px-2">Операции</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 gap-1">
+          <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2">Заказы</TabsTrigger>
+          <TabsTrigger value="cashback" className="text-xs sm:text-sm px-1 sm:px-2">Обмен</TabsTrigger>
+          <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-1 sm:px-2">Карта</TabsTrigger>
+          <TabsTrigger value="transactions" className="text-xs sm:text-sm px-1 sm:px-2">История</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="space-y-3 mt-6">
@@ -412,6 +416,19 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                 </Card>
               ))}
             </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="cashback" className="space-y-3 mt-6">
+          {user && (
+            <CashbackExchange
+              userCashback={user.cashback || 0}
+              userId={user.id}
+              onExchangeSuccess={() => {
+                loadTransactions();
+                onBalanceUpdate();
+              }}
+            />
           )}
         </TabsContent>
 
