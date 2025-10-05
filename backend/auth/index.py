@@ -17,7 +17,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -318,6 +318,41 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'success': True,
                     'transaction': dict(transaction)
                 }, default=str),
+                'isBase64Encoded': False
+            }
+        finally:
+            cur.close()
+            conn.close()
+    
+    if method == 'DELETE':
+        from psycopg2.extras import RealDictCursor
+        db_url = os.environ.get('DATABASE_URL')
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        try:
+            body_data = json.loads(event.get('body', '{}'))
+            transaction_ids = body_data.get('transaction_ids', [])
+            
+            if not transaction_ids:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'transaction_ids required'}),
+                    'isBase64Encoded': False
+                }
+            
+            ids_str = ','.join(str(id) for id in transaction_ids)
+            cur.execute(f"DELETE FROM transactions WHERE id IN ({ids_str})")
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'success': True,
+                    'deleted_count': cur.rowcount
+                }),
                 'isBase64Encoded': False
             }
         finally:

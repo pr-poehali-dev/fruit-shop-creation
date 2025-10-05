@@ -65,16 +65,43 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
     }
   }, [users]);
 
-  const loadTransactions = async (userId: number) => {
+  useEffect(() => {
+    if (selectedUser && operationType === 'history') {
+      const interval = setInterval(() => {
+        loadTransactions(selectedUser.id, true);
+      }, 10000);
+
+      return () => clearInterval(interval);
+    }
+  }, [selectedUser, operationType]);
+
+  const loadTransactions = async (userId: number, silent = false) => {
     try {
-      setLoadingTransactions(true);
+      if (!silent) setLoadingTransactions(true);
       const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=balance&user_id=${userId}`);
       const data = await response.json();
-      setTransactions(data.transactions || []);
+      const allTransactions = data.transactions || [];
+      
+      if (allTransactions.length > 15) {
+        const recentTransactions = allTransactions.slice(0, 15);
+        const oldTransactionIds = allTransactions.slice(15).map((t: Transaction) => t.id);
+        
+        if (oldTransactionIds.length > 0) {
+          fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transaction_ids: oldTransactionIds })
+          }).catch(err => console.error('Error cleaning old transactions:', err));
+        }
+        
+        setTransactions(recentTransactions);
+      } else {
+        setTransactions(allTransactions);
+      }
     } catch (error) {
       console.error('Error loading transactions:', error);
     } finally {
-      setLoadingTransactions(false);
+      if (!silent) setLoadingTransactions(false);
     }
   };
 
