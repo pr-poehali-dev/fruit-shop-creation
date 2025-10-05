@@ -52,7 +52,6 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       loadOrders(user);
-      setShowAuthDialog(false);
     }
   }, [user]);
 
@@ -351,8 +350,6 @@ const Index = () => {
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}
                     siteSettings={siteSettings}
-                    isAuthenticated={!!user}
-                    onShowAuth={() => setShowAuthDialog(true)}
                   />
                 )}
 
