@@ -75,13 +75,21 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Input 
               id="logo-url" 
               name="logo_url" 
-              type="url"
               defaultValue={siteSettings.logo_url || ''} 
-              placeholder="https://example.com/logo.jpg"
+              placeholder="/img/a1a22e5b-c78c-45d4-b175-00ce2339c64f.jpg"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Введите ссылку на изображение логотипа (будет отображаться в шапке сайта)
+              Введите путь к изображению логотипа или ссылку (например: /img/logo.jpg)
             </p>
+            {siteSettings.logo_url && (
+              <div className="mt-2">
+                <img 
+                  src={siteSettings.logo_url} 
+                  alt="Превью логотипа" 
+                  className="h-16 w-16 rounded-full object-cover border-2 border-emerald-500"
+                />
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="site-description">Описание</Label>
