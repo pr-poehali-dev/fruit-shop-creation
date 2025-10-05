@@ -47,7 +47,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                            'product_name', p.name,
                            'quantity', oi.quantity,
                            'price', oi.price,
-                           'is_out_of_stock', oi.is_out_of_stock
+                           'is_out_of_stock', oi.is_out_of_stock,
+                           'available_quantity', oi.available_quantity,
+                           'available_price', oi.available_price
                        )) as items
                        FROM orders o
                        LEFT JOIN users u ON o.user_id = u.id
@@ -74,7 +76,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                            'product_name', p.name,
                            'quantity', oi.quantity,
                            'price', oi.price,
-                           'is_out_of_stock', oi.is_out_of_stock
+                           'is_out_of_stock', oi.is_out_of_stock,
+                           'available_quantity', oi.available_quantity,
+                           'available_price', oi.available_price
                        )) as items
                        FROM orders o
                        LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -105,6 +109,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if action == 'cancel_order':
                 order_id = body_data.get('order_id')
+                cancelled_by = body_data.get('cancelled_by', 'user')
+                cancellation_reason = body_data.get('cancellation_reason', 'Отменён пользователем').replace("'", "''")
                 
                 if not order_id:
                     return {
@@ -136,7 +142,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cur.execute(
-                    f"UPDATE orders SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
+                    f"UPDATE orders SET status = 'cancelled', cancelled_by = '{cancelled_by}', cancellation_reason = '{cancellation_reason}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
                 )
                 
                 if order['payment_method'] == 'balance':
@@ -244,7 +250,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            if rejection_reason:
+            if status == 'cancelled':
+                cancellation_reason = rejection_reason if rejection_reason else 'Отменён администратором'
+                cur.execute(
+                    f"UPDATE orders SET status = '{status}', cancelled_by = 'admin', cancellation_reason = '{cancellation_reason}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
+                )
+            elif rejection_reason:
                 cur.execute(
                     f"UPDATE orders SET status = '{status}', rejection_reason = '{rejection_reason}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
                 )
