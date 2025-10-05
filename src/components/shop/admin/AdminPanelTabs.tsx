@@ -8,6 +8,8 @@ import SettingsTab from './SettingsTab';
 import SupportTab from './SupportTab';
 import LoyaltyScannerTab from './LoyaltyScannerTab';
 import PagesTab from './PagesTab';
+import OrdersStatsCard from './OrdersStatsCard';
+import SupportStatsCard from './SupportStatsCard';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -65,7 +67,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -89,6 +91,10 @@ const AdminPanelTabs = ({
         <TabsTrigger value="support" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="MessageCircle" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Поддержка</span>
+        </TabsTrigger>
+        <TabsTrigger value="ratings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="Star" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">Оценки</span>
         </TabsTrigger>
         <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="FileText" size={16} className="sm:mr-1" />
@@ -149,6 +155,13 @@ const AdminPanelTabs = ({
           onLoadTicket={onLoadTicket}
           onDeleteTicket={onDeleteTicket}
         />
+      </TabsContent>
+
+      <TabsContent value="ratings">
+        <div className="space-y-4">
+          <OrdersStatsCard orders={orders} />
+          <SupportStatsCard tickets={tickets} />
+        </div>
       </TabsContent>
 
       <TabsContent value="pages">
