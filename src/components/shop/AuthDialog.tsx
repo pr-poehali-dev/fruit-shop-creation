@@ -168,7 +168,7 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
             <TabsTrigger value="register">Регистрация</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
-            <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-4">
+            <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-4" autoComplete="on">
               <div>
                 <Label htmlFor="login-phone">Телефон</Label>
                 <Input 
@@ -181,12 +181,13 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
                   onFocus={(e) => {
                     if (e.target.value === '') e.target.value = '+7';
                   }}
+                  autoComplete="username"
                   required 
                 />
               </div>
               <div>
                 <Label htmlFor="login-password">Пароль</Label>
-                <Input id="login-password" name="password" type="password" required />
+                <Input id="login-password" name="password" type="password" autoComplete="current-password" required />
               </div>
               <Button type="submit" className="w-full">Войти</Button>
               
@@ -215,7 +216,7 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
             </form>
           </TabsContent>
           <TabsContent value="register">
-            <form onSubmit={(e) => onSubmit(e, 'register')} className="space-y-4">
+            <form onSubmit={(e) => onSubmit(e, 'register')} className="space-y-4" autoComplete="on">
               <div>
                 <Label htmlFor="register-phone">Телефон</Label>
                 <Input 
@@ -228,16 +229,17 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
                   onFocus={(e) => {
                     if (e.target.value === '') e.target.value = '+7';
                   }}
+                  autoComplete="username"
                   required 
                 />
               </div>
               <div>
                 <Label htmlFor="register-name">Имя</Label>
-                <Input id="register-name" name="full_name" placeholder="Иван Иванов" />
+                <Input id="register-name" name="full_name" placeholder="Иван Иванов" autoComplete="name" />
               </div>
               <div>
                 <Label htmlFor="register-password">Пароль</Label>
-                <Input id="register-password" name="password" type="password" required />
+                <Input id="register-password" name="password" type="password" autoComplete="new-password" required />
               </div>
               <Button type="submit" className="w-full">Зарегистрироваться</Button>
             </form>

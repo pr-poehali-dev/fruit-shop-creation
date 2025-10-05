@@ -79,9 +79,9 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
-        <form autoComplete="off" onSubmit={(e) => { e.preventDefault(); handleExchange(); }}>
-          <input type="text" name="fakeusernameremembered" style={{ position: 'absolute', top: '-9999px' }} tabIndex={-1} />
-          <input type="password" name="fakepasswordremembered" style={{ position: 'absolute', top: '-9999px' }} tabIndex={-1} />
+        <form autoComplete="off" onSubmit={(e) => { e.preventDefault(); handleExchange(); }} data-form-type="other">
+          <input type="text" name="prevent_autofill" autoComplete="off" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} tabIndex={-1} aria-hidden="true" />
+          <input type="password" name="prevent_autofill_pass" autoComplete="new-password" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} tabIndex={-1} aria-hidden="true" />
           
           <div className="p-3 sm:p-4 bg-white/50 dark:bg-black/20 rounded-lg space-y-2 sm:space-y-3">
             <div className="flex justify-between items-center">
@@ -133,7 +133,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
             <div className="relative">
               <Input
                 id="cashback-input"
-                name="cashback-exchange-amount"
+                name="cashback_exchange_amount_field"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -143,7 +143,10 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
                   setCashbackAmount(value);
                 }}
                 placeholder="0"
-                autoComplete="new-password"
+                autoComplete="off"
+                data-form-type="other"
+                data-lpignore="true"
+                data-1p-ignore="true"
                 className="pr-8 text-base sm:text-lg h-11 sm:h-12"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base">₽</span>
