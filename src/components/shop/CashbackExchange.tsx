@@ -28,23 +28,31 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
 
     setIsExchanging(true);
     try {
+      const requestBody = {
+        user_id: userId,
+        type: 'cashback_exchange',
+        amount: rubleValue,
+        cashback_amount: cashbackValue,
+        description: `Обмен ${cashbackValue}₽ кэшбека на ${rubleValue.toFixed(2)}₽`,
+        action: 'update_balance'
+      };
+      
+      console.log('Sending exchange request:', requestBody);
+      
       const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          type: 'cashback_exchange',
-          amount: rubleValue,
-          cashback_amount: cashbackValue,
-          description: `Обмен ${cashbackValue}₽ кэшбека на ${rubleValue.toFixed(2)}₽`
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
+      console.log('Exchange response:', data);
 
       if (data.success) {
         setCashbackAmount('');
         onExchangeSuccess();
+      } else {
+        console.error('Exchange failed:', data);
       }
     } catch (error) {
       console.error('Error exchanging cashback:', error);
