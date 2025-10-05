@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminData } from './useAdminData';
 import { useAdminHandlers } from './useAdminHandlers';
 import AdminPanelHeader from './AdminPanelHeader';
 import AdminPanelTabs from './AdminPanelTabs';
 import ProductDialog from './ProductDialog';
 import CategoryDialog from './CategoryDialog';
+import AdminPinDialog from './AdminPinDialog';
 import { Product, Category } from './types';
 
 interface AdminPanelProps {
@@ -14,10 +15,25 @@ interface AdminPanelProps {
 }
 
 const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
+  const [isPinVerified, setIsPinVerified] = useState(false);
+  const [showPinDialog, setShowPinDialog] = useState(true);
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
+  useEffect(() => {
+    const verified = localStorage.getItem('admin_pin_verified');
+    const expiry = localStorage.getItem('admin_pin_expiry');
+    
+    if (verified === 'true' && expiry) {
+      const expiryTime = parseInt(expiry, 10);
+      if (Date.now() < expiryTime) {
+        setIsPinVerified(true);
+        setShowPinDialog(false);
+      }
+    }
+  }, []);
 
   const {
     products,
@@ -81,6 +97,25 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     setEditingProduct(product || null);
     setShowProductDialog(true);
   };
+
+  const handlePinSuccess = () => {
+    setIsPinVerified(true);
+    setShowPinDialog(false);
+  };
+
+  const handlePinCancel = () => {
+    onClose();
+  };
+
+  if (!isPinVerified) {
+    return (
+      <AdminPinDialog
+        open={showPinDialog}
+        onSuccess={handlePinSuccess}
+        onCancel={handlePinCancel}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">

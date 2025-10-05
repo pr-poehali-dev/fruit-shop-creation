@@ -195,6 +195,32 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
               </div>
             </div>
           </div>
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Shield" size={20} />
+              Безопасность
+            </h3>
+            <div>
+              <Label htmlFor="admin-pin">PIN-код для входа в админ-панель</Label>
+              <Input 
+                id="admin-pin" 
+                name="admin_pin" 
+                type="text"
+                maxLength={10}
+                defaultValue={siteSettings.admin_pin || '0000'} 
+                placeholder="0000"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Дополнительная защита для админ-панели. Потребуется вводить при каждом входе. По умолчанию: 0000
+              </p>
+              <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                  <Icon name="AlertTriangle" size={16} />
+                  <span>Запомните свой PIN-код! Без него вход в админ-панель будет невозможен.</span>
+                </p>
+              </div>
+            </div>
+          </div>
           <Button type="submit">
             <Icon name="Save" size={18} className="mr-2" />
             Сохранить изменения
