@@ -159,6 +159,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             onDismiss={ratedTicket ? () => setRatedTicket(null) : undefined}
             apiUrl={API_SUPPORT}
             messagesEndRef={messagesEndRef}
+            userId={user?.id}
           />
         ) : (
           <Card>

@@ -8,9 +8,10 @@ interface QuickRatingBarProps {
   ticketId: number;
   apiUrl: string;
   onRatingSubmitted: () => void;
+  userId?: number;
 }
 
-const QuickRatingBar = ({ ticketId, apiUrl, onRatingSubmitted }: QuickRatingBarProps) => {
+const QuickRatingBar = ({ ticketId, apiUrl, onRatingSubmitted, userId }: QuickRatingBarProps) => {
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [showComment, setShowComment] = useState(false);
@@ -38,7 +39,8 @@ const QuickRatingBar = ({ ticketId, apiUrl, onRatingSubmitted }: QuickRatingBarP
           action: 'rate_ticket',
           ticket_id: ticketId,
           rating: rating,
-          rating_comment: ratingComment
+          rating_comment: ratingComment,
+          user_id: userId
         })
       });
 

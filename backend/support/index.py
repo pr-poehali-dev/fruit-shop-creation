@@ -101,9 +101,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                        FROM support_tickets t
                        LEFT JOIN users u ON t.user_id = u.id
                        LEFT JOIN support_messages m ON t.id = m.ticket_id
-                       WHERE t.user_id = {user_id} AND t.status IN ('open', 'in_progress')
+                       WHERE t.user_id = {user_id}
                        GROUP BY t.id, u.full_name, u.phone
-                       ORDER BY t.created_at DESC
+                       ORDER BY t.updated_at DESC
                        LIMIT 1"""
                 )
                 active_ticket = cur.fetchone()

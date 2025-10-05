@@ -18,6 +18,7 @@ interface TicketCardProps {
   onDismiss?: () => void;
   apiUrl?: string;
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  userId?: number;
 }
 
 const TicketCard = ({
@@ -30,7 +31,8 @@ const TicketCard = ({
   onShowRating,
   onDismiss,
   apiUrl,
-  messagesEndRef
+  messagesEndRef,
+  userId
 }: TicketCardProps) => {
   const isClosed = ticket.status === 'closed' || ticket.status === 'resolved';
   const canReply = !isClosed || (isClosed && !ticket.rating);
@@ -167,6 +169,7 @@ const TicketCard = ({
           ticketId={ticket.id}
           apiUrl={apiUrl}
           onRatingSubmitted={onShowRating}
+          userId={userId}
         />
       )}
     </Card>
