@@ -86,10 +86,10 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
             )}
           </>
         ) : (
-          <div className="w-full h-48 bg-muted flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <Icon name="ImageOff" size={48} className="mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Картинка ещё не добавлена</p>
+          <div className="w-full h-48 bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <Icon name="ImageOff" size={48} className="mx-auto mb-2" />
+              <p className="text-sm font-medium">Картинка ещё не добавлена</p>
             </div>
           </div>
         )}
