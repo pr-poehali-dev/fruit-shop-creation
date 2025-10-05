@@ -52,6 +52,7 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       loadOrders(user);
+      setShowAuthDialog(false);
     }
   }, [user]);
 
