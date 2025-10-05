@@ -27,13 +27,7 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
 
-  useEffect(() => {
-    if (scrollToSupport && supportRef.current) {
-      setTimeout(() => {
-        supportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 300);
-    }
-  }, [scrollToSupport]);
+
 
   useEffect(() => {
     const checkLoyaltyCard = async () => {

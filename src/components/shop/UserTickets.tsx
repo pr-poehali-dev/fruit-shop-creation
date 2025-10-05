@@ -36,7 +36,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadActiveTicket = async (shouldScroll: boolean = true) => {
+  const loadActiveTicket = async (shouldScroll: boolean = false) => {
     if (!user) return;
     
     try {
@@ -101,7 +101,7 @@ const UserTickets = ({ user }: UserTicketsProps) => {
           description: 'Ваш ответ добавлен в тикет'
         });
         setReplyMessage('');
-        await loadActiveTicket();
+        await loadActiveTicket(false);
         setTimeout(scrollToBottom, 100);
       } else {
         throw new Error(data.error);
