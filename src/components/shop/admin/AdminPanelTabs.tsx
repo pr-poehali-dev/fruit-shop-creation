@@ -33,6 +33,7 @@ interface AdminPanelTabsProps {
   onDeleteOrder: (orderId: number) => void;
   onDeleteTicket: (ticketId: number) => void;
   onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
+  onUpdateItemAvailability?: (itemId: number, availableQuantity: number, availablePrice?: number) => void;
 }
 
 const AdminPanelTabs = ({
@@ -57,7 +58,8 @@ const AdminPanelTabs = ({
   onSaveSettings,
   onDeleteOrder,
   onDeleteTicket,
-  onUpdateItemStock
+  onUpdateItemStock,
+  onUpdateItemAvailability
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
@@ -128,6 +130,7 @@ const AdminPanelTabs = ({
           onUpdateStatus={onUpdateOrderStatus} 
           onDeleteOrder={onDeleteOrder}
           onUpdateItemStock={onUpdateItemStock}
+          onUpdateItemAvailability={onUpdateItemAvailability}
         />
       </TabsContent>
 

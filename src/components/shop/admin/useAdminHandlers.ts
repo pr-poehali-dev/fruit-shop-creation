@@ -515,6 +515,36 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleUpdateItemAvailability = async (itemId: number, availableQuantity: number, availablePrice?: number) => {
+    try {
+      const response = await fetch(props.API_ORDERS, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          item_id: itemId,
+          available_quantity: availableQuantity,
+          available_price: availablePrice
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Доступность обновлена',
+          description: `Установлено: ${availableQuantity} шт.${availablePrice ? ` по ${availablePrice}₽` : ''}`
+        });
+        props.loadOrders();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить доступность товара',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return {
     handleSaveProduct,
     handleSaveCategory,
@@ -528,6 +558,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleSaveSettings,
     handleDeleteOrder,
     handleDeleteTicket,
-    handleUpdateItemStock
+    handleUpdateItemStock,
+    handleUpdateItemAvailability
   };
 };

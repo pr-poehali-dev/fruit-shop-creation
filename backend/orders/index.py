@@ -276,7 +276,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'PATCH':
             body_data = json.loads(event.get('body', '{}'))
             item_id = body_data.get('item_id')
-            is_out_of_stock = body_data.get('is_out_of_stock', False)
+            is_out_of_stock = body_data.get('is_out_of_stock')
+            available_quantity = body_data.get('available_quantity')
+            available_price = body_data.get('available_price')
             
             if not item_id:
                 return {
@@ -298,9 +300,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             order_id = item_data['order_id']
             
-            cur.execute(
-                f"UPDATE order_items SET is_out_of_stock = {is_out_of_stock} WHERE id = {item_id}"
-            )
+            if is_out_of_stock is not None:
+                cur.execute(
+                    f"UPDATE order_items SET is_out_of_stock = {is_out_of_stock} WHERE id = {item_id}"
+                )
+            
+            if available_quantity is not None:
+                cur.execute(
+                    f"UPDATE order_items SET available_quantity = {available_quantity} WHERE id = {item_id}"
+                )
+            
+            if available_price is not None:
+                cur.execute(
+                    f"UPDATE order_items SET available_price = {available_price} WHERE id = {item_id}"
+                )
             
             cur.execute(
                 f"""SELECT COALESCE(SUM(CASE WHEN is_out_of_stock = FALSE THEN price * quantity ELSE 0 END), 0) as new_total

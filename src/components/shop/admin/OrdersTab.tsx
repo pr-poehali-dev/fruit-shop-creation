@@ -14,6 +14,7 @@ interface OrdersTabProps {
   onUpdateStatus: (orderId: number, status: string, rejectionReason?: string) => void;
   onDeleteOrder: (orderId: number) => void;
   onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
+  onUpdateItemAvailability?: (itemId: number, availableQuantity: number, availablePrice?: number) => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -24,11 +25,12 @@ const statusLabels: Record<string, string> = {
   'cancelled': '🚫 Отменён'
 };
 
-const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }: OrdersTabProps) => {
+const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, onUpdateItemAvailability }: OrdersTabProps) => {
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [viewingOrder, setViewingOrder] = useState<any>(null);
   const [newStatus, setNewStatus] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [itemAvailability, setItemAvailability] = useState<Record<number, { quantity: number; price: string }>>({});
 
   const openStatusDialog = (order: any) => {
     setEditingOrder(order);
@@ -311,33 +313,71 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }:
                       </div>
 
                       {item.is_out_of_stock && (
-                        <div className="grid grid-cols-2 gap-2 pt-2 border-t">
-                          <div>
-                            <Label className="text-xs">Есть в наличии (шт)</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              max={item.quantity}
-                              placeholder="0"
-                              className="h-8 text-sm"
-                              defaultValue={item.available_quantity || 0}
-                            />
+                        <div className="space-y-2 pt-2 border-t">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Есть в наличии (шт)</Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                max={item.quantity}
+                                placeholder="0"
+                                className="h-8 text-sm"
+                                value={itemAvailability[item.id]?.quantity ?? item.available_quantity ?? 0}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value) || 0;
+                                  setItemAvailability(prev => ({
+                                    ...prev,
+                                    [item.id]: {
+                                      quantity: value,
+                                      price: prev[item.id]?.price ?? item.available_price ?? item.price
+                                    }
+                                  }));
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Цена (₽)</Label>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder={item.price}
+                                className="h-8 text-sm"
+                                value={itemAvailability[item.id]?.price ?? item.available_price ?? ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setItemAvailability(prev => ({
+                                    ...prev,
+                                    [item.id]: {
+                                      quantity: prev[item.id]?.quantity ?? item.available_quantity ?? 0,
+                                      price: value
+                                    }
+                                  }));
+                                }}
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <Label className="text-xs">Цена (₽)</Label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder={item.price}
-                              className="h-8 text-sm"
-                              defaultValue={item.available_price || ''}
-                            />
-                          </div>
-                          <div className="col-span-2 text-xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground">
                             <Icon name="Info" size={12} className="inline mr-1" />
                             Укажите количество, если товар есть частично, или новую цену
                           </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full text-xs"
+                            onClick={() => {
+                              const availability = itemAvailability[item.id];
+                              if (availability && onUpdateItemAvailability) {
+                                const price = availability.price ? parseFloat(availability.price) : undefined;
+                                onUpdateItemAvailability(item.id, availability.quantity, price);
+                                alert('Данные о наличии сохранены');
+                              }
+                            }}
+                          >
+                            <Icon name="Save" size={14} className="mr-1" />
+                            Сохранить наличие
+                          </Button>
                         </div>
                       )}
 

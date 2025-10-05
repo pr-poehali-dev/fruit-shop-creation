@@ -351,33 +351,66 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                       {order.items && order.items.length > 0 && (
                         <div className="space-y-2">
                           <div className="text-sm font-medium">Товары:</div>
-                          {order.items.filter((i: any) => i.product_name).map((item: any, idx: number) => (
-                            <div 
-                              key={idx} 
-                              className={`text-xs p-2 rounded border ${item.is_out_of_stock ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/30'}`}
-                            >
-                              <div className="flex justify-between items-start">
-                                <span className={item.is_out_of_stock ? 'line-through text-muted-foreground' : ''}>
-                                  {item.product_name}
-                                </span>
-                                {!item.is_out_of_stock && (
-                                  <span className="font-medium">{item.quantity} × {item.price}₽</span>
+                          {order.items.filter((i: any) => i.product_name).map((item: any, idx: number) => {
+                            const hasPartialAvailability = item.is_out_of_stock && item.available_quantity > 0;
+                            const effectivePrice = item.available_price || item.price;
+                            const effectiveQuantity = hasPartialAvailability ? item.available_quantity : item.quantity;
+                            
+                            return (
+                              <div 
+                                key={idx} 
+                                className={`text-xs p-2 rounded border ${item.is_out_of_stock ? 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800' : 'bg-muted/30'}`}
+                              >
+                                <div className="flex justify-between items-start">
+                                  <span className={item.is_out_of_stock && !hasPartialAvailability ? 'line-through text-muted-foreground' : ''}>
+                                    {item.product_name}
+                                  </span>
+                                  {!item.is_out_of_stock && (
+                                    <span className="font-medium">{item.quantity} × {item.price}₽</span>
+                                  )}
+                                </div>
+                                
+                                {item.is_out_of_stock && (
+                                  <div className="mt-1 space-y-1">
+                                    {hasPartialAvailability ? (
+                                      <>
+                                        <div className="text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                                          <Icon name="AlertCircle" size={12} />
+                                          <span>Доступно: {effectiveQuantity} шт. из {item.quantity}</span>
+                                        </div>
+                                        <div className="font-medium">
+                                          {effectiveQuantity} × {effectivePrice}₽ = {(effectiveQuantity * effectivePrice).toFixed(2)}₽
+                                          {item.available_price && item.available_price !== item.price && (
+                                            <span className="text-muted-foreground ml-1">(новая цена)</span>
+                                          )}
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div className="text-destructive flex items-center gap-1">
+                                        <Icon name="AlertCircle" size={12} />
+                                        Товар отсутствует в наличии
+                                      </div>
+                                    )}
+                                  </div>
                                 )}
                               </div>
-                              {item.is_out_of_stock && (
-                                <div className="text-destructive mt-1 flex items-center gap-1">
-                                  <Icon name="AlertCircle" size={12} />
-                                  Товар отсутствует в наличии
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                           <div className="flex justify-between items-center pt-2 border-t text-sm font-bold">
                             <span>Итого к оплате:</span>
                             <span>
                               {order.items
-                                .filter((i: any) => i.product_name && !i.is_out_of_stock)
-                                .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
+                                .filter((i: any) => i.product_name)
+                                .reduce((sum: number, i: any) => {
+                                  if (i.is_out_of_stock) {
+                                    if (i.available_quantity > 0) {
+                                      const price = i.available_price || i.price;
+                                      return sum + (price * i.available_quantity);
+                                    }
+                                    return sum;
+                                  }
+                                  return sum + (i.price * i.quantity);
+                                }, 0)
                               }₽
                             </span>
                           </div>
