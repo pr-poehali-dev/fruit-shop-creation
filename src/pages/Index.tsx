@@ -367,6 +367,7 @@ const Index = () => {
                     favoriteIds={favoriteIds}
                     onToggleFavorite={toggleFavorite}
                     siteSettings={siteSettings}
+                    onClose={() => setCurrentSection('catalog')}
                   />
                 )}
 

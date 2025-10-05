@@ -38,9 +38,10 @@ interface FavoritesSectionProps {
   favoriteIds: Set<number>;
   onToggleFavorite: (productId: number) => void;
   siteSettings?: any;
+  onClose?: () => void;
 }
 
-const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorite, siteSettings }: FavoritesSectionProps) => {
+const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorite, siteSettings, onClose }: FavoritesSectionProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -62,9 +63,20 @@ const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorit
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-8">
-        <Icon name="Heart" size={32} className="text-red-500" />
-        <h2 className="text-4xl font-display font-bold">Избранное</h2>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <Icon name="Heart" size={32} className="text-red-500" />
+          <h2 className="text-4xl font-display font-bold">Избранное</h2>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-muted rounded-full transition-colors"
+            aria-label="Вернуться на главную"
+          >
+            <Icon name="X" size={24} />
+          </button>
+        )}
       </div>
 
       {favorites.length === 0 ? (
