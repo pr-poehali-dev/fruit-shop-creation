@@ -161,21 +161,21 @@ const LoyaltyScannerTab = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Сканер карт лояльности</CardTitle>
-        <CardDescription>Начисление кэшбэка по QR-коду карты</CardDescription>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Сканер карт лояльности</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Начисление кэшбэка по QR-коду</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-primary/5 p-4 rounded-lg border-2 border-dashed border-primary/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Icon name="ScanLine" size={24} className="text-primary" />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="bg-primary/5 p-3 sm:p-4 rounded-lg border-2 border-dashed border-primary/20">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Icon name="ScanLine" size={20} className="text-primary sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <p className="font-semibold">Сканирование QR-кода</p>
-                  <p className="text-xs text-muted-foreground">Камера или ввод вручную</p>
+                  <p className="font-semibold text-sm sm:text-base">Сканирование QR-кода</p>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Камера или ввод вручную</p>
                 </div>
               </div>
               <Button
@@ -183,38 +183,39 @@ const LoyaltyScannerTab = () => {
                 variant={isCameraActive ? "destructive" : "default"}
                 size="sm"
                 onClick={toggleCamera}
+                className="w-full sm:w-auto"
               >
                 <Icon name={isCameraActive ? "CameraOff" : "Camera"} size={18} className="mr-2" />
-                {isCameraActive ? 'Закрыть' : 'Открыть камеру'}
+                {isCameraActive ? 'Закрыть камеру' : 'Открыть камеру'}
               </Button>
             </div>
 
             {isCameraActive && (
-              <div className="mb-4 rounded-lg overflow-hidden border-2 border-primary">
+              <div className="mb-4 rounded-lg overflow-hidden border-2 border-primary aspect-square max-h-[300px] sm:max-h-[400px]">
                 <QrScanner
                   delay={300}
                   onError={handleError}
                   onScan={handleScan}
-                  style={{ width: '100%' }}
+                  style={{ width: '100%', height: '100%' }}
                   constraints={{
-                    video: { facingMode: 'environment' }
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1280 } }
                   }}
                 />
               </div>
             )}
 
             {cameraError && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-800 dark:text-red-200 flex items-center gap-2">
-                  <Icon name="AlertCircle" size={16} />
-                  {cameraError}
+              <div className="mb-3 p-2.5 sm:p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-xs sm:text-sm text-red-800 dark:text-red-200 flex items-center gap-2">
+                  <Icon name="AlertCircle" size={16} className="flex-shrink-0" />
+                  <span>{cameraError}</span>
                 </p>
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="card-number">Номер карты</Label>
+                <Label htmlFor="card-number" className="text-sm">Номер карты</Label>
                 <Input
                   ref={cardInputRef}
                   id="card-number"
@@ -222,17 +223,17 @@ const LoyaltyScannerTab = () => {
                   onChange={(e) => handleCardNumberChange(e.target.value)}
                   placeholder="Отсканируйте QR или введите LC..."
                   required
-                  className="font-mono text-base"
+                  className="font-mono text-sm sm:text-base h-11 sm:h-10"
                   autoComplete="off"
                   autoFocus={!isCameraActive}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  💡 Нажмите "Открыть камеру" для сканирования QR-кода
+                  💡 Откройте камеру для сканирования QR
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="purchase-amount">Сумма покупки (₽)</Label>
+                <Label htmlFor="purchase-amount" className="text-sm">Сумма покупки (₽)</Label>
                 <Input
                   id="purchase-amount"
                   type="number"
@@ -242,15 +243,17 @@ const LoyaltyScannerTab = () => {
                   onChange={(e) => setPurchaseAmount(e.target.value)}
                   placeholder="1000"
                   required
+                  className="text-sm sm:text-base h-11 sm:h-10"
+                  inputMode="decimal"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Кэшбек 3% начисляется от суммы покупки от 100₽
+                  Кэшбек 3% от суммы от 100₽
                 </p>
               </div>
             </div>
           </div>
 
-          <Button type="submit" disabled={isProcessing} className="w-full">
+          <Button type="submit" disabled={isProcessing} className="w-full h-11 sm:h-10 text-sm sm:text-base font-semibold">
             {isProcessing ? (
               <>Обработка...</>
             ) : (
@@ -262,35 +265,35 @@ const LoyaltyScannerTab = () => {
           </Button>
 
           {lastResult && (
-            <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                  <Icon name="CheckCircle2" size={20} className="text-white" />
+            <div className="bg-green-50 dark:bg-green-950/20 p-3 sm:p-4 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                  <Icon name="CheckCircle2" size={18} className="text-white sm:w-5 sm:h-5" />
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-green-900 dark:text-green-100">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100">
                     Кэшбек успешно начислен
                   </h4>
-                  <div className="mt-2 space-y-1 text-sm text-green-800 dark:text-green-200">
-                    <p>Клиент: <strong>{lastResult.user_name}</strong> ({lastResult.user_phone})</p>
-                    <p>Начислено кэшбэка: <strong className="text-lg">+{lastResult.cashback_earned.toFixed(2)}₽</strong></p>
-                    <p>Новый баланс кэшбэка: <strong>{lastResult.new_cashback.toFixed(2)}₽</strong></p>
+                  <div className="mt-2 space-y-1 text-xs sm:text-sm text-green-800 dark:text-green-200">
+                    <p className="break-words">Клиент: <strong>{lastResult.user_name}</strong></p>
+                    <p className="text-sm sm:text-base">Начислено: <strong className="text-base sm:text-lg">+{lastResult.cashback_earned.toFixed(2)}₽</strong></p>
+                    <p>Баланс: <strong>{lastResult.new_cashback.toFixed(2)}₽</strong></p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <h4 className="font-semibold mb-2 flex items-center gap-2">
-              <Icon name="Info" size={16} />
-              Как это работает
+          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg">
+            <h4 className="font-semibold mb-2 text-sm sm:text-base flex items-center gap-2">
+              <Icon name="Info" size={16} className="flex-shrink-0" />
+              Как работает
             </h4>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Нажмите "Открыть камеру" и наведите на QR-код</li>
+            <ul className="text-xs sm:text-sm text-muted-foreground space-y-1">
+              <li>• Откройте камеру и наведите на QR-код</li>
               <li>• Или введите номер карты вручную</li>
-              <li>• Введите сумму покупки (минимум 100₽)</li>
-              <li>• Система начислит 3% кэшбэка на счет клиента</li>
+              <li>• Введите сумму покупки (мин. 100₽)</li>
+              <li>• Система начислит 3% кэшбэка</li>
             </ul>
           </div>
         </form>
