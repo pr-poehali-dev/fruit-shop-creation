@@ -158,7 +158,11 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            onAddToCart(product);
+            if (hasVariants) {
+              onViewDetails(product);
+            } else {
+              onAddToCart(product);
+            }
           }}
         >
           {isNewYear && <div className="button-snow-cap"></div>}
