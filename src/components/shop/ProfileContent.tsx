@@ -295,7 +295,14 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{order.total_amount} ₽</span>
+                        <span className="text-sm font-medium">
+                          {order.items ? 
+                            order.items
+                              .filter((i: any) => i.product_name && !i.is_out_of_stock)
+                              .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
+                            : order.total_amount
+                          } ₽
+                        </span>
                         <Badge variant="outline" className="text-xs">
                           {order.status === 'pending' && '⏳'}
                           {order.status === 'processing' && '📦'}
@@ -336,6 +343,42 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
                           </div>
                         )}
                       </div>
+                      
+                      {order.items && order.items.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="text-sm font-medium">Товары:</div>
+                          {order.items.filter((i: any) => i.product_name).map((item: any, idx: number) => (
+                            <div 
+                              key={idx} 
+                              className={`text-xs p-2 rounded border ${item.is_out_of_stock ? 'bg-destructive/5 border-destructive/20' : 'bg-muted/30'}`}
+                            >
+                              <div className="flex justify-between items-start">
+                                <span className={item.is_out_of_stock ? 'line-through text-muted-foreground' : ''}>
+                                  {item.product_name}
+                                </span>
+                                {!item.is_out_of_stock && (
+                                  <span className="font-medium">{item.quantity} × {item.price}₽</span>
+                                )}
+                              </div>
+                              {item.is_out_of_stock && (
+                                <div className="text-destructive mt-1 flex items-center gap-1">
+                                  <Icon name="AlertCircle" size={12} />
+                                  Товар отсутствует в наличии
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          <div className="flex justify-between items-center pt-2 border-t text-sm font-bold">
+                            <span>Итого к оплате:</span>
+                            <span>
+                              {order.items
+                                .filter((i: any) => i.product_name && !i.is_out_of_stock)
+                                .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
+                              }₽
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       
                       {order.rejection_reason && (
                         <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">

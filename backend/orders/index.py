@@ -275,15 +275,46 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            cur.execute(f"SELECT order_id FROM order_items WHERE id = {item_id}")
+            item_data = cur.fetchone()
+            if not item_data:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Item not found'}),
+                    'isBase64Encoded': False
+                }
+            
+            order_id = item_data['order_id']
+            
             cur.execute(
                 f"UPDATE order_items SET is_out_of_stock = {is_out_of_stock} WHERE id = {item_id}"
             )
+            
+            cur.execute(
+                f"""SELECT COALESCE(SUM(CASE WHEN is_out_of_stock = FALSE THEN price * quantity ELSE 0 END), 0) as new_total
+                   FROM order_items WHERE order_id = {order_id}"""
+            )
+            total_data = cur.fetchone()
+            new_total = float(total_data['new_total'])
+            
+            cur.execute(
+                f"SELECT payment_method, amount_paid FROM orders WHERE id = {order_id}"
+            )
+            order_info = cur.fetchone()
+            
+            new_amount_paid = new_total if order_info and order_info['payment_method'] == 'balance' else (order_info['amount_paid'] if order_info else 0)
+            
+            cur.execute(
+                f"UPDATE orders SET total_amount = {new_total}, amount_paid = {new_amount_paid}, updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
+            )
+            
             conn.commit()
             
             return {
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'success': True}),
+                'body': json.dumps({'success': True, 'new_total': new_total}),
                 'isBase64Encoded': False
             }
         

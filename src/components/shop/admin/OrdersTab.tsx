@@ -78,7 +78,14 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }:
                     </div>
                   </div>
                   <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:text-right">
-                    <div className="font-bold text-base sm:text-lg">{order.total_amount}₽</div>
+                    <div className="font-bold text-base sm:text-lg">
+                      {order.items ? 
+                        order.items
+                          .filter((i: any) => i.product_name && !i.is_out_of_stock)
+                          .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
+                        : order.total_amount
+                      }₽
+                    </div>
                     <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
                       {statusLabels[order.status] || order.status}
                     </Badge>
@@ -231,7 +238,14 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }:
               </div>
               <div>
                 <div className="font-medium text-muted-foreground">Сумма</div>
-                <div className="font-bold text-lg">{viewingOrder?.total_amount}₽</div>
+                <div className="font-bold text-lg">
+                  {viewingOrder?.items ? 
+                    viewingOrder.items
+                      .filter((i: any) => i.product_name && !i.is_out_of_stock)
+                      .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
+                    : viewingOrder?.total_amount
+                  }₽
+                </div>
               </div>
               <div>
                 <div className="font-medium text-muted-foreground">Статус</div>
@@ -266,12 +280,18 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }:
                         size="sm"
                         variant={item.is_out_of_stock ? "outline" : "destructive"}
                         onClick={() => {
-                          onUpdateItemStock(viewingOrder.id, item.id, !item.is_out_of_stock);
+                          const newOutOfStockStatus = !item.is_out_of_stock;
+                          onUpdateItemStock(viewingOrder.id, item.id, newOutOfStockStatus);
+                          const updatedItems = viewingOrder.items.map((i: any) => 
+                            i.id === item.id ? {...i, is_out_of_stock: newOutOfStockStatus} : i
+                          );
+                          const newTotal = updatedItems
+                            .filter((i: any) => !i.is_out_of_stock)
+                            .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0);
                           setViewingOrder({
                             ...viewingOrder,
-                            items: viewingOrder.items.map((i: any) => 
-                              i.id === item.id ? {...i, is_out_of_stock: !i.is_out_of_stock} : i
-                            )
+                            items: updatedItems,
+                            total_amount: newTotal
                           });
                         }}
                         className="text-xs"
@@ -282,6 +302,17 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock }:
                     )}
                   </div>
                 ))}
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t font-bold">
+                <span>Итого к оплате:</span>
+                <span className="text-lg">
+                  {viewingOrder?.items ? 
+                    viewingOrder.items
+                      .filter((i: any) => i.product_name && !i.is_out_of_stock)
+                      .reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0)
+                    : viewingOrder?.total_amount
+                  }₽
+                </span>
               </div>
             </div>
 
