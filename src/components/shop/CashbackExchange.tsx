@@ -69,27 +69,27 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
 
   return (
     <Card className="border-2 border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon name="ArrowLeftRight" size={24} className="text-green-600" />
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Icon name="ArrowLeftRight" size={20} className="text-green-600 sm:w-6 sm:h-6" />
           Обмен кэшбека
         </CardTitle>
-        <CardDescription>
-          Конвертируйте кэшбек в рубли на баланс по курсу <span className="font-bold text-green-600">0.4₽ = 1₽</span>
+        <CardDescription className="text-xs sm:text-sm">
+          Курс: <span className="font-bold text-green-600">0.4₽ = 1₽</span> на баланс
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="p-4 bg-white/50 dark:bg-black/20 rounded-lg space-y-3">
+      <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+        <div className="p-3 sm:p-4 bg-white/50 dark:bg-black/20 rounded-lg space-y-2 sm:space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Доступно кэшбека:</span>
-            <span className="text-2xl font-bold text-green-600">{maxCashback}₽</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Доступно:</span>
+            <span className="text-xl sm:text-2xl font-bold text-green-600">{maxCashback}₽</span>
           </div>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
             <Button 
               size="sm" 
               variant="outline" 
               onClick={() => setPercentage(0.25)}
-              className="flex-1 text-xs"
+              className="text-[11px] sm:text-xs h-8 sm:h-9 px-1 sm:px-2"
             >
               25%
             </Button>
@@ -97,7 +97,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
               size="sm" 
               variant="outline" 
               onClick={() => setPercentage(0.5)}
-              className="flex-1 text-xs"
+              className="text-[11px] sm:text-xs h-8 sm:h-9 px-1 sm:px-2"
             >
               50%
             </Button>
@@ -105,7 +105,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
               size="sm" 
               variant="outline" 
               onClick={() => setPercentage(0.75)}
-              className="flex-1 text-xs"
+              className="text-[11px] sm:text-xs h-8 sm:h-9 px-1 sm:px-2"
             >
               75%
             </Button>
@@ -113,15 +113,15 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
               size="sm" 
               variant="outline" 
               onClick={() => setPercentage(1)}
-              className="flex-1 text-xs"
+              className="text-[11px] sm:text-xs h-8 sm:h-9 px-1 sm:px-2"
             >
               Всё
             </Button>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="cashback-input">Сумма кэшбека для обмена</Label>
+        <div className="space-y-1.5 sm:space-y-2">
+          <Label htmlFor="cashback-input" className="text-xs sm:text-sm">Сумма кэшбека</Label>
           <div className="relative">
             <Input
               id="cashback-input"
@@ -131,44 +131,44 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
               value={cashbackAmount}
               onChange={(e) => setCashbackAmount(e.target.value)}
               placeholder="0"
-              className="pr-8 text-lg"
+              className="pr-8 text-base sm:text-lg h-11 sm:h-12"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">₽</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base">₽</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-center py-2">
-          <Icon name="ArrowDown" size={32} className="text-green-600 animate-pulse" />
+        <div className="flex items-center justify-center py-1 sm:py-2">
+          <Icon name="ArrowDown" size={24} className="text-green-600 animate-pulse sm:w-8 sm:h-8" />
         </div>
 
-        <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+        <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-lg border-2 border-blue-200 dark:border-blue-800">
           <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-1">Вы получите на баланс</p>
-            <p className="text-3xl font-bold text-blue-600">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-1">На баланс</p>
+            <p className="text-2xl sm:text-3xl font-bold text-blue-600">
               {rubleValue.toFixed(2)}₽
             </p>
           </div>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-1 sm:pt-2">
           <Button
             onClick={handleExchange}
             disabled={!cashbackValue || cashbackValue > userCashback || isExchanging}
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            className="flex-1 bg-green-600 hover:bg-green-700 h-11 sm:h-12 text-sm sm:text-base"
           >
-            <Icon name="Repeat" size={18} className="mr-2" />
+            <Icon name="Repeat" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
             {isExchanging ? 'Обмен...' : 'Обменять'}
           </Button>
         </div>
 
-        <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
+        <div className="text-[11px] sm:text-xs text-muted-foreground space-y-0.5 sm:space-y-1 pt-2 border-t">
           <p className="flex items-center gap-1">
-            <Icon name="Info" size={14} />
-            Курс обмена: 1₽ кэшбека = 0.40₽ баланса
+            <Icon name="Info" size={12} className="flex-shrink-0 sm:w-[14px] sm:h-[14px]" />
+            <span>Курс: 1₽ кэшбека = 0.40₽ баланса</span>
           </p>
           <p className="flex items-center gap-1">
-            <Icon name="Zap" size={14} />
-            Мгновенное зачисление на баланс
+            <Icon name="Zap" size={12} className="flex-shrink-0 sm:w-[14px] sm:h-[14px]" />
+            <span>Мгновенное зачисление</span>
           </p>
         </div>
       </CardContent>
