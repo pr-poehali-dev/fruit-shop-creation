@@ -16,6 +16,7 @@ interface SideMenuProps {
     promotions?: string;
     additional_info?: string;
     price_list_url?: string;
+    logo_url?: string;
   };
   onSectionChange: (section: string) => void;
 }
@@ -43,7 +44,15 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
       <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="mb-6">
           <SheetTitle className="flex items-center gap-2 text-2xl">
-            <Icon name="Flower2" size={32} className="text-primary" />
+            {siteSettings?.logo_url ? (
+              <img 
+                src={siteSettings.logo_url} 
+                alt="Логотип"
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <Icon name="Flower2" size={32} className="text-primary" />
+            )}
             {siteSettings?.site_name || 'Питомник растений'}
           </SheetTitle>
           {siteSettings?.site_description && (
