@@ -59,7 +59,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur.execute(
                 f"""SELECT COALESCE(SUM(total_amount), 0) as total_spent
                    FROM t_p77282076_fruit_shop_creation.orders 
-                   WHERE user_id = {user_id} AND status = 'completed'"""
+                   WHERE user_id = {user_id} AND status IN ('delivered', 'processing')"""
             )
             spent_data = cur.fetchone()
             total_spent = float(spent_data['total_spent']) if spent_data else 0.0
@@ -143,7 +143,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.execute(
                     f"""SELECT COALESCE(SUM(total_amount), 0) as total_spent
                        FROM t_p77282076_fruit_shop_creation.orders 
-                       WHERE user_id = {user_id} AND status = 'completed'"""
+                       WHERE user_id = {user_id} AND status IN ('delivered', 'processing')"""
                 )
                 spent_data = cur.fetchone()
                 total_spent = float(spent_data['total_spent']) if spent_data else 0.0
