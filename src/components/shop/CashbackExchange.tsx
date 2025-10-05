@@ -22,16 +22,12 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
   const maxCashback = Math.floor(userCashback);
 
   const handleExchange = async () => {
-    console.log('Exchange clicked', { cashbackValue, userCashback, isExchanging });
-    
     if (cashbackValue <= 0 || cashbackValue > userCashback) {
-      console.log('Invalid amount');
       return;
     }
 
     setIsExchanging(true);
     try {
-      console.log('Sending request...');
       const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,9 +40,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
         })
       });
 
-      console.log('Response received');
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (data.success) {
         setCashbackAmount('');
