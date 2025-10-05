@@ -14,6 +14,18 @@
         "success": true
       },
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "Login with invalid credentials returns 401",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "login",
+        "phone": "+7 (999) 999-99-99",
+        "password": "wrongpassword"
+      },
+      "expectedStatus": 401,
+      "bodyMatcher": "partial"
     }
   ]
 }

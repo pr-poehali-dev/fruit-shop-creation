@@ -97,6 +97,11 @@ export const useAuth = () => {
         return;
       }
       
+      if (!response.ok) {
+        onError(data.error || 'Ошибка авторизации');
+        return;
+      }
+      
       if (data.success) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -104,7 +109,7 @@ export const useAuth = () => {
         onSuccess(data.user, message);
         setBanInfo(null);
       } else {
-        onError(data.error);
+        onError(data.error || 'Неизвестная ошибка');
       }
     } catch (error) {
       onError('Не удалось выполнить операцию');

@@ -391,7 +391,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if action == 'register':
             full_name = body_data.get('full_name', '')
             
-            cur.execute("SELECT id FROM users WHERE phone = %s", (phone,))
+            phone_escaped = phone.replace("'", "''")
+            password_escaped = password.replace("'", "''")
+            full_name_escaped = full_name.replace("'", "''")
+            
+            cur.execute(f"SELECT id FROM users WHERE phone = '{phone_escaped}'")
             if cur.fetchone():
                 return {
                     'statusCode': 400,
@@ -399,10 +403,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Пользователь с таким телефоном уже существует'}),
                     'isBase64Encoded': False
                 }
-            
-            phone_escaped = phone.replace("'", "''")
-            password_escaped = password.replace("'", "''")
-            full_name_escaped = full_name.replace("'", "''")
             
             cur.execute(
                 f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar) VALUES ('{phone_escaped}', '{password_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
