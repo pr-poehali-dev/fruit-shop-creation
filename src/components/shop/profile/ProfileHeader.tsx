@@ -11,9 +11,10 @@ interface ProfileHeaderProps {
   user: User | null;
   siteSettings?: any;
   onShowAdminPanel: () => void;
+  onUserUpdate: (updatedUser: User) => void;
 }
 
-const ProfileHeader = ({ user, siteSettings, onShowAdminPanel }: ProfileHeaderProps) => {
+const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: ProfileHeaderProps) => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
 
@@ -38,7 +39,8 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel }: ProfileHeaderPr
       if (data.success) {
         const updatedUser = { ...user, avatar: data.avatar };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        window.location.reload();
+        onUserUpdate(updatedUser);
+        setShowAvatarPicker(false);
       }
     } catch (error) {
       console.error('Error updating avatar:', error);

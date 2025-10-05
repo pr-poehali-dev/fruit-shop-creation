@@ -29,16 +29,8 @@ const OrdersTab = ({ orders, userId, onOrderUpdate }: OrdersTabProps) => {
       const data = await response.json();
       
       if (data.success) {
-        const userResponse = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=user&user_id=${userId}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const userData = await userResponse.json();
-        if (userData.user) {
-          localStorage.setItem('user', JSON.stringify(userData.user));
-        }
+        onOrderUpdate();
         alert('Заказ успешно отменён. Средства и кэшбэк обновлены.');
-        window.location.reload();
       } else {
         alert(data.error || 'Не удалось отменить заказ');
       }

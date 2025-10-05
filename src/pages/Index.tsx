@@ -264,7 +264,11 @@ const Index = () => {
       siteSettings={siteSettings}
       onShowAdminPanel={() => setShowAdminPanel(true)}
       onLogout={() => handleLogout(onLogout)}
-      onBalanceUpdate={() => refreshUserBalance(user, setUser, setIsRefreshingBalance)}
+      onBalanceUpdate={() => {
+        refreshUserBalance(user, setUser, setIsRefreshingBalance);
+        loadOrders();
+      }}
+      onUserUpdate={(updatedUser) => setUser(updatedUser)}
       scrollToSupport={scrollToSupport}
     />
   );
