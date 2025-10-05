@@ -179,7 +179,7 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
             </div>
           )}
           
-          {(order.status === 'pending' || order.status === 'processing') && (
+          {order.status === 'pending' && (
             <Button 
               size="sm" 
               variant="destructive"
