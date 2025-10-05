@@ -73,7 +73,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
             />
           </button>
         )}
-        {primaryImage ? (
+        {primaryImage && primaryImage.trim() !== '' ? (
           <>
             <img src={primaryImage} alt={product.name} className="w-full h-48 object-cover" />
             {hasMultipleImages && (
