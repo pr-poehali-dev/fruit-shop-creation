@@ -9,10 +9,11 @@ import { User } from '@/types/shop';
 
 interface ProfileHeaderProps {
   user: User | null;
+  siteSettings?: any;
   onShowAdminPanel: () => void;
 }
 
-const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
+const ProfileHeader = ({ user, siteSettings, onShowAdminPanel }: ProfileHeaderProps) => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
 
@@ -126,7 +127,7 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
           <span className="text-base sm:text-lg font-semibold text-green-600">{user?.cashback ? user.cashback.toFixed(0) : '0'}₽</span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Кэшбэк 5% начисляется при оплате заказа балансом
+          Кэшбэк {siteSettings?.balance_payment_cashback_percent || 5}% начисляется при оплате заказа балансом
         </p>
       </div>
       

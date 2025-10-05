@@ -14,13 +14,14 @@ import TransactionsTab from './profile/TransactionsTab';
 interface ProfileContentProps {
   user: User | null;
   orders: Order[];
+  siteSettings?: any;
   onShowAdminPanel: () => void;
   onLogout: () => void;
   onBalanceUpdate: () => void;
   scrollToSupport?: boolean;
 }
 
-const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpdate, scrollToSupport = false }: ProfileContentProps) => {
+const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout, onBalanceUpdate, scrollToSupport = false }: ProfileContentProps) => {
   const supportRef = useRef<HTMLDivElement>(null);
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
@@ -57,7 +58,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
 
   return (
     <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4 px-2 sm:px-0">
-      <ProfileHeader user={user} onShowAdminPanel={onShowAdminPanel} />
+      <ProfileHeader user={user} siteSettings={siteSettings} onShowAdminPanel={onShowAdminPanel} />
 
       <Tabs defaultValue="orders" className="w-full">
         <TabsList className={`grid w-full ${hasLoyaltyCard ? 'grid-cols-4' : 'grid-cols-3'} gap-0.5 sm:gap-1 h-9 sm:h-10`}>

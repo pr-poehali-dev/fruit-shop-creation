@@ -261,6 +261,7 @@ const Index = () => {
     <ProfileContent
       user={user}
       orders={orders}
+      siteSettings={siteSettings}
       onShowAdminPanel={() => setShowAdminPanel(true)}
       onLogout={() => handleLogout(onLogout)}
       onBalanceUpdate={() => refreshUserBalance(user, setUser, setIsRefreshingBalance)}
