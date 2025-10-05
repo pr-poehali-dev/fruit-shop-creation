@@ -130,7 +130,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
             <div className="mt-4">
               <h3 className="text-lg font-semibold">Карта лояльности</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Кэшбек {cashbackPercent}% с каждой покупки по карте
+                Кэшбэк {cashbackPercent}% с каждой покупки по карте
               </p>
             </div>
           </div>
@@ -284,7 +284,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
             <Icon name="Percent" size={14} className="text-white sm:w-4 sm:h-4" />
           </div>
           <p className="text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-100">
-            Кэшбек {cashbackPercent}% от покупки
+            Кэшбэк {cashbackPercent}% от покупки
           </p>
         </div>
         <p className="text-[11px] sm:text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">

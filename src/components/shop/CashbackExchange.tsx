@@ -33,7 +33,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
         type: 'cashback_exchange',
         amount: rubleValue,
         cashback_amount: cashbackValue,
-        description: `Обмен ${cashbackValue}₽ кэшбека на ${rubleValue.toFixed(2)}₽`,
+        description: `Обмен ${cashbackValue}₽ кэшбэка на ${rubleValue.toFixed(2)}₽`,
         action: 'update_balance'
       };
       
@@ -71,7 +71,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
       <CardHeader className="p-4 sm:p-6">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Icon name="ArrowLeftRight" size={20} className="text-green-600 sm:w-6 sm:h-6" />
-          Обмен кэшбека
+          Обмен кэшбэка
         </CardTitle>
         <CardDescription className="text-xs sm:text-sm">
           Курс: <span className="font-bold text-green-600">0.4₽ = 1₽</span> на баланс
@@ -126,7 +126,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
           </div>
 
           <div className="space-y-1.5 sm:space-y-2 mt-3 sm:mt-4">
-            <Label className="text-xs sm:text-sm">Сумма кэшбека</Label>
+            <Label className="text-xs sm:text-sm">Сумма кэшбэка</Label>
             <div className="relative">
               <input
                 type="text"
@@ -170,7 +170,7 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
           <div className="text-[11px] sm:text-xs text-muted-foreground space-y-0.5 sm:space-y-1 pt-2 border-t mt-3 sm:mt-4">
             <p className="flex items-center gap-1">
               <Icon name="Info" size={12} className="flex-shrink-0 sm:w-[14px] sm:h-[14px]" />
-              <span>Курс: 1₽ кэшбека = 0.40₽ баланса</span>
+              <span>Курс: 1₽ кэшбэка = 0.40₽ баланса</span>
             </p>
             <p className="flex items-center gap-1">
               <Icon name="Zap" size={12} className="flex-shrink-0 sm:w-[14px] sm:h-[14px]" />

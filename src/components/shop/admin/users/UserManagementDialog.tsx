@@ -89,7 +89,7 @@ const UserManagementDialog = ({
             </TabsTrigger>
             <TabsTrigger value="cashback" className="flex flex-col items-center gap-1 py-2 text-xs">
               <Icon name="Gift" size={16} />
-              <span className="hidden sm:inline">Кэшбек</span>
+              <span className="hidden sm:inline">Кэшбэк</span>
             </TabsTrigger>
             <TabsTrigger value="loyalty" className="flex flex-col items-center gap-1 py-2 text-xs">
               <Icon name="CreditCard" size={16} />

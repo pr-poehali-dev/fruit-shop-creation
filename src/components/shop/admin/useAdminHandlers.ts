@@ -178,7 +178,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
 
       if (data.success) {
         toast({
-          title: 'Кэшбек начислен',
+          title: 'Кэшбэк начислен',
           description: `Начислено ${amount}₽`
         });
         props.loadUsers();

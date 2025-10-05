@@ -66,7 +66,7 @@ const LoyaltyScannerTab = () => {
       if (data.success) {
         setLastResult(data);
         toast({
-          title: 'Кэшбек начислен!',
+          title: 'Кэшбэк начислен!',
           description: `+${data.cashback_earned.toFixed(2)}₽ для ${data.user_name}`
         });
         setCardNumber('');
@@ -247,7 +247,7 @@ const LoyaltyScannerTab = () => {
                   inputMode="decimal"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Кэшбек 3% от суммы от 100₽
+                  Кэшбэк 3% от суммы от 100₽
                 </p>
               </div>
             </div>
@@ -272,7 +272,7 @@ const LoyaltyScannerTab = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100">
-                    Кэшбек успешно начислен
+                    Кэшбэк успешно начислен
                   </h4>
                   <div className="mt-2 space-y-1 text-xs sm:text-sm text-green-800 dark:text-green-200">
                     <p className="break-words">Клиент: <strong>{lastResult.user_name}</strong></p>

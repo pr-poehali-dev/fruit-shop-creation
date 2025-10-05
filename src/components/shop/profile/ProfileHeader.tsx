@@ -122,11 +122,11 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
           <span className="text-base sm:text-lg font-bold">{user?.balance?.toFixed(2) || '0.00'}₽</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-sm text-muted-foreground">Кэшбек:</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Кэшбэк:</span>
           <span className="text-base sm:text-lg font-semibold text-green-600">{user?.cashback ? user.cashback.toFixed(0) : '0'}₽</span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Кэшбек 5% начисляется при оплате заказа балансом
+          Кэшбэк 5% начисляется при оплате заказа балансом
         </p>
       </div>
       

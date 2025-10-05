@@ -120,8 +120,8 @@ const TransactionsTab = ({ userId }: TransactionsTabProps) => {
                 <p className="text-[10px] sm:text-xs text-muted-foreground capitalize hidden sm:block">
                   {transaction.type === 'deposit' && 'Пополнение'}
                   {transaction.type === 'withdraw' && 'Списание'}
-                  {transaction.type === 'cashback_deposit' && 'Кэшбек'}
-                  {transaction.type === 'cashback_earned' && 'Кэшбек'}
+                  {transaction.type === 'cashback_deposit' && 'Кэшбэк'}
+                  {transaction.type === 'cashback_earned' && 'Кэшбэк'}
                   {transaction.type === 'cashback_used' && 'Использование кэшбэка'}
                   {transaction.type === 'order_payment' && 'Оплата заказа'}
                 </p>

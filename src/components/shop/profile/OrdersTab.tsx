@@ -37,7 +37,7 @@ const OrdersTab = ({ orders, userId, onOrderUpdate }: OrdersTabProps) => {
         if (userData.user) {
           localStorage.setItem('user', JSON.stringify(userData.user));
         }
-        alert('Заказ успешно отменён. Средства и кэшбек обновлены.');
+        alert('Заказ успешно отменён. Средства и кэшбэк обновлены.');
         window.location.reload();
       } else {
         alert(data.error || 'Не удалось отменить заказ');
