@@ -66,14 +66,13 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
   }, [users]);
 
   const loadTransactions = async (userId: number) => {
-    setLoadingTransactions(true);
     try {
+      setLoadingTransactions(true);
       const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=balance&user_id=${userId}`);
       const data = await response.json();
       setTransactions(data.transactions || []);
     } catch (error) {
       console.error('Error loading transactions:', error);
-      setTransactions([]);
     } finally {
       setLoadingTransactions(false);
     }
@@ -448,12 +447,15 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
                   </Button>
                 </div>
 
-                {loadingTransactions ? (
-                  <p className="text-center text-muted-foreground py-8">Загрузка...</p>
-                ) : transactions.length === 0 ? (
+                {transactions.length === 0 && !loadingTransactions ? (
                   <p className="text-center text-muted-foreground py-8">История операций пуста</p>
                 ) : (
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                  <div className="space-y-2 max-h-96 overflow-y-auto relative">
+                    {loadingTransactions && (
+                      <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                        <Icon name="Loader2" size={24} className="animate-spin text-muted-foreground" />
+                      </div>
+                    )}
                     {transactions.map(transaction => (
                       <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
