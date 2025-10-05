@@ -178,7 +178,7 @@ const Index = () => {
         toast({
           title: 'Заказ оформлен!',
           description: paymentMethod === 'balance' 
-            ? `Заказ #${data.order_id}. Начислен кэшбэк 5%!` 
+            ? `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.loyalty_cashback_percent || 5}%!` 
             : `Номер заказа: ${data.order_id}`
         });
         clearCart();

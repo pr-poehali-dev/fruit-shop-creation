@@ -180,6 +180,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             total_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             
+            cur.execute("SELECT value FROM site_settings WHERE key = 'loyalty_cashback_percent'")
+            cashback_percent_row = cur.fetchone()
+            cashback_percent = float(cashback_percent_row['value']) / 100 if cashback_percent_row else 0.05
+            
             if payment_method == 'balance':
                 cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
@@ -195,7 +199,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE users SET balance = balance - {total_amount} WHERE id = {user_id}"
                 )
                 
-                cashback_amount = total_amount * 0.05
+                cashback_amount = total_amount * cashback_percent
                 cur.execute(
                     f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {user_id}"
                 )
@@ -204,14 +208,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {total_amount}, 'Оплата заказа')"
                 )
                 cur.execute(
-                    f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'cashback_earned', {cashback_amount}, 'Кэшбек 5% от заказа')"
+                    f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'cashback_earned', {cashback_amount}, 'Кэшбек {int(cashback_percent * 100)}% от заказа')"
                 )
             
             cashback_earned = 0
             amount_paid = 0
             
             if payment_method == 'balance':
-                cashback_earned = total_amount * 0.05
+                cashback_earned = total_amount * cashback_percent
                 amount_paid = total_amount
             
             cur.execute(

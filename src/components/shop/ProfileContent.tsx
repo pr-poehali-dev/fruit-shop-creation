@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +22,8 @@ interface ProfileContentProps {
 
 const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpdate, scrollToSupport = false }: ProfileContentProps) => {
   const supportRef = useRef<HTMLDivElement>(null);
+  const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
+  const [isLoadingCard, setIsLoadingCard] = useState(true);
 
   useEffect(() => {
     if (scrollToSupport && supportRef.current) {
@@ -31,14 +33,38 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
     }
   }, [scrollToSupport]);
 
+  useEffect(() => {
+    const checkLoyaltyCard = async () => {
+      if (!user) {
+        setIsLoadingCard(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`https://functions.poehali.dev/ed127250-fe9d-4c7e-9a93-fb8b7fdc038a?action=get_card&user_id=${user.id}`);
+        const data = await response.json();
+        setHasLoyaltyCard(!!data.card);
+      } catch (error) {
+        console.error('Failed to check loyalty card:', error);
+        setHasLoyaltyCard(false);
+      } finally {
+        setIsLoadingCard(false);
+      }
+    };
+
+    checkLoyaltyCard();
+  }, [user]);
+
   return (
     <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4 px-2 sm:px-0">
       <ProfileHeader user={user} onShowAdminPanel={onShowAdminPanel} />
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 gap-0.5 sm:gap-1 h-9 sm:h-10">
+        <TabsList className={`grid w-full ${hasLoyaltyCard ? 'grid-cols-4' : 'grid-cols-3'} gap-0.5 sm:gap-1 h-9 sm:h-10`}>
           <TabsTrigger value="orders" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Заказы</TabsTrigger>
-          <TabsTrigger value="cashback" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Обмен</TabsTrigger>
+          {hasLoyaltyCard && (
+            <TabsTrigger value="cashback" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Обмен</TabsTrigger>
+          )}
           <TabsTrigger value="loyalty" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Карта</TabsTrigger>
           <TabsTrigger value="transactions" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">История</TabsTrigger>
         </TabsList>
@@ -53,15 +79,17 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           )}
         </TabsContent>
 
-        <TabsContent value="cashback" className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
-          {user && (
-            <CashbackExchange
-              userCashback={user.cashback || 0}
-              userId={user.id}
-              onExchangeSuccess={onBalanceUpdate}
-            />
-          )}
-        </TabsContent>
+        {hasLoyaltyCard && (
+          <TabsContent value="cashback" className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
+            {user && (
+              <CashbackExchange
+                userCashback={user.cashback || 0}
+                userId={user.id}
+                onExchangeSuccess={onBalanceUpdate}
+              />
+            )}
+          </TabsContent>
+        )}
 
         <TabsContent value="loyalty" className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
           <h3 className="font-semibold text-sm sm:text-base">Карта лояльности</h3>
@@ -69,7 +97,21 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
             <LoyaltyCard 
               userId={user.id} 
               userBalance={user.balance || 0}
-              onBalanceUpdate={onBalanceUpdate}
+              onBalanceUpdate={() => {
+                onBalanceUpdate();
+                setIsLoadingCard(true);
+                setTimeout(async () => {
+                  try {
+                    const response = await fetch(`https://functions.poehali.dev/ed127250-fe9d-4c7e-9a93-fb8b7fdc038a?action=get_card&user_id=${user.id}`);
+                    const data = await response.json();
+                    setHasLoyaltyCard(!!data.card);
+                  } catch (error) {
+                    console.error('Failed to check loyalty card:', error);
+                  } finally {
+                    setIsLoadingCard(false);
+                  }
+                }, 500);
+              }}
             />
           )}
         </TabsContent>
