@@ -46,24 +46,24 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
 
   return (
     <>
-      <div className="text-center pb-4">
+      <div className="text-center pb-3 sm:pb-4">
         <div 
-          className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors relative group"
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 mx-auto mb-2 sm:mb-3 flex items-center justify-center cursor-pointer active:scale-95 hover:bg-primary/20 transition-all relative group"
           onClick={() => setShowAvatarPicker(!showAvatarPicker)}
         >
           {user?.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('/')) ? (
             <img src={user.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
           ) : (
-            <span className="text-4xl">{user?.avatar || '👤'}</span>
+            <span className="text-3xl sm:text-4xl">{user?.avatar || '👤'}</span>
           )}
           <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Icon name="Camera" size={24} className="text-white" />
+            <Icon name="Camera" size={20} className="text-white sm:w-6 sm:h-6" />
           </div>
         </div>
         {showAvatarPicker && (
           <Card className="p-4 mb-4">
             <div className="space-y-3">
-              <div className="grid grid-cols-8 gap-2">
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
                 {avatarEmojis.map((emoji) => (
                   <button
                     key={emoji}
@@ -71,7 +71,7 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
                       handleUpdateAvatar(emoji);
                       setShowAvatarPicker(false);
                     }}
-                    className="text-3xl hover:scale-125 transition-transform cursor-pointer"
+                    className="text-2xl sm:text-3xl active:scale-110 hover:scale-125 transition-transform cursor-pointer p-2 rounded hover:bg-accent"
                   >
                     {emoji}
                   </button>
@@ -100,8 +100,8 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
             </div>
           </Card>
         )}
-        <h3 className="text-xl font-semibold">{user?.full_name || 'Пользователь'}</h3>
-        <p className="text-sm text-muted-foreground">{user?.phone}</p>
+        <h3 className="text-lg sm:text-xl font-semibold break-words px-2">{user?.full_name || 'Пользователь'}</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">{user?.phone}</p>
         <Badge variant={user?.is_admin ? 'default' : 'secondary'} className="mt-2">
           {user?.is_admin ? (
             <span className="flex items-center gap-1">
@@ -116,14 +116,14 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
       
       <Separator />
       
-      <div className="bg-muted p-4 rounded-lg space-y-2">
+      <div className="bg-muted p-3 sm:p-4 rounded-lg space-y-1.5 sm:space-y-2">
         <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Баланс:</span>
-          <span className="text-lg font-bold">{user?.balance?.toFixed(2) || '0.00'}₽</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Баланс:</span>
+          <span className="text-base sm:text-lg font-bold">{user?.balance?.toFixed(2) || '0.00'}₽</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Кэшбек:</span>
-          <span className="text-lg font-semibold text-green-600">{user?.cashback ? user.cashback.toFixed(0) : '0'}₽</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Кэшбек:</span>
+          <span className="text-base sm:text-lg font-semibold text-green-600">{user?.cashback ? user.cashback.toFixed(0) : '0'}₽</span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           Кэшбек 5% начисляется при оплате заказа балансом
@@ -132,8 +132,8 @@ const ProfileHeader = ({ user, onShowAdminPanel }: ProfileHeaderProps) => {
       
       {user?.is_admin && (
         <>
-          <Button className="w-full" variant="default" onClick={onShowAdminPanel}>
-            <Icon name="Settings" size={18} className="mr-2" />
+          <Button className="w-full text-sm sm:text-base" variant="default" onClick={onShowAdminPanel}>
+            <Icon name="Settings" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
             Панель администратора
           </Button>
           <Separator />

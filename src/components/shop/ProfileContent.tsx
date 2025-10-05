@@ -32,15 +32,15 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
   }, [scrollToSupport]);
 
   return (
-    <div className="mt-6 space-y-4">
+    <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4 px-2 sm:px-0">
       <ProfileHeader user={user} onShowAdminPanel={onShowAdminPanel} />
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 gap-1">
-          <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2">Заказы</TabsTrigger>
-          <TabsTrigger value="cashback" className="text-xs sm:text-sm px-1 sm:px-2">Обмен</TabsTrigger>
-          <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-1 sm:px-2">Карта</TabsTrigger>
-          <TabsTrigger value="transactions" className="text-xs sm:text-sm px-1 sm:px-2">История</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 gap-0.5 sm:gap-1 h-9 sm:h-10">
+          <TabsTrigger value="orders" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Заказы</TabsTrigger>
+          <TabsTrigger value="cashback" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Обмен</TabsTrigger>
+          <TabsTrigger value="loyalty" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Карта</TabsTrigger>
+          <TabsTrigger value="transactions" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">История</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
@@ -53,7 +53,7 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           )}
         </TabsContent>
 
-        <TabsContent value="cashback" className="space-y-3 mt-6">
+        <TabsContent value="cashback" className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
           {user && (
             <CashbackExchange
               userCashback={user.cashback || 0}
@@ -63,8 +63,8 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
           )}
         </TabsContent>
 
-        <TabsContent value="loyalty" className="space-y-3 mt-6">
-          <h3 className="font-semibold">Карта лояльности</h3>
+        <TabsContent value="loyalty" className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
+          <h3 className="font-semibold text-sm sm:text-base">Карта лояльности</h3>
           {user && (
             <LoyaltyCard 
               userId={user.id} 
@@ -85,10 +85,10 @@ const ProfileContent = ({ user, orders, onShowAdminPanel, onLogout, onBalanceUpd
         <UserTickets user={user} />
       </div>
       
-      <Separator className="my-4" />
+      <Separator className="my-3 sm:my-4" />
       
-      <Button variant="destructive" className="w-full" onClick={onLogout}>
-        <Icon name="LogOut" size={18} className="mr-2" />
+      <Button variant="destructive" className="w-full text-sm sm:text-base h-10 sm:h-11" onClick={onLogout}>
+        <Icon name="LogOut" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
         Выйти
       </Button>
     </div>

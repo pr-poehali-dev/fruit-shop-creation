@@ -71,47 +71,53 @@ const TransactionsTab = ({ userId }: TransactionsTabProps) => {
   };
 
   return (
-    <div className="space-y-3 mt-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">История операций</h3>
+    <div className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-semibold text-sm sm:text-base">История операций</h3>
         <Button 
           size="sm" 
           variant="outline"
           onClick={loadTransactions}
           disabled={loadingTransactions}
+          className="h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"
         >
-          <Icon name="RefreshCw" size={16} className="mr-2" />
-          Обновить
+          <Icon name="RefreshCw" size={14} className="mr-1 sm:mr-2 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Обновить</span>
         </Button>
       </div>
       
       {loadingTransactions ? (
-        <p className="text-center text-muted-foreground py-4">Загрузка...</p>
+        <p className="text-center text-muted-foreground py-4 text-sm">Загрузка...</p>
       ) : transactions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">История операций пуста</p>
+        <p className="text-xs sm:text-sm text-muted-foreground">История операций пуста</p>
       ) : (
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="space-y-1.5 sm:space-y-2 max-h-96 overflow-y-auto">
           {transactions.slice(0, 20).map(transaction => (
-            <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-3">
+            <div key={transaction.id} className="flex items-center justify-between p-2 sm:p-3 border rounded-lg gap-2">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <Icon 
                   name={getTransactionIcon(transaction.type)} 
-                  size={20} 
-                  className={getTransactionColor(transaction.type)}
+                  size={18} 
+                  className={`${getTransactionColor(transaction.type)} flex-shrink-0 sm:w-5 sm:h-5`}
                 />
-                <div>
-                  <p className="text-sm font-medium">{transaction.description || 'Операция'}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(transaction.created_at).toLocaleString('ru-RU')}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium truncate">{transaction.description || 'Операция'}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                    {new Date(transaction.created_at).toLocaleString('ru-RU', { 
+                      day: '2-digit', 
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className={`text-sm font-semibold ${getTransactionColor(transaction.type)}`}>
+              <div className="text-right flex-shrink-0">
+                <p className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${getTransactionColor(transaction.type)}`}>
                   {(transaction.type.includes('deposit') || transaction.type === 'cashback_used') ? '+' : '-'}
                   {Number(transaction.amount).toFixed(2)}₽
                 </p>
-                <p className="text-xs text-muted-foreground capitalize">
+                <p className="text-[10px] sm:text-xs text-muted-foreground capitalize hidden sm:block">
                   {transaction.type === 'deposit' && 'Пополнение'}
                   {transaction.type === 'withdraw' && 'Списание'}
                   {transaction.type === 'cashback_deposit' && 'Кэшбек'}

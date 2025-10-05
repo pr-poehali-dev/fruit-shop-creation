@@ -51,12 +51,12 @@ const OrdersTab = ({ orders, userId, onOrderUpdate }: OrdersTabProps) => {
   };
 
   return (
-    <div className="space-y-3 mt-6">
-      <h3 className="font-semibold">История заказов</h3>
+    <div className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
+      <h3 className="font-semibold text-sm sm:text-base">История заказов</h3>
       {orders.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Заказов пока нет</p>
+        <p className="text-xs sm:text-sm text-muted-foreground">Заказов пока нет</p>
       ) : (
-        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+        <div className="space-y-1.5 sm:space-y-2 max-h-[500px] sm:max-h-[600px] overflow-y-auto">
           {orders.map(order => (
             <OrderItem
               key={order.id}
