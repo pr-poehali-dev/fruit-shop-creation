@@ -15,6 +15,7 @@ interface SupportTabProps {
   onUpdateStatus: (ticketId: number, status: string) => void;
   onLoadTicket: (ticketId: number) => Promise<any>;
   onDeleteTicket: (ticketId: number) => void;
+  onRefreshTickets?: () => void;
 }
 
 const statusLabels: Record<string, string> = {
@@ -30,7 +31,7 @@ const priorityLabels: Record<string, string> = {
   'high': 'Высокий'
 };
 
-const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTicket }: SupportTabProps) => {
+const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTicket, onRefreshTickets }: SupportTabProps) => {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [replyMessage, setReplyMessage] = useState('');
   const [newStatus, setNewStatus] = useState('');
@@ -46,6 +47,7 @@ const SupportTab = ({ tickets, onReply, onUpdateStatus, onLoadTicket, onDeleteTi
     
     const interval = setInterval(() => {
       handleOpenTicket(selectedTicket, false);
+      onRefreshTickets?.();
     }, 10000);
     
     return () => clearInterval(interval);
