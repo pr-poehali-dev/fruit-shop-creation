@@ -197,36 +197,50 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
           <CardDescription>Список всех зарегистрированных пользователей</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {users.map(user => (
-              <div key={user.id} className="flex justify-between items-center p-4 border rounded-lg">
-                <div className="flex-1">
-                  <div className="font-medium flex items-center gap-2">
-                    {user.full_name}
-                    {user.is_admin && <Icon name="Crown" size={18} className="text-yellow-500" />}
+              <div key={user.id} className="border rounded-lg overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium flex items-center gap-2 mb-1">
+                      {user.full_name}
+                      {user.is_admin && <Icon name="Crown" size={16} className="text-yellow-500 flex-shrink-0" />}
+                    </div>
+                    <div className="text-sm text-muted-foreground truncate">{user.phone}</div>
+                    <div className="flex gap-3 mt-2">
+                      <div className="flex items-center gap-1 text-xs">
+                        <Icon name="Wallet" size={14} className="text-blue-500" />
+                        <span className="font-medium">{Number(user.balance || 0).toFixed(0)}₽</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Icon name="Gift" size={14} className="text-green-500" />
+                        <span className="font-medium">{Math.round(Number(user.cashback || 0))}₽</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Icon name="Calendar" size={14} />
+                        <span>{new Date(user.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">{user.phone}</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Баланс: {Number(user.balance || 0).toFixed(2)}₽ | Кэшбек: {Math.round(Number(user.cashback || 0))}₽
+                  
+                  <div className="flex items-center gap-2 sm:flex-col sm:items-end">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Label className="text-muted-foreground">Админ</Label>
+                      <Switch 
+                        checked={user.is_admin} 
+                        onCheckedChange={() => handleToggleAdmin(user)}
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleUserClick(user)}
+                      className="w-full sm:w-auto"
+                    >
+                      <Icon name="Settings" size={16} className="sm:mr-2" />
+                      <span className="hidden sm:inline">Управление</span>
+                    </Button>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col items-center gap-1">
-                    <Label className="text-xs text-muted-foreground">Админ</Label>
-                    <Switch 
-                      checked={user.is_admin} 
-                      onCheckedChange={() => handleToggleAdmin(user)}
-                    />
-                  </div>
-                  <Badge variant="outline">{new Date(user.created_at).toLocaleDateString()}</Badge>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleUserClick(user)}
-                  >
-                    <Icon name="Wallet" size={16} className="mr-2" />
-                    Управление
-                  </Button>
                 </div>
               </div>
             ))}
@@ -235,7 +249,7 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
       </Card>
 
       <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Управление пользователем</DialogTitle>
             <DialogDescription>
@@ -244,12 +258,27 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
           </DialogHeader>
 
           <Tabs value={operationType} onValueChange={(v) => setOperationType(v as 'balance' | 'cashback' | 'loyalty')}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="balance">Баланс</TabsTrigger>
-              <TabsTrigger value="cashback">Кэшбек</TabsTrigger>
-              <TabsTrigger value="loyalty">Карта</TabsTrigger>
-              <TabsTrigger value="ban">Бан</TabsTrigger>
-              <TabsTrigger value="history">История</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 h-auto">
+              <TabsTrigger value="balance" className="flex flex-col items-center gap-1 py-2 text-xs">
+                <Icon name="Wallet" size={16} />
+                <span className="hidden sm:inline">Баланс</span>
+              </TabsTrigger>
+              <TabsTrigger value="cashback" className="flex flex-col items-center gap-1 py-2 text-xs">
+                <Icon name="Gift" size={16} />
+                <span className="hidden sm:inline">Кэшбек</span>
+              </TabsTrigger>
+              <TabsTrigger value="loyalty" className="flex flex-col items-center gap-1 py-2 text-xs">
+                <Icon name="CreditCard" size={16} />
+                <span className="hidden sm:inline">Карта</span>
+              </TabsTrigger>
+              <TabsTrigger value="ban" className="flex flex-col items-center gap-1 py-2 text-xs">
+                <Icon name="Ban" size={16} />
+                <span className="hidden sm:inline">Бан</span>
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex flex-col items-center gap-1 py-2 text-xs">
+                <Icon name="Clock" size={16} />
+                <span className="hidden sm:inline">История</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="balance">
@@ -281,11 +310,11 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
                     rows={2}
                   />
                 </div>
-                <div className="flex gap-2 justify-end pt-4">
-                  <Button type="button" variant="outline" onClick={() => setSelectedUser(null)}>
+                <div className="flex flex-col sm:flex-row gap-2 justify-end pt-4">
+                  <Button type="button" variant="outline" onClick={() => setSelectedUser(null)} className="w-full sm:w-auto">
                     Отмена
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="w-full sm:w-auto">
                     <Icon name="Plus" size={18} className="mr-2" />
                     Начислить {amount ? `${amount}₽` : ''}
                   </Button>
@@ -322,11 +351,11 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
                     rows={2}
                   />
                 </div>
-                <div className="flex gap-2 justify-end pt-4">
-                  <Button type="button" variant="outline" onClick={() => setSelectedUser(null)}>
+                <div className="flex flex-col sm:flex-row gap-2 justify-end pt-4">
+                  <Button type="button" variant="outline" onClick={() => setSelectedUser(null)} className="w-full sm:w-auto">
                     Отмена
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="w-full sm:w-auto">
                     <Icon name="Gift" size={18} className="mr-2" />
                     Начислить {amount ? `${amount}₽` : ''}
                   </Button>
