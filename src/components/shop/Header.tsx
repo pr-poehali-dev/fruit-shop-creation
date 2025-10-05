@@ -166,7 +166,7 @@ const Header = ({
                 {isNewYear && <div className="icon-snow-sparkle">✨</div>}
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-lg">
+            <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
               <SheetHeader>
                 <SheetTitle>Корзина</SheetTitle>
               </SheetHeader>
