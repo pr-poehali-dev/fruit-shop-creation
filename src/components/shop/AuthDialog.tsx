@@ -29,10 +29,10 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
     let formatted = '+7';
     
     if (cleaned.length > 1) {
-      formatted += '(' + cleaned.substring(1, 4);
+      formatted += ' (' + cleaned.substring(1, 4);
     }
     if (cleaned.length >= 5) {
-      formatted += ')' + cleaned.substring(4, 7);
+      formatted += ') ' + cleaned.substring(4, 7);
     }
     if (cleaned.length >= 8) {
       formatted += '-' + cleaned.substring(7, 9);
@@ -175,7 +175,7 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
                   id="login-phone" 
                   name="phone" 
                   type="tel" 
-                  placeholder="+7(999)123-45-67" 
+                  placeholder="+7 (999) 123-45-67" 
                   defaultValue="+7"
                   onChange={handlePhoneChange}
                   onFocus={(e) => {
@@ -223,7 +223,7 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
                   id="register-phone" 
                   name="phone" 
                   type="tel" 
-                  placeholder="+7(999)123-45-67" 
+                  placeholder="+7 (999) 123-45-67" 
                   defaultValue="+7"
                   onChange={handlePhoneChange}
                   onFocus={(e) => {

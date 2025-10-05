@@ -140,7 +140,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cleaned_phone = '7' + cleaned_phone
     
     if len(cleaned_phone) >= 11:
-        phone = f"+7({cleaned_phone[1:4]}){cleaned_phone[4:7]}-{cleaned_phone[7:9]}-{cleaned_phone[9:11]}"
+        phone = f"+7 ({cleaned_phone[1:4]}) {cleaned_phone[4:7]}-{cleaned_phone[7:9]}-{cleaned_phone[9:11]}"
     else:
         phone = phone_raw
     
