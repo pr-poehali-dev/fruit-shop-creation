@@ -376,6 +376,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       loyalty_card_price: parseFloat(formData.get('loyalty_card_price') as string || '500'),
       loyalty_unlock_amount: parseFloat(formData.get('loyalty_unlock_amount') as string || '5000'),
       loyalty_cashback_percent: parseFloat(formData.get('loyalty_cashback_percent') as string || '5'),
+      balance_payment_cashback_percent: parseFloat(formData.get('balance_payment_cashback_percent') as string || '5'),
       holiday_theme: formData.get('holiday_theme') as string,
       delivery_enabled: formData.get('delivery_enabled') === 'on',
       delivery_price: parseFloat(formData.get('delivery_price') as string || '0'),
@@ -417,9 +418,6 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
           description: 'Изменения применены на сайте'
         });
         props.loadSettings();
-        if (props.onSettingsUpdate) {
-          props.onSettingsUpdate();
-        }
       }
     } catch (error) {
       toast({

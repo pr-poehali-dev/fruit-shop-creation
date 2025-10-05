@@ -177,12 +177,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             payment_method = body_data.get('payment_method', 'card')
             delivery_address = body_data.get('delivery_address', '').replace("'", "''")
             delivery_type = body_data.get('delivery_type', 'pickup')
+            cashback_percent_input = body_data.get('cashback_percent', 5)
             
             total_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             
-            cur.execute("SELECT value FROM site_settings WHERE key = 'loyalty_cashback_percent'")
-            cashback_percent_row = cur.fetchone()
-            cashback_percent = float(cashback_percent_row['value']) / 100 if cashback_percent_row else 0.05
+            cashback_percent = float(cashback_percent_input) / 100
             
             if payment_method == 'balance':
                 cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")

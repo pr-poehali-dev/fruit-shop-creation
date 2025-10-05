@@ -168,7 +168,8 @@ const Index = () => {
           })),
           payment_method: paymentMethod,
           delivery_address: deliveryAddress,
-          delivery_type: deliveryType
+          delivery_type: deliveryType,
+          cashback_percent: siteSettings?.balance_payment_cashback_percent || 5
         })
       });
 
@@ -178,7 +179,7 @@ const Index = () => {
         toast({
           title: 'Заказ оформлен!',
           description: paymentMethod === 'balance' 
-            ? `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.loyalty_cashback_percent || 5}%!` 
+            ? `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!` 
             : `Номер заказа: ${data.order_id}`
         });
         clearCart();
@@ -308,7 +309,6 @@ const Index = () => {
             loadSettings();
             setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 300);
           }}
-          onSettingsUpdate={loadSettings}
         />
       ) : (
         <>

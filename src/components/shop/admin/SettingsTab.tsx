@@ -169,7 +169,7 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                 </p>
               </div>
               <div>
-                <Label htmlFor="loyalty-cashback-percent">Процент кэшбэка при оплате с баланса (%)</Label>
+                <Label htmlFor="loyalty-cashback-percent">Процент кэшбэка по карте лояльности (%)</Label>
                 <Input 
                   id="loyalty-cashback-percent" 
                   name="loyalty_cashback_percent" 
@@ -178,6 +178,21 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                   min="0"
                   max="100"
                   defaultValue={siteSettings.loyalty_cashback_percent || 5} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Процент от покупки, который начисляется владельцам карты лояльности
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="balance-payment-cashback-percent">Процент кэшбэка при оплате балансом (%)</Label>
+                <Input 
+                  id="balance-payment-cashback-percent" 
+                  name="balance_payment_cashback_percent" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  defaultValue={siteSettings.balance_payment_cashback_percent || 5} 
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Процент от покупки с баланса, который возвращается как кэшбэк владельцам карты
