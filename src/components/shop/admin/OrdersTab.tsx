@@ -91,7 +91,13 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder }: OrdersTabProps) =>
                     </div>
                   </div>
                   <div>
-                    <div className="font-medium">Адрес доставки:</div>
+                    <div className="font-medium">Доставка:</div>
+                    <div className="text-muted-foreground">
+                      {order.delivery_type === 'delivery' ? '🚚 Доставка' : '🏪 Самовывоз'}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <div className="font-medium">Адрес:</div>
                     <div className="text-muted-foreground break-words">{order.delivery_address}</div>
                   </div>
                 </div>

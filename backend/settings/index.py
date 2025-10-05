@@ -79,6 +79,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             loyalty_unlock_amount = body_data.get('loyalty_unlock_amount') or 5000
             loyalty_cashback_percent = body_data.get('loyalty_cashback_percent') or 5
             admin_pin = (body_data.get('admin_pin') or '0000').replace("'", "''")
+            delivery_enabled = body_data.get('delivery_enabled', True)
+            delivery_price = body_data.get('delivery_price') or 0
             
             about_title = (body_data.get('about_title') or '').replace("'", "''")
             about_text = (body_data.get('about_text') or '').replace("'", "''")
@@ -109,6 +111,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"""INSERT INTO site_settings (
                     id, site_name, logo_url, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, 
                     holiday_theme, loyalty_card_price, loyalty_unlock_amount, loyalty_cashback_percent, admin_pin,
+                    delivery_enabled, delivery_price,
                     about_title, about_text, care_title, care_watering_title, care_watering_text, care_lighting_title, care_lighting_text,
                     care_pruning_title, care_pruning_text, delivery_title, delivery_courier_title, delivery_courier_text,
                     delivery_transport_title, delivery_transport_text, delivery_pickup_title, delivery_pickup_text,
@@ -116,6 +119,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    )
                    VALUES (1, '{site_name}', '{logo_url}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
                     '{holiday_theme}', {loyalty_card_price}, {loyalty_unlock_amount}, {loyalty_cashback_percent}, '{admin_pin}',
+                    {delivery_enabled}, {delivery_price},
                     '{about_title}', '{about_text}', '{care_title}', '{care_watering_title}', '{care_watering_text}', '{care_lighting_title}', '{care_lighting_text}',
                     '{care_pruning_title}', '{care_pruning_text}', '{delivery_title}', '{delivery_courier_title}', '{delivery_courier_text}',
                     '{delivery_transport_title}', '{delivery_transport_text}', '{delivery_pickup_title}', '{delivery_pickup_text}',
@@ -137,6 +141,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    loyalty_unlock_amount = EXCLUDED.loyalty_unlock_amount,
                    loyalty_cashback_percent = EXCLUDED.loyalty_cashback_percent,
                    admin_pin = EXCLUDED.admin_pin,
+                   delivery_enabled = EXCLUDED.delivery_enabled,
+                   delivery_price = EXCLUDED.delivery_price,
                    about_title = EXCLUDED.about_title,
                    about_text = EXCLUDED.about_text,
                    care_title = EXCLUDED.care_title,

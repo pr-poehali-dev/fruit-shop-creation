@@ -377,6 +377,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       loyalty_unlock_amount: parseFloat(formData.get('loyalty_unlock_amount') as string || '5000'),
       loyalty_cashback_percent: parseFloat(formData.get('loyalty_cashback_percent') as string || '5'),
       holiday_theme: formData.get('holiday_theme') as string,
+      delivery_enabled: formData.get('delivery_enabled') === 'on',
+      delivery_price: parseFloat(formData.get('delivery_price') as string || '0'),
       price_list_url: formData.get('price_list_url') as string,
       promotions: formData.get('promotions') as string,
       additional_info: formData.get('additional_info') as string,

@@ -168,6 +168,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             items = body_data.get('items', [])
             payment_method = body_data.get('payment_method', 'card')
             delivery_address = body_data.get('delivery_address', '').replace("'", "''")
+            delivery_type = body_data.get('delivery_type', 'pickup')
             
             total_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             
@@ -206,7 +207,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 amount_paid = total_amount
             
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, cashback_earned, amount_paid) VALUES ({user_id}, {total_amount}, '{payment_method}', '{delivery_address}', {cashback_earned}, {amount_paid}) RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, cashback_earned, amount_paid) VALUES ({user_id}, {total_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}', {cashback_earned}, {amount_paid}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             

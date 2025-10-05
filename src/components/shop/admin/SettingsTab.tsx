@@ -104,6 +104,40 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Input id="work-hours" name="work_hours" defaultValue={siteSettings.work_hours || 'Пн-Вс: 9:00 - 19:00'} />
           </div>
           <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Truck" size={20} />
+              Настройки доставки
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox" 
+                  id="delivery-enabled" 
+                  name="delivery_enabled"
+                  defaultChecked={siteSettings.delivery_enabled !== false}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <Label htmlFor="delivery-enabled" className="cursor-pointer">
+                  Включить доставку (если выключено - только самовывоз)
+                </Label>
+              </div>
+              <div>
+                <Label htmlFor="delivery-price">Стоимость доставки (₽)</Label>
+                <Input 
+                  id="delivery-price" 
+                  name="delivery_price" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={siteSettings.delivery_price || 0} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Укажите 0 для бесплатной доставки
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="border-t pt-4 mt-4">
             <h3 className="text-lg font-semibold mb-4">Настройки карты лояльности</h3>
             <div className="space-y-4">
               <div>

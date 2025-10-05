@@ -117,7 +117,7 @@ const Index = () => {
     setIsProductGalleryOpen(true);
   };
 
-  const handleCheckout = async (paymentMethod: string) => {
+  const handleCheckout = async (paymentMethod: string, deliveryType: string = 'pickup') => {
     if (!user) {
       toast({
         title: 'Требуется авторизация',
@@ -137,7 +137,8 @@ const Index = () => {
       return;
     }
 
-    const totalAmount = getTotalPrice();
+    const deliveryPrice = deliveryType === 'delivery' ? parseFloat(siteSettings?.delivery_price || 0) : 0;
+    const totalAmount = getTotalPrice() + deliveryPrice;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {
@@ -151,6 +152,10 @@ const Index = () => {
     }
 
     try {
+      const deliveryAddress = deliveryType === 'pickup' 
+        ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}` 
+        : 'Доставка (адрес уточняется)';
+        
       const response = await fetch(API_ORDERS, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,7 +167,8 @@ const Index = () => {
             price: item.product.price
           })),
           payment_method: paymentMethod,
-          delivery_address: 'Адрес доставки'
+          delivery_address: deliveryAddress,
+          delivery_type: deliveryType
         })
       });
 
@@ -246,6 +252,7 @@ const Index = () => {
       updateCartQuantity={updateCartQuantity}
       getTotalPrice={getTotalPrice}
       handleCheckout={handleCheckout}
+      siteSettings={siteSettings}
     />
   );
 
