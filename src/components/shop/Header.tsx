@@ -86,20 +86,20 @@ const Header = ({
       )}
       
       <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink min-w-0">
           <SideMenu siteSettings={siteSettings} onSectionChange={onSectionChange} />
           <button 
             onClick={() => onSectionChange('home')} 
-            className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition"
+            className="flex items-center gap-2 hover:opacity-90 transition min-w-0 flex-shrink"
           >
             {siteSettings?.logo_url && (
               <img 
                 src={siteSettings.logo_url} 
                 alt={`Логотип ${siteSettings?.site_name || 'Питомник растений'}`}
-                className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-full object-cover border-2 border-white/20 shadow-lg"
+                className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full object-cover border-2 border-white/20 shadow-lg flex-shrink-0"
               />
             )}
-            <h1 className="text-lg sm:text-2xl font-display font-extrabold tracking-tight drop-shadow-md">
+            <h1 className="text-sm sm:text-lg md:text-2xl font-display font-extrabold tracking-tight drop-shadow-md truncate max-w-[120px] sm:max-w-none">
               {siteSettings?.site_name || 'Питомник растений'}
             </h1>
           </button>
@@ -114,7 +114,7 @@ const Header = ({
           <button onClick={() => onSectionChange('contacts')} className="hover:opacity-80 transition">Контакты</button>
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {user && onRatingRequest && (
             <NotificationsDropdown userId={user.id} onRatingRequest={onRatingRequest} />
           )}
@@ -123,12 +123,12 @@ const Header = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
+              className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
               onClick={() => onSectionChange('favorites')}
             >
-              <Icon name="Heart" size={28} />
+              <Icon name="Heart" size={20} className="sm:w-7 sm:h-7" />
               {favoritesCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 text-xs rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
                   {favoritesCount}
                 </Badge>
               )}
@@ -138,10 +138,10 @@ const Header = ({
 
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 border-2 border-yellow-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
-                <Icon name="ShoppingCart" size={28} />
+              <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 border-2 border-yellow-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
+                <Icon name="ShoppingCart" size={20} className="sm:w-7 sm:h-7" />
                 {cart.length > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg animate-pulse">
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 text-xs rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg animate-pulse">
                     {cart.length}
                   </Badge>
                 )}
@@ -159,10 +159,10 @@ const Header = ({
           {user ? (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
-                  <Icon name="User" size={28} />
+                <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
+                  <Icon name="User" size={20} className="sm:w-7 sm:h-7" />
                   {unreadTickets > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 text-xs rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
                       {unreadTickets}
                     </Badge>
                   )}
@@ -177,7 +177,7 @@ const Header = ({
               </SheetContent>
             </Sheet>
           ) : (
-            <Button variant="secondary" onClick={onShowAuth}>
+            <Button variant="secondary" size="sm" onClick={onShowAuth} className="text-xs sm:text-sm px-3 sm:px-4">
               Войти
             </Button>
           )}
