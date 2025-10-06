@@ -99,7 +99,7 @@ const Header = ({
                 className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full object-cover border-2 border-white/20 shadow-lg flex-shrink-0"
               />
             )}
-            <h1 className="text-sm sm:text-lg md:text-2xl font-display font-extrabold tracking-tight drop-shadow-md truncate max-w-[120px] sm:max-w-none">
+            <h1 className="text-xs sm:text-base md:text-xl font-display font-extrabold tracking-tight drop-shadow-md leading-tight max-w-[100px] sm:max-w-[200px] md:max-w-none">
               {siteSettings?.site_name || 'Питомник растений'}
             </h1>
           </button>
