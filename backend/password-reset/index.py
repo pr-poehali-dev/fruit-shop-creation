@@ -55,7 +55,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     conn = psycopg2.connect(db_url)
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor = conn.cursor()
     
     try:
         if method == 'POST':
@@ -90,11 +90,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             reset_codes_cache[phone] = {
                 'code': reset_code,
                 'expires_at': expires_at,
-                'user_id': user['id']
+                'user_id': user[0]
             }
             
             send_telegram_notification(
-                user_name=user['full_name'] or 'Пользователь',
+                user_name=user[1] or 'Пользователь',
                 phone=phone,
                 reset_code=reset_code
             )
