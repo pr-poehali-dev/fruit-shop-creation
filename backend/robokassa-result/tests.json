@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "Accept valid webhook with GET",
+      "method": "GET",
+      "queryStringParameters": {
+        "OutSum": "1000",
+        "InvId": "12345",
+        "SignatureValue": "VALID_SIGNATURE",
+        "Shp_UserId": "user123"
+      },
+      "expectedStatus": 200,
+      "bodyMatcher": "contains",
+      "expectedBody": "OK"
+    },
+    {
+      "name": "Reject missing parameters",
+      "method": "GET",
+      "queryStringParameters": {
+        "OutSum": "1000"
+      },
+      "expectedStatus": 400
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}

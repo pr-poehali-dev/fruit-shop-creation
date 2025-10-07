@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
+import RobokassaTopUpDialog from '../RobokassaTopUpDialog';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -17,6 +18,7 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: ProfileHeaderProps) => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [showTopUpDialog, setShowTopUpDialog] = useState(false);
 
   const avatarEmojis = ['👤', '😊', '😎', '🤓', '🥳', '😇', '🤠', '🧑‍💻', '👨‍💼', '👩‍💼', '🦸', '🦹', '🧙', '🧛', '🧜', '🧚'];
 
@@ -131,6 +133,15 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: P
         <p className="text-xs text-muted-foreground mt-2">
           Кэшбэк {siteSettings?.balance_payment_cashback_percent || 5}% начисляется при оплате заказа балансом
         </p>
+        
+        <Button 
+          className="w-full mt-3" 
+          variant="default"
+          onClick={() => setShowTopUpDialog(true)}
+        >
+          <Icon name="Wallet" size={16} className="mr-2" />
+          Пополнить баланс
+        </Button>
       </div>
       
       {user?.is_admin && (
@@ -141,6 +152,14 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: P
           </Button>
           <Separator />
         </>
+      )}
+
+      {user && (
+        <RobokassaTopUpDialog
+          open={showTopUpDialog}
+          onOpenChange={setShowTopUpDialog}
+          userId={user.id}
+        />
       )}
     </>
   );

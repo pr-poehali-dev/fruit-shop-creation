@@ -1,0 +1,37 @@
+{
+  "tests": [
+    {
+      "name": "Create payment with valid amount",
+      "method": "POST",
+      "body": {
+        "amount": 1000,
+        "description": "Пополнение счета",
+        "user_id": "user123"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "payment_url": "string",
+        "invoice_id": "string",
+        "amount": 1000
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject invalid amount",
+      "method": "POST",
+      "body": {
+        "amount": 0,
+        "description": "Test"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Invalid amount"
+      }
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
