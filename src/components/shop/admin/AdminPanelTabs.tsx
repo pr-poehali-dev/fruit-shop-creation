@@ -8,6 +8,7 @@ import SettingsTab from './SettingsTab';
 import SupportTab from './SupportTab';
 import LoyaltyScannerTab from './LoyaltyScannerTab';
 import PagesTab from './PagesTab';
+import CodesTab from './CodesTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import SupportStatsCard from './SupportStatsCard';
 import { Product, Category, User } from './types';
@@ -19,6 +20,7 @@ interface AdminPanelTabsProps {
   orders: any[];
   tickets: any[];
   siteSettings: any;
+  userId: number;
   onAddProduct: () => void;
   onEditProduct: (product: Product) => void;
   onAddCategory: () => void;
@@ -47,6 +49,7 @@ const AdminPanelTabs = ({
   orders,
   tickets,
   siteSettings,
+  userId,
   onAddProduct,
   onEditProduct,
   onAddCategory,
@@ -69,7 +72,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -101,6 +104,10 @@ const AdminPanelTabs = ({
         <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="FileText" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Страницы</span>
+        </TabsTrigger>
+        <TabsTrigger value="codes" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="KeyRound" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">Коды</span>
         </TabsTrigger>
         <TabsTrigger value="settings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Settings" size={16} className="sm:mr-1" />
@@ -172,6 +179,10 @@ const AdminPanelTabs = ({
           siteSettings={siteSettings}
           onSaveSettings={onSaveSettings}
         />
+      </TabsContent>
+
+      <TabsContent value="codes">
+        <CodesTab userId={userId} />
       </TabsContent>
 
       <TabsContent value="settings">

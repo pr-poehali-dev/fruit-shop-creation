@@ -131,6 +131,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           orders={orders}
           tickets={tickets}
           siteSettings={siteSettings}
+          userId={user.id}
           onAddProduct={() => openProductDialog()}
           onEditProduct={openProductDialog}
           onAddCategory={() => setShowCategoryDialog(true)}

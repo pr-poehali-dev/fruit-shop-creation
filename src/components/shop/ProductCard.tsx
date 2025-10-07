@@ -88,8 +88,8 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
         ) : (
           <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
             <div className="text-center text-gray-400 dark:text-gray-500">
-              <Icon name="Image" size={48} className="mx-auto mb-2" />
-              <p className="text-sm">Фото отсутствует</p>
+              <Icon name="ImageOff" size={48} className="mx-auto mb-2" />
+              <p className="text-sm font-medium">Картинка ещё не добавлена</p>
             </div>
           </div>
         )}

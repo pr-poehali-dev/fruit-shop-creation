@@ -5,6 +5,7 @@ import NatureBackground from './auth/NatureBackground';
 import NatureAnimationStyles from './auth/NatureAnimationStyles';
 import AuthForms from './auth/AuthForms';
 import ForgotPasswordForm from './auth/ForgotPasswordForm';
+import AdminCodeVerification from './auth/AdminCodeVerification';
 
 interface BanInfo {
   banned: boolean;
@@ -17,9 +18,13 @@ interface AuthDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>, action: 'login' | 'register') => void;
   banInfo?: BanInfo | null;
+  requiresAdminCode?: boolean;
+  pendingAdminUser?: { id: number; full_name: string };
+  onAdminCodeVerify?: (code: string) => void;
+  adminCodeError?: string;
 }
 
-const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo }: AuthDialogProps) => {
+const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo, requiresAdminCode, pendingAdminUser, onAdminCodeVerify, adminCodeError }: AuthDialogProps) => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const formatPhoneInput = (value: string) => {
@@ -69,12 +74,22 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo }: AuthDialogProps) 
           <NatureBackground />
           <div className="w-full md:w-1/2 p-8 bg-white dark:bg-gray-900">
             <DialogHeader>
-              <DialogTitle>{showForgotPassword ? 'Восстановление пароля' : 'Вход и регистрация'}</DialogTitle>
+              <DialogTitle>
+                {requiresAdminCode ? 'Вход в админку' : showForgotPassword ? 'Восстановление пароля' : 'Вход и регистрация'}
+              </DialogTitle>
               <DialogDescription>
-                {showForgotPassword ? 'Запросите код для сброса пароля' : 'Войдите или создайте новый аккаунт'}
+                {requiresAdminCode ? 'Подтверждение доступа' : showForgotPassword ? 'Запросите код для сброса пароля' : 'Войдите или создайте новый аккаунт'}
               </DialogDescription>
             </DialogHeader>
-            {showForgotPassword ? (
+            {requiresAdminCode && pendingAdminUser && onAdminCodeVerify ? (
+              <AdminCodeVerification
+                userId={pendingAdminUser.id}
+                userName={pendingAdminUser.full_name}
+                onVerify={onAdminCodeVerify}
+                onBack={() => onOpenChange(false)}
+                error={adminCodeError}
+              />
+            ) : showForgotPassword ? (
               <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
             ) : (
               <AuthForms 

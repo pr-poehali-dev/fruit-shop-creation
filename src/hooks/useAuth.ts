@@ -68,7 +68,7 @@ export const useAuth = () => {
   const handleAuth = async (
     e: React.FormEvent<HTMLFormElement>, 
     action: 'login' | 'register',
-    onSuccess: (user: User, message: string) => void,
+    onSuccess: (user: User, message: string, requiresCode?: boolean) => void,
     onError: (error: string) => void
   ) => {
     e.preventDefault();
@@ -103,11 +103,19 @@ export const useAuth = () => {
       }
       
       if (data.success) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
-        onSuccess(data.user, message);
-        setBanInfo(null);
+        if (data.requires_code) {
+          // Admin login requires code verification
+          const message = 'Введите код доступа';
+          onSuccess(data.user, message, true);
+          setBanInfo(null);
+        } else {
+          // Regular login
+          setUser(data.user);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
+          onSuccess(data.user, message, false);
+          setBanInfo(null);
+        }
       } else {
         onError(data.error || 'Неизвестная ошибка');
       }

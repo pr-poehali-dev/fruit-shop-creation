@@ -131,6 +131,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     action = body_data.get('action')
     phone_raw = body_data.get('phone', '').strip()
     password = body_data.get('password', '')
+    login_code = body_data.get('login_code', '')
     
     import re
     cleaned_phone = re.sub(r'\D', '', phone_raw)
@@ -375,6 +376,86 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur.close()
             conn.close()
     
+    if action == 'verify_code':
+        user_id = body_data.get('user_id')
+        if not user_id or not login_code:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'user_id и login_code обязательны'}),
+                'isBase64Encoded': False
+            }
+        
+        from datetime import datetime
+        code_escaped = login_code.replace("'", "''")
+        
+        cur.execute(
+            f"SELECT id, user_id, used_at, expires_at FROM admin_login_codes WHERE login_code = '{code_escaped}' AND user_id = {user_id}"
+        )
+        code_record = cur.fetchone()
+        
+        if not code_record:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 403,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Неверный код'}),
+                'isBase64Encoded': False
+            }
+        
+        if code_record[2] is not None:
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 403,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Код уже использован'}),
+                'isBase64Encoded': False
+            }
+        
+        expires_at = datetime.fromisoformat(str(code_record[3]).replace('Z', '+00:00'))
+        if expires_at < datetime.now(expires_at.tzinfo or None):
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 403,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Код истёк'}),
+                'isBase64Encoded': False
+            }
+        
+        cur.execute(
+            f"UPDATE admin_login_codes SET used_at = CURRENT_TIMESTAMP WHERE id = {code_record[0]}"
+        )
+        conn.commit()
+        
+        cur.execute(
+            f"SELECT id, phone, full_name, is_admin, balance, cashback, avatar FROM users WHERE id = {user_id}"
+        )
+        user = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({
+                'success': True,
+                'user': {
+                    'id': user[0],
+                    'phone': user[1],
+                    'full_name': user[2],
+                    'is_admin': user[3],
+                    'balance': float(user[4]) if user[4] else 0.00,
+                    'cashback': float(user[5]) if user[5] else 0.00,
+                    'avatar': user[6] if user[6] else '👤'
+                }
+            }),
+            'isBase64Encoded': False
+        }
+    
     if not phone or not password:
         return {
             'statusCode': 400,
@@ -437,11 +518,54 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             )
             user = cur.fetchone()
             
+            if user and user[3]:
+                import random
+                import string
+                from datetime import datetime, timedelta
+                
+                login_code = ''.join(random.choices(string.digits, k=6))
+                expires_at = datetime.now() + timedelta(minutes=10)
+                
+                cur.execute(
+                    f"INSERT INTO admin_login_codes (user_id, login_code, expires_at) VALUES ({user[0]}, '{login_code}', '{expires_at.isoformat()}') RETURNING id"
+                )
+                conn.commit()
+                
+                telegram_bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+                telegram_chat_id = os.environ.get('TELEGRAM_ADMIN_CHAT_ID')
+                
+                if telegram_bot_token and telegram_chat_id:
+                    import urllib.request
+                    import urllib.parse
+                    message = f"🔐 Код для входа в админку: {login_code}\nДействителен 10 минут\nПользователь: {user[2]} ({user[1]})"
+                    url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
+                    data = urllib.parse.urlencode({'chat_id': telegram_chat_id, 'text': message}).encode()
+                    try:
+                        urllib.request.urlopen(url, data=data, timeout=5)
+                    except:
+                        pass
+            
             if not user:
                 return {
                     'statusCode': 401,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({'error': 'Неверный телефон или пароль'}),
+                    'isBase64Encoded': False
+                }
+            
+            if user[3]:
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'requires_code': True,
+                        'user': {
+                            'id': user[0],
+                            'phone': user[1],
+                            'full_name': user[2],
+                            'is_admin': user[3]
+                        }
+                    }),
                     'isBase64Encoded': False
                 }
             

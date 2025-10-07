@@ -52,6 +52,9 @@ const Index = () => {
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
   const [ratingEntityType, setRatingEntityType] = useState('');
   const [ratingEntityId, setRatingEntityId] = useState(0);
+  const [requiresAdminCode, setRequiresAdminCode] = useState(false);
+  const [pendingAdminUser, setPendingAdminUser] = useState<{ id: number; full_name: string } | null>(null);
+  const [adminCodeError, setAdminCodeError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -162,12 +165,20 @@ const Index = () => {
     }
   };
 
-  const onAuthSuccess = (userData: any, message: string) => {
-    setShowAuthDialog(false);
-    toast({
-      title: message,
-      description: `Добро пожаловать, ${userData.full_name || userData.phone}!`
-    });
+  const onAuthSuccess = (userData: any, message: string, requiresCode?: boolean) => {
+    if (requiresCode) {
+      setRequiresAdminCode(true);
+      setPendingAdminUser({ id: userData.id, full_name: userData.full_name });
+      setAdminCodeError('');
+    } else {
+      setShowAuthDialog(false);
+      setRequiresAdminCode(false);
+      setPendingAdminUser(null);
+      toast({
+        title: message,
+        description: `Добро пожаловать, ${userData.full_name || userData.phone}!`
+      });
+    }
   };
 
   const onAuthError = (error: string) => {
@@ -178,7 +189,41 @@ const Index = () => {
     });
   };
 
+  const handleAdminCodeVerify = async (code: string) => {
+    if (!pendingAdminUser) return;
 
+    try {
+      const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
+      const response = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify_code',
+          user_id: pendingAdminUser.id,
+          login_code: code
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setShowAuthDialog(false);
+        setRequiresAdminCode(false);
+        setPendingAdminUser(null);
+        setAdminCodeError('');
+        toast({
+          title: 'Доступ разрешён',
+          description: `Добро пожаловать в админку, ${data.user.full_name}!`
+        });
+      } else {
+        setAdminCodeError(data.error || 'Неверный код');
+      }
+    } catch (error) {
+      setAdminCodeError('Не удалось проверить код');
+    }
+  };
 
   const onLogout = () => {
     setCurrentSection('home');
@@ -345,9 +390,20 @@ const Index = () => {
 
           <AuthDialog 
             open={showAuthDialog} 
-            onOpenChange={setShowAuthDialog}
+            onOpenChange={(open) => {
+              setShowAuthDialog(open);
+              if (!open) {
+                setRequiresAdminCode(false);
+                setPendingAdminUser(null);
+                setAdminCodeError('');
+              }
+            }}
             onSubmit={(e, action) => handleAuth(e, action, onAuthSuccess, onAuthError)}
             banInfo={banInfo}
+            requiresAdminCode={requiresAdminCode}
+            pendingAdminUser={pendingAdminUser || undefined}
+            onAdminCodeVerify={handleAdminCodeVerify}
+            adminCodeError={adminCodeError}
           />
 
           {user && (

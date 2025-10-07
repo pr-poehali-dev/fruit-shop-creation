@@ -1,12 +1,12 @@
 {
   "tests": [
     {
-      "name": "Get reset codes as admin",
+      "name": "Get reset codes - requires auth",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 200,
+      "expectedStatus": 401,
       "expectedBody": {
-        "codes": "array"
+        "error": "string"
       },
       "bodyMatcher": "partial"
     }

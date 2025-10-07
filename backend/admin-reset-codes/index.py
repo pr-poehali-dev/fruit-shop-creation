@@ -81,9 +81,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             LIMIT 100
         """)
         
-        codes = []
+        reset_codes = []
         for row in cur.fetchall():
-            codes.append({
+            reset_codes.append({
                 'id': row[0],
                 'phone': row[1],
                 'reset_code': row[2],
@@ -96,13 +96,45 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'is_used': row[4] is not None
             })
         
+        cur.execute("""
+            SELECT 
+                alc.id,
+                alc.login_code,
+                alc.created_at,
+                alc.used_at,
+                alc.expires_at,
+                u.full_name,
+                u.phone
+            FROM admin_login_codes alc
+            JOIN users u ON alc.user_id = u.id
+            ORDER BY alc.created_at DESC
+            LIMIT 100
+        """)
+        
+        login_codes = []
+        for row in cur.fetchall():
+            login_codes.append({
+                'id': row[0],
+                'login_code': row[1],
+                'created_at': row[2].isoformat() if row[2] else None,
+                'used_at': row[3].isoformat() if row[3] else None,
+                'expires_at': row[4].isoformat() if row[4] else None,
+                'user_name': row[5],
+                'phone': row[6],
+                'is_expired': datetime.now() > row[4] if row[4] else False,
+                'is_used': row[3] is not None
+            })
+        
         cur.close()
         conn.close()
         
         return {
             'statusCode': 200,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'codes': codes})
+            'body': json.dumps({
+                'reset_codes': reset_codes,
+                'login_codes': login_codes
+            })
         }
     
     except Exception as e:
