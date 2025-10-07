@@ -166,12 +166,13 @@ const Index = () => {
   };
 
   const onAuthSuccess = (userData: any, message: string, requiresCode?: boolean) => {
-    console.log('onAuthSuccess called:', { userData, message, requiresCode });
+    console.log('✅ onAuthSuccess called:', { userData, message, requiresCode });
     if (requiresCode) {
+      console.log('🔐 Setting requiresAdminCode to TRUE');
       setRequiresAdminCode(true);
       setPendingAdminUser({ id: userData.id, full_name: userData.full_name });
       setAdminCodeError('');
-      console.log('Admin code required, dialog should show code input');
+      console.log('📋 State updated:', { requiresAdminCode: true, pendingAdminUser: { id: userData.id, full_name: userData.full_name } });
     } else {
       setShowAuthDialog(false);
       setRequiresAdminCode(false);
