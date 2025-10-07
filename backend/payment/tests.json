@@ -1,0 +1,35 @@
+{
+  "tests": [
+    {
+      "name": "Test payment creation with valid data",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "amount": "1000.00",
+        "description": "Тестовая оплата",
+        "order_id": "test-order-123",
+        "email": "test@example.com"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "payment_id": "string",
+        "confirmation_url": "string",
+        "status": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test payment creation without amount",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "description": "Тестовая оплата"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Amount is required"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
