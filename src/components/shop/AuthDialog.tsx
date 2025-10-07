@@ -14,11 +14,10 @@ interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>, action: 'login' | 'register') => void;
-  onGoogleLogin?: () => void;
   banInfo?: BanInfo | null;
 }
 
-const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: AuthDialogProps) => {
+const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo }: AuthDialogProps) => {
   const formatPhoneInput = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
     let formatted = '+7';
@@ -64,12 +63,12 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
       <DialogContent className="overflow-hidden p-0 max-w-4xl sm:max-w-[90vw]">
         <div className="relative flex flex-col md:flex-row min-h-[600px]">
           <NatureBackground />
-          <div className="w-full md:w-1/2 p-8 bg-white">
+          <div className="w-full md:w-1/2 p-8 bg-white dark:bg-gray-900">
             <DialogHeader>
               <DialogTitle>Вход и регистрация</DialogTitle>
               <DialogDescription>Войдите или создайте новый аккаунт</DialogDescription>
             </DialogHeader>
-            <AuthForms onSubmit={onSubmit} handlePhoneChange={handlePhoneChange} onGoogleLogin={onGoogleLogin} />
+            <AuthForms onSubmit={onSubmit} handlePhoneChange={handlePhoneChange} />
           </div>
         </div>
         <NatureAnimationStyles />

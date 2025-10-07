@@ -60,54 +60,7 @@ const Index = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    
-    if (code && window.location.pathname === '/auth/google') {
-      handleGoogleCallback(code);
-    }
-  }, []);
 
-  const handleGoogleCallback = async (code: string) => {
-    try {
-      const currentUrl = window.location.origin;
-      const response = await fetch(
-        `https://functions.poehali.dev/4a59ecd1-c528-41e9-a77d-003da941bcf4?action=callback&code=${code}&redirect_uri=${encodeURIComponent(currentUrl + '/auth/google')}`
-      );
-      const data = await response.json();
-      
-      if (data.success && data.user) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        window.history.replaceState({}, '', '/');
-        
-        toast({
-          title: 'Вход выполнен',
-          description: `Добро пожаловать, ${data.user.full_name || data.user.email}!`
-        });
-        
-        if (data.user.is_admin) {
-          setShowAdminPanel(true);
-        }
-      } else {
-        window.history.replaceState({}, '', '/');
-        toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось войти через Google',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      window.history.replaceState({}, '', '/');
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось завершить вход через Google',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
@@ -225,25 +178,7 @@ const Index = () => {
     });
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const currentUrl = window.location.origin;
-      const response = await fetch(
-        `https://functions.poehali.dev/4a59ecd1-c528-41e9-a77d-003da941bcf4?action=login&redirect_uri=${encodeURIComponent(currentUrl + '/auth/google')}`
-      );
-      const data = await response.json();
-      
-      if (data.auth_url) {
-        window.location.href = data.auth_url;
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось инициировать вход через Google',
-        variant: 'destructive'
-      });
-    }
-  };
+
 
   const onLogout = () => {
     setCurrentSection('home');
@@ -412,7 +347,6 @@ const Index = () => {
             open={showAuthDialog} 
             onOpenChange={setShowAuthDialog}
             onSubmit={(e, action) => handleAuth(e, action, onAuthSuccess, onAuthError)}
-            onGoogleLogin={handleGoogleLogin}
             banInfo={banInfo}
           />
 
