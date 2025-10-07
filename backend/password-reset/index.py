@@ -12,26 +12,22 @@ import secrets
 from datetime import datetime, timedelta
 import requests
 from typing import Dict, Any
+import re
 
-def ensure_table_exists(cursor, conn):
-    '''Создание таблицы при первом запуске'''
-    try:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS password_reset_codes (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                code VARCHAR(16) NOT NULL,
-                expires_at TIMESTAMP NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT unique_user_reset UNIQUE (user_id)
-            )
-        """)
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_reset_codes(user_id)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_password_reset_code ON password_reset_codes(code)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_password_reset_expires ON password_reset_codes(expires_at)")
-        conn.commit()
-    except Exception:
-        pass
+reset_codes_cache = {}
+
+def normalize_phone(phone_raw: str) -> str:
+    '''Нормализация телефона к формату базы данных: +7 (999) 123-45-67'''
+    cleaned_phone = re.sub(r'\D', '', phone_raw)
+    if cleaned_phone.startswith('8'):
+        cleaned_phone = '7' + cleaned_phone[1:]
+    elif not cleaned_phone.startswith('7'):
+        cleaned_phone = '7' + cleaned_phone
+    
+    if len(cleaned_phone) >= 11:
+        return f"+7 ({cleaned_phone[1:4]}) {cleaned_phone[4:7]}-{cleaned_phone[7:9]}-{cleaned_phone[9:11]}"
+    else:
+        return phone_raw
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method: str = event.get('httpMethod', 'GET')
@@ -45,7 +41,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Max-Age': '86400'
             },
-            'body': ''
+            'body': '',
+            'isBase64Encoded': False
         }
     
     db_url = os.environ.get('DATABASE_URL')
@@ -60,20 +57,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     conn = psycopg2.connect(db_url)
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     
-    ensure_table_exists(cursor, conn)
-    
     try:
         if method == 'POST':
             body_data = json.loads(event.get('body', '{}'))
-            phone = body_data.get('phone', '').strip()
+            phone_raw = body_data.get('phone', '').strip()
             
-            if not phone:
+            if not phone_raw:
                 return {
                     'statusCode': 400,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'isBase64Encoded': False,
                     'body': json.dumps({'error': 'Телефон обязателен'})
                 }
+            
+            phone = normalize_phone(phone_raw)
             
             cursor.execute("SELECT id, full_name FROM users WHERE phone = %s", (phone,))
             user = cursor.fetchone()
@@ -89,13 +86,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             reset_code = secrets.token_hex(4).upper()
             expires_at = datetime.now() + timedelta(hours=24)
             
-            cursor.execute("""
-                INSERT INTO password_reset_codes (user_id, code, expires_at)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (user_id) 
-                DO UPDATE SET code = EXCLUDED.code, expires_at = EXCLUDED.expires_at, created_at = NOW()
-            """, (user['id'], reset_code, expires_at))
-            conn.commit()
+            reset_codes_cache[phone] = {
+                'code': reset_code,
+                'expires_at': expires_at,
+                'user_id': user['id']
+            }
             
             send_telegram_notification(
                 user_name=user['full_name'] or 'Пользователь',
@@ -115,11 +110,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif method == 'PUT':
             body_data = json.loads(event.get('body', '{}'))
-            phone = body_data.get('phone', '').strip()
+            phone_raw = body_data.get('phone', '').strip()
             code = body_data.get('code', '').strip().upper()
             new_password = body_data.get('new_password', '').strip()
             
-            if not all([phone, code, new_password]):
+            if not all([phone_raw, code, new_password]):
                 return {
                     'statusCode': 400,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -127,15 +122,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Все поля обязательны'})
                 }
             
-            cursor.execute("""
-                SELECT u.id, prc.code, prc.expires_at
-                FROM users u
-                JOIN password_reset_codes prc ON prc.user_id = u.id
-                WHERE u.phone = %s
-            """, (phone,))
-            result = cursor.fetchone()
+            phone = normalize_phone(phone_raw)
             
-            if not result:
+            if phone not in reset_codes_cache:
                 return {
                     'statusCode': 404,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -143,7 +132,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Код не найден или истёк'})
                 }
             
-            if result['code'] != code:
+            cached_data = reset_codes_cache[phone]
+            
+            if cached_data['code'] != code:
                 return {
                     'statusCode': 403,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -151,7 +142,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Неверный код'})
                 }
             
-            if datetime.now() > result['expires_at']:
+            if datetime.now() > cached_data['expires_at']:
+                del reset_codes_cache[phone]
                 return {
                     'statusCode': 403,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -161,9 +153,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             
-            cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hashed_password, result['id']))
-            cursor.execute("UPDATE password_reset_codes SET expires_at = NOW() - INTERVAL '1 day' WHERE user_id = %s", (result['id'],))
+            cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hashed_password, cached_data['user_id']))
             conn.commit()
+            
+            del reset_codes_cache[phone]
             
             return {
                 'statusCode': 200,

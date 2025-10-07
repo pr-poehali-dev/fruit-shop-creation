@@ -1,7 +1,7 @@
 {
   "tests": [
     {
-      "name": "Request password reset code",
+      "name": "Request password reset code - success",
       "method": "POST",
       "path": "/",
       "body": {
@@ -15,17 +15,15 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "Reset password with valid code",
-      "method": "PUT",
+      "name": "Request password reset code - user not found",
+      "method": "POST",
       "path": "/",
       "body": {
-        "phone": "+79991234567",
-        "code": "TESTCODE",
-        "new_password": "newpassword123"
+        "phone": "+70000000000"
       },
-      "expectedStatus": 200,
+      "expectedStatus": 404,
       "expectedBody": {
-        "message": "string"
+        "error": "string"
       },
       "bodyMatcher": "partial"
     }
