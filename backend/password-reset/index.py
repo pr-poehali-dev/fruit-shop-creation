@@ -55,6 +55,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     conn = psycopg2.connect(db_url)
+    conn.autocommit = True
     cursor = conn.cursor()
     
     try:
@@ -156,8 +157,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             hash_escaped = hashed_password.replace("'", "''")
             user_id = int(cached_data['user_id'])
             
-            cursor.execute(f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}")
-            conn.commit()
+            sql = f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}"
+            cursor.execute(sql)
             
             del reset_codes_cache[phone]
             
