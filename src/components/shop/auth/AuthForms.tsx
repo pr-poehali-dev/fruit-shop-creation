@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 interface AuthFormsProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>, action: 'login' | 'register') => void;
   handlePhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onForgotPassword: () => void;
 }
 
-const AuthForms = ({ onSubmit, handlePhoneChange }: AuthFormsProps) => {
+const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsProps) => {
   return (
     <Tabs defaultValue="login">
       <TabsList className="grid w-full grid-cols-2">
@@ -38,6 +39,14 @@ const AuthForms = ({ onSubmit, handlePhoneChange }: AuthFormsProps) => {
             <Input id="login-password" name="password" type="password" autoComplete="current-password" required />
           </div>
           <Button type="submit" className="w-full">Войти</Button>
+          <Button 
+            type="button" 
+            variant="link" 
+            className="w-full text-sm text-muted-foreground"
+            onClick={onForgotPassword}
+          >
+            Забыли пароль?
+          </Button>
         </form>
       </TabsContent>
       <TabsContent value="register">

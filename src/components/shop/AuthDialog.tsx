@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState } from 'react';
 import BanNotification from './auth/BanNotification';
 import NatureBackground from './auth/NatureBackground';
 import NatureAnimationStyles from './auth/NatureAnimationStyles';
 import AuthForms from './auth/AuthForms';
+import ForgotPasswordForm from './auth/ForgotPasswordForm';
 
 interface BanInfo {
   banned: boolean;
@@ -18,6 +20,8 @@ interface AuthDialogProps {
 }
 
 const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo }: AuthDialogProps) => {
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
   const formatPhoneInput = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
     let formatted = '+7';
@@ -65,10 +69,20 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo }: AuthDialogProps) 
           <NatureBackground />
           <div className="w-full md:w-1/2 p-8 bg-white dark:bg-gray-900">
             <DialogHeader>
-              <DialogTitle>Вход и регистрация</DialogTitle>
-              <DialogDescription>Войдите или создайте новый аккаунт</DialogDescription>
+              <DialogTitle>{showForgotPassword ? 'Восстановление пароля' : 'Вход и регистрация'}</DialogTitle>
+              <DialogDescription>
+                {showForgotPassword ? 'Запросите код для сброса пароля' : 'Войдите или создайте новый аккаунт'}
+              </DialogDescription>
             </DialogHeader>
-            <AuthForms onSubmit={onSubmit} handlePhoneChange={handlePhoneChange} />
+            {showForgotPassword ? (
+              <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
+            ) : (
+              <AuthForms 
+                onSubmit={onSubmit} 
+                handlePhoneChange={handlePhoneChange}
+                onForgotPassword={() => setShowForgotPassword(true)}
+              />
+            )}
           </div>
         </div>
         <NatureAnimationStyles />

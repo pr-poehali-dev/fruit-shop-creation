@@ -1,4 +1,6 @@
 {
+  "admin-reset-codes": "https://functions.poehali.dev/e343c1bf-14b9-4373-a620-36d059062d82",
+  "password-reset": "https://functions.poehali.dev/c7d83bd6-2027-4170-8c35-7f6462c5274a",
   "robokassa-result": "https://functions.poehali.dev/598e71d0-09c9-421a-9a7c-d1d412664abe",
   "robokassa-payment": "https://functions.poehali.dev/e659ee47-51d9-49ab-86dd-473d6b5c49af",
   "payment": "https://functions.poehali.dev/f0f80937-02c6-4d05-89d9-df4f8ec67fb8",

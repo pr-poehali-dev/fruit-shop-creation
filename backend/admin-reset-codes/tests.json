@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get reset codes as admin",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "codes": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
