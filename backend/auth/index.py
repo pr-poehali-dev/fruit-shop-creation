@@ -388,7 +388,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         from datetime import datetime
         
-        conn = psycopg2.connect(dsn)
+        db_url = os.environ.get('DATABASE_URL')
+        if not db_url:
+            return {
+                'statusCode': 500,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Database not configured'}),
+                'isBase64Encoded': False
+            }
+        
+        conn = psycopg2.connect(db_url)
         cur = conn.cursor()
         
         code_escaped = login_code.replace("'", "''")
