@@ -387,6 +387,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         
         from datetime import datetime
+        
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor()
+        
         code_escaped = login_code.replace("'", "''")
         
         cur.execute(
