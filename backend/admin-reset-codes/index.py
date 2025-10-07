@@ -53,7 +53,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         conn = psycopg2.connect(database_url)
         cur = conn.cursor()
         
-        cur.execute("SELECT is_admin FROM users WHERE id = %s", (user_id,))
+        user_id_int = int(user_id)
+        cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id_int}")
         user = cur.fetchone()
         
         if not user or not user[0]:

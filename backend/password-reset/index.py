@@ -71,8 +71,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             phone = normalize_phone(phone_raw)
+            phone_escaped = phone.replace("'", "''")
             
-            cursor.execute("SELECT id, full_name FROM users WHERE phone = %s", (phone,))
+            cursor.execute(f"SELECT id, full_name FROM users WHERE phone = '{phone_escaped}'")
             user = cursor.fetchone()
             
             if not user:
@@ -152,8 +153,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            hash_escaped = hashed_password.replace("'", "''")
+            user_id = int(cached_data['user_id'])
             
-            cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hashed_password, cached_data['user_id']))
+            cursor.execute(f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}")
             conn.commit()
             
             del reset_codes_cache[phone]
