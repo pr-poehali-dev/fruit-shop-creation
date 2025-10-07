@@ -3,10 +3,12 @@ import hashlib
 import os
 from typing import Dict, Any
 from urllib.parse import parse_qs
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    Business: Обработка Result URL (webhook) от Robokassa после успешной оплаты
+    Business: Обработка Result URL (webhook) от Robokassa после успешной оплаты и зачисление средств
     Args: event - dict с httpMethod, body или queryStringParameters
           context - объект с request_id
     Returns: HTTP response OK{invoice_id} для Robokassa или ошибка
@@ -71,6 +73,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False,
             'body': 'Invalid signature'
         }
+    
+    if shp_user_id:
+        database_url = os.environ.get('DATABASE_URL', '')
+        if database_url:
+            try:
+                conn = psycopg2.connect(database_url)
+                cur = conn.cursor(cursor_factory=RealDictCursor)
+                
+                amount = float(out_sum)
+                user_id = int(shp_user_id)
+                
+                cur.execute(
+                    "UPDATE users SET balance = balance + " + str(amount) + " WHERE id = " + str(user_id)
+                )
+                
+                cur.execute(
+                    "INSERT INTO balance_transactions (user_id, amount, transaction_type, description) " +
+                    "VALUES (" + str(user_id) + ", " + str(amount) + ", 'top_up', 'Пополнение через Robokassa #" + str(inv_id) + "')"
+                )
+                
+                conn.commit()
+                cur.close()
+                conn.close()
+            except Exception as e:
+                pass
     
     return {
         'statusCode': 200,

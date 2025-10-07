@@ -77,6 +77,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     base_url = 'https://auth.robokassa.ru/Merchant/Index.aspx' if not test_mode else 'https://auth.robokassa.ru/Merchant/Index.aspx'
     
+    success_url = 'https://your-domain.com/robokassa-success'
+    fail_url = 'https://your-domain.com/robokassa-fail'
+    
     params = {
         'MerchantLogin': merchant_login,
         'OutSum': amount,
@@ -84,7 +87,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         'Description': description,
         'SignatureValue': signature,
         'IsTest': '1' if test_mode else '0',
-        'Encoding': 'utf-8'
+        'Encoding': 'utf-8',
+        'Culture': 'ru'
     }
     
     if user_id:
