@@ -87,6 +87,7 @@ export const useAuth = () => {
       });
       
       const data = await response.json();
+      console.log('Auth response:', data);
       
       if (data.banned) {
         setBanInfo({
@@ -102,20 +103,18 @@ export const useAuth = () => {
         return;
       }
       
-      if (data.success) {
-        if (data.requires_code) {
-          // Admin login requires code verification
-          const message = 'Введите код доступа';
-          onSuccess(data.user, message, true);
-          setBanInfo(null);
-        } else {
-          // Regular login
-          setUser(data.user);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
-          onSuccess(data.user, message, false);
-          setBanInfo(null);
-        }
+      if (data.requires_code) {
+        // Admin login requires code verification
+        const message = 'Введите код доступа';
+        onSuccess(data.user, message, true);
+        setBanInfo(null);
+      } else if (data.success) {
+        // Regular login
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
+        onSuccess(data.user, message, false);
+        setBanInfo(null);
       } else {
         onError(data.error || 'Неизвестная ошибка');
       }
