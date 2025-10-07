@@ -6,15 +6,12 @@ Returns: HTTP response с результатом операции
 import json
 import os
 import psycopg2
-from psycopg2.extras import RealDictCursor
 import bcrypt
 import secrets
 from datetime import datetime, timedelta
 import requests
 from typing import Dict, Any
 import re
-
-reset_codes_cache = {}
 
 def normalize_phone(phone_raw: str) -> str:
     '''Нормализация телефона к формату базы данных: +7 (999) 123-45-67'''
@@ -87,12 +84,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             reset_code = secrets.token_hex(4).upper()
             expires_at = datetime.now() + timedelta(hours=24)
+            created_at = datetime.now()
             
-            reset_codes_cache[phone] = {
-                'code': reset_code,
-                'expires_at': expires_at,
-                'user_id': user[0]
-            }
+            # Сохраняем код в БД
+            user_id = int(user[0])
+            reset_code_escaped = reset_code.replace("'", "''")
+            expires_str = expires_at.strftime('%Y-%m-%d %H:%M:%S')
+            created_str = created_at.strftime('%Y-%m-%d %H:%M:%S')
+            
+            cursor.execute(f"""
+                INSERT INTO password_reset_codes (user_id, phone, reset_code, created_at, expires_at)
+                VALUES ({user_id}, '{phone_escaped}', '{reset_code_escaped}', '{created_str}', '{expires_str}')
+            """)
             
             send_telegram_notification(
                 user_name=user[1] or 'Пользователь',
@@ -125,18 +128,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             phone = normalize_phone(phone_raw)
+            phone_escaped = phone.replace("'", "''")
+            code_escaped = code.replace("'", "''")
             
-            if phone not in reset_codes_cache:
-                return {
-                    'statusCode': 404,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'isBase64Encoded': False,
-                    'body': json.dumps({'error': 'Код не найден или истёк'})
-                }
+            # Получаем код из БД
+            cursor.execute(f"""
+                SELECT id, user_id, used_at, expires_at 
+                FROM password_reset_codes 
+                WHERE phone = '{phone_escaped}' AND reset_code = '{code_escaped}'
+                ORDER BY created_at DESC
+                LIMIT 1
+            """)
+            code_record = cursor.fetchone()
             
-            cached_data = reset_codes_cache[phone]
-            
-            if cached_data['code'] != code:
+            if not code_record:
                 return {
                     'statusCode': 403,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -144,8 +149,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'Неверный код'})
                 }
             
-            if datetime.now() > cached_data['expires_at']:
-                del reset_codes_cache[phone]
+            # Проверяем использован ли код
+            if code_record[2] is not None:
+                return {
+                    'statusCode': 403,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'isBase64Encoded': False,
+                    'body': json.dumps({'error': 'Код уже использован'})
+                }
+            
+            # Проверяем истёк ли код
+            if datetime.now() > code_record[3]:
                 return {
                     'statusCode': 403,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -155,12 +169,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             hash_escaped = hashed_password.replace("'", "''")
-            user_id = int(cached_data['user_id'])
+            user_id = int(code_record[1])
+            code_id = int(code_record[0])
             
-            sql = f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}"
-            cursor.execute(sql)
+            # Обновляем пароль
+            cursor.execute(f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}")
             
-            del reset_codes_cache[phone]
+            # Отмечаем код как использованный
+            used_at_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            cursor.execute(f"UPDATE password_reset_codes SET used_at = '{used_at_str}' WHERE id = {code_id}")
             
             return {
                 'statusCode': 200,
