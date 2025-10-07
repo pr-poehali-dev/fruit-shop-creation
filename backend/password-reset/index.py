@@ -52,6 +52,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     conn = psycopg2.connect(db_url)
+    conn.set_session(autocommit=True)
     cursor = conn.cursor()
     
     try:
@@ -95,7 +96,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 INSERT INTO password_reset_codes (user_id, phone, reset_code, created_at, expires_at)
                 VALUES ({user_id}, '{phone_escaped}', '{reset_code_escaped}', '{created_str}', '{expires_str}')
             """)
-            conn.commit()
             
             send_telegram_notification(
                 user_name=user[1] or 'Пользователь',
@@ -178,8 +178,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             # Отмечаем код как использованный
             used_at_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute(f"UPDATE password_reset_codes SET used_at = '{used_at_str}' WHERE id = {code_id}")
-            
-            conn.commit()
             
             return {
                 'statusCode': 200,
