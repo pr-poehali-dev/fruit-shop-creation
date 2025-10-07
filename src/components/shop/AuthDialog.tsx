@@ -225,29 +225,6 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
                 <Input id="login-password" name="password" type="password" autoComplete="current-password" required />
               </div>
               <Button type="submit" className="w-full">Войти</Button>
-              
-              {onGoogleLogin && (
-                <>
-                  <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">Для администраторов</span>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={onGoogleLogin}
-                  >
-                    <Icon name="Chrome" size={18} className="mr-2" />
-                    Войти через Google
-                  </Button>
-                </>
-              )}
             </form>
           </TabsContent>
           <TabsContent value="register">
