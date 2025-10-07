@@ -13,9 +13,9 @@ interface AuthDialogProps {
 const AuthDialog = ({ open, onOpenChange, onAuth }: AuthDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 max-w-4xl">
-        <div className="relative flex min-h-[600px]">
-          <div className="hidden md:flex md:w-1/2 relative overflow-hidden bg-gradient-to-br from-emerald-950 via-green-800 to-teal-700">
+      <DialogContent className="overflow-hidden p-0 max-w-4xl sm:max-w-[90vw]">
+        <div className="relative flex flex-col md:flex-row min-h-[600px]">
+          <div className="flex w-full md:w-1/2 relative overflow-hidden bg-gradient-to-br from-emerald-950 via-green-800 to-teal-700 min-h-[200px] md:min-h-[600px]">
             <div className="absolute inset-0">
               <div className="sun"></div>
               <div className="leaf leaf-1"></div>
