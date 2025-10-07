@@ -1,7 +1,7 @@
 {
   "tests": [
     {
-      "name": "Login with valid credentials",
+      "name": "Admin login requires code",
       "method": "POST",
       "path": "/",
       "body": {
@@ -11,7 +11,11 @@
       },
       "expectedStatus": 200,
       "expectedBody": {
-        "success": true
+        "requires_code": true,
+        "user": {
+          "id": 1,
+          "is_admin": true
+        }
       },
       "bodyMatcher": "partial"
     },

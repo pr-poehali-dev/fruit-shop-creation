@@ -532,18 +532,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 conn.commit()
                 
                 telegram_bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
-                telegram_chat_id = os.environ.get('TELEGRAM_ADMIN_CHAT_ID')
+                telegram_chat_id = os.environ.get('ADMIN_TELEGRAM_CHAT_ID')
                 
                 if telegram_bot_token and telegram_chat_id:
                     import urllib.request
                     import urllib.parse
-                    message = f"🔐 Код для входа в админку: {login_code}\nДействителен 10 минут\nПользователь: {user[2]} ({user[1]})"
+                    message = f"🔐 *Код для входа в админку*\n\n`{login_code}`\n\n⏱ Действителен 10 минут\n👤 {user[2]}\n📱 {user[1]}"
                     url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
-                    data = urllib.parse.urlencode({'chat_id': telegram_chat_id, 'text': message}).encode()
+                    data = urllib.parse.urlencode({
+                        'chat_id': telegram_chat_id, 
+                        'text': message,
+                        'parse_mode': 'Markdown'
+                    }).encode()
                     try:
-                        urllib.request.urlopen(url, data=data, timeout=5)
-                    except:
-                        pass
+                        req = urllib.request.Request(url, data=data, method='POST')
+                        urllib.request.urlopen(req, timeout=5)
+                    except Exception as e:
+                        print(f"Telegram send error: {e}")
             
             if not user:
                 return {
