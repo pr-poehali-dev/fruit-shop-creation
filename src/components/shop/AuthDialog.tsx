@@ -69,7 +69,7 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, onGoogleLogin, banInfo }: Au
               <DialogTitle>Вход и регистрация</DialogTitle>
               <DialogDescription>Войдите или создайте новый аккаунт</DialogDescription>
             </DialogHeader>
-            <AuthForms onSubmit={onSubmit} handlePhoneChange={handlePhoneChange} />
+            <AuthForms onSubmit={onSubmit} handlePhoneChange={handlePhoneChange} onGoogleLogin={onGoogleLogin} />
           </div>
         </div>
         <NatureAnimationStyles />
