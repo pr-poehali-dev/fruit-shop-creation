@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import Icon from '@/components/ui/icon';
 import NotificationsDropdown from './NotificationsDropdown';
+import TreeLogo from './TreeLogo';
 
 interface User {
   id: number;
@@ -37,7 +38,7 @@ const Header = ({ user, cart, currentSection, onSectionChange, onShowAuth, onSho
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon name="Flower2" size={32} />
+          <TreeLogo size={40} />
           <h1 className="text-2xl font-display font-bold">Питомник растений</h1>
         </div>
         
