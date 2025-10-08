@@ -79,8 +79,8 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
             <Input 
               id="logo-url" 
               name="logo_url" 
-              defaultValue={siteSettings.logo_url || ''} 
-              placeholder="/img/a1a22e5b-c78c-45d4-b175-00ce2339c64f.jpg"
+              defaultValue={siteSettings.logo_url || 'https://storage.yandexcloud.net/poehali-files/d64bcbd2-3424-4fbc-8e3a-56f22a820104.jpg'} 
+              placeholder="https://storage.yandexcloud.net/poehali-files/d64bcbd2-3424-4fbc-8e3a-56f22a820104.jpg"
             />
             <p className="text-xs text-muted-foreground mt-1">
               Введите путь к изображению логотипа или ссылку (например: /img/logo.jpg)
