@@ -20,9 +20,10 @@ interface ProductsTabProps {
   products: Product[];
   onAddProduct: () => void;
   onEditProduct: (product: Product) => void;
+  onDeleteProduct: (productId: number) => void;
 }
 
-const ProductsTab = ({ products, onAddProduct, onEditProduct }: ProductsTabProps) => {
+const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }: ProductsTabProps) => {
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -52,16 +53,27 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct }: ProductsTabProps
                     <Badge variant="outline" className="text-xs">Склад: {product.stock}</Badge>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onEditProduct(product)}
-                  className="w-full sm:w-auto flex-shrink-0"
-                >
-                  <Icon name="Pencil" size={14} className="sm:mr-2" />
-                  <span className="hidden sm:inline">Изменить</span>
-                  <span className="sm:hidden ml-2">Редактировать</span>
-                </Button>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => onEditProduct(product)}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Icon name="Pencil" size={14} className="sm:mr-2" />
+                    <span className="hidden sm:inline">Изменить</span>
+                    <span className="sm:hidden ml-2">Редактировать</span>
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => onDeleteProduct(product.id)}
+                    className="flex-shrink-0"
+                  >
+                    <Icon name="Trash2" size={14} className="sm:mr-2" />
+                    <span className="hidden sm:inline">Удалить</span>
+                  </Button>
+                </div>
               </div>
             </CardHeader>
           </Card>

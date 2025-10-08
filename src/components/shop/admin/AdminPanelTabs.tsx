@@ -24,6 +24,7 @@ interface AdminPanelTabsProps {
   userId: number;
   onAddProduct: () => void;
   onEditProduct: (product: Product) => void;
+  onDeleteProduct: (productId: number) => void;
   onAddCategory: () => void;
   onEditCategory: (category: Category) => void;
   onAddBalance: (userId: number, amount: number, description: string) => void;
@@ -53,6 +54,7 @@ const AdminPanelTabs = ({
   userId,
   onAddProduct,
   onEditProduct,
+  onDeleteProduct,
   onAddCategory,
   onEditCategory,
   onAddBalance,
@@ -125,6 +127,7 @@ const AdminPanelTabs = ({
           products={products}
           onAddProduct={onAddProduct}
           onEditProduct={onEditProduct}
+          onDeleteProduct={onDeleteProduct}
         />
       </TabsContent>
 

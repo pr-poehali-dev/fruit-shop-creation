@@ -71,7 +71,8 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     handleDeleteOrder,
     handleDeleteTicket,
     handleUpdateItemStock,
-    handleUpdateItemAvailability
+    handleUpdateItemAvailability,
+    handleDeleteProduct
   } = useAdminHandlers({
     user,
     API_PRODUCTS,
@@ -134,6 +135,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           userId={user.id}
           onAddProduct={() => openProductDialog()}
           onEditProduct={openProductDialog}
+          onDeleteProduct={handleDeleteProduct}
           onAddCategory={() => setShowCategoryDialog(true)}
           onEditCategory={(category) => {
             setEditingCategory(category);

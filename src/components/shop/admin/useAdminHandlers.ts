@@ -548,6 +548,40 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleDeleteProduct = async (productId: number) => {
+    if (!confirm('Удалить товар? Это действие нельзя отменить.')) return;
+    
+    try {
+      const response = await fetch(props.API_PRODUCTS, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Товар удалён',
+          description: 'Товар успешно удалён из каталога'
+        });
+        props.loadProducts();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось удалить товар',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить товар',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return {
     handleSaveProduct,
     handleSaveCategory,
@@ -562,6 +596,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleDeleteOrder,
     handleDeleteTicket,
     handleUpdateItemStock,
-    handleUpdateItemAvailability
+    handleUpdateItemAvailability,
+    handleDeleteProduct
   };
 };
