@@ -84,88 +84,6 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
       break;
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="relative min-h-[600px] rounded-3xl overflow-hidden group">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-105 group-hover:blur-sm"
-          style={{ backgroundImage: 'url(/img/d64bcbd2-3424-4fbc-8e3a-56f22a820104.jpg)' }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/80 transition-all duration-700" />
-        </div>
-        
-        {showPumpkin && (
-          <button
-            onClick={() => setShowPumpkin(false)}
-            className="hidden md:block absolute top-8 right-8 z-20 text-7xl hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer animate-bounce hover:animate-none"
-            aria-label="Новогодний декор"
-          >
-            🎄
-          </button>
-        )}
-        
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[600px] text-center px-6 py-12">
-          <div className="max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 group-hover:scale-105 transition-transform duration-500">
-            <div className="inline-block">
-              <div className="bg-white/10 backdrop-blur-md rounded-full p-6 mb-6">
-                <Icon name="Lock" size={64} className="text-white" />
-              </div>
-            </div>
-            
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white leading-tight">
-              Откройте мир прекрасных растений
-            </h2>
-            
-            <p className="text-lg md:text-xl text-white/90 leading-relaxed">
-              Для просмотра каталога и совершения покупок необходимо войти в аккаунт.<br />
-              Получите доступ к эксклюзивным предложениям и лучшим ценам!
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-              <Button 
-                size="lg" 
-                onClick={onShowAuth}
-                className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
-              >
-                <Icon name="LogIn" size={24} className="mr-2" />
-                Войти в аккаунт
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={onShowAuth}
-                className="text-lg px-8 py-6 bg-white/10 backdrop-blur-md text-white border-white/30 hover:bg-white/20 hover:border-white/50 shadow-xl transition-all hover:scale-105"
-              >
-                <Icon name="UserPlus" size={24} className="mr-2" />
-                Зарегистрироваться
-              </Button>
-            </div>
-            
-            <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-white/80">
-              <div className="flex items-center gap-3 justify-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-full p-2">
-                  <Icon name="ShoppingBag" size={20} />
-                </div>
-                <span className="text-sm font-medium">Широкий ассортимент</span>
-              </div>
-              <div className="flex items-center gap-3 justify-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-full p-2">
-                  <Icon name="Truck" size={20} />
-                </div>
-                <span className="text-sm font-medium">Быстрая доставка</span>
-              </div>
-              <div className="flex items-center gap-3 justify-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-full p-2">
-                  <Icon name="Gift" size={20} />
-                </div>
-                <span className="text-sm font-medium">Специальные предложения</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -242,6 +160,8 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
             isFavorite={favoriteIds?.has(product.id)}
             onToggleFavorite={onToggleFavorite}
             siteSettings={siteSettings}
+            isAuthenticated={isAuthenticated}
+            onShowAuth={onShowAuth}
           />
         ))}
       </div>

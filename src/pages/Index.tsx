@@ -403,6 +403,8 @@ const Index = () => {
             open={isProductGalleryOpen}
             onOpenChange={setIsProductGalleryOpen}
             onAddToCart={handleAddToCart}
+            isAuthenticated={!!user}
+            onShowAuth={() => setShowAuthDialog(true)}
           />
 
           <AuthDialog 

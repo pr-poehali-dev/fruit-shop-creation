@@ -37,9 +37,11 @@ interface ProductGalleryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddToCart: (product: Product) => void;
+  isAuthenticated?: boolean;
+  onShowAuth?: () => void;
 }
 
-const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: ProductGalleryDialogProps) => {
+const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuthenticated = false, onShowAuth }: ProductGalleryDialogProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
@@ -190,6 +192,11 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart }: Prod
               <Button 
                 size="lg"
                 onClick={() => {
+                  if (!isAuthenticated) {
+                    onShowAuth?.();
+                    handleOpenChange(false);
+                    return;
+                  }
                   const productToAdd = selectedVariant 
                     ? { ...product, price: selectedVariant.price, stock: selectedVariant.stock, selectedSize: selectedVariant.size }
                     : product;

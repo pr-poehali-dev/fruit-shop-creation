@@ -40,9 +40,11 @@ interface ProductCardProps {
   isFavorite?: boolean;
   onToggleFavorite?: (productId: number) => void;
   siteSettings?: any;
+  isAuthenticated?: boolean;
+  onShowAuth?: () => void;
 }
 
-const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite, siteSettings }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite, siteSettings, isAuthenticated = false, onShowAuth }: ProductCardProps) => {
   const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.image_url;
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
@@ -158,6 +160,10 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
+            if (!isAuthenticated) {
+              onShowAuth?.();
+              return;
+            }
             if (hasVariants) {
               onViewDetails(product);
             } else {
