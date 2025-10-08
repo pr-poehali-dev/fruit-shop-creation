@@ -13,7 +13,7 @@ interface PagesTabProps {
 
 const PagesTab = ({ siteSettings, onSaveSettings }: PagesTabProps) => {
   return (
-    <Tabs defaultValue="about" className="space-y-4">
+    <Tabs key={JSON.stringify(siteSettings)} defaultValue="about" className="space-y-4">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="about">
           <Icon name="Info" size={16} className="mr-2" />

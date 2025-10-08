@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SettingsTabProps {
   siteSettings: any;
@@ -15,6 +15,10 @@ interface SettingsTabProps {
 const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
   const [holidayTheme, setHolidayTheme] = useState(siteSettings.holiday_theme || 'none');
 
+  useEffect(() => {
+    setHolidayTheme(siteSettings.holiday_theme || 'none');
+  }, [siteSettings]);
+
   return (
     <Card>
       <CardHeader>
@@ -22,7 +26,7 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
         <CardDescription>Настройте основную информацию</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSaveSettings} className="space-y-4">
+        <form key={JSON.stringify(siteSettings)} onSubmit={onSaveSettings} className="space-y-4">
           <div className="border-b pb-4 mb-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <span>🎃</span> Праздничная тема сайта <span>🎄</span>

@@ -31,7 +31,7 @@ export const useShopData = () => {
 
   const loadSettings = async () => {
     try {
-      const response = await fetch(API_SETTINGS);
+      const response = await fetch(`${API_SETTINGS}?t=${Date.now()}`);
       if (!response.ok) {
         console.error('Settings API error:', response.status);
         setSiteSettings({

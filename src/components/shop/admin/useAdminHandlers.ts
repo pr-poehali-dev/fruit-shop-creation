@@ -419,7 +419,10 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
           title: 'Настройки сохранены',
           description: 'Изменения применены на сайте'
         });
-        props.loadSettings();
+        await props.loadSettings();
+        if (props.onSettingsUpdate) {
+          props.onSettingsUpdate();
+        }
       }
     } catch (error) {
       toast({

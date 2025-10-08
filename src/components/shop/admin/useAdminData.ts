@@ -38,7 +38,7 @@ export const useAdminData = () => {
 
   const loadSettings = async () => {
     try {
-      const response = await fetch(API_SETTINGS);
+      const response = await fetch(`${API_SETTINGS}?t=${Date.now()}`);
       const data = await response.json();
       setSiteSettings(data.settings || {});
     } catch (error) {
