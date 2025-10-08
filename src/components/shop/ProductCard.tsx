@@ -157,7 +157,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           Подробнее
         </Button>
         <Button 
-          className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''}`}
+          className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${!isAuthenticated ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             if (!isAuthenticated) {
@@ -172,8 +172,17 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           }}
         >
           {isNewYear && <div className="button-snow-cap"></div>}
-          <Icon name="ShoppingCart" size={18} className="mr-2" />
-          В корзину
+          {!isAuthenticated ? (
+            <>
+              <Icon name="Lock" size={18} className="mr-2" />
+              Войти для покупки
+            </>
+          ) : (
+            <>
+              <Icon name="ShoppingCart" size={18} className="mr-2" />
+              В корзину
+            </>
+          )}
         </Button>
       </CardFooter>
       
