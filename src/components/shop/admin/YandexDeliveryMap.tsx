@@ -33,8 +33,8 @@ const YandexDeliveryMap = ({ zones, nurseryAddress = 'Барнаул, Спорт
         const data = await response.json();
         const apiKey = data.api_key;
         
-        if (!apiKey) {
-          setError('API ключ Яндекс Карт не настроен. Добавьте YANDEX_MAPS_API_KEY в секреты проекта.');
+        if (!apiKey || apiKey === '') {
+          setError('YANDEX_MAPS_API_KEY');
           setIsLoading(false);
           return;
         }
@@ -154,6 +154,65 @@ const YandexDeliveryMap = ({ zones, nurseryAddress = 'Барнаул, Спорт
     });
   };
 
+  if (error === 'YANDEX_MAPS_API_KEY') {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Icon name="Map" size={20} />
+            Яндекс Карта зон доставки
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Icon name="Info" size={20} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+              <div className="flex-1 space-y-3">
+                <p className="font-semibold text-blue-900 dark:text-blue-100">
+                  Для отображения карты нужен API ключ Яндекс Карт
+                </p>
+                <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                  <p><strong>Как получить бесплатный ключ:</strong></p>
+                  <ol className="list-decimal list-inside space-y-1 ml-2">
+                    <li>Перейдите на <a href="https://developer.tech.yandex.ru/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600">developer.tech.yandex.ru</a></li>
+                    <li>Зарегистрируйтесь или войдите</li>
+                    <li>Создайте приложение → выберите "JavaScript API"</li>
+                    <li>Скопируйте полученный API ключ</li>
+                  </ol>
+                  <p className="mt-3"><strong>Куда добавить ключ:</strong></p>
+                  <p className="ml-2">
+                    <Icon name="Settings" size={14} className="inline mr-1" />
+                    Настройки проекта → Секреты → <code className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-xs">YANDEX_MAPS_API_KEY</code>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {zones.length > 0 && (
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <Icon name="MapPin" size={16} />
+                Настроенные зоны (будут на карте):
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {zones.map((zone) => (
+                  <div key={zone.id} className="flex items-center gap-2 text-sm">
+                    <div 
+                      className="w-4 h-4 rounded border border-gray-300"
+                      style={{ backgroundColor: zone.zone_color }}
+                    />
+                    <span>{zone.zone_name} — {parseFloat(zone.delivery_price).toFixed(0)} ₽</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (error) {
     return (
       <Card>
@@ -164,7 +223,7 @@ const YandexDeliveryMap = ({ zones, nurseryAddress = 'Барнаул, Спорт
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 p-4 bg-yellow-50 dark:bg-yellow-950/20 text-yellow-800 dark:text-yellow-200 rounded-lg">
+          <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-200 rounded-lg">
             <Icon name="AlertCircle" size={20} />
             <p className="text-sm">{error}</p>
           </div>

@@ -95,7 +95,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             loyalty_cashback_percent = body_data.get('loyalty_cashback_percent') or 5
             balance_payment_cashback_percent = body_data.get('balance_payment_cashback_percent') or 5
             admin_pin = (body_data.get('admin_pin') or '0000').replace("'", "''")
-            delivery_enabled = body_data.get('delivery_enabled', True)
+            delivery_enabled = bool(body_data.get('delivery_enabled', False))
             delivery_price = body_data.get('delivery_price') or 0
             free_delivery_min = body_data.get('free_delivery_min') or 3000
             courier_delivery_price = body_data.get('courier_delivery_price') or 300
