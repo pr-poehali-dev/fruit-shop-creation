@@ -44,6 +44,18 @@ const AboutSection = ({ siteSettings }: AboutSectionProps) => {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-6 sm:mt-8 bg-muted/50">
+        <CardHeader>
+          <CardTitle className="text-lg sm:text-xl">Реквизиты</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1 text-sm sm:text-base">
+            <p className="font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
+            <p className="text-muted-foreground">ИНН: 222261894107</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
