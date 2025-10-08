@@ -26,11 +26,24 @@ const CartContent = ({
   const [deliveryType, setDeliveryType] = useState('pickup');
   const deliveryEnabled = siteSettings?.delivery_enabled !== false;
   const deliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
+  const courierRequestFee = parseFloat(siteSettings?.courier_request_fee || 0);
+  const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
   const pickupAddress = siteSettings?.address || '';
   
   const getFinalPrice = () => {
     const basePrice = getTotalPrice();
-    return deliveryType === 'delivery' ? basePrice + deliveryPrice : basePrice;
+    if (deliveryType === 'delivery') {
+      const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
+      const totalDeliveryFee = isFreeDelivery ? 0 : deliveryPrice + courierRequestFee;
+      return basePrice + totalDeliveryFee;
+    }
+    return basePrice;
+  };
+  
+  const getDeliveryFee = () => {
+    const basePrice = getTotalPrice();
+    const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
+    return isFreeDelivery ? 0 : deliveryPrice + courierRequestFee;
   };
 
   return (
@@ -94,7 +107,7 @@ const CartContent = ({
                         <p className="font-semibold">Доставка</p>
                         <p className="text-xs text-muted-foreground mt-1">Доставим по указанному адресу</p>
                         <p className="text-sm font-medium text-primary mt-1">
-                          {deliveryPrice > 0 ? `${deliveryPrice} ₽` : 'Бесплатно'}
+                          {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
                         </p>
                       </div>
                     </div>
@@ -111,10 +124,10 @@ const CartContent = ({
               <span className="text-muted-foreground">Товары:</span>
               <span>{getTotalPrice()} ₽</span>
             </div>
-            {deliveryType === 'delivery' && deliveryPrice > 0 && (
+            {deliveryType === 'delivery' && getDeliveryFee() > 0 && (
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Доставка:</span>
-                <span>{deliveryPrice} ₽</span>
+                <span>{getDeliveryFee()} ₽</span>
               </div>
             )}
             <Separator />

@@ -157,6 +157,20 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                   При заказе от этой суммы доставка становится бесплатной. Укажите 0, чтобы отключить
                 </p>
               </div>
+              <div>
+                <Label htmlFor="courier-request-fee">Стоимость курьерской заявки (₽)</Label>
+                <Input 
+                  id="courier-request-fee" 
+                  name="courier_request_fee" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={siteSettings.courier_request_fee || 300} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Плата за вызов курьера для доставки заказа
+                </p>
+              </div>
             </div>
           </div>
           <div className="border-t pt-4 mt-4">

@@ -98,8 +98,21 @@ const Index = () => {
       return;
     }
 
-    const deliveryPrice = deliveryType === 'delivery' ? parseFloat(siteSettings?.delivery_price || 0) : 0;
-    const totalAmount = getTotalPrice() + deliveryPrice;
+    const basePrice = getTotalPrice();
+    let deliveryPrice = 0;
+    
+    if (deliveryType === 'delivery') {
+      const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
+      const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
+      
+      if (!isFreeDelivery) {
+        const baseDeliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
+        const courierRequestFee = parseFloat(siteSettings?.courier_request_fee || 0);
+        deliveryPrice = baseDeliveryPrice + courierRequestFee;
+      }
+    }
+    
+    const totalAmount = basePrice + deliveryPrice;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {

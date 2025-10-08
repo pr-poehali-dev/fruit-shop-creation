@@ -380,6 +380,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       holiday_theme: formData.get('holiday_theme') as string,
       delivery_enabled: formData.get('delivery_enabled') === 'on',
       delivery_price: parseFloat(formData.get('delivery_price') as string || '0'),
+      free_delivery_min: parseFloat(formData.get('free_delivery_min') as string || '3000'),
+      courier_request_fee: parseFloat(formData.get('courier_request_fee') as string || '300'),
       price_list_url: formData.get('price_list_url') as string,
       promotions: formData.get('promotions') as string,
       additional_info: formData.get('additional_info') as string,
