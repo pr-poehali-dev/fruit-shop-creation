@@ -68,10 +68,10 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }:
                     variant="destructive" 
                     size="sm" 
                     onClick={() => onDeleteProduct(product.id)}
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white"
                   >
-                    <Icon name="Trash2" size={14} className="sm:mr-2" />
-                    <span className="hidden sm:inline">Удалить</span>
+                    <Icon name="Trash2" size={14} />
+                    <span className="ml-1">Удалить</span>
                   </Button>
                 </div>
               </div>
