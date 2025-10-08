@@ -75,19 +75,24 @@ export const useAuth = () => {
     const formData = new FormData(e.currentTarget);
     
     try {
+      const phone = formData.get('phone');
+      const password = formData.get('password');
+      
+      console.log('Auth attempt:', { action, phone, hasPassword: !!password });
+      
       const response = await fetch(API_AUTH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action,
-          phone: formData.get('phone'),
-          password: formData.get('password'),
+          phone,
+          password,
           full_name: formData.get('full_name') || ''
         })
       });
       
       const data = await response.json();
-      console.log('Auth response:', data);
+      console.log('Auth response:', { status: response.status, data });
       
       if (data.banned) {
         setBanInfo({
@@ -95,31 +100,35 @@ export const useAuth = () => {
           ban_reason: data.ban_reason,
           ban_until: data.ban_until
         });
+        onError(data.ban_reason || 'Аккаунт заблокирован');
         return;
       }
       
       if (!response.ok) {
-        onError(data.error || 'Ошибка авторизации');
+        const errorMsg = data.error || `Ошибка ${response.status}`;
+        console.error('Auth failed:', errorMsg);
+        onError(errorMsg);
         return;
       }
       
       if (data.requires_code) {
-        // Admin login requires code verification
         const message = 'Введите код доступа';
         onSuccess(data.user, message, true);
         setBanInfo(null);
-      } else if (data.success) {
-        // Regular login
+      } else if (data.success && data.user) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
         const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
         onSuccess(data.user, message, false);
         setBanInfo(null);
       } else {
-        onError(data.error || 'Неизвестная ошибка');
+        const errorMsg = data.error || 'Неизвестная ошибка. Проверьте данные';
+        console.error('Auth error:', errorMsg, data);
+        onError(errorMsg);
       }
     } catch (error) {
-      onError('Не удалось выполнить операцию');
+      console.error('Auth exception:', error);
+      onError('Не удалось подключиться к серверу');
     }
   };
 
