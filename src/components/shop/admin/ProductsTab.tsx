@@ -66,11 +66,16 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }:
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    onClick={() => onDeleteProduct(product.id)}
-                    className="w-full sm:w-auto !bg-red-600 hover:!bg-red-700 !text-white"
+                    onClick={() => {
+                      if (window.confirm('Удалить товар? Это действие нельзя отменить.')) {
+                        onDeleteProduct(product.id);
+                      }
+                    }}
+                    style={{ backgroundColor: '#dc2626', color: 'white' }}
+                    className="w-full sm:w-auto hover:opacity-90"
                   >
                     <Icon name="Trash2" size={16} className="mr-2" />
-                    <span>Удалить</span>
+                    <span>Удалить товар</span>
                   </Button>
                 </div>
               </div>
