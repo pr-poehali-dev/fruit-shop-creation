@@ -143,6 +143,7 @@ const Index = () => {
           payment_method: paymentMethod,
           delivery_address: deliveryAddress,
           delivery_type: deliveryType,
+          delivery_zone_id: deliveryZoneId,
           cashback_percent: siteSettings?.balance_payment_cashback_percent || 5
         })
       });

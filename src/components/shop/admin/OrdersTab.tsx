@@ -117,6 +117,11 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                     <div className="font-medium">Доставка:</div>
                     <div className="text-muted-foreground">
                       {order.delivery_type === 'delivery' ? '🚚 Доставка' : '🏪 Самовывоз'}
+                      {order.delivery_zone_id && (
+                        <span className="ml-1 text-xs text-primary">
+                          (Зона #{order.delivery_zone_id})
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="sm:col-span-2">

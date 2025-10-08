@@ -47,11 +47,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             zone_name = (body_data.get('zone_name') or '').replace("'", "''")
             delivery_price = body_data.get('delivery_price') or 0
+            zone_color = (body_data.get('zone_color') or '#3b82f6').replace("'", "''")
             is_active = body_data.get('is_active', True)
             
             cur.execute(f"""
-                INSERT INTO delivery_zones (zone_name, delivery_price, is_active)
-                VALUES ('{zone_name}', {delivery_price}, {is_active})
+                INSERT INTO delivery_zones (zone_name, delivery_price, zone_color, is_active)
+                VALUES ('{zone_name}', {delivery_price}, '{zone_color}', {is_active})
                 RETURNING *
             """)
             conn.commit()
@@ -78,12 +79,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             zone_name = (body_data.get('zone_name') or '').replace("'", "''")
             delivery_price = body_data.get('delivery_price') or 0
+            zone_color = (body_data.get('zone_color') or '#3b82f6').replace("'", "''")
             is_active = body_data.get('is_active', True)
             
             cur.execute(f"""
                 UPDATE delivery_zones 
                 SET zone_name = '{zone_name}', 
-                    delivery_price = {delivery_price}, 
+                    delivery_price = {delivery_price},
+                    zone_color = '{zone_color}', 
                     is_active = {is_active},
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = {zone_id}

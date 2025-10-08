@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import DeliveryZoneMap from './DeliveryZoneMap';
 
 const API_ZONES = 'https://functions.poehali.dev/8c8e301f-2323-4f3b-85f0-14a3c210e670';
 
@@ -12,6 +13,7 @@ interface DeliveryZone {
   id: number;
   zone_name: string;
   delivery_price: string;
+  zone_color: string;
   is_active: boolean;
 }
 
@@ -19,7 +21,7 @@ const DeliveryZonesTab = () => {
   const { toast } = useToast();
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [loading, setLoading] = useState(false);
-  const [newZone, setNewZone] = useState({ zone_name: '', delivery_price: '' });
+  const [newZone, setNewZone] = useState({ zone_name: '', delivery_price: '', zone_color: '#3b82f6' });
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const loadZones = async () => {
@@ -50,7 +52,8 @@ const DeliveryZonesTab = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           zone_name: newZone.zone_name,
-          delivery_price: parseFloat(newZone.delivery_price)
+          delivery_price: parseFloat(newZone.delivery_price),
+          zone_color: newZone.zone_color
         })
       });
 
@@ -61,7 +64,7 @@ const DeliveryZonesTab = () => {
           title: 'Успешно',
           description: 'Зона доставки добавлена'
         });
-        setNewZone({ zone_name: '', delivery_price: '' });
+        setNewZone({ zone_name: '', delivery_price: '', zone_color: '#3b82f6' });
         loadZones();
       }
     } catch (error) {
@@ -85,7 +88,8 @@ const DeliveryZonesTab = () => {
         body: JSON.stringify({
           id: zone.id,
           zone_name: zone.zone_name,
-          delivery_price: parseFloat(zone.delivery_price)
+          delivery_price: parseFloat(zone.delivery_price),
+          zone_color: zone.zone_color
         })
       });
 
@@ -149,7 +153,7 @@ const DeliveryZonesTab = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddZone} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="zone-name">Название зоны</Label>
                 <Input
@@ -174,6 +178,27 @@ const DeliveryZonesTab = () => {
                   required
                   disabled={loading}
                 />
+              </div>
+              <div>
+                <Label htmlFor="zone-color">Цвет зоны на карте</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="zone-color"
+                    type="color"
+                    value={newZone.zone_color}
+                    onChange={(e) => setNewZone({ ...newZone, zone_color: e.target.value })}
+                    className="w-16 h-10 p-1 cursor-pointer"
+                    disabled={loading}
+                  />
+                  <Input
+                    type="text"
+                    value={newZone.zone_color}
+                    onChange={(e) => setNewZone({ ...newZone, zone_color: e.target.value })}
+                    placeholder="#3b82f6"
+                    disabled={loading}
+                    className="flex-1"
+                  />
+                </div>
               </div>
             </div>
             <Button type="submit" disabled={loading}>
@@ -203,7 +228,7 @@ const DeliveryZonesTab = () => {
                 >
                   {editingId === zone.id ? (
                     <>
-                      <div className="flex-1 grid grid-cols-2 gap-4">
+                      <div className="flex-1 grid grid-cols-3 gap-4">
                         <Input
                           value={zone.zone_name}
                           onChange={(e) =>
@@ -221,6 +246,16 @@ const DeliveryZonesTab = () => {
                               z.id === zone.id ? { ...z, delivery_price: e.target.value } : z
                             ))
                           }
+                        />
+                        <Input
+                          type="color"
+                          value={zone.zone_color}
+                          onChange={(e) =>
+                            setZones(zones.map((z) =>
+                              z.id === zone.id ? { ...z, zone_color: e.target.value } : z
+                            ))
+                          }
+                          className="w-full h-10 p-1 cursor-pointer"
                         />
                       </div>
                       <Button
@@ -244,6 +279,10 @@ const DeliveryZonesTab = () => {
                     </>
                   ) : (
                     <>
+                      <div 
+                        className="w-8 h-8 rounded-full border-2" 
+                        style={{ backgroundColor: zone.zone_color }}
+                      />
                       <div className="flex-1">
                         <p className="font-semibold">{zone.zone_name}</p>
                         <p className="text-sm text-muted-foreground">
@@ -274,6 +313,8 @@ const DeliveryZonesTab = () => {
           )}
         </CardContent>
       </Card>
+
+      <DeliveryZoneMap />
     </div>
   );
 };
