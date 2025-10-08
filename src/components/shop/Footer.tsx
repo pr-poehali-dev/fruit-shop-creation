@@ -30,6 +30,12 @@ const Footer = () => {
             </Link>
           </div>
           
+          {/* Информация о самозанятом */}
+          <div className="text-xs md:text-sm opacity-75 text-center">
+            <p className="font-medium">ИП Бояринцев Вадим Вячеславович</p>
+            <p className="mt-1">ИНН: 222261894107</p>
+          </div>
+          
           {/* Копирайт */}
           <p className="flex items-center gap-2 text-xs md:text-sm opacity-75">
             <Icon name="Flower2" size={16} />
