@@ -32,7 +32,7 @@ const Footer = () => {
           
           {/* Информация о самозанятом */}
           <div className="text-xs md:text-sm opacity-75 text-center">
-            <p className="font-medium">ИП Бояринцев Вадим Вячеславович</p>
+            <p className="font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
             <p className="mt-1">ИНН: 222261894107</p>
           </div>
           
