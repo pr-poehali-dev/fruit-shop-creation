@@ -53,25 +53,24 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }:
                     <Badge variant="outline" className="text-xs">Склад: {product.stock}</Badge>
                   </div>
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => onEditProduct(product)}
-                    className="flex-1 sm:flex-none"
+                    className="w-full sm:w-auto"
                   >
-                    <Icon name="Pencil" size={14} className="sm:mr-2" />
-                    <span className="hidden sm:inline">Изменить</span>
-                    <span className="sm:hidden ml-2">Редактировать</span>
+                    <Icon name="Pencil" size={16} className="mr-2" />
+                    <span>Изменить</span>
                   </Button>
                   <Button 
                     variant="destructive" 
                     size="sm" 
                     onClick={() => onDeleteProduct(product.id)}
-                    className="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white"
+                    className="w-full sm:w-auto !bg-red-600 hover:!bg-red-700 !text-white"
                   >
-                    <Icon name="Trash2" size={14} />
-                    <span className="ml-1">Удалить</span>
+                    <Icon name="Trash2" size={16} className="mr-2" />
+                    <span>Удалить</span>
                   </Button>
                 </div>
               </div>
