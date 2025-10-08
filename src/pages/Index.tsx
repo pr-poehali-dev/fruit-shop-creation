@@ -107,8 +107,8 @@ const Index = () => {
       
       if (!isFreeDelivery) {
         const baseDeliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
-        const courierRequestFee = parseFloat(siteSettings?.courier_request_fee || 0);
-        deliveryPrice = baseDeliveryPrice + courierRequestFee;
+        const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
+        deliveryPrice = baseDeliveryPrice + courierDeliveryPrice;
       }
     }
     

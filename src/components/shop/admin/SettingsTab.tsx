@@ -158,17 +158,17 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                 </p>
               </div>
               <div>
-                <Label htmlFor="courier-request-fee">Стоимость курьерской заявки (₽)</Label>
+                <Label htmlFor="courier-delivery-price">Стоимость курьерской доставки (₽)</Label>
                 <Input 
-                  id="courier-request-fee" 
-                  name="courier_request_fee" 
+                  id="courier-delivery-price" 
+                  name="courier_delivery_price" 
                   type="number"
                   step="0.01"
                   min="0"
-                  defaultValue={siteSettings.courier_request_fee || 300} 
+                  defaultValue={siteSettings.courier_delivery_price || 300} 
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Плата за вызов курьера для доставки заказа
+                  Стоимость доставки курьером
                 </p>
               </div>
             </div>

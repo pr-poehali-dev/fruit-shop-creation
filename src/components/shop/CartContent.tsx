@@ -26,7 +26,7 @@ const CartContent = ({
   const [deliveryType, setDeliveryType] = useState('pickup');
   const deliveryEnabled = siteSettings?.delivery_enabled !== false;
   const deliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
-  const courierRequestFee = parseFloat(siteSettings?.courier_request_fee || 0);
+  const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
   const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
   const pickupAddress = siteSettings?.address || '';
   
@@ -34,7 +34,7 @@ const CartContent = ({
     const basePrice = getTotalPrice();
     if (deliveryType === 'delivery') {
       const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
-      const totalDeliveryFee = isFreeDelivery ? 0 : deliveryPrice + courierRequestFee;
+      const totalDeliveryFee = isFreeDelivery ? 0 : deliveryPrice + courierDeliveryPrice;
       return basePrice + totalDeliveryFee;
     }
     return basePrice;
@@ -43,7 +43,7 @@ const CartContent = ({
   const getDeliveryFee = () => {
     const basePrice = getTotalPrice();
     const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
-    return isFreeDelivery ? 0 : deliveryPrice + courierRequestFee;
+    return isFreeDelivery ? 0 : deliveryPrice + courierDeliveryPrice;
   };
 
   return (
