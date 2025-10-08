@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import DeliveryZoneMap from './DeliveryZoneMap';
+import YandexDeliveryMap from './YandexDeliveryMap';
 
 const API_ZONES = 'https://functions.poehali.dev/8c8e301f-2323-4f3b-85f0-14a3c210e670';
 
@@ -314,7 +315,10 @@ const DeliveryZonesTab = () => {
         </CardContent>
       </Card>
 
-      <DeliveryZoneMap />
+      <YandexDeliveryMap 
+        zones={zones} 
+        nurseryAddress="Барнаул, Спортивная 84" 
+      />
     </div>
   );
 };

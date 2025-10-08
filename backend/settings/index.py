@@ -4,9 +4,9 @@ from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    Business: Manage site settings and information
-    Args: event with httpMethod, body
-    Returns: HTTP response with settings data
+    Business: Manage site settings and information with Yandex Maps API key
+    Args: event with httpMethod, body, queryStringParameters
+    Returns: HTTP response with settings data and API keys
     '''
     import psycopg2
     from psycopg2.extras import RealDictCursor
@@ -32,6 +32,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         if method == 'GET':
+            params = event.get('queryStringParameters', {}) or {}
+            get_api_key = params.get('api_key') == 'yandex_maps'
+            
+            if get_api_key:
+                yandex_key = os.environ.get('YANDEX_MAPS_API_KEY', '')
+                return {
+                    'statusCode': 200,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({'api_key': yandex_key}),
+                    'isBase64Encoded': False
+                }
+            
             cur.execute("SELECT * FROM site_settings WHERE id = 1")
             settings = cur.fetchone()
             
