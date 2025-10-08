@@ -2,16 +2,23 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { CartItem, User } from '@/types/shop';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface DeliveryZone {
+  id: number;
+  zone_name: string;
+  delivery_price: string;
+}
 
 interface CartContentProps {
   cart: CartItem[];
   user: User | null;
   updateCartQuantity: (productId: number, quantity: number) => void;
   getTotalPrice: () => number;
-  handleCheckout: (paymentMethod: string, deliveryType: string) => void;
+  handleCheckout: (paymentMethod: string, deliveryType: string, deliveryZoneId?: number) => void;
   siteSettings?: any;
 }
 
@@ -24,17 +31,42 @@ const CartContent = ({
   siteSettings 
 }: CartContentProps) => {
   const [deliveryType, setDeliveryType] = useState('pickup');
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+  
   const deliveryEnabled = siteSettings?.delivery_enabled !== false;
   const deliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
   const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
   const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
   const pickupAddress = siteSettings?.address || '';
   
+  useEffect(() => {
+    const loadZones = async () => {
+      try {
+        const response = await fetch('https://functions.poehali.dev/8c8e301f-2323-4f3b-85f0-14a3c210e670');
+        const data = await response.json();
+        setDeliveryZones(data.zones || []);
+      } catch (error) {
+        console.error('Failed to load delivery zones:', error);
+      }
+    };
+    
+    if (deliveryEnabled) {
+      loadZones();
+    }
+  }, [deliveryEnabled]);
+  
+  const getZoneDeliveryPrice = () => {
+    if (!selectedZoneId) return deliveryPrice + courierDeliveryPrice;
+    const zone = deliveryZones.find(z => z.id === selectedZoneId);
+    return zone ? parseFloat(zone.delivery_price) : deliveryPrice + courierDeliveryPrice;
+  };
+  
   const getFinalPrice = () => {
     const basePrice = getTotalPrice();
     if (deliveryType === 'delivery') {
       const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
-      const totalDeliveryFee = isFreeDelivery ? 0 : deliveryPrice + courierDeliveryPrice;
+      const totalDeliveryFee = isFreeDelivery ? 0 : getZoneDeliveryPrice();
       return basePrice + totalDeliveryFee;
     }
     return basePrice;
@@ -43,7 +75,7 @@ const CartContent = ({
   const getDeliveryFee = () => {
     const basePrice = getTotalPrice();
     const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
-    return isFreeDelivery ? 0 : deliveryPrice + courierDeliveryPrice;
+    return isFreeDelivery ? 0 : getZoneDeliveryPrice();
   };
 
   return (
@@ -98,20 +130,45 @@ const CartContent = ({
               </div>
               
               {deliveryEnabled && (
-                <div className="flex items-start space-x-2 p-3 rounded-lg border-2 border-primary/20 bg-background hover:bg-primary/5 transition-colors">
-                  <RadioGroupItem value="delivery" id="delivery" className="mt-0.5" />
-                  <Label htmlFor="delivery" className="flex-1 cursor-pointer">
-                    <div className="flex items-start gap-2">
-                      <Icon name="Truck" size={18} className="text-primary mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-semibold">Доставка</p>
-                        <p className="text-xs text-muted-foreground mt-1">Доставим по указанному адресу</p>
-                        <p className="text-sm font-medium text-primary mt-1">
-                          {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
-                        </p>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2 p-3 rounded-lg border-2 border-primary/20 bg-background hover:bg-primary/5 transition-colors">
+                    <RadioGroupItem value="delivery" id="delivery" className="mt-0.5" />
+                    <Label htmlFor="delivery" className="flex-1 cursor-pointer">
+                      <div className="flex items-start gap-2">
+                        <Icon name="Truck" size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="font-semibold">Доставка</p>
+                          <p className="text-xs text-muted-foreground mt-1">Доставим по указанному адресу</p>
+                          <p className="text-sm font-medium text-primary mt-1">
+                            {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
+                          </p>
+                        </div>
                       </div>
+                    </Label>
+                  </div>
+                  
+                  {deliveryType === 'delivery' && deliveryZones.length > 0 && (
+                    <div className="pl-9">
+                      <Label htmlFor="delivery-zone" className="text-xs text-muted-foreground">
+                        Выберите зону доставки
+                      </Label>
+                      <Select
+                        value={selectedZoneId?.toString() || ''}
+                        onValueChange={(value) => setSelectedZoneId(parseInt(value))}
+                      >
+                        <SelectTrigger id="delivery-zone" className="w-full mt-1">
+                          <SelectValue placeholder="Выберите зону" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {deliveryZones.map((zone) => (
+                            <SelectItem key={zone.id} value={zone.id.toString()}>
+                              {zone.zone_name} — {parseFloat(zone.delivery_price).toFixed(0)} ₽
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </Label>
+                  )}
                 </div>
               )}
             </RadioGroup>
@@ -139,16 +196,16 @@ const CartContent = ({
           
           <div className="space-y-2">
             {user && (
-              <Button className="w-full" variant="default" onClick={() => handleCheckout('balance', deliveryType)}>
+              <Button className="w-full" variant="default" onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined)}>
                 <Icon name="Wallet" size={18} className="mr-2" />
                 Оплатить балансом ({(user.balance || 0).toFixed(2)}₽)
               </Button>
             )}
-            <Button className="w-full" onClick={() => handleCheckout('card', deliveryType)}>
+            <Button className="w-full" onClick={() => handleCheckout('card', deliveryType, selectedZoneId || undefined)}>
               <Icon name="CreditCard" size={18} className="mr-2" />
               Оплатить картой
             </Button>
-            <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash', deliveryType)}>
+            <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined)}>
               <Icon name="Coins" size={18} className="mr-2" />
               Наличными при получении
             </Button>

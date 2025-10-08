@@ -71,7 +71,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             phone = normalize_phone(phone_raw)
             phone_escaped = phone.replace("'", "''")
             
-            cursor.execute(f"SELECT id, full_name FROM t_p77282076_fruit_shop_creation.users WHERE phone = '{phone_escaped}'")
+            cursor.execute(f"SELECT id, full_name FROM users WHERE phone = '{phone_escaped}'")
             user = cursor.fetchone()
             
             if not user:
@@ -93,7 +93,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             created_str = created_at.strftime('%Y-%m-%d %H:%M:%S')
             
             cursor.execute(f"""
-                INSERT INTO t_p77282076_fruit_shop_creation.password_reset_codes (user_id, phone, reset_code, created_at, expires_at)
+                INSERT INTO password_reset_codes (user_id, phone, reset_code, created_at, expires_at)
                 VALUES ({user_id}, '{phone_escaped}', '{reset_code_escaped}', '{created_str}', '{expires_str}')
             """)
             
@@ -134,7 +134,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             # Получаем код из БД
             cursor.execute(f"""
                 SELECT id, user_id, used_at, expires_at 
-                FROM t_p77282076_fruit_shop_creation.password_reset_codes 
+                FROM password_reset_codes 
                 WHERE phone = '{phone_escaped}' AND reset_code = '{code_escaped}'
                 ORDER BY created_at DESC
                 LIMIT 1
@@ -173,11 +173,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             code_id = int(code_record[0])
             
             # Обновляем пароль
-            cursor.execute(f"UPDATE t_p77282076_fruit_shop_creation.users SET password_hash = '{hash_escaped}' WHERE id = {user_id}")
+            cursor.execute(f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}")
             
             # Отмечаем код как использованный
             used_at_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cursor.execute(f"UPDATE t_p77282076_fruit_shop_creation.password_reset_codes SET used_at = '{used_at_str}' WHERE id = {code_id}")
+            cursor.execute(f"UPDATE password_reset_codes SET used_at = '{used_at_str}' WHERE id = {code_id}")
             
             return {
                 'statusCode': 200,

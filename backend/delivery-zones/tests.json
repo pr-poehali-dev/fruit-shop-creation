@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get delivery zones",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "zones": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

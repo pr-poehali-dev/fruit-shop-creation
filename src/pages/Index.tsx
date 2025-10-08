@@ -78,7 +78,7 @@ const Index = () => {
     setIsProductGalleryOpen(true);
   };
 
-  const handleCheckout = async (paymentMethod: string, deliveryType: string = 'pickup') => {
+  const handleCheckout = async (paymentMethod: string, deliveryType: string = 'pickup', deliveryZoneId?: number) => {
     if (!user) {
       toast({
         title: 'Требуется авторизация',

@@ -9,6 +9,7 @@ import SupportTab from './SupportTab';
 import LoyaltyScannerTab from './LoyaltyScannerTab';
 import PagesTab from './PagesTab';
 import CodesTab from './CodesTab';
+import DeliveryZonesTab from './DeliveryZonesTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import SupportStatsCard from './SupportStatsCard';
 import { Product, Category, User } from './types';
@@ -72,7 +73,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -88,6 +89,10 @@ const AdminPanelTabs = ({
         <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="ShoppingCart" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Заказы</span>
+        </TabsTrigger>
+        <TabsTrigger value="delivery-zones" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="MapPin" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">Зоны</span>
         </TabsTrigger>
         <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="ScanLine" size={16} className="sm:mr-1" />
@@ -179,6 +184,10 @@ const AdminPanelTabs = ({
           siteSettings={siteSettings}
           onSaveSettings={onSaveSettings}
         />
+      </TabsContent>
+
+      <TabsContent value="delivery-zones">
+        <DeliveryZonesTab />
       </TabsContent>
 
       <TabsContent value="codes">

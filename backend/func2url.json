@@ -1,4 +1,5 @@
 {
+  "delivery-zones": "https://functions.poehali.dev/8c8e301f-2323-4f3b-85f0-14a3c210e670",
   "admin-reset-codes": "https://functions.poehali.dev/e343c1bf-14b9-4373-a620-36d059062d82",
   "password-reset": "https://functions.poehali.dev/c7d83bd6-2027-4170-8c35-7f6462c5274a",
   "robokassa-result": "https://functions.poehali.dev/598e71d0-09c9-421a-9a7c-d1d412664abe",
