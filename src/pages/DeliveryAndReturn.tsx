@@ -7,6 +7,7 @@ const API_SETTINGS = 'https://functions.poehali.dev/87c6f94e-2ca8-4eb7-a7de-a98c
 
 const DeliveryAndReturn = () => {
   const [deliveryPrice, setDeliveryPrice] = useState<number>(300);
+  const [freeDeliveryMin, setFreeDeliveryMin] = useState<number>(3000);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -14,8 +15,9 @@ const DeliveryAndReturn = () => {
       try {
         const response = await fetch(`${API_SETTINGS}?action=get`);
         const data = await response.json();
-        if (data.delivery_price !== undefined) {
-          setDeliveryPrice(Number(data.delivery_price));
+        if (data.settings) {
+          setDeliveryPrice(Number(data.settings.delivery_price) || 300);
+          setFreeDeliveryMin(Number(data.settings.free_delivery_min) || 3000);
         }
       } catch (error) {
         console.error('Failed to load settings:', error);
@@ -82,9 +84,11 @@ const DeliveryAndReturn = () => {
                   Курьер доставит заказ по указанному адресу в удобное для вас время. 
                   Мы согласуем время доставки заранее по телефону.
                 </p>
-                <p className="text-sm">
-                  <strong className="text-foreground">Бесплатная доставка</strong> при заказе от 3000 рублей
-                </p>
+                {!isLoading && freeDeliveryMin > 0 && (
+                  <p className="text-sm">
+                    <strong className="text-foreground">Бесплатная доставка</strong> при заказе от {freeDeliveryMin.toLocaleString('ru-RU')} рублей
+                  </p>
+                )}
               </div>
 
               <div className="bg-card p-6 rounded-lg border">

@@ -143,6 +143,20 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                   Укажите 0 для бесплатной доставки
                 </p>
               </div>
+              <div>
+                <Label htmlFor="free-delivery-min">Минимальная сумма для бесплатной доставки (₽)</Label>
+                <Input 
+                  id="free-delivery-min" 
+                  name="free_delivery_min" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={siteSettings.free_delivery_min || 3000} 
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  При заказе от этой суммы доставка становится бесплатной. Укажите 0, чтобы отключить
+                </p>
+              </div>
             </div>
           </div>
           <div className="border-t pt-4 mt-4">
