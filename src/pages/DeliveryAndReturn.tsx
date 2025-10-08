@@ -1,8 +1,31 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
 import Footer from '@/components/shop/Footer';
 
+const API_SETTINGS = 'https://functions.poehali.dev/87c6f94e-2ca8-4eb7-a7de-a98cec1dd03c';
+
 const DeliveryAndReturn = () => {
+  const [deliveryPrice, setDeliveryPrice] = useState<number>(300);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch(`${API_SETTINGS}?action=get`);
+        const data = await response.json();
+        if (data.delivery_price !== undefined) {
+          setDeliveryPrice(Number(data.delivery_price));
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b bg-card">
@@ -44,7 +67,16 @@ const DeliveryAndReturn = () => {
                   <Icon name="Car" size={20} className="text-primary" />
                   Курьерская доставка по городу
                 </h3>
-                <p className="mb-2"><strong className="text-foreground">Стоимость:</strong> От 300 рублей (зависит от района и веса заказа)</p>
+                <p className="mb-2">
+                  <strong className="text-foreground">Стоимость:</strong>{' '}
+                  {isLoading ? (
+                    'Загрузка...'
+                  ) : deliveryPrice === 0 ? (
+                    'Бесплатно'
+                  ) : (
+                    `От ${deliveryPrice} рублей (зависит от района и веса заказа)`
+                  )}
+                </p>
                 <p className="mb-2"><strong className="text-foreground">Срок:</strong> 1-2 рабочих дня</p>
                 <p className="mb-3">
                   Курьер доставит заказ по указанному адресу в удобное для вас время. 
