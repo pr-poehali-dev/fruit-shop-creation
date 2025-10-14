@@ -154,13 +154,12 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: P
         </>
       )}
 
-      {user && (
-        <SBPTopUpDialog
-          open={showTopUpDialog}
-          onOpenChange={setShowTopUpDialog}
-          userId={user.id}
-        />
-      )}
+      <SBPTopUpDialog
+        key={`sbp-dialog-${user?.id}`}
+        open={showTopUpDialog}
+        onOpenChange={setShowTopUpDialog}
+        userId={user?.id || 0}
+      />
     </>
   );
 };

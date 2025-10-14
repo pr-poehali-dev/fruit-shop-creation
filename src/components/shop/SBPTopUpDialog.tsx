@@ -19,6 +19,13 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
 
   const presetAmounts = [100, 500, 1000, 2000, 5000];
 
+  React.useEffect(() => {
+    if (!open) {
+      setAmount('');
+      setIsLoading(false);
+    }
+  }, [open]);
+
   const handleTopUp = async () => {
     const numAmount = parseFloat(amount);
     
@@ -76,7 +83,7 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" data-version="sbp-v2">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon name="Smartphone" size={24} className="text-primary" />
