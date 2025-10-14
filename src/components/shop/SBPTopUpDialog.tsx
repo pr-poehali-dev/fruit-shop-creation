@@ -80,10 +80,10 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon name="Smartphone" size={24} className="text-primary" />
-            Пополнить баланс через СБП
+            Пополнить баланс
           </DialogTitle>
           <DialogDescription>
-            Система быстрых платежей. Оплата без комиссии для клиентов. Минимум 10₽
+            Система быстрых платежей (СБП). Оплата без комиссии для клиентов. Минимум 10₽
           </DialogDescription>
         </DialogHeader>
 
