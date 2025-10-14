@@ -134,7 +134,7 @@ const DeliveryAndReturn = () => {
               
               <div className="bg-card p-4 rounded-lg border">
                 <h3 className="font-semibold text-foreground mb-2">💳 Банковской картой онлайн</h3>
-                <p className="text-sm">Безопасная оплата через платежную систему</p>
+                <p className="text-sm">Безопасная оплата через СБП</p>
               </div>
               
               <div className="bg-card p-4 rounded-lg border">
