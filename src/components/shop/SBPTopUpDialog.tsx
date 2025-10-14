@@ -83,7 +83,7 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
             Пополнить баланс через СБП
           </DialogTitle>
           <DialogDescription>
-            Система быстрых платежей. Комиссия 0.4-0.7%. Минимум 10₽
+            Система быстрых платежей. Оплата без комиссии для клиентов. Минимум 10₽
           </DialogDescription>
         </DialogHeader>
 
@@ -144,8 +144,8 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
               <span>Безопасная оплата через СБП</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-green-600">
-              <Icon name="TrendingDown" size={14} />
-              <span>Самая низкая комиссия 0.4-0.7%</span>
+              <Icon name="Banknote" size={14} />
+              <span>Без комиссии для покупателя</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-blue-600">
               <Icon name="Zap" size={14} />
