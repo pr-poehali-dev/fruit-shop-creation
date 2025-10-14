@@ -43,12 +43,18 @@ const InstallPrompt = () => {
     localStorage.setItem('pwa-install-dismissed', 'true');
   };
 
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowPrompt(false);
+    }
+  }, []);
+
   if (!showPrompt || localStorage.getItem('pwa-install-dismissed')) {
     return null;
   }
 
   return (
-    <Card className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 p-4 shadow-lg z-50 border-2 border-primary/20">
+    <Card className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 p-4 shadow-lg z-50 border-2 border-primary/20 lg:hidden">
       <div className="flex items-start gap-3">
         <div className="p-2 bg-primary/10 rounded-lg">
           <Icon name="Smartphone" size={24} className="text-primary" />

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SideMenuProps {
   siteSettings?: {
@@ -21,12 +21,48 @@ interface SideMenuProps {
   onSectionChange: (section: string) => void;
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
   const [open, setOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
 
   const handleNavigate = (section: string) => {
     onSectionChange(section);
     setOpen(false);
+  };
+
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsInstalled(true);
+    }
   };
 
   return (
@@ -120,6 +156,45 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
           </div>
 
           <Separator />
+
+          {!isInstalled && deferredPrompt && (
+            <>
+              <div>
+                <Button
+                  variant="default"
+                  className="w-full h-12 text-base bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90"
+                  onClick={handleInstallApp}
+                >
+                  <Icon name="Smartphone" size={20} className="mr-3" />
+                  Установить приложение
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Быстрый доступ с главного экрана
+                </p>
+              </div>
+              <Separator />
+            </>
+          )}
+
+          {isInstalled && (
+            <>
+              <div>
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-center gap-3">
+                      <Icon name="CheckCircle2" size={24} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <div>
+                        <p className="font-semibold text-sm text-green-900 dark:text-green-100">Приложение установлено</p>
+                        <p className="text-xs text-green-700 dark:text-green-300">Спасибо за установку!</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <Separator />
+            </>
+          )}
+
 
           {siteSettings?.price_list_url && (
             <>

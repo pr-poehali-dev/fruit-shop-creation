@@ -5,6 +5,7 @@ import Icon from '@/components/ui/icon';
 import SideMenu from './SideMenu';
 import SnowEffect from './SnowEffect';
 import NotificationsDropdown from '../NotificationsDropdown';
+import { useState, useEffect } from 'react';
 
 interface User {
   id: number;
@@ -38,6 +39,11 @@ interface HeaderProps {
   onRatingRequest?: (entityType: string, entityId: number) => void;
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 const Header = ({ 
   cart, 
   user, 
@@ -53,6 +59,37 @@ const Header = ({
   onRatingRequest
 }: HeaderProps) => {
   const isNewYear = siteSettings?.holiday_theme === 'new_year';
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsInstalled(true);
+    }
+  };
   
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-800 text-primary-foreground shadow-md overflow-hidden">
@@ -113,6 +150,18 @@ const Header = ({
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          {!isInstalled && deferredPrompt && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden lg:flex items-center gap-2 text-primary-foreground hover:bg-primary/90 bg-white/10 backdrop-blur-sm border border-white/20"
+              onClick={handleInstallApp}
+            >
+              <Icon name="Download" size={16} />
+              <span className="hidden xl:inline">Установить</span>
+            </Button>
+          )}
+
           {user && onRatingRequest && (
             <NotificationsDropdown userId={user.id} onRatingRequest={onRatingRequest} />
           )}
