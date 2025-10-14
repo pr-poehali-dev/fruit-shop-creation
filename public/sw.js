@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nursery-v2-sbp';
+const CACHE_NAME = 'nursery-v3-install-btn';
 const urlsToCache = [
   '/',
   '/index.html',

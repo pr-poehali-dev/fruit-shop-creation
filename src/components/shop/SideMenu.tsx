@@ -157,20 +157,47 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
 
           <Separator />
 
-          {!isInstalled && deferredPrompt && (
+          {!isInstalled && (
             <>
               <div>
-                <Button
-                  variant="default"
-                  className="w-full h-12 text-base bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90"
-                  onClick={handleInstallApp}
-                >
-                  <Icon name="Smartphone" size={20} className="mr-3" />
-                  Установить приложение
-                </Button>
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  Быстрый доступ с главного экрана
-                </p>
+                {deferredPrompt ? (
+                  <>
+                    <Button
+                      variant="default"
+                      className="w-full h-12 text-base bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90"
+                      onClick={handleInstallApp}
+                    >
+                      <Icon name="Smartphone" size={20} className="mr-3" />
+                      Установить приложение
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Быстрый доступ с главного экрана
+                    </p>
+                  </>
+                ) : (
+                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                    <CardContent className="pt-4 pb-4">
+                      <div className="flex items-start gap-3">
+                        <Icon name="Smartphone" size={24} className="text-primary flex-shrink-0 mt-1" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm mb-2">Установить приложение</p>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            1. Нажмите на меню браузера (⋮)<br/>
+                            2. Выберите "Установить приложение"<br/>
+                            3. Готово!
+                          </p>
+                          <a 
+                            href="/install-app.html" 
+                            target="_blank"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Подробная инструкция →
+                          </a>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
               <Separator />
             </>
