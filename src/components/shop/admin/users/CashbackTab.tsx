@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +21,7 @@ interface CashbackTabProps {
   description: string;
   onAmountChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, finalAmount?: number) => void;
   onCancel: () => void;
 }
 
@@ -33,12 +34,42 @@ const CashbackTab = ({
   onSubmit,
   onCancel
 }: CashbackTabProps) => {
+  const [isDeduct, setIsDeduct] = React.useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const finalAmount = isDeduct ? -Math.abs(parseFloat(amount)) : parseFloat(amount);
+    onSubmit(e, finalAmount);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label>Текущий кэшбэк</Label>
         <p className="text-2xl font-bold text-green-600">{Math.round(Number(selectedUser?.cashback || 0))}₽</p>
       </div>
+
+      <div className="flex gap-2 bg-muted p-1 rounded-lg">
+        <Button
+          type="button"
+          variant={!isDeduct ? 'default' : 'ghost'}
+          className="flex-1"
+          onClick={() => setIsDeduct(false)}
+        >
+          <Icon name="Plus" size={16} className="mr-2" />
+          Начислить
+        </Button>
+        <Button
+          type="button"
+          variant={isDeduct ? 'destructive' : 'ghost'}
+          className="flex-1"
+          onClick={() => setIsDeduct(true)}
+        >
+          <Icon name="Minus" size={16} className="mr-2" />
+          Списать
+        </Button>
+      </div>
+
       <div>
         <Label htmlFor="cashback-amount">Сумма кэшбэка (₽) *</Label>
         <Input
@@ -58,7 +89,7 @@ const CashbackTab = ({
           id="cashback-description"
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder="Начисление кэшбэка администратором"
+          placeholder={isDeduct ? "Списание за покупку" : "Начисление кэшбэка администратором"}
           rows={2}
         />
       </div>
@@ -66,9 +97,13 @@ const CashbackTab = ({
         <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
           Отмена
         </Button>
-        <Button type="submit" className="w-full sm:w-auto">
-          <Icon name="Gift" size={18} className="mr-2" />
-          Начислить {amount ? `${amount}₽` : ''}
+        <Button 
+          type="submit" 
+          className="w-full sm:w-auto"
+          variant={isDeduct ? 'destructive' : 'default'}
+        >
+          <Icon name={isDeduct ? "Minus" : "Gift"} size={18} className="mr-2" />
+          {isDeduct ? 'Списать' : 'Начислить'} {amount ? `${amount}₽` : ''}
         </Button>
       </div>
     </form>

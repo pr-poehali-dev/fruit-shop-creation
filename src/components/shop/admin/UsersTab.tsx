@@ -164,13 +164,14 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
     loadLoyaltyCard(user.id);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, finalAmount?: number) => {
     e.preventDefault();
     if (selectedUser && amount) {
+      const amountToUse = finalAmount !== undefined ? finalAmount : parseFloat(amount);
       if (operationType === 'balance') {
-        await onAddBalance(selectedUser.id, parseFloat(amount), description);
+        await onAddBalance(selectedUser.id, amountToUse, description);
       } else {
-        await onAddCashback(selectedUser.id, parseFloat(amount), description);
+        await onAddCashback(selectedUser.id, amountToUse, description);
       }
       setAmount('');
       setDescription('');

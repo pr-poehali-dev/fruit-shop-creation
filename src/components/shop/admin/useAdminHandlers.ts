@@ -162,6 +162,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
 
   const handleAddCashback = async (userId: number, amount: number, description: string) => {
     try {
+      const isDeduct = amount < 0;
       const response = await fetch(props.API_AUTH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -169,8 +170,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
           action: 'update_cashback',
           user_id: userId,
           amount,
-          type: 'cashback_deposit',
-          description: description || 'Начисление кэшбэка администратором'
+          type: isDeduct ? 'cashback_deduct' : 'cashback_deposit',
+          description: description || (isDeduct ? 'Списание кэшбэка администратором' : 'Начисление кэшбэка администратором')
         })
       });
 
@@ -178,21 +179,21 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
 
       if (data.success) {
         toast({
-          title: 'Кэшбэк начислен',
-          description: `Начислено ${amount}₽`
+          title: isDeduct ? 'Кэшбэк списан' : 'Кэшбэк начислен',
+          description: `${isDeduct ? 'Списано' : 'Начислено'} ${Math.abs(amount)}₽`
         });
         props.loadUsers();
       } else {
         toast({
           title: 'Ошибка',
-          description: data.error || 'Не удалось начислить кэшбэк',
+          description: data.error || `Не удалось ${isDeduct ? 'списать' : 'начислить'} кэшбэк`,
           variant: 'destructive'
         });
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось начислить кэшбэк',
+        description: 'Не удалось обработать операцию',
         variant: 'destructive'
       });
     }

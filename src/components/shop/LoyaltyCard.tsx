@@ -4,6 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const API_LOYALTY = 'https://functions.poehali.dev/ed127250-fe9d-4c7e-9a93-fb8b7fdc038a';
 
@@ -31,6 +37,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
   const [canUnlock, setCanUnlock] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   const loadCard = async () => {
     try {
@@ -236,7 +243,10 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
             </div>
           </div>
           
-          <div className="bg-white/20 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-4 flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+          <div 
+            className="bg-white/20 backdrop-blur-md rounded-lg sm:rounded-xl p-3 sm:p-4 flex items-center justify-center mb-4 sm:mb-6 shadow-lg cursor-pointer hover:bg-white/30 transition-all"
+            onClick={() => setShowQRModal(true)}
+          >
             <div className="bg-white p-2 sm:p-3 rounded-lg shadow-inner">
               <QRCodeSVG 
                 value={card.qr_code} 
@@ -246,6 +256,7 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
               />
             </div>
           </div>
+          <p className="text-center text-xs opacity-80 -mt-3 mb-4">Нажмите для увеличения</p>
 
           <div className="space-y-2 sm:space-y-3">
             <div className="flex justify-between items-end gap-2">
@@ -291,6 +302,28 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
           Предъявите QR-код при покупке от 100₽ и получайте кэшбэк на счет
         </p>
       </div>
+
+      <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">QR-код карты лояльности</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 p-4">
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <QRCodeSVG 
+                value={card.qr_code} 
+                size={280}
+                level="H"
+                includeMargin={false}
+              />
+            </div>
+            <div className="text-center space-y-1">
+              <p className="font-bold text-lg">{card.card_number}</p>
+              <p className="text-sm text-muted-foreground">Предъявите QR-код на кассе</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
