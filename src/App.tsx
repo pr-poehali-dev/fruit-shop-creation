@@ -5,10 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Payment from "./pages/Payment";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import RobokassaSuccess from "./pages/RobokassaSuccess";
-import RobokassaFail from "./pages/RobokassaFail";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import DeliveryAndReturn from "./pages/DeliveryAndReturn";
@@ -36,10 +32,6 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/robokassa-success" element={<RobokassaSuccess />} />
-            <Route path="/robokassa-fail" element={<RobokassaFail />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/delivery-and-return" element={<DeliveryAndReturn />} />

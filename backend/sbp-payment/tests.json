@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "name": "Test SBP payment creation",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "amount": 100,
+        "user_id": "1",
+        "description": "Пополнение баланса"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "string",
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test minimum amount validation",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "amount": 5,
+        "user_id": "1"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Minimum amount is 10 rubles"
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
-import RobokassaTopUpDialog from '../RobokassaTopUpDialog';
+import SBPTopUpDialog from '../SBPTopUpDialog';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -155,7 +155,7 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: P
       )}
 
       {user && (
-        <RobokassaTopUpDialog
+        <SBPTopUpDialog
           open={showTopUpDialog}
           onOpenChange={setShowTopUpDialog}
           userId={user.id}

@@ -6,13 +6,13 @@ import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 
-interface RobokassaTopUpDialogProps {
+interface SBPTopUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: number;
 }
 
-const RobokassaTopUpDialog: React.FC<RobokassaTopUpDialogProps> = ({ open, onOpenChange, userId }) => {
+const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, userId }) => {
   const { toast } = useToast();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +43,7 @@ const RobokassaTopUpDialog: React.FC<RobokassaTopUpDialogProps> = ({ open, onOpe
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://functions.poehali.dev/e659ee47-51d9-49ab-86dd-473d6b5c49af', {
+      const response = await fetch('https://functions.poehali.dev/eb724c49-3637-42d6-aba0-7fc3565d9c2b', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,9 +59,8 @@ const RobokassaTopUpDialog: React.FC<RobokassaTopUpDialogProps> = ({ open, onOpe
         window.location.href = data.payment_url;
       } else {
         toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось создать платёж',
-          variant: 'destructive'
+          title: 'В разработке',
+          description: data.message || 'Интеграция с СБП скоро будет доступна',
         });
       }
     } catch (error) {
@@ -80,11 +79,11 @@ const RobokassaTopUpDialog: React.FC<RobokassaTopUpDialogProps> = ({ open, onOpe
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Icon name="Wallet" size={24} className="text-primary" />
-            Пополнить баланс
+            <Icon name="Smartphone" size={24} className="text-primary" />
+            Пополнить баланс через СБП
           </DialogTitle>
           <DialogDescription>
-            Выберите сумму или введите свою. Минимум 10₽
+            Система быстрых платежей. Комиссия 0.4-0.7%. Минимум 10₽
           </DialogDescription>
         </DialogHeader>
 
@@ -133,15 +132,25 @@ const RobokassaTopUpDialog: React.FC<RobokassaTopUpDialogProps> = ({ open, onOpe
               </>
             ) : (
               <>
-                <Icon name="CreditCard" size={20} className="mr-2" />
-                Пополнить через Robokassa
+                <Icon name="Smartphone" size={20} className="mr-2" />
+                Оплатить через СБП
               </>
             )}
           </Button>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
-            <Icon name="Shield" size={14} />
-            <span>Безопасная оплата через Robokassa</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
+              <Icon name="Shield" size={14} />
+              <span>Безопасная оплата через СБП</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-green-600">
+              <Icon name="TrendingDown" size={14} />
+              <span>Самая низкая комиссия 0.4-0.7%</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-blue-600">
+              <Icon name="Zap" size={14} />
+              <span>Мгновенное зачисление 24/7</span>
+            </div>
           </div>
         </div>
       </DialogContent>
@@ -149,4 +158,4 @@ const RobokassaTopUpDialog: React.FC<RobokassaTopUpDialogProps> = ({ open, onOpe
   );
 };
 
-export default RobokassaTopUpDialog;
+export default SBPTopUpDialog;
