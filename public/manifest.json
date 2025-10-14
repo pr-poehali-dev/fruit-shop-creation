@@ -29,5 +29,37 @@
       "sizes": "540x720",
       "type": "image/png"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Каталог",
+      "short_name": "Каталог",
+      "description": "Открыть каталог растений",
+      "url": "/?source=shortcut",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Корзина",
+      "short_name": "Корзина",
+      "description": "Открыть корзину",
+      "url": "/?cart=open&source=shortcut",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Профиль",
+      "short_name": "Профиль",
+      "description": "Открыть профиль",
+      "url": "/?profile=open&source=shortcut",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Установить приложение - Питомник растений</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: #22c55e;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .steps {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        .step-number {
+            background: #22c55e;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-title {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+        .step-text {
+            color: #666;
+            font-size: 14px;
+        }
+        .benefits {
+            background: #ecfdf5;
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .benefits h3 {
+            color: #16a34a;
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .benefits ul {
+            list-style: none;
+        }
+        .benefits li {
+            color: #1a1a1a;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            background: #22c55e;
+            color: white;
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #16a34a;
+        }
+        .note {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🌱</div>
+        <h1>Установите наше приложение</h1>
+        <p class="subtitle">Удобный доступ к каталогу растений всегда под рукой</p>
+
+        <div class="benefits">
+            <h3>✨ Преимущества приложения:</h3>
+            <ul>
+                <li>✅ Быстрый доступ с главного экрана</li>
+                <li>✅ Работает без интернета</li>
+                <li>✅ Занимает всего ~5 МБ</li>
+                <li>✅ Автоматические обновления</li>
+                <li>✅ Уведомления о новинках и скидках</li>
+            </ul>
+        </div>
+
+        <ul class="steps">
+            <li class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Откройте меню браузера</div>
+                    <div class="step-text">Нажмите на три точки в правом верхнем углу</div>
+                </div>
+            </li>
+            <li class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Выберите "Установить приложение"</div>
+                    <div class="step-text">Или "Добавить на главный экран"</div>
+                </div>
+            </li>
+            <li class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Подтвердите установку</div>
+                    <div class="step-text">Приложение появится на главном экране</div>
+                </div>
+            </li>
+        </ul>
+
+        <a href="/" class="btn">Перейти на главную</a>
+        
+        <p class="note">Работает на всех Android устройствах с Chrome или Яндекс.Браузером</p>
+    </div>
+</body>
+</html>
