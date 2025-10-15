@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Plant, PlantFormData, API_PLANTS } from './types';
+import { Plant, PlantFormData, API_PLANTS, API_UPLOAD_PDF } from './types';
 
 export const usePlantsData = () => {
   const { toast } = useToast();
@@ -117,13 +117,11 @@ export const usePlantsData = () => {
         console.log('Uploading PDF:', file.name, 'Size:', Math.round(base64Data.length / 1024), 'KB');
         setUploadProgress(60);
         
-        const response = await fetch(API_PLANTS, {
+        const response = await fetch(API_UPLOAD_PDF, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action: 'upload_pdf',
-            pdf_file: base64Data,
-            pdf_name: file.name
+            file: base64Data
           })
         });
 
@@ -140,15 +138,41 @@ export const usePlantsData = () => {
         setUploadProgress(90);
         console.log('PDF upload response:', data);
 
-        if (data.success) {
+        if (data.plants && data.plants.length > 0) {
+          for (const plantData of data.plants) {
+            const saveResponse = await fetch(API_PLANTS, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'add',
+                plant: {
+                  name: plantData.name,
+                  latin_name: plantData.latin_name || '',
+                  category: plantData.category || '',
+                  quantity: plantData.stock || 0,
+                  unit: 'шт',
+                  price: plantData.price || 0,
+                  supplier: '',
+                  location: '',
+                  notes: `Размер: ${plantData.size || 'не указан'}`,
+                  pdf_source: file.name
+                }
+              })
+            });
+
+            if (!saveResponse.ok) {
+              console.error('Failed to save plant:', plantData.name);
+            }
+          }
+
           setUploadProgress(100);
           toast({
             title: 'Успешно загружено',
-            description: data.message
+            description: `Добавлено растений: ${data.plants.length}`
           });
           await loadPlants();
         } else {
-          throw new Error(data.error || 'Неизвестная ошибка сервера');
+          throw new Error('В PDF не найдено данных о растениях');
         }
       } catch (error) {
         console.error('PDF upload error:', error);

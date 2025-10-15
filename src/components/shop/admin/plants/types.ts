@@ -26,3 +26,4 @@ export interface PlantFormData {
 }
 
 export const API_PLANTS = 'https://functions.poehali.dev/ff57c64d-2ef3-40a0-b0ef-d3ecc109a1fa';
+export const API_UPLOAD_PDF = 'https://functions.poehali.dev/1dd9da2d-583e-4678-9e8a-b647fdb30eea';
