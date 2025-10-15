@@ -10,6 +10,7 @@ import LoyaltyScannerTab from './LoyaltyScannerTab';
 import PagesTab from './PagesTab';
 import CodesTab from './CodesTab';
 import DeliveryZonesTab from './DeliveryZonesTab';
+import PlantsInventoryTab from './PlantsInventoryTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import SupportStatsCard from './SupportStatsCard';
 import { Product, Category, User } from './types';
@@ -75,7 +76,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-12 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -83,6 +84,10 @@ const AdminPanelTabs = ({
         <TabsTrigger value="categories" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="FolderTree" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Категории</span>
+        </TabsTrigger>
+        <TabsTrigger value="plants" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="Sprout" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">Растения</span>
         </TabsTrigger>
         <TabsTrigger value="users" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Users" size={16} className="sm:mr-1" />
@@ -148,6 +153,10 @@ const AdminPanelTabs = ({
           onIssueLoyaltyCard={onIssueLoyaltyCard}
           onRefreshUsers={onRefreshUsers}
         />
+      </TabsContent>
+
+      <TabsContent value="plants">
+        <PlantsInventoryTab />
       </TabsContent>
 
       <TabsContent value="orders">
