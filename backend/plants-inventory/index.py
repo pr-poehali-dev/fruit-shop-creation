@@ -118,48 +118,62 @@ def handle_pdf_upload(conn, body_data: Dict[str, Any], headers: Dict[str, str]) 
             'body': json.dumps({'error': 'PDF файл не предоставлен'})
         }
     
-    pdf_bytes = base64.b64decode(pdf_base64)
-    pdf_file = BytesIO(pdf_bytes)
-    
-    reader = PdfReader(pdf_file)
-    text = ''
-    for page in reader.pages:
-        text += page.extract_text() + '\n'
-    
-    plants = parse_plants_from_text(text, pdf_name)
-    
-    with conn.cursor() as cur:
-        inserted_count = 0
-        for plant in plants:
-            cur.execute('''
-                INSERT INTO t_p77282076_fruit_shop_creation.plants_inventory
-                (name, latin_name, category, quantity, unit, price, supplier, location, notes, pdf_source)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ''', (
-                plant.get('name'),
-                plant.get('latin_name'),
-                plant.get('category'),
-                plant.get('quantity', 0),
-                plant.get('unit', 'шт'),
-                plant.get('price'),
-                plant.get('supplier'),
-                plant.get('location'),
-                plant.get('notes'),
-                pdf_name
-            ))
-            inserted_count += 1
+    try:
+        pdf_bytes = base64.b64decode(pdf_base64)
+        pdf_file = BytesIO(pdf_bytes)
         
-        conn.commit()
+        reader = PdfReader(pdf_file)
+        text = ''
+        for page in reader.pages:
+            text += page.extract_text() + '\n'
+        
+        plants = parse_plants_from_text(text, pdf_name)
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'headers': headers,
+            'body': json.dumps({'error': f'Ошибка чтения PDF: {str(e)}'})
+        }
     
-    return {
-        'statusCode': 200,
-        'headers': headers,
-        'body': json.dumps({
-            'success': True,
-            'message': f'Добавлено {inserted_count} растений из PDF',
-            'count': inserted_count
-        })
-    }
+    try:
+        with conn.cursor() as cur:
+            inserted_count = 0
+            for plant in plants:
+                cur.execute('''
+                    INSERT INTO t_p77282076_fruit_shop_creation.plants_inventory
+                    (name, latin_name, category, quantity, unit, price, supplier, location, notes, pdf_source)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ''', (
+                    plant.get('name'),
+                    plant.get('latin_name'),
+                    plant.get('category'),
+                    plant.get('quantity', 0),
+                    plant.get('unit', 'шт'),
+                    plant.get('price'),
+                    plant.get('supplier'),
+                    plant.get('location'),
+                    plant.get('notes'),
+                    pdf_name
+                ))
+                inserted_count += 1
+            
+            conn.commit()
+        
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'message': f'Добавлено {inserted_count} растений из PDF',
+                'count': inserted_count
+            })
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({'error': f'Ошибка сохранения данных: {str(e)}'})
+        }
 
 
 def parse_plants_from_text(text: str, pdf_source: str) -> List[Dict[str, Any]]:

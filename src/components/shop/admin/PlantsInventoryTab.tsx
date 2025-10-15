@@ -129,6 +129,7 @@ const PlantsInventoryTab = () => {
         });
 
         const data = await response.json();
+        console.log('PDF upload response:', data);
 
         if (data.success) {
           toast({
@@ -137,9 +138,10 @@ const PlantsInventoryTab = () => {
           });
           loadPlants();
         } else {
-          throw new Error(data.error);
+          throw new Error(data.error || 'Неизвестная ошибка сервера');
         }
       } catch (error) {
+        console.error('PDF upload error:', error);
         toast({
           title: 'Ошибка загрузки PDF',
           description: error instanceof Error ? error.message : 'Неизвестная ошибка',
@@ -147,6 +149,7 @@ const PlantsInventoryTab = () => {
         });
       } finally {
         setIsUploading(false);
+        e.target.value = '';
       }
     };
 
