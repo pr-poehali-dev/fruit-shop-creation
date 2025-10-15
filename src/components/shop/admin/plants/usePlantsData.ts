@@ -85,6 +85,16 @@ export const usePlantsData = () => {
       return;
     }
 
+    const maxSizeMB = 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      toast({
+        title: 'Файл слишком большой',
+        description: `Максимальный размер файла: ${maxSizeMB}MB`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsUploading(true);
 
     const reader = new FileReader();
