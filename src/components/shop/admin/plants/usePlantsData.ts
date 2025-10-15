@@ -115,17 +115,37 @@ export const usePlantsData = () => {
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         
-        console.log('Uploading PDF:', file.name, 'Size:', Math.round(base64Data.length / 1024), 'KB');
+        const fileSizeKB = Math.round(base64Data.length / 1024);
+        console.log('Uploading PDF:', file.name, 'Size:', fileSizeKB, 'KB');
+        
+        if (fileSizeKB > 2500) {
+          throw new Error(`Файл после кодирования слишком большой (${fileSizeKB} KB). Максимум 2.5MB. Сожмите PDF.`);
+        }
+        
         setUploadProgress(60);
         
-        const response = await fetch(API_UPLOAD_PDF, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            file: base64Data
-          })
-        });
-
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000);
+        
+        let response;
+        try {
+          response = await fetch(API_UPLOAD_PDF, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              file: base64Data
+            }),
+            signal: controller.signal
+          });
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId);
+          if (fetchError.name === 'AbortError') {
+            throw new Error('Время ожидания истекло. Попробуйте файл меньшего размера.');
+          }
+          throw new Error('Ошибка сети. Проверьте подключение к интернету.');
+        }
+        
+        clearTimeout(timeoutId);
         setUploadProgress(80);
         console.log('Response status:', response.status);
 
@@ -134,7 +154,11 @@ export const usePlantsData = () => {
           console.error('Server error:', errorText);
           
           if (response.status === 413) {
-            throw new Error('Файл слишком большой для обработки. Сожмите PDF до 10MB.');
+            throw new Error('Файл слишком большой для сервера. Сожмите PDF до 2MB.');
+          }
+          
+          if (response.status === 504 || response.status === 502) {
+            throw new Error('Сервер не успел обработать файл. Попробуйте файл меньшего размера.');
           }
           
           throw new Error(`Ошибка сервера: ${response.status}`);
