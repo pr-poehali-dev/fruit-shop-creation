@@ -86,7 +86,7 @@ export const usePlantsData = () => {
       return;
     }
 
-    const maxSizeMB = 2;
+    const maxSizeMB = 10;
     if (file.size > maxSizeMB * 1024 * 1024) {
       toast({
         title: 'Файл слишком большой',
@@ -134,7 +134,7 @@ export const usePlantsData = () => {
           console.error('Server error:', errorText);
           
           if (response.status === 413) {
-            throw new Error('Файл слишком большой для обработки. Сожмите PDF до 2MB.');
+            throw new Error('Файл слишком большой для обработки. Сожмите PDF до 10MB.');
           }
           
           throw new Error(`Ошибка сервера: ${response.status}`);
