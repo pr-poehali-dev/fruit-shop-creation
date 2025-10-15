@@ -7,6 +7,7 @@ export const usePlantsData = () => {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,15 +97,25 @@ export const usePlantsData = () => {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
 
     const reader = new FileReader();
     
+    reader.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round((event.loaded / event.total) * 50);
+        setUploadProgress(progress);
+      }
+    };
+    
     reader.onload = async () => {
       try {
+        setUploadProgress(50);
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         
         console.log('Uploading PDF:', file.name, 'Size:', Math.round(base64Data.length / 1024), 'KB');
+        setUploadProgress(60);
         
         const response = await fetch(API_PLANTS, {
           method: 'POST',
@@ -116,6 +127,7 @@ export const usePlantsData = () => {
           })
         });
 
+        setUploadProgress(80);
         console.log('Response status:', response.status);
 
         if (!response.ok) {
@@ -125,9 +137,11 @@ export const usePlantsData = () => {
         }
 
         const data = await response.json();
+        setUploadProgress(90);
         console.log('PDF upload response:', data);
 
         if (data.success) {
+          setUploadProgress(100);
           toast({
             title: 'Успешно загружено',
             description: data.message
@@ -145,6 +159,7 @@ export const usePlantsData = () => {
         });
       } finally {
         setIsUploading(false);
+        setUploadProgress(0);
         if (e.target) e.target.value = '';
       }
     };
@@ -156,6 +171,7 @@ export const usePlantsData = () => {
         variant: 'destructive'
       });
       setIsUploading(false);
+      setUploadProgress(0);
       if (e.target) e.target.value = '';
     };
     
@@ -276,6 +292,7 @@ export const usePlantsData = () => {
     filteredPlants,
     isLoading,
     isUploading,
+    uploadProgress,
     showAddDialog,
     editingPlant,
     searchQuery,

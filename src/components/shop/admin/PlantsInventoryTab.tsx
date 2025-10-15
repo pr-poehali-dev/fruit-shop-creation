@@ -13,6 +13,7 @@ const PlantsInventoryTab = () => {
     filteredPlants,
     isLoading,
     isUploading,
+    uploadProgress,
     showAddDialog,
     editingPlant,
     searchQuery,
@@ -47,7 +48,7 @@ const PlantsInventoryTab = () => {
                 <Icon name="Plus" size={16} className="mr-2" />
                 Добавить вручную
               </Button>
-              <label>
+              <label className="flex-1 sm:flex-none">
                 <Input
                   type="file"
                   accept=".pdf"
@@ -55,10 +56,10 @@ const PlantsInventoryTab = () => {
                   className="hidden"
                   disabled={isUploading}
                 />
-                <Button variant="outline" disabled={isUploading} asChild>
+                <Button variant="outline" disabled={isUploading} asChild className="w-full">
                   <span className="cursor-pointer">
                     <Icon name="Upload" size={16} className="mr-2" />
-                    {isUploading ? 'Загрузка...' : 'Загрузить PDF'}
+                    {isUploading ? `${uploadProgress}%` : 'Загрузить PDF'}
                   </span>
                 </Button>
               </label>
