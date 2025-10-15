@@ -1,0 +1,209 @@
+import { useToast } from '@/hooks/use-toast';
+import { CartItem } from '@/types/shop';
+
+interface CheckoutParams {
+  user: any;
+  cart: CartItem[];
+  getTotalPrice: () => number;
+  clearCart: () => void;
+  loadOrders: (user: any) => void;
+  refreshUserBalance: (user: any, isRefreshingBalance: boolean, setIsRefreshingBalance: (value: boolean) => void, setUser: (user: any) => void) => void;
+  isRefreshingBalance: boolean;
+  setIsRefreshingBalance: (value: boolean) => void;
+  setUser: (user: any) => void;
+  setShowAuthDialog: (value: boolean) => void;
+  siteSettings: any;
+  API_ORDERS: string;
+}
+
+export const useCheckout = ({
+  user,
+  cart,
+  getTotalPrice,
+  clearCart,
+  loadOrders,
+  refreshUserBalance,
+  isRefreshingBalance,
+  setIsRefreshingBalance,
+  setUser,
+  setShowAuthDialog,
+  siteSettings,
+  API_ORDERS
+}: CheckoutParams) => {
+  const { toast } = useToast();
+
+  const handleCheckout = async (
+    paymentMethod: string,
+    deliveryType: string = 'pickup',
+    deliveryZoneId?: number
+  ) => {
+    if (!user) {
+      toast({
+        title: 'Требуется авторизация',
+        description: 'Пожалуйста, войдите в аккаунт для оформления заказа',
+        variant: 'destructive'
+      });
+      setShowAuthDialog(true);
+      return;
+    }
+
+    if (cart.length === 0) {
+      toast({
+        title: 'Корзина пуста',
+        description: 'Добавьте товары в корзину',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const basePrice = getTotalPrice();
+    let deliveryPrice = 0;
+
+    if (deliveryType === 'delivery') {
+      const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
+      const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
+
+      if (!isFreeDelivery) {
+        const baseDeliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
+        const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
+        deliveryPrice = baseDeliveryPrice + courierDeliveryPrice;
+      }
+    }
+
+    const totalAmount = basePrice + deliveryPrice;
+
+    if (paymentMethod === 'balance') {
+      if (!user.balance || user.balance < totalAmount) {
+        toast({
+          title: 'Недостаточно средств',
+          description: `На балансе ${user.balance?.toFixed(2) || 0}₽, требуется ${totalAmount}₽`,
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
+    if (paymentMethod === 'alfabank') {
+      try {
+        const response = await fetch('https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: totalAmount,
+            description: `Оплата заказа (${cart.length} товар${cart.length > 1 ? 'а' : ''})`,
+            user_id: user.id.toString(),
+            return_url: `${window.location.origin}/payment/success`
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.payment_url) {
+          const deliveryAddress = deliveryType === 'pickup'
+            ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}`
+            : 'Доставка (адрес уточняется)';
+
+          const orderResponse = await fetch(API_ORDERS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: user.id,
+              items: cart.map(item => ({
+                product_id: item.product.id,
+                quantity: item.quantity,
+                price: item.product.price
+              })),
+              payment_method: paymentMethod,
+              delivery_address: deliveryAddress,
+              delivery_type: deliveryType,
+              delivery_zone_id: deliveryZoneId,
+              cashback_percent: siteSettings?.balance_payment_cashback_percent || 5,
+              alfabank_order_id: data.order_id
+            })
+          });
+
+          const orderData = await orderResponse.json();
+
+          if (orderData.success) {
+            clearCart();
+            window.location.href = data.payment_url;
+          } else {
+            toast({
+              title: 'Ошибка',
+              description: orderData.error || 'Не удалось оформить заказ',
+              variant: 'destructive'
+            });
+          }
+        } else {
+          toast({
+            title: 'Ошибка',
+            description: data.error || data.message || 'Не удалось создать платёж',
+            variant: 'destructive'
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось создать платёж',
+          variant: 'destructive'
+        });
+      }
+      return;
+    }
+
+    try {
+      const deliveryAddress = deliveryType === 'pickup'
+        ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}`
+        : 'Доставка (адрес уточняется)';
+
+      const response = await fetch(API_ORDERS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          items: cart.map(item => ({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price
+          })),
+          payment_method: paymentMethod,
+          delivery_address: deliveryAddress,
+          delivery_type: deliveryType,
+          delivery_zone_id: deliveryZoneId,
+          cashback_percent: siteSettings?.balance_payment_cashback_percent || 5
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Заказ оформлен!',
+          description: paymentMethod === 'balance'
+            ? `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
+            : `Номер заказа: ${data.order_id}`
+        });
+        clearCart();
+        loadOrders(user);
+
+        if (paymentMethod === 'balance') {
+          setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 500);
+        }
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось оформить заказ',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось оформить заказ',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  return { handleCheckout };
+};

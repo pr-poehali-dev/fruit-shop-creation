@@ -5,25 +5,19 @@ import { useCart } from '@/hooks/useCart';
 import { useShopData } from '@/hooks/useShopData';
 import { useTicketNotifications } from '@/hooks/useTicketNotifications';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useCheckout } from '@/components/shop/hooks/useCheckout';
+import { useAdminAuth } from '@/components/shop/hooks/useAdminAuth';
+import { getBackgroundStyle } from '@/components/shop/utils/themeHelpers';
 import Header from '@/components/shop/Header';
 import AuthDialog from '@/components/shop/AuthDialog';
 import Footer from '@/components/shop/Footer';
-import HomeSection from '@/components/shop/sections/HomeSection';
-import CatalogSection from '@/components/shop/sections/CatalogSection';
-import FavoritesSection from '@/components/shop/sections/FavoritesSection';
-import AboutSection from '@/components/shop/sections/AboutSection';
-import DeliverySection from '@/components/shop/sections/DeliverySection';
-import CareSection from '@/components/shop/sections/CareSection';
-import ContactsSection from '@/components/shop/sections/ContactsSection';
 import AdminPanel from '@/components/shop/admin/AdminPanel';
 import CartContent from '@/components/shop/CartContent';
 import ProfileContent from '@/components/shop/ProfileContent';
 import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
-import NewYearBackground from '@/components/NewYearBackground';
-import HalloweenTheme from '@/components/HalloweenTheme';
-import SummerTheme from '@/components/SummerTheme';
+import HolidayThemeRenderer from '@/components/shop/HolidayThemeRenderer';
+import MainContent from '@/components/shop/MainContent';
 import RatingModal from '@/components/RatingModal';
-
 import { Product } from '@/types/shop';
 
 const Index = () => {
@@ -52,9 +46,31 @@ const Index = () => {
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
   const [ratingEntityType, setRatingEntityType] = useState('');
   const [ratingEntityId, setRatingEntityId] = useState(0);
-  const [requiresAdminCode, setRequiresAdminCode] = useState(false);
-  const [pendingAdminUser, setPendingAdminUser] = useState<{ id: number; full_name: string } | null>(null);
-  const [adminCodeError, setAdminCodeError] = useState('');
+
+  const { handleCheckout } = useCheckout({
+    user,
+    cart,
+    getTotalPrice,
+    clearCart,
+    loadOrders,
+    refreshUserBalance,
+    isRefreshingBalance,
+    setIsRefreshingBalance,
+    setUser,
+    setShowAuthDialog,
+    siteSettings,
+    API_ORDERS
+  });
+
+  const {
+    requiresAdminCode,
+    pendingAdminUser,
+    adminCodeError,
+    onAuthSuccess,
+    onAuthError,
+    handleAdminCodeVerify,
+    resetAdminAuth
+  } = useAdminAuth({ setUser, setShowAuthDialog });
 
   useEffect(() => {
     if (user) {
@@ -62,8 +78,6 @@ const Index = () => {
       setShowAuthDialog(false);
     }
   }, [user]);
-
-
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
@@ -76,238 +90,6 @@ const Index = () => {
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
     setIsProductGalleryOpen(true);
-  };
-
-  const handleCheckout = async (paymentMethod: string, deliveryType: string = 'pickup', deliveryZoneId?: number) => {
-    if (!user) {
-      toast({
-        title: 'Требуется авторизация',
-        description: 'Пожалуйста, войдите в аккаунт для оформления заказа',
-        variant: 'destructive'
-      });
-      setShowAuthDialog(true);
-      return;
-    }
-
-    if (cart.length === 0) {
-      toast({
-        title: 'Корзина пуста',
-        description: 'Добавьте товары в корзину',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    const basePrice = getTotalPrice();
-    let deliveryPrice = 0;
-    
-    if (deliveryType === 'delivery') {
-      const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
-      const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
-      
-      if (!isFreeDelivery) {
-        const baseDeliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
-        const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
-        deliveryPrice = baseDeliveryPrice + courierDeliveryPrice;
-      }
-    }
-    
-    const totalAmount = basePrice + deliveryPrice;
-
-    if (paymentMethod === 'balance') {
-      if (!user.balance || user.balance < totalAmount) {
-        toast({
-          title: 'Недостаточно средств',
-          description: `На балансе ${user.balance?.toFixed(2) || 0}₽, требуется ${totalAmount}₽`,
-          variant: 'destructive'
-        });
-        return;
-      }
-    }
-
-    if (paymentMethod === 'alfabank') {
-      try {
-        const response = await fetch('https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: totalAmount,
-            description: `Оплата заказа (${cart.length} товар${cart.length > 1 ? 'а' : ''})`,
-            user_id: user.id.toString(),
-            return_url: `${window.location.origin}/payment/success`
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.payment_url) {
-          const deliveryAddress = deliveryType === 'pickup' 
-            ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}` 
-            : 'Доставка (адрес уточняется)';
-            
-          const orderResponse = await fetch(API_ORDERS, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user_id: user.id,
-              items: cart.map(item => ({
-                product_id: item.product.id,
-                quantity: item.quantity,
-                price: item.product.price
-              })),
-              payment_method: paymentMethod,
-              delivery_address: deliveryAddress,
-              delivery_type: deliveryType,
-              delivery_zone_id: deliveryZoneId,
-              cashback_percent: siteSettings?.balance_payment_cashback_percent || 5,
-              alfabank_order_id: data.order_id
-            })
-          });
-
-          const orderData = await orderResponse.json();
-
-          if (orderData.success) {
-            clearCart();
-            window.location.href = data.payment_url;
-          } else {
-            toast({
-              title: 'Ошибка',
-              description: orderData.error || 'Не удалось оформить заказ',
-              variant: 'destructive'
-            });
-          }
-        } else {
-          toast({
-            title: 'Ошибка',
-            description: data.error || data.message || 'Не удалось создать платёж',
-            variant: 'destructive'
-          });
-        }
-      } catch (error) {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось создать платёж',
-          variant: 'destructive'
-        });
-      }
-      return;
-    }
-
-    try {
-      const deliveryAddress = deliveryType === 'pickup' 
-        ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}` 
-        : 'Доставка (адрес уточняется)';
-        
-      const response = await fetch(API_ORDERS, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user.id,
-          items: cart.map(item => ({
-            product_id: item.product.id,
-            quantity: item.quantity,
-            price: item.product.price
-          })),
-          payment_method: paymentMethod,
-          delivery_address: deliveryAddress,
-          delivery_type: deliveryType,
-          delivery_zone_id: deliveryZoneId,
-          cashback_percent: siteSettings?.balance_payment_cashback_percent || 5
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Заказ оформлен!',
-          description: paymentMethod === 'balance' 
-            ? `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!` 
-            : `Номер заказа: ${data.order_id}`
-        });
-        clearCart();
-        loadOrders(user);
-        
-        if (paymentMethod === 'balance') {
-          setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 500);
-        }
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось оформить заказ',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось оформить заказ',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const onAuthSuccess = (userData: any, message: string, requiresCode?: boolean) => {
-    console.log('✅ onAuthSuccess called:', { userData, message, requiresCode });
-    if (requiresCode) {
-      console.log('🔐 Setting requiresAdminCode to TRUE');
-      setRequiresAdminCode(true);
-      setPendingAdminUser({ id: userData.id, full_name: userData.full_name });
-      setAdminCodeError('');
-      console.log('📋 State updated:', { requiresAdminCode: true, pendingAdminUser: { id: userData.id, full_name: userData.full_name } });
-    } else {
-      setShowAuthDialog(false);
-      setRequiresAdminCode(false);
-      setPendingAdminUser(null);
-      toast({
-        title: message,
-        description: `Добро пожаловать, ${userData.full_name || userData.phone}!`
-      });
-    }
-  };
-
-  const onAuthError = (error: string) => {
-    toast({
-      title: 'Ошибка',
-      description: error,
-      variant: 'destructive'
-    });
-  };
-
-  const handleAdminCodeVerify = async (code: string) => {
-    if (!pendingAdminUser) return;
-
-    try {
-      const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
-      const response = await fetch(API_AUTH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'verify_code',
-          user_id: pendingAdminUser.id,
-          login_code: code
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setShowAuthDialog(false);
-        setRequiresAdminCode(false);
-        setPendingAdminUser(null);
-        setAdminCodeError('');
-        toast({
-          title: 'Доступ разрешён',
-          description: `Добро пожаловать в админку, ${data.user.full_name}!`
-        });
-      } else {
-        setAdminCodeError(data.error || 'Неверный код');
-      }
-    } catch (error) {
-      setAdminCodeError('Не удалось проверить код');
-    }
   };
 
   const onLogout = () => {
@@ -343,40 +125,12 @@ const Index = () => {
     />
   );
 
-  const getBackgroundStyle = () => {
-    const theme = siteSettings?.holiday_theme || 'none';
-    switch (theme) {
-      case 'new_year':
-        return 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50';
-      case 'halloween':
-        return 'bg-gradient-to-br from-purple-900 via-gray-900 to-orange-900';
-      case 'summer':
-        return 'bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50';
-      default:
-        return 'bg-background';
-    }
-  };
-
-  const renderHolidayTheme = () => {
-    const theme = siteSettings?.holiday_theme || 'none';
-    switch (theme) {
-      case 'new_year':
-        return <NewYearBackground />;
-      case 'halloween':
-        return <HalloweenTheme />;
-      case 'summer':
-        return <SummerTheme />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className={`min-h-screen ${getBackgroundStyle()} relative`}>
-      {renderHolidayTheme()}
-      
+    <div className={`min-h-screen ${getBackgroundStyle(siteSettings?.holiday_theme)} relative`}>
+      <HolidayThemeRenderer theme={siteSettings?.holiday_theme} />
+
       {showAdminPanel && user?.is_admin ? (
-        <AdminPanel 
+        <AdminPanel
           user={user}
           onClose={() => {
             setShowAdminPanel(false);
@@ -387,7 +141,7 @@ const Index = () => {
         />
       ) : (
         <>
-          <Header 
+          <Header
             cart={cart}
             user={user}
             currentSection={currentSection}
@@ -407,61 +161,20 @@ const Index = () => {
           />
 
           <main className="container mx-auto px-4 py-8">
-            {isLoading ? (
-              <div className="flex justify-center items-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Загрузка...</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                {currentSection === 'home' && (
-                  <HomeSection 
-                    products={products} 
-                    onNavigate={setCurrentSection} 
-                    onAddToCart={handleAddToCart}
-                    onViewDetails={handleViewDetails}
-                    favoriteIds={favoriteIds}
-                    onToggleFavorite={toggleFavorite}
-                    siteSettings={siteSettings}
-                    isAuthenticated={!!user}
-                    onShowAuth={() => setShowAuthDialog(true)}
-                  />
-                )}
-
-                {currentSection === 'catalog' && (
-                  <CatalogSection 
-                    products={products} 
-                    onAddToCart={handleAddToCart}
-                    favoriteIds={favoriteIds}
-                    onToggleFavorite={toggleFavorite}
-                    siteSettings={siteSettings}
-                    isAuthenticated={!!user}
-                    onShowAuth={() => setShowAuthDialog(true)}
-                  />
-                )}
-
-                {currentSection === 'favorites' && (
-                  <FavoritesSection 
-                    favorites={favorites} 
-                    onAddToCart={handleAddToCart}
-                    favoriteIds={favoriteIds}
-                    onToggleFavorite={toggleFavorite}
-                    siteSettings={siteSettings}
-                    onClose={() => setCurrentSection('catalog')}
-                  />
-                )}
-
-                {currentSection === 'about' && <AboutSection siteSettings={siteSettings} />}
-
-                {currentSection === 'delivery' && <DeliverySection siteSettings={siteSettings} />}
-
-                {currentSection === 'care' && <CareSection siteSettings={siteSettings} />}
-
-                {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
-              </>
-            )}
+            <MainContent
+              isLoading={isLoading}
+              currentSection={currentSection}
+              products={products}
+              favorites={favorites}
+              favoriteIds={favoriteIds}
+              siteSettings={siteSettings}
+              isAuthenticated={!!user}
+              onSectionChange={setCurrentSection}
+              onAddToCart={handleAddToCart}
+              onViewDetails={handleViewDetails}
+              onToggleFavorite={toggleFavorite}
+              onShowAuth={() => setShowAuthDialog(true)}
+            />
           </main>
 
           <Footer />
@@ -475,14 +188,12 @@ const Index = () => {
             onShowAuth={() => setShowAuthDialog(true)}
           />
 
-          <AuthDialog 
-            open={showAuthDialog} 
+          <AuthDialog
+            open={showAuthDialog}
             onOpenChange={(open) => {
               setShowAuthDialog(open);
               if (!open) {
-                setRequiresAdminCode(false);
-                setPendingAdminUser(null);
-                setAdminCodeError('');
+                resetAdminAuth();
               }
             }}
             onSubmit={(e, action) => handleAuth(e, action, onAuthSuccess, onAuthError)}
