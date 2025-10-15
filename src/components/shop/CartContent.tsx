@@ -3,12 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
 import Icon from '@/components/ui/icon';
 import { CartItem, User } from '@/types/shop';
 import { useState, useEffect } from 'react';
@@ -39,7 +34,6 @@ const CartContent = ({
   const [deliveryType, setDeliveryType] = useState('pickup');
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
-  const [showSberQR, setShowSberQR] = useState(false);
   
   const deliveryEnabled = siteSettings?.delivery_enabled !== false;
   const deliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
@@ -208,13 +202,9 @@ const CartContent = ({
                 Оплатить балансом ({(user.balance || 0).toFixed(2)}₽)
               </Button>
             )}
-            <Button className="w-full" onClick={() => handleCheckout('card', deliveryType, selectedZoneId || undefined)}>
+            <Button className="w-full" onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined)}>
               <Icon name="CreditCard" size={18} className="mr-2" />
-              Оплатить картой
-            </Button>
-            <Button className="w-full" variant="secondary" onClick={() => setShowSberQR(true)}>
-              <Icon name="QrCode" size={18} className="mr-2" />
-              Оплатить по QR СберБанк
+              Оплатить через Альфа-Банк
             </Button>
             <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined)}>
               <Icon name="Coins" size={18} className="mr-2" />
@@ -223,42 +213,6 @@ const CartContent = ({
           </div>
         </>
       )}
-      
-      <Dialog open={showSberQR} onOpenChange={setShowSberQR}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Icon name="QrCode" size={24} className="text-green-600" />
-              Оплата через СберБанк
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4">
-            <img 
-              src="https://cdn.poehali.dev/files/d2c2a829-8f2c-4deb-8827-68a200bded7f.png" 
-              alt="QR код для оплаты СберБанк" 
-              className="w-full max-w-[280px] h-auto"
-            />
-            <div className="text-center space-y-2">
-              <p className="font-semibold text-lg">Сумма к оплате: {getFinalPrice()} ₽</p>
-              <p className="text-sm text-muted-foreground">
-                Отсканируйте QR-код в приложении СберБанк
-              </p>
-              <p className="text-xs text-muted-foreground">
-                После оплаты нажмите кнопку ниже
-              </p>
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={() => {
-                setShowSberQR(false);
-                handleCheckout('sber_qr', deliveryType, selectedZoneId || undefined);
-              }}
-            >
-              Я оплатил(а)
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

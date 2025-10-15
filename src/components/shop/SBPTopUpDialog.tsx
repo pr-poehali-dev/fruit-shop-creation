@@ -16,7 +16,6 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
   const { toast } = useToast();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showSberQR, setShowSberQR] = useState(false);
 
   const presetAmounts = [100, 500, 1000, 2000, 5000];
 
@@ -24,7 +23,6 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
     if (!open) {
       setAmount('');
       setIsLoading(false);
-      setShowSberQR(false);
     }
   }, [open]);
 
@@ -52,31 +50,9 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://functions.poehali.dev/eb724c49-3637-42d6-aba0-7fc3565d9c2b', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: numAmount,
-          description: 'Пополнение баланса',
-          user_id: userId.toString()
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.payment_url) {
-        window.location.href = data.payment_url;
-      } else {
-        toast({
-          title: 'В разработке',
-          description: data.message || 'Интеграция с СБП скоро будет доступна',
-        });
-      }
-    } catch (error) {
       toast({
-        title: 'Ошибка',
-        description: 'Не удалось создать платёж',
-        variant: 'destructive'
+        title: 'В разработке',
+        description: 'Интеграция с Альфа-Банком скоро будет доступна',
       });
     } finally {
       setIsLoading(false);
@@ -88,11 +64,11 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
       <DialogContent className="sm:max-w-md" data-version="sbp-v2">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Icon name="Smartphone" size={24} className="text-primary" />
+            <Icon name="CreditCard" size={24} className="text-primary" />
             Пополнить баланс
           </DialogTitle>
           <DialogDescription>
-            Система быстрых платежей (СБП). Оплата без комиссии для клиентов. Минимум 10₽
+            Оплата через Альфа-Банк. Безопасная оплата картой. Минимум 10₽
           </DialogDescription>
         </DialogHeader>
 
@@ -141,87 +117,28 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
               </>
             ) : (
               <>
-                <Icon name="Smartphone" size={20} className="mr-2" />
-                Оплатить через СБП
+                <Icon name="CreditCard" size={20} className="mr-2" />
+                Оплатить через Альфа-Банк
               </>
             )}
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">или</span>
-            </div>
-          </div>
-
-          <Button
-            onClick={() => setShowSberQR(true)}
-            disabled={!amount}
-            variant="secondary"
-            className="w-full h-12 text-base font-semibold"
-          >
-            <Icon name="QrCode" size={20} className="mr-2" />
-            Оплатить по QR СберБанк
           </Button>
 
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
               <Icon name="Shield" size={14} />
-              <span>Безопасная оплата через СБП</span>
+              <span>Безопасная оплата через Альфа-Банк</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-green-600">
-              <Icon name="Banknote" size={14} />
-              <span>Без комиссии для покупателя</span>
+              <Icon name="Lock" size={14} />
+              <span>Защищённая транзакция</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-blue-600">
               <Icon name="Zap" size={14} />
-              <span>Мгновенное зачисление 24/7</span>
+              <span>Моментальное зачисление</span>
             </div>
           </div>
         </div>
       </DialogContent>
-
-      <Dialog open={showSberQR} onOpenChange={setShowSberQR}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Icon name="QrCode" size={24} className="text-green-600" />
-              Пополнение через СберБанк
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4">
-            <img 
-              src="https://cdn.poehali.dev/files/d2c2a829-8f2c-4deb-8827-68a200bded7f.png" 
-              alt="QR код для пополнения СберБанк" 
-              className="w-full max-w-[280px] h-auto"
-            />
-            <div className="text-center space-y-2">
-              <p className="font-semibold text-lg">Сумма пополнения: {amount} ₽</p>
-              <p className="text-sm text-muted-foreground">
-                Отсканируйте QR-код в приложении СберБанк
-              </p>
-              <p className="text-xs text-muted-foreground">
-                После оплаты свяжитесь с поддержкой для зачисления
-              </p>
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={() => {
-                setShowSberQR(false);
-                onOpenChange(false);
-                toast({
-                  title: 'Ожидание оплаты',
-                  description: 'После оплаты свяжитесь с поддержкой для подтверждения',
-                });
-              }}
-            >
-              Готово
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </Dialog>
   );
 };

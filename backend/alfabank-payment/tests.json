@@ -1,0 +1,38 @@
+{
+  "tests": [
+    {
+      "name": "Create payment with valid data",
+      "method": "POST",
+      "body": {
+        "amount": 1000,
+        "user_id": 1,
+        "order_id": 123,
+        "description": "Тестовый заказ"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "pending",
+        "amount": 1000,
+        "user_id": 1
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject payment without amount",
+      "method": "POST",
+      "body": {
+        "user_id": 1
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}

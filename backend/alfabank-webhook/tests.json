@@ -1,0 +1,36 @@
+{
+  "tests": [
+    {
+      "name": "Process successful payment webhook",
+      "method": "POST",
+      "body": {
+        "payment_id": "test_payment_123",
+        "status": "success",
+        "amount": 1000,
+        "user_id": 1
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject webhook without payment_id",
+      "method": "POST",
+      "body": {
+        "status": "success"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
