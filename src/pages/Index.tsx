@@ -125,6 +125,74 @@ const Index = () => {
       }
     }
 
+    if (paymentMethod === 'alfabank') {
+      try {
+        const response = await fetch('https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: totalAmount,
+            description: `Оплата заказа (${cart.length} товар${cart.length > 1 ? 'а' : ''})`,
+            user_id: user.id.toString(),
+            return_url: `${window.location.origin}/payment/success`
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.payment_url) {
+          const deliveryAddress = deliveryType === 'pickup' 
+            ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}` 
+            : 'Доставка (адрес уточняется)';
+            
+          const orderResponse = await fetch(API_ORDERS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: user.id,
+              items: cart.map(item => ({
+                product_id: item.product.id,
+                quantity: item.quantity,
+                price: item.product.price
+              })),
+              payment_method: paymentMethod,
+              delivery_address: deliveryAddress,
+              delivery_type: deliveryType,
+              delivery_zone_id: deliveryZoneId,
+              cashback_percent: siteSettings?.balance_payment_cashback_percent || 5,
+              alfabank_order_id: data.order_id
+            })
+          });
+
+          const orderData = await orderResponse.json();
+
+          if (orderData.success) {
+            clearCart();
+            window.location.href = data.payment_url;
+          } else {
+            toast({
+              title: 'Ошибка',
+              description: orderData.error || 'Не удалось оформить заказ',
+              variant: 'destructive'
+            });
+          }
+        } else {
+          toast({
+            title: 'Ошибка',
+            description: data.error || data.message || 'Не удалось создать платёж',
+            variant: 'destructive'
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось создать платёж',
+          variant: 'destructive'
+        });
+      }
+      return;
+    }
+
     try {
       const deliveryAddress = deliveryType === 'pickup' 
         ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}` 

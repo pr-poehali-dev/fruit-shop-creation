@@ -50,9 +50,33 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
     setIsLoading(true);
 
     try {
+      const response = await fetch('https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: numAmount,
+          description: 'Пополнение баланса',
+          user_id: userId.toString(),
+          return_url: `${window.location.origin}/payment/success`
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || data.message || 'Не удалось создать платёж',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
       toast({
-        title: 'В разработке',
-        description: 'Интеграция с Альфа-Банком скоро будет доступна',
+        title: 'Ошибка',
+        description: 'Не удалось создать платёж',
+        variant: 'destructive'
       });
     } finally {
       setIsLoading(false);
