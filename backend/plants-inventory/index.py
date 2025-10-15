@@ -33,42 +33,50 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         'Access-Control-Allow-Origin': '*'
     }
     
-    dsn = os.environ.get('DATABASE_URL')
-    if not dsn:
+    try:
+        dsn = os.environ.get('DATABASE_URL')
+        if not dsn:
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({'error': 'DATABASE_URL не настроен'})
+            }
+        
+        conn = psycopg2.connect(dsn)
+        
+        try:
+            if method == 'GET':
+                return handle_get(conn, headers)
+            elif method == 'POST':
+                body_data = json.loads(event.get('body', '{}'))
+                action = body_data.get('action', 'list')
+                
+                if action == 'upload_pdf':
+                    return handle_pdf_upload(conn, body_data, headers)
+                elif action == 'add':
+                    return handle_add_plant(conn, body_data, headers)
+                elif action == 'update':
+                    return handle_update_plant(conn, body_data, headers)
+                elif action == 'delete':
+                    return handle_delete_plant(conn, body_data, headers)
+                else:
+                    return handle_get(conn, headers)
+            
+            return {
+                'statusCode': 405,
+                'headers': headers,
+                'body': json.dumps({'error': 'Метод не поддерживается'})
+            }
+        
+        finally:
+            conn.close()
+    
+    except Exception as e:
         return {
             'statusCode': 500,
             'headers': headers,
-            'body': json.dumps({'error': 'DATABASE_URL не настроен'})
+            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'})
         }
-    
-    conn = psycopg2.connect(dsn)
-    
-    try:
-        if method == 'GET':
-            return handle_get(conn, headers)
-        elif method == 'POST':
-            body_data = json.loads(event.get('body', '{}'))
-            action = body_data.get('action', 'list')
-            
-            if action == 'upload_pdf':
-                return handle_pdf_upload(conn, body_data, headers)
-            elif action == 'add':
-                return handle_add_plant(conn, body_data, headers)
-            elif action == 'update':
-                return handle_update_plant(conn, body_data, headers)
-            elif action == 'delete':
-                return handle_delete_plant(conn, body_data, headers)
-            else:
-                return handle_get(conn, headers)
-        
-        return {
-            'statusCode': 405,
-            'headers': headers,
-            'body': json.dumps({'error': 'Метод не поддерживается'})
-        }
-    
-    finally:
-        conn.close()
 
 
 def handle_get(conn, headers: Dict[str, str]) -> Dict[str, Any]:
@@ -103,7 +111,8 @@ def handle_get(conn, headers: Dict[str, str]) -> Dict[str, Any]:
         return {
             'statusCode': 200,
             'headers': headers,
-            'body': json.dumps({'plants': result})
+            'body': json.dumps({'plants': result}),
+            'isBase64Encoded': False
         }
 
 
@@ -166,13 +175,15 @@ def handle_pdf_upload(conn, body_data: Dict[str, Any], headers: Dict[str, str]) 
                 'success': True,
                 'message': f'Добавлено {inserted_count} растений из PDF',
                 'count': inserted_count
-            })
+            }),
+            'isBase64Encoded': False
         }
     except Exception as e:
         return {
             'statusCode': 500,
             'headers': headers,
-            'body': json.dumps({'error': f'Ошибка сохранения данных: {str(e)}'})
+            'body': json.dumps({'error': f'Ошибка сохранения данных: {str(e)}'}),
+            'isBase64Encoded': False
         }
 
 
@@ -247,7 +258,8 @@ def handle_add_plant(conn, body_data: Dict[str, Any], headers: Dict[str, str]) -
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({'success': True, 'id': plant_id})
+        'body': json.dumps({'success': True, 'id': plant_id}),
+        'isBase64Encoded': False
     }
 
 
@@ -280,7 +292,8 @@ def handle_update_plant(conn, body_data: Dict[str, Any], headers: Dict[str, str]
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({'success': True})
+        'body': json.dumps({'success': True}),
+        'isBase64Encoded': False
     }
 
 
@@ -298,5 +311,6 @@ def handle_delete_plant(conn, body_data: Dict[str, Any], headers: Dict[str, str]
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({'success': True})
+        'body': json.dumps({'success': True}),
+        'isBase64Encoded': False
     }

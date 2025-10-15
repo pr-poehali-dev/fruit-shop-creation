@@ -118,15 +118,27 @@ const PlantsInventoryTab = () => {
       const base64Data = base64.split(',')[1];
 
       try {
+        console.log('Uploading PDF:', file.name, 'Size:', Math.round(base64Data.length / 1024), 'KB');
+        
         const response = await fetch(API_PLANTS, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             action: 'upload_pdf',
             pdf_file: base64Data,
             pdf_name: file.name
           })
         });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Server error:', errorText);
+          throw new Error(`Ошибка сервера: ${response.status}`);
+        }
 
         const data = await response.json();
         console.log('PDF upload response:', data);
@@ -151,6 +163,16 @@ const PlantsInventoryTab = () => {
         setIsUploading(false);
         e.target.value = '';
       }
+    };
+
+    reader.onerror = () => {
+      toast({
+        title: 'Ошибка чтения файла',
+        description: 'Не удалось прочитать PDF файл',
+        variant: 'destructive'
+      });
+      setIsUploading(false);
+      e.target.value = '';
     };
 
     reader.readAsDataURL(file);
