@@ -48,13 +48,23 @@ export const usePlantsData = () => {
   const loadPlants = async () => {
     setIsLoading(true);
     try {
+      console.log('Loading plants from:', API_PLANTS);
       const response = await fetch(API_PLANTS);
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
+      console.log('Plants data:', data);
       setPlants(data.plants || []);
     } catch (error) {
+      console.error('Load plants error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось загрузить список растений';
       toast({
         title: 'Ошибка загрузки',
-        description: 'Не удалось загрузить список растений',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
