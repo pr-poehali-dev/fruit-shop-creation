@@ -86,13 +86,14 @@ export const usePlantsData = () => {
       return;
     }
 
-    const maxSizeMB = 10;
+    const maxSizeMB = 2;
     if (file.size > maxSizeMB * 1024 * 1024) {
       toast({
         title: 'Файл слишком большой',
-        description: `Максимальный размер файла: ${maxSizeMB}MB. Попробуйте сжать PDF или разбить на части.`,
+        description: `Максимальный размер: ${maxSizeMB}MB. Ваш файл: ${(file.size / 1024 / 1024).toFixed(1)}MB. Сожмите PDF перед загрузкой.`,
         variant: 'destructive'
       });
+      if (e.target) e.target.value = '';
       return;
     }
 
@@ -131,6 +132,11 @@ export const usePlantsData = () => {
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Server error:', errorText);
+          
+          if (response.status === 413) {
+            throw new Error('Файл слишком большой для обработки. Сожмите PDF до 2MB.');
+          }
+          
           throw new Error(`Ошибка сервера: ${response.status}`);
         }
 
