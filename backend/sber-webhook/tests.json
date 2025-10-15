@@ -1,0 +1,20 @@
+{
+  "tests": [
+    {
+      "name": "Webhook payment success",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "payment_id": "test123",
+        "status": "success",
+        "amount": 100,
+        "user_id": 1
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

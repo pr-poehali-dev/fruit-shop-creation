@@ -1,4 +1,6 @@
 {
+  "sber-webhook": "https://functions.poehali.dev/cdc4847a-d461-4a7c-958b-a2f14e6ee6f1",
+  "sber-payment-check": "https://functions.poehali.dev/a3b83a92-22e8-47cb-84cf-74e55cb9da7d",
   "sbp-payment": "https://functions.poehali.dev/eb724c49-3637-42d6-aba0-7fc3565d9c2b",
   "delivery-zones": "https://functions.poehali.dev/8c8e301f-2323-4f3b-85f0-14a3c210e670",
   "admin-reset-codes": "https://functions.poehali.dev/e343c1bf-14b9-4373-a620-36d059062d82",

@@ -16,6 +16,7 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
   const { toast } = useToast();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSberQR, setShowSberQR] = useState(false);
 
   const presetAmounts = [100, 500, 1000, 2000, 5000];
 
@@ -23,6 +24,7 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
     if (!open) {
       setAmount('');
       setIsLoading(false);
+      setShowSberQR(false);
     }
   }, [open]);
 
@@ -145,6 +147,25 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
             )}
           </Button>
 
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">или</span>
+            </div>
+          </div>
+
+          <Button
+            onClick={() => setShowSberQR(true)}
+            disabled={!amount}
+            variant="secondary"
+            className="w-full h-12 text-base font-semibold"
+          >
+            <Icon name="QrCode" size={20} className="mr-2" />
+            Оплатить по QR СберБанк
+          </Button>
+
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
               <Icon name="Shield" size={14} />
@@ -161,6 +182,46 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
           </div>
         </div>
       </DialogContent>
+
+      <Dialog open={showSberQR} onOpenChange={setShowSberQR}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon name="QrCode" size={24} className="text-green-600" />
+              Пополнение через СберБанк
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <img 
+              src="https://cdn.poehali.dev/files/d2c2a829-8f2c-4deb-8827-68a200bded7f.png" 
+              alt="QR код для пополнения СберБанк" 
+              className="w-full max-w-[280px] h-auto"
+            />
+            <div className="text-center space-y-2">
+              <p className="font-semibold text-lg">Сумма пополнения: {amount} ₽</p>
+              <p className="text-sm text-muted-foreground">
+                Отсканируйте QR-код в приложении СберБанк
+              </p>
+              <p className="text-xs text-muted-foreground">
+                После оплаты свяжитесь с поддержкой для зачисления
+              </p>
+            </div>
+            <Button 
+              className="w-full" 
+              onClick={() => {
+                setShowSberQR(false);
+                onOpenChange(false);
+                toast({
+                  title: 'Ожидание оплаты',
+                  description: 'После оплаты свяжитесь с поддержкой для подтверждения',
+                });
+              }}
+            >
+              Готово
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

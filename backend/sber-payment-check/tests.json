@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "Check service status",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "message": "string",
+        "status": "active"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Manual confirm deposit",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "manual_confirm",
+        "user_id": 1,
+        "amount": 100,
+        "payment_type": "deposit"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
