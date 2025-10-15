@@ -86,20 +86,19 @@ export const usePlantsData = () => {
     }
 
     setIsUploading(true);
-    
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      const base64Data = base64.split(',')[1];
 
+    const reader = new FileReader();
+    
+    reader.onload = async () => {
       try {
+        const base64 = reader.result as string;
+        const base64Data = base64.split(',')[1];
+        
         console.log('Uploading PDF:', file.name, 'Size:', Math.round(base64Data.length / 1024), 'KB');
         
         const response = await fetch(API_PLANTS, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'upload_pdf',
             pdf_file: base64Data,
@@ -123,7 +122,7 @@ export const usePlantsData = () => {
             title: 'Успешно загружено',
             description: data.message
           });
-          loadPlants();
+          await loadPlants();
         } else {
           throw new Error(data.error || 'Неизвестная ошибка сервера');
         }
@@ -136,10 +135,10 @@ export const usePlantsData = () => {
         });
       } finally {
         setIsUploading(false);
-        e.target.value = '';
+        if (e.target) e.target.value = '';
       }
     };
-
+    
     reader.onerror = () => {
       toast({
         title: 'Ошибка чтения файла',
@@ -147,9 +146,9 @@ export const usePlantsData = () => {
         variant: 'destructive'
       });
       setIsUploading(false);
-      e.target.value = '';
+      if (e.target) e.target.value = '';
     };
-
+    
     reader.readAsDataURL(file);
   };
 
