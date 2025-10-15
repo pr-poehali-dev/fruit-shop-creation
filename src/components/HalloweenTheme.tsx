@@ -7,9 +7,12 @@ const HalloweenTheme = () => {
         <div className="bat bat-3">🦇</div>
         <div className="bat bat-4">🦇</div>
         <div className="bat bat-5">🦇</div>
+        <div className="bat bat-6">🦇</div>
+        <div className="bat bat-7">🦇</div>
         
         <div className="ghost ghost-1">👻</div>
         <div className="ghost ghost-2">👻</div>
+        <div className="ghost ghost-3">👻</div>
         
         <div className="spider spider-1">
           <div className="spider-web"></div>
@@ -19,6 +22,17 @@ const HalloweenTheme = () => {
           <div className="spider-web"></div>
           🕷️
         </div>
+        <div className="spider spider-3">
+          <div className="spider-web"></div>
+          🕷️
+        </div>
+        
+        <div className="floating-candy candy-1">🍬</div>
+        <div className="floating-candy candy-2">🍭</div>
+        <div className="floating-candy candy-3">🍫</div>
+        
+        <div className="skull skull-1">💀</div>
+        <div className="skull skull-2">💀</div>
       </div>
 
       <div className="hidden md:block fixed bottom-0 right-0 z-[99] pointer-events-none halloween-pumpkin">
@@ -39,8 +53,12 @@ const HalloweenTheme = () => {
         </div>
       </div>
 
-      <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-900/30 to-transparent pointer-events-none z-[97]"></div>
-      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-orange-900/30 to-transparent pointer-events-none z-[97]"></div>
+      <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-900/40 to-transparent pointer-events-none z-[97]"></div>
+      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-orange-900/40 to-transparent pointer-events-none z-[97]"></div>
+      
+      <div className="fixed top-1/4 left-0 w-full pointer-events-none z-[97]">
+        <div className="fog-layer"></div>
+      </div>
 
       <style>{`
         .halloween-pumpkin {
@@ -260,6 +278,125 @@ const HalloweenTheme = () => {
           }
           75% {
             transform: translateX(-15px) rotate(-10deg);
+          }
+        }
+
+        .bat-6 {
+          top: 20%;
+          animation-duration: 17s;
+          animation-delay: 10s;
+        }
+
+        .bat-7 {
+          top: 85%;
+          animation-duration: 23s;
+          animation-delay: 5s;
+        }
+
+        .ghost-3 {
+          top: 70%;
+          left: 30%;
+          animation-delay: 6s;
+        }
+
+        .spider-3 {
+          top: 6%;
+          left: 50%;
+          animation-delay: 3s;
+        }
+
+        .floating-candy {
+          position: absolute;
+          font-size: 36px;
+          animation: candy-fall 12s linear infinite;
+          filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.6));
+        }
+
+        .candy-1 {
+          left: 15%;
+          animation-delay: 0s;
+        }
+
+        .candy-2 {
+          left: 50%;
+          animation-delay: 4s;
+        }
+
+        .candy-3 {
+          left: 85%;
+          animation-delay: 8s;
+        }
+
+        @keyframes candy-fall {
+          0% {
+            top: -50px;
+            transform: rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            top: 100%;
+            transform: rotate(360deg);
+            opacity: 0;
+          }
+        }
+
+        .skull {
+          position: absolute;
+          font-size: 40px;
+          animation: skull-appear 6s ease-in-out infinite;
+          filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.8));
+        }
+
+        .skull-1 {
+          top: 30%;
+          left: 5%;
+        }
+
+        .skull-2 {
+          top: 60%;
+          right: 8%;
+          animation-delay: 3s;
+        }
+
+        @keyframes skull-appear {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(0.5) rotate(-15deg);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1) rotate(0deg);
+          }
+        }
+
+        .fog-layer {
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(
+            to bottom,
+            transparent,
+            rgba(138, 43, 226, 0.1),
+            rgba(255, 140, 0, 0.15),
+            transparent
+          );
+          animation: fog-move 20s ease-in-out infinite;
+          filter: blur(30px);
+        }
+
+        @keyframes fog-move {
+          0%, 100% {
+            transform: translateX(-10%);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translateX(10%);
+            opacity: 0.6;
           }
         }
       `}</style>
