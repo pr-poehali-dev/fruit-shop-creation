@@ -81,7 +81,10 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
             <div className="flex justify-between text-xs sm:text-sm gap-2">
               <span className="text-muted-foreground">Оплата:</span>
               <span className="font-medium">
-                {order.payment_method === 'balance' ? 'Баланс' : 'Карта'}
+                {order.payment_method === 'balance' ? 'Баланс' : 
+                 order.payment_method === 'sber_qr' ? 'СберБанк QR' :
+                 order.payment_method === 'card' ? 'Карта' : 
+                 'При получении'}
               </span>
             </div>
             {order.delivery_address && (

@@ -110,7 +110,10 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                   <div>
                     <div className="font-medium">Способ оплаты:</div>
                     <div className="text-muted-foreground">
-                      {order.payment_method === 'balance' ? 'Баланс' : order.payment_method === 'card' ? 'Карта' : 'При получении'}
+                      {order.payment_method === 'balance' ? 'Баланс' : 
+                       order.payment_method === 'card' ? 'Карта' : 
+                       order.payment_method === 'sber_qr' ? 'СберБанк QR' :
+                       'При получении'}
                     </div>
                   </div>
                   <div>
