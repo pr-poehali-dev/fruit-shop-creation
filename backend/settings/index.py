@@ -79,54 +79,65 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'PUT':
             body_data = json.loads(event.get('body', '{}'))
             
-            site_name = (body_data.get('site_name') or '').replace("'", "''")
-            logo_url = (body_data.get('logo_url') or '').replace("'", "''")
-            site_desc = (body_data.get('site_description') or '').replace("'", "''")
-            phone = (body_data.get('phone') or '').replace("'", "''")
-            email = (body_data.get('email') or '').replace("'", "''")
-            address = (body_data.get('address') or '').replace("'", "''")
-            work_hours = (body_data.get('work_hours') or '').replace("'", "''")
-            promotions = (body_data.get('promotions') or '').replace("'", "''")
-            additional_info = (body_data.get('additional_info') or '').replace("'", "''")
-            price_list_url = (body_data.get('price_list_url') or '').replace("'", "''")
-            holiday_theme = (body_data.get('holiday_theme') or 'none').replace("'", "''")
-            loyalty_card_price = body_data.get('loyalty_card_price') or 500
-            loyalty_unlock_amount = body_data.get('loyalty_unlock_amount') or 5000
-            loyalty_cashback_percent = body_data.get('loyalty_cashback_percent') or 5
-            balance_payment_cashback_percent = body_data.get('balance_payment_cashback_percent') or 5
-            admin_pin = (body_data.get('admin_pin') or '0000').replace("'", "''")
+            def safe_str(value):
+                if value is None:
+                    return ''
+                return str(value).replace("'", "''")
+            
+            site_name = safe_str(body_data.get('site_name', ''))
+            logo_url = safe_str(body_data.get('logo_url', ''))
+            site_desc = safe_str(body_data.get('site_description', ''))
+            phone = safe_str(body_data.get('phone', ''))
+            email = safe_str(body_data.get('email', ''))
+            address = safe_str(body_data.get('address', ''))
+            work_hours = safe_str(body_data.get('work_hours', ''))
+            promotions = safe_str(body_data.get('promotions', ''))
+            additional_info = safe_str(body_data.get('additional_info', ''))
+            price_list_url = safe_str(body_data.get('price_list_url', ''))
+            holiday_theme = safe_str(body_data.get('holiday_theme', 'none')) if body_data.get('holiday_theme') else 'none'
+            loyalty_card_price = body_data.get('loyalty_card_price', 500) if body_data.get('loyalty_card_price') is not None else 500
+            loyalty_unlock_amount = body_data.get('loyalty_unlock_amount', 5000) if body_data.get('loyalty_unlock_amount') is not None else 5000
+            loyalty_cashback_percent = body_data.get('loyalty_cashback_percent', 5) if body_data.get('loyalty_cashback_percent') is not None else 5
+            balance_payment_cashback_percent = body_data.get('balance_payment_cashback_percent', 5) if body_data.get('balance_payment_cashback_percent') is not None else 5
+            admin_pin = safe_str(body_data.get('admin_pin', '0000')) if body_data.get('admin_pin') else '0000'
             delivery_enabled = bool(body_data.get('delivery_enabled', False))
-            pickup_enabled = bool(body_data.get('pickup_enabled', True))
+            pickup_enabled = bool(body_data.get('pickup_enabled', False))
             preorder_enabled = bool(body_data.get('preorder_enabled', False))
-            preorder_message = (body_data.get('preorder_message') or 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.').replace("'", "''")
-            preorder_start_date = body_data.get('preorder_start_date') or 'NULL'
-            preorder_end_date = body_data.get('preorder_end_date') or 'NULL'
+            preorder_message = safe_str(body_data.get('preorder_message', 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.'))
+            preorder_start_date = body_data.get('preorder_start_date')
+            preorder_end_date = body_data.get('preorder_end_date')
             
-            if preorder_start_date != 'NULL':
+            if preorder_start_date:
                 preorder_start_date = f"'{preorder_start_date}'"
-            if preorder_end_date != 'NULL':
-                preorder_end_date = f"'{preorder_end_date}'"
-            delivery_price = body_data.get('delivery_price') or 0
-            free_delivery_min = body_data.get('free_delivery_min') or 3000
-            courier_delivery_price = body_data.get('courier_delivery_price') or 300
+            else:
+                preorder_start_date = 'NULL'
             
-            about_title = (body_data.get('about_title') or '').replace("'", "''")
-            about_text = (body_data.get('about_text') or '').replace("'", "''")
-            care_title = (body_data.get('care_title') or '').replace("'", "''")
-            care_watering_title = (body_data.get('care_watering_title') or '').replace("'", "''")
-            care_watering_text = (body_data.get('care_watering_text') or '').replace("'", "''")
-            care_lighting_title = (body_data.get('care_lighting_title') or '').replace("'", "''")
-            care_lighting_text = (body_data.get('care_lighting_text') or '').replace("'", "''")
-            care_pruning_title = (body_data.get('care_pruning_title') or '').replace("'", "''")
-            care_pruning_text = (body_data.get('care_pruning_text') or '').replace("'", "''")
-            delivery_title = (body_data.get('delivery_title') or '').replace("'", "''")
-            delivery_courier_title = (body_data.get('delivery_courier_title') or '').replace("'", "''")
-            delivery_courier_text = (body_data.get('delivery_courier_text') or '').replace("'", "''")
-            delivery_transport_title = (body_data.get('delivery_transport_title') or '').replace("'", "''")
-            delivery_transport_text = (body_data.get('delivery_transport_text') or '').replace("'", "''")
-            delivery_pickup_title = (body_data.get('delivery_pickup_title') or '').replace("'", "''")
-            delivery_pickup_text = (body_data.get('delivery_pickup_text') or '').replace("'", "''")
-            payment_title = (body_data.get('payment_title') or '').replace("'", "''")
+            if preorder_end_date:
+                preorder_end_date = f"'{preorder_end_date}'"
+            else:
+                preorder_end_date = 'NULL'
+            
+            delivery_price = body_data.get('delivery_price', 0) if body_data.get('delivery_price') is not None else 0
+            free_delivery_min = body_data.get('free_delivery_min', 3000) if body_data.get('free_delivery_min') is not None else 3000
+            courier_delivery_price = body_data.get('courier_delivery_price', 300) if body_data.get('courier_delivery_price') is not None else 300
+            
+            about_title = safe_str(body_data.get('about_title', ''))
+            about_text = safe_str(body_data.get('about_text', ''))
+            care_title = safe_str(body_data.get('care_title', ''))
+            care_watering_title = safe_str(body_data.get('care_watering_title', ''))
+            care_watering_text = safe_str(body_data.get('care_watering_text', ''))
+            care_lighting_title = safe_str(body_data.get('care_lighting_title', ''))
+            care_lighting_text = safe_str(body_data.get('care_lighting_text', ''))
+            care_pruning_title = safe_str(body_data.get('care_pruning_title', ''))
+            care_pruning_text = safe_str(body_data.get('care_pruning_text', ''))
+            delivery_title = safe_str(body_data.get('delivery_title', ''))
+            delivery_courier_title = safe_str(body_data.get('delivery_courier_title', ''))
+            delivery_courier_text = safe_str(body_data.get('delivery_courier_text', ''))
+            delivery_transport_title = safe_str(body_data.get('delivery_transport_title', ''))
+            delivery_transport_text = safe_str(body_data.get('delivery_transport_text', ''))
+            delivery_pickup_title = safe_str(body_data.get('delivery_pickup_title', ''))
+            delivery_pickup_text = safe_str(body_data.get('delivery_pickup_text', ''))
+            payment_title = safe_str(body_data.get('payment_title', ''))
             
             payment_methods = body_data.get('payment_methods', '')
             if isinstance(payment_methods, str):

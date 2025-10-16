@@ -169,17 +169,13 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${isHalloween ? 'halloween-button' : ''} ${!isAuthenticated ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            console.log('ProductCard button clicked', { isAuthenticated, hasVariants, product: product.name });
             if (!isAuthenticated) {
-              console.log('User not authenticated, showing auth dialog');
               onShowAuth?.();
               return;
             }
             if (hasVariants) {
-              console.log('Has variants, opening details');
               onViewDetails(product);
             } else {
-              console.log('Adding to cart', product.name);
               onAddToCart(product);
             }
           }}
