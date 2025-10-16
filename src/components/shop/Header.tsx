@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import Icon from '@/components/ui/icon';
 import SideMenu from './SideMenu';
 import SnowEffect from './SnowEffect';
+import LeafyTitle from './LeafyTitle';
 import NotificationsDropdown from '../NotificationsDropdown';
 import { useState, useEffect } from 'react';
 
@@ -136,9 +137,10 @@ const Header = ({
                 className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full object-cover border-2 border-white/20 shadow-lg flex-shrink-0"
               />
             )}
-            <h1 className="text-xs sm:text-base md:text-2xl font-extrabold tracking-tight drop-shadow-md leading-tight max-w-[100px] sm:max-w-[200px] md:max-w-none" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {siteSettings?.site_name || 'Питомник растений'}
-            </h1>
+            <LeafyTitle 
+              text={siteSettings?.site_name || 'Питомник растений'} 
+              className="text-xs sm:text-base md:text-2xl max-w-[100px] sm:max-w-[200px] md:max-w-none"
+            />
           </button>
         </div>
         

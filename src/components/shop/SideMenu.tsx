@@ -79,7 +79,10 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
       </SheetTrigger>
       <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="mb-6">
-          <SheetTitle className="flex items-center gap-2 text-2xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <SheetTitle className="flex items-center gap-2 text-2xl" style={{ 
+            fontFamily: "'Playfair Display', serif",
+            color: '#2d5016'
+          }}>
             {siteSettings?.logo_url ? (
               <img 
                 src={siteSettings.logo_url} 
@@ -90,6 +93,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
               <Icon name="Flower2" size={32} className="text-primary" />
             )}
             {siteSettings?.site_name || 'Питомник растений'}
+            <span className="text-green-500 text-xl">🌿</span>
           </SheetTitle>
           {siteSettings?.site_description && (
             <p className="text-sm text-muted-foreground text-left">
