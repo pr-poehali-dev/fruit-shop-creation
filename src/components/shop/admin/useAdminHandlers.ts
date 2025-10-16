@@ -9,6 +9,7 @@ interface UseAdminHandlersProps {
   API_ORDERS: string;
   API_SUPPORT: string;
   API_SETTINGS: string;
+  siteSettings: any;
   loadProducts: () => void;
   loadCategories: () => void;
   loadUsers: () => void;
@@ -364,52 +365,58 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    const getFormValue = (key: string, defaultValue: any = '') => {
+      const value = formData.get(key);
+      if (value !== null) return value;
+      return props.siteSettings?.[key] ?? defaultValue;
+    };
+    
     const paymentMethods = formData.get('payment_methods') as string;
     
     const settingsData = {
-      site_name: formData.get('site_name') as string,
-      logo_url: formData.get('logo_url') as string,
-      site_description: formData.get('site_description') as string,
-      phone: formData.get('phone') as string,
-      email: formData.get('email') as string,
-      address: formData.get('address') as string,
-      work_hours: formData.get('work_hours') as string,
-      admin_pin: formData.get('admin_pin') as string,
-      loyalty_card_price: parseFloat(formData.get('loyalty_card_price') as string || '500'),
-      loyalty_unlock_amount: parseFloat(formData.get('loyalty_unlock_amount') as string || '5000'),
-      loyalty_cashback_percent: parseFloat(formData.get('loyalty_cashback_percent') as string || '5'),
-      balance_payment_cashback_percent: parseFloat(formData.get('balance_payment_cashback_percent') as string || '5'),
-      holiday_theme: formData.get('holiday_theme') as string,
-      delivery_enabled: formData.get('delivery_enabled') === 'on',
-      pickup_enabled: formData.get('pickup_enabled') === 'on',
-      preorder_enabled: formData.get('preorder_enabled') === 'on',
-      preorder_message: formData.get('preorder_message') as string,
-      preorder_start_date: formData.get('preorder_start_date') as string || null,
-      preorder_end_date: formData.get('preorder_end_date') as string || null,
-      delivery_price: parseFloat(formData.get('delivery_price') as string || '0'),
-      free_delivery_min: parseFloat(formData.get('free_delivery_min') as string || '3000'),
-      courier_delivery_price: parseFloat(formData.get('courier_delivery_price') as string || '300'),
-      price_list_url: formData.get('price_list_url') as string,
-      promotions: formData.get('promotions') as string,
-      additional_info: formData.get('additional_info') as string,
-      about_title: formData.get('about_title') as string,
-      about_text: formData.get('about_text') as string,
-      care_title: formData.get('care_title') as string,
-      care_watering_title: formData.get('care_watering_title') as string,
-      care_watering_text: formData.get('care_watering_text') as string,
-      care_lighting_title: formData.get('care_lighting_title') as string,
-      care_lighting_text: formData.get('care_lighting_text') as string,
-      care_pruning_title: formData.get('care_pruning_title') as string,
-      care_pruning_text: formData.get('care_pruning_text') as string,
-      delivery_title: formData.get('delivery_title') as string,
-      delivery_courier_title: formData.get('delivery_courier_title') as string,
-      delivery_courier_text: formData.get('delivery_courier_text') as string,
-      delivery_transport_title: formData.get('delivery_transport_title') as string,
-      delivery_transport_text: formData.get('delivery_transport_text') as string,
-      delivery_pickup_title: formData.get('delivery_pickup_title') as string,
-      delivery_pickup_text: formData.get('delivery_pickup_text') as string,
-      payment_title: formData.get('payment_title') as string,
-      payment_methods: paymentMethods ? paymentMethods.split('\n').filter(m => m.trim()) : []
+      site_name: getFormValue('site_name', ''),
+      logo_url: getFormValue('logo_url', ''),
+      site_description: getFormValue('site_description', ''),
+      phone: getFormValue('phone', ''),
+      email: getFormValue('email', ''),
+      address: getFormValue('address', ''),
+      work_hours: getFormValue('work_hours', ''),
+      admin_pin: getFormValue('admin_pin', '0000'),
+      loyalty_card_price: parseFloat(getFormValue('loyalty_card_price', props.siteSettings?.loyalty_card_price || 500) as string),
+      loyalty_unlock_amount: parseFloat(getFormValue('loyalty_unlock_amount', props.siteSettings?.loyalty_unlock_amount || 5000) as string),
+      loyalty_cashback_percent: parseFloat(getFormValue('loyalty_cashback_percent', props.siteSettings?.loyalty_cashback_percent || 5) as string),
+      balance_payment_cashback_percent: parseFloat(getFormValue('balance_payment_cashback_percent', props.siteSettings?.balance_payment_cashback_percent || 5) as string),
+      holiday_theme: getFormValue('holiday_theme', props.siteSettings?.holiday_theme || 'none'),
+      delivery_enabled: formData.has('delivery_enabled') ? formData.get('delivery_enabled') === 'on' : props.siteSettings?.delivery_enabled || false,
+      pickup_enabled: formData.has('pickup_enabled') ? formData.get('pickup_enabled') === 'on' : props.siteSettings?.pickup_enabled || false,
+      preorder_enabled: formData.has('preorder_enabled') ? formData.get('preorder_enabled') === 'on' : props.siteSettings?.preorder_enabled || false,
+      preorder_message: getFormValue('preorder_message', props.siteSettings?.preorder_message || ''),
+      preorder_start_date: getFormValue('preorder_start_date', props.siteSettings?.preorder_start_date || null),
+      preorder_end_date: getFormValue('preorder_end_date', props.siteSettings?.preorder_end_date || null),
+      delivery_price: parseFloat(getFormValue('delivery_price', props.siteSettings?.delivery_price || 0) as string),
+      free_delivery_min: parseFloat(getFormValue('free_delivery_min', props.siteSettings?.free_delivery_min || 3000) as string),
+      courier_delivery_price: parseFloat(getFormValue('courier_delivery_price', props.siteSettings?.courier_delivery_price || 300) as string),
+      price_list_url: getFormValue('price_list_url', ''),
+      promotions: getFormValue('promotions', ''),
+      additional_info: getFormValue('additional_info', ''),
+      about_title: getFormValue('about_title', ''),
+      about_text: getFormValue('about_text', ''),
+      care_title: getFormValue('care_title', ''),
+      care_watering_title: getFormValue('care_watering_title', ''),
+      care_watering_text: getFormValue('care_watering_text', ''),
+      care_lighting_title: getFormValue('care_lighting_title', ''),
+      care_lighting_text: getFormValue('care_lighting_text', ''),
+      care_pruning_title: getFormValue('care_pruning_title', ''),
+      care_pruning_text: getFormValue('care_pruning_text', ''),
+      delivery_title: getFormValue('delivery_title', ''),
+      delivery_courier_title: getFormValue('delivery_courier_title', ''),
+      delivery_courier_text: getFormValue('delivery_courier_text', ''),
+      delivery_transport_title: getFormValue('delivery_transport_title', ''),
+      delivery_transport_text: getFormValue('delivery_transport_text', ''),
+      delivery_pickup_title: getFormValue('delivery_pickup_title', ''),
+      delivery_pickup_text: getFormValue('delivery_pickup_text', ''),
+      payment_title: getFormValue('payment_title', ''),
+      payment_methods: paymentMethods !== null ? paymentMethods.split('\n').filter(m => m.trim()) : (props.siteSettings?.payment_methods || [])
     };
 
     try {

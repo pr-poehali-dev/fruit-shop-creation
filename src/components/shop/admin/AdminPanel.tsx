@@ -81,6 +81,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     API_ORDERS,
     API_SUPPORT,
     API_SETTINGS,
+    siteSettings,
     loadProducts,
     loadCategories,
     loadUsers,
