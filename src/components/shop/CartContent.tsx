@@ -36,6 +36,9 @@ const CartContent = ({
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   
   const deliveryEnabled = siteSettings?.delivery_enabled !== false;
+  const pickupEnabled = siteSettings?.pickup_enabled !== false;
+  const preorderEnabled = siteSettings?.preorder_enabled || false;
+  const preorderMessage = siteSettings?.preorder_message || 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.';
   const deliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
   const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
   const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
@@ -108,27 +111,41 @@ const CartContent = ({
           ))}
           <Separator />
           
+          {preorderEnabled && (
+            <div className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <Icon name="Calendar" size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Режим предзаказа</p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">{preorderMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="space-y-3 bg-muted/30 p-3 rounded-lg">
             <h4 className="font-semibold text-sm flex items-center gap-2">
               <Icon name="MapPin" size={16} />
               Способ получения
             </h4>
             <RadioGroup value={deliveryType} onValueChange={setDeliveryType}>
-              <div className="flex items-start space-x-2 p-3 rounded-lg border-2 border-primary/20 bg-background hover:bg-primary/5 transition-colors">
-                <RadioGroupItem value="pickup" id="pickup" className="mt-0.5" />
-                <Label htmlFor="pickup" className="flex-1 cursor-pointer">
-                  <div className="flex items-start gap-2">
-                    <Icon name="Store" size={18} className="text-primary mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-semibold">Самовывоз</p>
-                      {pickupAddress && (
-                        <p className="text-xs text-muted-foreground mt-1">{pickupAddress}</p>
-                      )}
-                      <p className="text-sm font-medium text-green-600 mt-1">Бесплатно</p>
+              {pickupEnabled && (
+                <div className="flex items-start space-x-2 p-3 rounded-lg border-2 border-primary/20 bg-background hover:bg-primary/5 transition-colors">
+                  <RadioGroupItem value="pickup" id="pickup" className="mt-0.5" />
+                  <Label htmlFor="pickup" className="flex-1 cursor-pointer">
+                    <div className="flex items-start gap-2">
+                      <Icon name="Store" size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold">Самовывоз</p>
+                        {pickupAddress && (
+                          <p className="text-xs text-muted-foreground mt-1">{pickupAddress}</p>
+                        )}
+                        <p className="text-sm font-medium text-green-600 mt-1">Бесплатно</p>
+                      </div>
                     </div>
-                  </div>
-                </Label>
-              </div>
+                  </Label>
+                </div>
+              )}
               
               {deliveryEnabled && (
                 <div className="space-y-2">

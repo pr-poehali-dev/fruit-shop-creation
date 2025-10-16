@@ -121,17 +121,31 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
               Настройки доставки
             </h3>
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="delivery-enabled" 
-                  name="delivery_enabled"
-                  defaultChecked={siteSettings.delivery_enabled !== false}
-                  className="w-4 h-4 rounded border-gray-300"
-                />
-                <Label htmlFor="delivery-enabled" className="cursor-pointer">
-                  Включить доставку (если выключено - только самовывоз)
-                </Label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="delivery-enabled" 
+                    name="delivery_enabled"
+                    defaultChecked={siteSettings.delivery_enabled !== false}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <Label htmlFor="delivery-enabled" className="cursor-pointer">
+                    Включить доставку
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="pickup-enabled" 
+                    name="pickup_enabled"
+                    defaultChecked={siteSettings.pickup_enabled !== false}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <Label htmlFor="pickup-enabled" className="cursor-pointer">
+                    Включить самовывоз
+                  </Label>
+                </div>
               </div>
               <div>
                 <Label htmlFor="delivery-price">Стоимость доставки (₽)</Label>
@@ -174,6 +188,39 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                 <p className="text-xs text-muted-foreground mt-1">
                   Стоимость доставки курьером
                 </p>
+              </div>
+              <div className="border-t pt-4">
+                <h4 className="text-md font-semibold mb-3 flex items-center gap-2">
+                  <Icon name="Calendar" size={18} />
+                  Система предзаказа
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="preorder-enabled" 
+                      name="preorder_enabled"
+                      defaultChecked={siteSettings.preorder_enabled || false}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <Label htmlFor="preorder-enabled" className="cursor-pointer">
+                      Включить режим предзаказа
+                    </Label>
+                  </div>
+                  <div>
+                    <Label htmlFor="preorder-message">Сообщение о предзаказе</Label>
+                    <Textarea 
+                      id="preorder-message" 
+                      name="preorder_message" 
+                      defaultValue={siteSettings.preorder_message || 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.'} 
+                      rows={2}
+                      placeholder="Например: Предзаказ на весну 2026. Доставка с марта по май 2026 года."
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Это сообщение будет показываться клиентам на сайте
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
