@@ -430,6 +430,12 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
         ? (formData.get('payment_methods') as string).split('\n').filter(m => m.trim()) 
         : (props.siteSettings?.payment_methods || [])
     };
+    
+    console.log('Saving settings:', {
+      delivery_enabled: settingsData.delivery_enabled,
+      pickup_enabled: settingsData.pickup_enabled,
+      preorder_enabled: settingsData.preorder_enabled
+    });
 
     try {
       const response = await fetch(props.API_SETTINGS, {

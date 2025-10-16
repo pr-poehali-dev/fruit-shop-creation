@@ -100,9 +100,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             loyalty_cashback_percent = body_data.get('loyalty_cashback_percent', 5) if body_data.get('loyalty_cashback_percent') is not None else 5
             balance_payment_cashback_percent = body_data.get('balance_payment_cashback_percent', 5) if body_data.get('balance_payment_cashback_percent') is not None else 5
             admin_pin = safe_str(body_data.get('admin_pin', '0000')) if body_data.get('admin_pin') else '0000'
-            delivery_enabled = body_data.get('delivery_enabled') == 'on' if 'delivery_enabled' in body_data else False
-            pickup_enabled = body_data.get('pickup_enabled') == 'on' if 'pickup_enabled' in body_data else False
-            preorder_enabled = body_data.get('preorder_enabled') == 'on' if 'preorder_enabled' in body_data else False
+            delivery_enabled = bool(body_data.get('delivery_enabled', False))
+            pickup_enabled = bool(body_data.get('pickup_enabled', False))
+            preorder_enabled = bool(body_data.get('preorder_enabled', False))
             preorder_message = safe_str(body_data.get('preorder_message', 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.'))
             preorder_start_date = body_data.get('preorder_start_date')
             preorder_end_date = body_data.get('preorder_end_date')
