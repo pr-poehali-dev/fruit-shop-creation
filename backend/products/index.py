@@ -231,6 +231,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            cur.execute(f"DELETE FROM favorites WHERE product_id = {product_id}")
+            cur.execute(f"DELETE FROM order_items WHERE product_id = {product_id}")
             cur.execute(f"DELETE FROM product_variants WHERE product_id = {product_id}")
             cur.execute(f"DELETE FROM product_images WHERE product_id = {product_id}")
             cur.execute(f"DELETE FROM products WHERE id = {product_id}")
@@ -247,6 +249,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 405,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({'error': 'Method not allowed'}),
+            'isBase64Encoded': False
+        }
+    
+    except Exception as e:
+        conn.rollback()
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'success': False, 'error': str(e)}),
             'isBase64Encoded': False
         }
     
