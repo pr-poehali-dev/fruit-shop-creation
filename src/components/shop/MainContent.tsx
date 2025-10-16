@@ -5,6 +5,7 @@ import AboutSection from '@/components/shop/sections/AboutSection';
 import DeliverySection from '@/components/shop/sections/DeliverySection';
 import CareSection from '@/components/shop/sections/CareSection';
 import ContactsSection from '@/components/shop/sections/ContactsSection';
+import GallerySection from '@/components/shop/sections/GallerySection';
 import { Product } from '@/types/shop';
 
 interface MainContentProps {
@@ -93,6 +94,8 @@ const MainContent = ({
       {currentSection === 'care' && <CareSection siteSettings={siteSettings} />}
 
       {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
+
+      {currentSection === 'gallery' && <GallerySection />}
     </>
   );
 };

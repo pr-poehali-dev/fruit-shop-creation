@@ -156,6 +156,14 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
                 <Icon name="Phone" size={20} className="mr-3" />
                 Контакты
               </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-base h-12"
+                onClick={() => handleNavigate('gallery')}
+              >
+                <Icon name="Images" size={20} className="mr-3" />
+                Галерея
+              </Button>
             </nav>
           </div>
 

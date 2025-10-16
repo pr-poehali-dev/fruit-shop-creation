@@ -31,7 +31,7 @@ const galleryImages: GalleryImage[] = [
   }
 ];
 
-const Gallery = () => {
+const GallerySection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -73,31 +73,21 @@ const Gallery = () => {
     });
   };
 
-  const handleBack = () => {
-    window.history.back();
-  };
-
   const currentImage = galleryImages[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          className="bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
-        >
-          <Icon name="ArrowLeft" size={24} />
-        </Button>
-      </div>
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-6xl">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-display font-bold mb-2">Наша галерея</h2>
+          <p className="text-muted-foreground">Фотографии нашего питомника и растений</p>
+        </div>
 
-      <div className="fixed top-4 right-4 z-50 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white font-medium">
-        {currentIndex + 1} / {galleryImages.length}
-      </div>
+        <div className="relative w-full max-w-5xl mx-auto aspect-[4/3] mb-4">
+          <div className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white font-medium text-sm">
+            {currentIndex + 1} / {galleryImages.length}
+          </div>
 
-      <div className="h-screen flex items-center justify-center px-4 perspective-1000">
-        <div className="relative w-full max-w-5xl aspect-[4/3]">
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={currentIndex}
@@ -127,27 +117,27 @@ const Gallery = () => {
               className="absolute inset-0 w-full h-full"
               style={{ transformStyle: 'preserve-3d' }}
             >
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-800 to-gray-900">
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-card">
                 <img
                   src={currentImage.url}
                   alt={currentImage.title}
                   className="w-full h-full object-contain select-none"
                   draggable="false"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-8 text-white">
-                  <motion.h2
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 sm:p-8 text-white">
+                  <motion.h3
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="text-3xl font-bold mb-2"
+                    className="text-2xl sm:text-3xl font-bold mb-2"
                   >
                     {currentImage.title}
-                  </motion.h2>
+                  </motion.h3>
                   <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-lg text-gray-200"
+                    className="text-base sm:text-lg text-gray-200"
                   >
                     {currentImage.description}
                   </motion.p>
@@ -156,47 +146,51 @@ const Gallery = () => {
             </motion.div>
           </AnimatePresence>
 
-          <button
+          <Button
             onClick={() => paginate(-1)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            size="icon"
+            variant="ghost"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white transition-all hover:scale-110 active:scale-95"
             aria-label="Предыдущее фото"
           >
             <Icon name="ChevronLeft" size={28} />
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={() => paginate(1)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            size="icon"
+            variant="ghost"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white transition-all hover:scale-110 active:scale-95"
             aria-label="Следующее фото"
           >
             <Icon name="ChevronRight" size={28} />
-          </button>
+          </Button>
         </div>
-      </div>
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        {galleryImages.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              setDirection(index > currentIndex ? 1 : -1);
-              setCurrentIndex(index);
-            }}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentIndex
-                ? 'bg-white w-8'
-                : 'bg-white/50 hover:bg-white/70'
-            }`}
-            aria-label={`Перейти к фото ${index + 1}`}
-          />
-        ))}
-      </div>
+        <div className="flex justify-center gap-2 mb-4">
+          {galleryImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={`h-2 rounded-full transition-all ${
+                index === currentIndex
+                  ? 'bg-primary w-8'
+                  : 'bg-primary/30 hover:bg-primary/50 w-2'
+              }`}
+              aria-label={`Перейти к фото ${index + 1}`}
+            />
+          ))}
+        </div>
 
-      <div className="fixed bottom-8 right-8 text-white/50 text-sm">
-        <p>← → или свайп для перелистывания</p>
+        <div className="text-center text-muted-foreground text-sm">
+          <p>← → или свайп для перелистывания</p>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Gallery;
+export default GallerySection;
