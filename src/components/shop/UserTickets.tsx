@@ -28,6 +28,10 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [closedTicket, setClosedTicket] = useState<any>(null);
   const [ratedTicket, setRatedTicket] = useState<any>(null);
+  const [dismissedTickets, setDismissedTickets] = useState<Set<number>>(() => {
+    const saved = localStorage.getItem('dismissedTickets');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -56,12 +60,17 @@ const UserTickets = ({ user }: UserTicketsProps) => {
         console.log('Ticket closed, checking rating status');
         const needsRating = !data.active_ticket.rating;
         const hasRating = !!data.active_ticket.rating;
+        const isDismissed = dismissedTickets.has(data.active_ticket.id);
         
         if (needsRating) {
           setClosedTicket(data.active_ticket);
           setActiveTicket(data.active_ticket);
-        } else if (hasRating) {
+        } else if (hasRating && !isDismissed) {
           setRatedTicket(data.active_ticket);
+          setActiveTicket(null);
+          setClosedTicket(null);
+        } else {
+          setRatedTicket(null);
           setActiveTicket(null);
           setClosedTicket(null);
         }
@@ -156,7 +165,13 @@ const UserTickets = ({ user }: UserTicketsProps) => {
             onReplyChange={setReplyMessage}
             onSendReply={handleSendReply}
             onShowRating={loadActiveTicket}
-            onDismiss={ratedTicket ? () => setRatedTicket(null) : undefined}
+            onDismiss={ratedTicket ? () => {
+              const newDismissed = new Set(dismissedTickets);
+              newDismissed.add(ratedTicket.id);
+              setDismissedTickets(newDismissed);
+              localStorage.setItem('dismissedTickets', JSON.stringify(Array.from(newDismissed)));
+              setRatedTicket(null);
+            } : undefined}
             apiUrl={API_SUPPORT}
             messagesEndRef={messagesEndRef}
             userId={user?.id}
