@@ -35,8 +35,8 @@ const CartContent = ({
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   
-  const deliveryEnabled = siteSettings?.delivery_enabled !== false;
-  const pickupEnabled = siteSettings?.pickup_enabled !== false;
+  const deliveryEnabled = siteSettings?.delivery_enabled === true;
+  const pickupEnabled = siteSettings?.pickup_enabled === true;
   const preorderSettings = siteSettings?.preorder_enabled || false;
   const preorderMessage = siteSettings?.preorder_message || 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.';
   const preorderStartDate = siteSettings?.preorder_start_date;
@@ -68,6 +68,16 @@ const CartContent = ({
   const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
   const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
   const pickupAddress = siteSettings?.address || '';
+  
+  useEffect(() => {
+    if (pickupEnabled && !deliveryEnabled) {
+      setDeliveryType('pickup');
+    } else if (deliveryEnabled && !pickupEnabled) {
+      setDeliveryType('delivery');
+    } else if (pickupEnabled) {
+      setDeliveryType('pickup');
+    }
+  }, [pickupEnabled, deliveryEnabled]);
   
   useEffect(() => {
     const loadZones = async () => {
@@ -167,7 +177,14 @@ const CartContent = ({
               <Icon name="MapPin" size={16} />
               Способ получения
             </h4>
-            <RadioGroup value={deliveryType} onValueChange={setDeliveryType}>
+            {!pickupEnabled && !deliveryEnabled ? (
+              <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
+                <p className="text-sm text-yellow-900 dark:text-yellow-100">
+                  В данный момент доставка и самовывоз недоступны. Пожалуйста, свяжитесь с нами для оформления заказа.
+                </p>
+              </div>
+            ) : (
+              <RadioGroup value={deliveryType} onValueChange={setDeliveryType}>
               {pickupEnabled && (
                 <div className="flex items-start space-x-2 p-3 rounded-lg border-2 border-primary/20 bg-background hover:bg-primary/5 transition-colors">
                   <RadioGroupItem value="pickup" id="pickup" className="mt-0.5" />
@@ -229,6 +246,7 @@ const CartContent = ({
                 </div>
               )}
             </RadioGroup>
+            )}
           </div>
 
           <Separator />
@@ -262,7 +280,12 @@ const CartContent = ({
           
           <div className="space-y-2">
             {user && (
-              <Button className="w-full" variant="default" onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined)}>
+              <Button 
+                className="w-full" 
+                variant="default" 
+                onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined)}
+                disabled={!pickupEnabled && !deliveryEnabled}
+              >
                 <Icon name="Wallet" size={18} className="mr-2" />
                 {preorderEnabled 
                   ? `Оплатить 50% балансом (${(getFinalPrice() * 0.5).toFixed(2)}₽)`
@@ -270,14 +293,23 @@ const CartContent = ({
                 }
               </Button>
             )}
-            <Button className="w-full" onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined)}>
+            <Button 
+              className="w-full" 
+              onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined)}
+              disabled={!pickupEnabled && !deliveryEnabled}
+            >
               <Icon name="CreditCard" size={18} className="mr-2" />
               {preorderEnabled 
                 ? `Оплатить 50% через Альфа-Банк (${(getFinalPrice() * 0.5).toFixed(2)}₽)`
                 : 'Оплатить через Альфа-Банк'
               }
             </Button>
-            <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined)}>
+            <Button 
+              className="w-full" 
+              variant="outline" 
+              onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined)}
+              disabled={!pickupEnabled && !deliveryEnabled}
+            >
               <Icon name="Coins" size={18} className="mr-2" />
               Наличными при получении
             </Button>
