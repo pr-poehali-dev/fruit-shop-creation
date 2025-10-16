@@ -16,15 +16,9 @@ export const useCart = () => {
   }, [cart]);
 
   const addToCart = (product: Product) => {
-    console.log('Adding to cart:', product);
-    console.log('Has variants:', product.variants);
-    console.log('Selected size:', (product as any).selectedSize);
-    
     const productKey = (product as any).selectedSize 
       ? `${product.id}-${(product as any).selectedSize}` 
       : `${product.id}`;
-    
-    console.log('Product key:', productKey);
     
     const existingItem = cart.find(item => {
       const itemKey = (item.product as any).selectedSize 
@@ -34,7 +28,6 @@ export const useCart = () => {
     });
     
     if (existingItem) {
-      console.log('Item already in cart, increasing quantity');
       setCart(cart.map(item => {
         const itemKey = (item.product as any).selectedSize 
           ? `${item.product.id}-${(item.product as any).selectedSize}` 
@@ -44,7 +37,6 @@ export const useCart = () => {
           : item;
       }));
     } else {
-      console.log('Adding new item to cart');
       setCart([...cart, { product, quantity: 1 }]);
     }
   };

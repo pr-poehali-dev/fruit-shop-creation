@@ -60,6 +60,21 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
     }
   };
 
+  const handleAddVariantToCart = (e: React.MouseEvent, variant: ProductVariant) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      onShowAuth?.();
+      return;
+    }
+    const productWithVariant = {
+      ...product,
+      price: variant.price,
+      stock: variant.stock,
+      selectedSize: variant.size
+    };
+    onAddToCart(productWithVariant);
+  };
+
   return (
     <Card className={`overflow-hidden transition-all relative ${isHalloween ? 'halloween-card hover:shadow-[0_0_30px_rgba(255,120,0,0.5)] border-2 border-orange-500/30' : 'hover:shadow-lg'}`}>
       {isNewYear && <div className="snow-cap"></div>}
@@ -113,13 +128,24 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
         <div className="mt-4">
           {hideMainPrice ? (
             <div className="space-y-2">
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-col gap-2">
                 {product.variants!.map((variant, idx) => (
-                  <div key={idx} className="flex items-baseline gap-1">
-                    <Badge variant="outline" className="text-xs">
-                      {variant.size}
-                    </Badge>
-                    <span className="text-sm font-semibold">{variant.price} ₽</span>
+                  <div key={idx} className="flex items-center justify-between p-2 border rounded-lg hover:border-primary transition-colors">
+                    <div className="flex items-baseline gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {variant.size}
+                      </Badge>
+                      <span className="text-lg font-bold text-primary">{variant.price} ₽</span>
+                    </div>
+                    <Button 
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => handleAddVariantToCart(e, variant)}
+                      className="h-8"
+                    >
+                      <Icon name="ShoppingCart" size={16} className="mr-1" />
+                      В корзину
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -154,7 +180,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
       <CardFooter className="gap-2">
         <Button 
           variant="outline" 
-          className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${isHalloween ? 'halloween-button-outline' : ''}`}
+          className={`${hideMainPrice ? 'w-full' : 'flex-1'} relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${isHalloween ? 'halloween-button-outline' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onViewDetails(product);
@@ -165,38 +191,37 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           <Icon name="Eye" size={18} className="mr-2" />
           Подробнее
         </Button>
-        <Button 
-          className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${isHalloween ? 'halloween-button' : ''} ${!isAuthenticated ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('ProductCard - Button clicked, hasVariants:', hasVariants, 'product:', product);
-            if (!isAuthenticated) {
-              onShowAuth?.();
-              return;
-            }
-            if (hasVariants) {
-              console.log('ProductCard - Opening details for product with variants');
-              onViewDetails(product);
-            } else {
-              console.log('ProductCard - Adding product without variants to cart');
-              onAddToCart(product);
-            }
-          }}
-        >
-          {isNewYear && <div className="button-snow-cap"></div>}
-          {isHalloween && <div className="halloween-button-glow"></div>}
-          {!isAuthenticated ? (
-            <>
-              <Icon name="Lock" size={18} className="mr-2" />
-              Войти для покупки
-            </>
-          ) : (
-            <>
-              <Icon name="ShoppingCart" size={18} className="mr-2" />
-              В корзину
-            </>
-          )}
-        </Button>
+        {!hideMainPrice && (
+          <Button 
+            className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${isHalloween ? 'halloween-button' : ''} ${!isAuthenticated ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isAuthenticated) {
+                onShowAuth?.();
+                return;
+              }
+              if (hasVariants) {
+                onViewDetails(product);
+              } else {
+                onAddToCart(product);
+              }
+            }}
+          >
+            {isNewYear && <div className="button-snow-cap"></div>}
+            {isHalloween && <div className="halloween-button-glow"></div>}
+            {!isAuthenticated ? (
+              <>
+                <Icon name="Lock" size={18} className="mr-2" />
+                Войти для покупки
+              </>
+            ) : (
+              <>
+                <Icon name="ShoppingCart" size={18} className="mr-2" />
+                В корзину
+              </>
+            )}
+          </Button>
+        )}
       </CardFooter>
       
       <style>{`
