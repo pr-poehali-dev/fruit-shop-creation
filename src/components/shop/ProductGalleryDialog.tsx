@@ -199,11 +199,13 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
                     return;
                   }
                   if (hasVariants && !selectedVariant) {
+                    console.log('Cannot add to cart - no variant selected');
                     return;
                   }
                   const productToAdd = selectedVariant 
                     ? { ...product, price: selectedVariant.price, stock: selectedVariant.stock, selectedSize: selectedVariant.size }
                     : product;
+                  console.log('ProductGalleryDialog - Adding to cart:', productToAdd);
                   onAddToCart(productToAdd);
                   handleOpenChange(false);
                 }}
