@@ -129,11 +129,13 @@ const Header = ({
             onClick={() => onSectionChange('home')} 
             className="flex items-center gap-2 hover:opacity-90 transition min-w-0 flex-shrink"
           >
-            <img 
-              src={siteSettings?.logo_url || 'https://storage.yandexcloud.net/poehali-prod/files/tree-logo-circle.png'} 
-              alt={`Логотип ${siteSettings?.site_name || 'Питомник растений'}`}
-              className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full object-cover border-2 border-white/20 shadow-lg flex-shrink-0"
-            />
+            {siteSettings?.logo_url && (
+              <img 
+                src={siteSettings.logo_url} 
+                alt={`Логотип ${siteSettings?.site_name || 'Питомник растений'}`}
+                className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full object-cover border-2 border-white/20 shadow-lg flex-shrink-0"
+              />
+            )}
             <h1 className="text-xs sm:text-base md:text-xl font-display font-extrabold tracking-tight drop-shadow-md leading-tight max-w-[100px] sm:max-w-[200px] md:max-w-none">
               {siteSettings?.site_name || 'Питомник растений'}
             </h1>

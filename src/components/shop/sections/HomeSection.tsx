@@ -30,6 +30,27 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
   const showNewYearBanner = siteSettings?.holiday_theme === 'new_year';
   const holidayTheme = siteSettings?.holiday_theme || 'none';
   
+  const isPreorderActive = () => {
+    if (!siteSettings?.preorder_enabled) return false;
+    
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    if (siteSettings.preorder_start_date) {
+      const startDate = new Date(siteSettings.preorder_start_date);
+      startDate.setHours(0, 0, 0, 0);
+      if (now < startDate) return false;
+    }
+    
+    if (siteSettings.preorder_end_date) {
+      const endDate = new Date(siteSettings.preorder_end_date);
+      endDate.setHours(23, 59, 59, 999);
+      if (now > endDate) return false;
+    }
+    
+    return true;
+  };
+  
   const getHeroContent = () => {
     switch (holidayTheme) {
       case 'new_year':
@@ -72,6 +93,52 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
   return (
     <div className="space-y-16">
       {showNewYearBanner && <NewYearBanner />}
+      
+      {/* Уведомление о предзаказе */}
+      {isPreorderActive() && (
+        <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 duration-500">
+          <div className="relative p-6 md:p-8">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+                  <Icon name="Calendar" size={32} className="text-white" />
+                </div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <h3 className="text-2xl md:text-3xl font-bold">Режим предзаказа активен! 🌱</h3>
+                <p className="text-blue-100 text-base md:text-lg leading-relaxed">
+                  {siteSettings?.preorder_message || 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.'}
+                </p>
+                {(siteSettings?.preorder_start_date || siteSettings?.preorder_end_date) && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {siteSettings?.preorder_start_date && (
+                      <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-medium">
+                        <Icon name="CalendarCheck" size={14} />
+                        С {new Date(siteSettings.preorder_start_date).toLocaleDateString('ru-RU')}
+                      </span>
+                    )}
+                    {siteSettings?.preorder_end_date && (
+                      <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-medium">
+                        <Icon name="CalendarClock" size={14} />
+                        До {new Date(siteSettings.preorder_end_date).toLocaleDateString('ru-RU')}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <Button 
+                onClick={() => onNavigate('catalog')} 
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all flex-shrink-0"
+              >
+                Оформить предзаказ
+                <Icon name="ArrowRight" size={18} className="ml-2" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Hero секция с градиентным фоном */}
       <section className={`relative text-center py-20 px-6 rounded-3xl overflow-hidden ${heroContent.gradient}`}>
