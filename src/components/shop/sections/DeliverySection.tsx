@@ -11,6 +11,10 @@ const DeliverySection = ({ siteSettings }: DeliverySectionProps) => {
         ? siteSettings.payment_methods 
         : siteSettings.payment_methods.split('\n').filter((m: string) => m.trim()))
     : ['Банковская карта онлайн', 'Наличные при получении', 'Банковский перевод'];
+  
+  const deliveryEnabled = siteSettings?.delivery_enabled === true;
+  const pickupEnabled = siteSettings?.pickup_enabled === true;
+  const hasAnyDelivery = deliveryEnabled || pickupEnabled;
 
   return (
     <div className="max-w-3xl mx-auto px-2">
@@ -26,18 +30,31 @@ const DeliverySection = ({ siteSettings }: DeliverySectionProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div>
-              <h4 className="font-semibold">{siteSettings?.delivery_courier_title || 'Курьерская доставка'}</h4>
-              <p className="text-sm text-muted-foreground">{siteSettings?.delivery_courier_text || 'По Москве и области — 500 ₽'}</p>
-            </div>
-            <div>
-              <h4 className="font-semibold">{siteSettings?.delivery_transport_title || 'Транспортная компания'}</h4>
-              <p className="text-sm text-muted-foreground">{siteSettings?.delivery_transport_text || 'По России — рассчитывается индивидуально'}</p>
-            </div>
-            <div>
-              <h4 className="font-semibold">{siteSettings?.delivery_pickup_title || 'Самовывоз'}</h4>
-              <p className="text-sm text-muted-foreground">{siteSettings?.delivery_pickup_text || 'Бесплатно из питомника'}</p>
-            </div>
+            {!hasAnyDelivery && (
+              <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
+                <p className="text-sm text-yellow-900 dark:text-yellow-100">
+                  В данный момент доставка временно недоступна. Пожалуйста, свяжитесь с нами для уточнения деталей.
+                </p>
+              </div>
+            )}
+            {deliveryEnabled && (
+              <>
+                <div>
+                  <h4 className="font-semibold">{siteSettings?.delivery_courier_title || 'Курьерская доставка'}</h4>
+                  <p className="text-sm text-muted-foreground">{siteSettings?.delivery_courier_text || 'По Москве и области — 500 ₽'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold">{siteSettings?.delivery_transport_title || 'Транспортная компания'}</h4>
+                  <p className="text-sm text-muted-foreground">{siteSettings?.delivery_transport_text || 'По России — рассчитывается индивидуально'}</p>
+                </div>
+              </>
+            )}
+            {pickupEnabled && (
+              <div>
+                <h4 className="font-semibold">{siteSettings?.delivery_pickup_title || 'Самовывоз'}</h4>
+                <p className="text-sm text-muted-foreground">{siteSettings?.delivery_pickup_text || 'Бесплатно из питомника'}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
