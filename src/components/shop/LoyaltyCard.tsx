@@ -137,8 +137,16 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
             <div className="mt-4">
               <h3 className="text-lg font-semibold">Карта лояльности</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Кэшбэк {cashbackPercent}% с каждой покупки по карте
+                Кэшбэк {cashbackPercent}% с каждой покупки
               </p>
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-2 text-left">
+                  <Icon name="Info" size={16} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-blue-800 dark:text-blue-200">
+                    <strong>Условия начисления кэшбэка:</strong> кэшбэк начисляется только при оплате заказа с баланса сайта. При других способах оплаты кэшбэк не начисляется.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -290,13 +298,23 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
       </div>
       
       <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/30 dark:via-green-950/20 dark:to-teal-950/30 rounded-lg sm:rounded-xl border-2 border-emerald-200 dark:border-emerald-800 shadow-md">
-        <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+        <div className="flex items-center gap-2 mb-2 sm:mb-3">
           <div className="bg-emerald-500 p-1 sm:p-1.5 rounded-lg flex-shrink-0">
             <Icon name="Percent" size={14} className="text-white sm:w-4 sm:h-4" />
           </div>
           <p className="text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-100">
             Кэшбэк {cashbackPercent}% от покупки
           </p>
+        </div>
+        <div className="pl-7 sm:pl-8">
+          <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-start gap-2">
+              <Icon name="Info" size={14} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <p className="text-[10px] sm:text-xs text-blue-800 dark:text-blue-200">
+                <strong>Условия начисления:</strong> кэшбэк начисляется только при оплате заказа с баланса сайта. При других способах оплаты кэшбэк не начисляется.
+              </p>
+            </div>
+          </div>
         </div>
         <p className="text-[11px] sm:text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
           Предъявите QR-код при покупке от 100₽ и получайте кэшбэк на счет
