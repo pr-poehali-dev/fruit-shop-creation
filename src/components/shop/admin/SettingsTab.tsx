@@ -127,7 +127,8 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                     type="checkbox" 
                     id="delivery-enabled" 
                     name="delivery_enabled"
-                    defaultChecked={siteSettings.delivery_enabled !== false}
+                    value="on"
+                    defaultChecked={siteSettings.delivery_enabled === true}
                     className="w-4 h-4 rounded border-gray-300"
                   />
                   <Label htmlFor="delivery-enabled" className="cursor-pointer">
@@ -139,7 +140,8 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                     type="checkbox" 
                     id="pickup-enabled" 
                     name="pickup_enabled"
-                    defaultChecked={siteSettings.pickup_enabled !== false}
+                    value="on"
+                    defaultChecked={siteSettings.pickup_enabled === true}
                     className="w-4 h-4 rounded border-gray-300"
                   />
                   <Label htmlFor="pickup-enabled" className="cursor-pointer">
@@ -200,7 +202,8 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                       type="checkbox" 
                       id="preorder-enabled" 
                       name="preorder_enabled"
-                      defaultChecked={siteSettings.preorder_enabled || false}
+                      value="on"
+                      defaultChecked={siteSettings.preorder_enabled === true}
                       className="w-4 h-4 rounded border-gray-300"
                     />
                     <Label htmlFor="preorder-enabled" className="cursor-pointer">

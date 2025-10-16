@@ -373,10 +373,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     };
     
     const getCheckboxValue = (key: string) => {
-      if (formData.has(key)) {
-        return formData.get(key) === 'on';
-      }
-      return props.siteSettings?.[key] || false;
+      return formData.get(key) === 'on';
     };
     
     const getNumberValue = (key: string, defaultValue: number) => {
