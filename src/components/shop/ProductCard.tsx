@@ -169,13 +169,16 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           className={`flex-1 relative overflow-hidden ${isNewYear ? 'snow-button' : ''} ${isHalloween ? 'halloween-button' : ''} ${!isAuthenticated ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
+            console.log('ProductCard - Button clicked, hasVariants:', hasVariants, 'product:', product);
             if (!isAuthenticated) {
               onShowAuth?.();
               return;
             }
             if (hasVariants) {
+              console.log('ProductCard - Opening details for product with variants');
               onViewDetails(product);
             } else {
+              console.log('ProductCard - Adding product without variants to cart');
               onAddToCart(product);
             }
           }}

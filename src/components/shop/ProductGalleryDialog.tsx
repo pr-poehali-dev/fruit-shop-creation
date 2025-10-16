@@ -57,6 +57,8 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
   const showStock = product.show_stock !== false;
   const hideMainPrice = product.hide_main_price && hasVariants && product.variants!.length >= 2;
   
+  console.log('ProductGalleryDialog - Open:', open, 'hasVariants:', hasVariants, 'variants:', product.variants, 'selectedVariant:', selectedVariant);
+  
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
   const displayStock = selectedVariant 
     ? (selectedVariant.stock != null ? selectedVariant.stock : 999) 
