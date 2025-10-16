@@ -16,19 +16,20 @@ const LeafyTitle = ({ text, className = '' }: LeafyTitleProps) => {
           position: relative;
           display: inline-block;
           font-family: 'Playfair Display', serif;
-          font-weight: 800;
-          color: #2d5016;
+          font-weight: 900;
+          color: #1a3a0d;
           text-shadow: 
-            2px 2px 0px rgba(139, 195, 74, 0.4),
-            -1px -1px 0px rgba(139, 195, 74, 0.3),
-            3px 3px 8px rgba(76, 175, 80, 0.3),
-            0 0 20px rgba(139, 195, 74, 0.2);
+            0 0 3px rgba(255, 255, 255, 0.8),
+            0 0 8px rgba(255, 255, 255, 0.6),
+            2px 2px 0px rgba(139, 195, 74, 0.6),
+            -1px -1px 0px rgba(255, 255, 255, 0.4),
+            3px 3px 6px rgba(0, 0, 0, 0.5);
           letter-spacing: 0.08em;
-          background: linear-gradient(180deg, #4a7c2c 0%, #2d5016 100%);
+          background: linear-gradient(180deg, #5a9c3c 0%, #2d5a18 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+          filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4)) contrast(1.3) brightness(1.2);
         }
         
         .leaf-decoration {
