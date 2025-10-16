@@ -191,10 +191,14 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
               
               <Button 
                 size="lg"
+                disabled={hasVariants && !selectedVariant}
                 onClick={() => {
                   if (!isAuthenticated) {
                     onShowAuth?.();
                     handleOpenChange(false);
+                    return;
+                  }
+                  if (hasVariants && !selectedVariant) {
                     return;
                   }
                   const productToAdd = selectedVariant 
@@ -205,7 +209,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
                 }}
               >
                 <Icon name="ShoppingCart" size={20} className="mr-2" />
-                В корзину
+                {hasVariants && !selectedVariant ? 'Выберите размер' : 'В корзину'}
               </Button>
             </div>
           </div>
