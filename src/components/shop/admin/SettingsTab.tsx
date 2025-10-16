@@ -220,6 +220,32 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                       Это сообщение будет показываться клиентам на сайте
                     </p>
                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="preorder-start-date">Дата начала приёма предзаказов</Label>
+                      <Input 
+                        id="preorder-start-date" 
+                        name="preorder_start_date" 
+                        type="date"
+                        defaultValue={siteSettings.preorder_start_date || ''} 
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        С какой даты принимаем предзаказы
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="preorder-end-date">Дата окончания приёма предзаказов</Label>
+                      <Input 
+                        id="preorder-end-date" 
+                        name="preorder_end_date" 
+                        type="date"
+                        defaultValue={siteSettings.preorder_end_date || ''} 
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        До какой даты принимаем предзаказы
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

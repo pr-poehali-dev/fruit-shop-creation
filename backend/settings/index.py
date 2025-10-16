@@ -99,6 +99,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             pickup_enabled = bool(body_data.get('pickup_enabled', True))
             preorder_enabled = bool(body_data.get('preorder_enabled', False))
             preorder_message = (body_data.get('preorder_message') or 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.').replace("'", "''")
+            preorder_start_date = body_data.get('preorder_start_date') or 'NULL'
+            preorder_end_date = body_data.get('preorder_end_date') or 'NULL'
+            
+            if preorder_start_date != 'NULL':
+                preorder_start_date = f"'{preorder_start_date}'"
+            if preorder_end_date != 'NULL':
+                preorder_end_date = f"'{preorder_end_date}'"
             delivery_price = body_data.get('delivery_price') or 0
             free_delivery_min = body_data.get('free_delivery_min') or 3000
             courier_delivery_price = body_data.get('courier_delivery_price') or 300
@@ -132,7 +139,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"""INSERT INTO site_settings (
                     id, site_name, logo_url, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, 
                     holiday_theme, loyalty_card_price, loyalty_unlock_amount, loyalty_cashback_percent, balance_payment_cashback_percent, admin_pin,
-                    delivery_enabled, pickup_enabled, preorder_enabled, preorder_message, delivery_price, free_delivery_min, courier_delivery_price,
+                    delivery_enabled, pickup_enabled, preorder_enabled, preorder_message, preorder_start_date, preorder_end_date, 
+                    delivery_price, free_delivery_min, courier_delivery_price,
                     about_title, about_text, care_title, care_watering_title, care_watering_text, care_lighting_title, care_lighting_text,
                     care_pruning_title, care_pruning_text, delivery_title, delivery_courier_title, delivery_courier_text,
                     delivery_transport_title, delivery_transport_text, delivery_pickup_title, delivery_pickup_text,
@@ -140,7 +148,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    )
                    VALUES (1, '{site_name}', '{logo_url}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
                     '{holiday_theme}', {loyalty_card_price}, {loyalty_unlock_amount}, {loyalty_cashback_percent}, {balance_payment_cashback_percent}, '{admin_pin}',
-                    {delivery_enabled}, {pickup_enabled}, {preorder_enabled}, '{preorder_message}', {delivery_price}, {free_delivery_min}, {courier_delivery_price},
+                    {delivery_enabled}, {pickup_enabled}, {preorder_enabled}, '{preorder_message}', {preorder_start_date}, {preorder_end_date},
+                    {delivery_price}, {free_delivery_min}, {courier_delivery_price},
                     '{about_title}', '{about_text}', '{care_title}', '{care_watering_title}', '{care_watering_text}', '{care_lighting_title}', '{care_lighting_text}',
                     '{care_pruning_title}', '{care_pruning_text}', '{delivery_title}', '{delivery_courier_title}', '{delivery_courier_text}',
                     '{delivery_transport_title}', '{delivery_transport_text}', '{delivery_pickup_title}', '{delivery_pickup_text}',
@@ -167,6 +176,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    pickup_enabled = EXCLUDED.pickup_enabled,
                    preorder_enabled = EXCLUDED.preorder_enabled,
                    preorder_message = EXCLUDED.preorder_message,
+                   preorder_start_date = EXCLUDED.preorder_start_date,
+                   preorder_end_date = EXCLUDED.preorder_end_date,
                    delivery_price = EXCLUDED.delivery_price,
                    free_delivery_min = EXCLUDED.free_delivery_min,
                    courier_delivery_price = EXCLUDED.courier_delivery_price,

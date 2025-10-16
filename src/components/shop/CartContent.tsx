@@ -37,8 +37,33 @@ const CartContent = ({
   
   const deliveryEnabled = siteSettings?.delivery_enabled !== false;
   const pickupEnabled = siteSettings?.pickup_enabled !== false;
-  const preorderEnabled = siteSettings?.preorder_enabled || false;
+  const preorderSettings = siteSettings?.preorder_enabled || false;
   const preorderMessage = siteSettings?.preorder_message || 'Предзаказ на весну 2026. Доставка с марта по май 2026 года.';
+  const preorderStartDate = siteSettings?.preorder_start_date;
+  const preorderEndDate = siteSettings?.preorder_end_date;
+  
+  const isPreorderActive = () => {
+    if (!preorderSettings) return false;
+    
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    if (preorderStartDate) {
+      const startDate = new Date(preorderStartDate);
+      startDate.setHours(0, 0, 0, 0);
+      if (now < startDate) return false;
+    }
+    
+    if (preorderEndDate) {
+      const endDate = new Date(preorderEndDate);
+      endDate.setHours(23, 59, 59, 999);
+      if (now > endDate) return false;
+    }
+    
+    return true;
+  };
+  
+  const preorderEnabled = isPreorderActive();
   const deliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
   const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
   const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
@@ -115,9 +140,23 @@ const CartContent = ({
             <div className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-3">
               <div className="flex items-start gap-2">
                 <Icon name="Calendar" size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Режим предзаказа</p>
                   <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">{preorderMessage}</p>
+                  {(preorderStartDate || preorderEndDate) && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {preorderStartDate && (
+                        <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded">
+                          С {new Date(preorderStartDate).toLocaleDateString('ru-RU')}
+                        </span>
+                      )}
+                      {preorderEndDate && (
+                        <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded">
+                          До {new Date(preorderEndDate).toLocaleDateString('ru-RU')}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
