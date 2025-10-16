@@ -79,7 +79,7 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
       </SheetTrigger>
       <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="mb-6">
-          <SheetTitle className="flex items-center gap-2 text-2xl">
+          <SheetTitle className="flex items-center gap-2 text-2xl" style={{ fontFamily: "'Playfair Display', serif" }}>
             {siteSettings?.logo_url ? (
               <img 
                 src={siteSettings.logo_url} 
