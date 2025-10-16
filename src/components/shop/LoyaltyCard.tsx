@@ -244,7 +244,22 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
           <div className="flex justify-between items-start mb-6 sm:mb-8 gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-[10px] sm:text-xs opacity-90 uppercase tracking-wider font-semibold">Карта лояльности</p>
-              <p className="text-base sm:text-2xl font-bold mt-1 tracking-wide break-all">{card.card_number}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-base sm:text-2xl font-bold tracking-wide break-all">{card.card_number}</p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(card.card_number);
+                    toast({
+                      title: 'Скопировано!',
+                      description: 'Номер карты скопирован в буфер обмена'
+                    });
+                  }}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg p-1.5 sm:p-2 transition-all flex-shrink-0"
+                  title="Скопировать номер карты"
+                >
+                  <Icon name="Copy" size={16} className="sm:w-5 sm:h-5" />
+                </button>
+              </div>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-full p-1.5 sm:p-2 flex-shrink-0">
               <Icon name="Sparkles" size={24} className="text-yellow-300 sm:w-7 sm:h-7" />
