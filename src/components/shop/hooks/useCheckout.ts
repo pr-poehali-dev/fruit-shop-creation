@@ -70,13 +70,17 @@ export const useCheckout = ({
       }
     }
 
-    const totalAmount = basePrice + deliveryPrice;
+    const isPreorder = siteSettings?.preorder_enabled === true;
+    const fullTotalAmount = basePrice + deliveryPrice;
+    const totalAmount = isPreorder ? fullTotalAmount * 0.5 : fullTotalAmount;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {
         toast({
           title: 'Недостаточно средств',
-          description: `На балансе ${user.balance?.toFixed(2) || 0}₽, требуется ${totalAmount}₽`,
+          description: isPreorder 
+            ? `На балансе ${user.balance?.toFixed(2) || 0}₽, требуется ${totalAmount.toFixed(2)}₽ (50% предоплата)`
+            : `На балансе ${user.balance?.toFixed(2) || 0}₽, требуется ${totalAmount.toFixed(2)}₽`,
           variant: 'destructive'
         });
         return;
@@ -90,7 +94,9 @@ export const useCheckout = ({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount: totalAmount,
-            description: `Оплата заказа (${cart.length} товар${cart.length > 1 ? 'а' : ''})`,
+            description: isPreorder 
+              ? `Предзаказ (50% предоплата) - ${cart.length} товар${cart.length > 1 ? 'а' : ''}`
+              : `Оплата заказа (${cart.length} товар${cart.length > 1 ? 'а' : ''})`,
             user_id: user.id.toString(),
             return_url: `${window.location.origin}/payment/success`
           })
@@ -177,11 +183,17 @@ export const useCheckout = ({
       const data = await response.json();
 
       if (data.success) {
+        const orderMessage = paymentMethod === 'balance'
+          ? isPreorder
+            ? `Заказ #${data.order_id}. Оплачено 50% (${totalAmount.toFixed(2)}₽). Остальное при получении. Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
+            : `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
+          : isPreorder
+            ? `Заказ #${data.order_id}. Предзаказ оформлен! Оплачено 50% предоплаты`
+            : `Номер заказа: ${data.order_id}`;
+        
         toast({
           title: 'Заказ оформлен!',
-          description: paymentMethod === 'balance'
-            ? `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
-            : `Номер заказа: ${data.order_id}`
+          description: orderMessage
         });
         clearCart();
         loadOrders(user);

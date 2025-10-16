@@ -249,18 +249,33 @@ const CartContent = ({
               <span>Итого:</span>
               <span>{getFinalPrice()} ₽</span>
             </div>
+            {preorderEnabled && (
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-blue-900 dark:text-blue-100 font-medium">Предоплата (50%):</span>
+                  <span className="text-blue-900 dark:text-blue-100 font-bold">{(getFinalPrice() * 0.5).toFixed(2)} ₽</span>
+                </div>
+                <p className="text-[10px] text-blue-700 dark:text-blue-300 mt-1">Остальное оплатите при получении</p>
+              </div>
+            )}
           </div>
           
           <div className="space-y-2">
             {user && (
               <Button className="w-full" variant="default" onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined)}>
                 <Icon name="Wallet" size={18} className="mr-2" />
-                Оплатить балансом ({(user.balance || 0).toFixed(2)}₽)
+                {preorderEnabled 
+                  ? `Оплатить 50% балансом (${(getFinalPrice() * 0.5).toFixed(2)}₽)`
+                  : `Оплатить балансом (${(user.balance || 0).toFixed(2)}₽)`
+                }
               </Button>
             )}
             <Button className="w-full" onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined)}>
               <Icon name="CreditCard" size={18} className="mr-2" />
-              Оплатить через Альфа-Банк
+              {preorderEnabled 
+                ? `Оплатить 50% через Альфа-Банк (${(getFinalPrice() * 0.5).toFixed(2)}₽)`
+                : 'Оплатить через Альфа-Банк'
+              }
             </Button>
             <Button className="w-full" variant="outline" onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined)}>
               <Icon name="Coins" size={18} className="mr-2" />
