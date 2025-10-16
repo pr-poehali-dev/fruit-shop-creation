@@ -35,23 +35,7 @@ const HalloweenTheme = () => {
         <div className="skull skull-2">💀</div>
       </div>
 
-      <div className="hidden md:block fixed bottom-0 right-0 z-[99] pointer-events-none halloween-pumpkin">
-        <div className="relative">
-          <div className="pumpkin-speech">
-            <p className="text-sm font-bold text-orange-100">
-              🎃 Бу-у-у! <br/>
-              Happy Halloween! 👻
-            </p>
-          </div>
 
-          <div className="pumpkin">
-            <div className="pumpkin-glow"></div>
-            <div className="pumpkin-body">
-              🎃
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="fixed top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-900/40 to-transparent pointer-events-none z-[97]"></div>
       <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-orange-900/40 to-transparent pointer-events-none z-[97]"></div>
