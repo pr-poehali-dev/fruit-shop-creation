@@ -17,19 +17,36 @@ const LeafyTitle = ({ text, className = '' }: LeafyTitleProps) => {
           display: inline-block;
           font-family: 'Playfair Display', serif;
           font-weight: 900;
-          color: #1a3a0d;
+          color: #ffffff;
           text-shadow: 
-            0 0 3px rgba(255, 255, 255, 0.8),
-            0 0 8px rgba(255, 255, 255, 0.6),
-            2px 2px 0px rgba(139, 195, 74, 0.6),
-            -1px -1px 0px rgba(255, 255, 255, 0.4),
-            3px 3px 6px rgba(0, 0, 0, 0.5);
+            0 0 10px rgba(255, 255, 255, 0.9),
+            -2px -2px 0 #2d5016,
+            -2px -1px 0 #2d5016,
+            -2px 0 0 #2d5016,
+            -2px 1px 0 #2d5016,
+            -2px 2px 0 #2d5016,
+            -1px -2px 0 #2d5016,
+            -1px -1px 0 #2d5016,
+            -1px 0 0 #2d5016,
+            -1px 1px 0 #2d5016,
+            -1px 2px 0 #2d5016,
+            0 -2px 0 #2d5016,
+            0 -1px 0 #2d5016,
+            0 1px 0 #2d5016,
+            0 2px 0 #2d5016,
+            1px -2px 0 #2d5016,
+            1px -1px 0 #2d5016,
+            1px 0 0 #2d5016,
+            1px 1px 0 #2d5016,
+            1px 2px 0 #2d5016,
+            2px -2px 0 #2d5016,
+            2px -1px 0 #2d5016,
+            2px 0 0 #2d5016,
+            2px 1px 0 #2d5016,
+            2px 2px 0 #2d5016,
+            4px 4px 8px rgba(0, 0, 0, 0.6);
           letter-spacing: 0.08em;
-          background: linear-gradient(180deg, #5a9c3c 0%, #2d5a18 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4)) contrast(1.3) brightness(1.2);
+          filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.5));
         }
         
         .leaf-decoration {
