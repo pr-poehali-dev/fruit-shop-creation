@@ -6,17 +6,21 @@ interface DeliverySectionProps {
 }
 
 const DeliverySection = ({ siteSettings }: DeliverySectionProps) => {
-  const paymentMethods = siteSettings?.payment_methods 
-    ? (Array.isArray(siteSettings.payment_methods) && siteSettings.payment_methods.length > 0
-        ? siteSettings.payment_methods 
-        : siteSettings.payment_methods.split('\n').filter((m: string) => m.trim()))
-    : [
-        'Банковская карта онлайн',
-        'СБП (Система быстрых платежей)',
-        'Оплата при получении наличными',
-        'Оплата при получении картой',
-        'Банковский перевод для юр. лиц'
-      ];
+  let paymentMethods = [
+    'Банковская карта онлайн',
+    'СБП (Система быстрых платежей)',
+    'Оплата при получении наличными',
+    'Оплата при получении картой',
+    'Банковский перевод для юр. лиц'
+  ];
+  
+  if (siteSettings?.payment_methods) {
+    if (Array.isArray(siteSettings.payment_methods) && siteSettings.payment_methods.length > 0) {
+      paymentMethods = siteSettings.payment_methods;
+    } else if (typeof siteSettings.payment_methods === 'string' && siteSettings.payment_methods.trim()) {
+      paymentMethods = siteSettings.payment_methods.split('\n').filter((m: string) => m.trim());
+    }
+  }
   
   const deliveryEnabled = siteSettings?.delivery_enabled === true;
   const pickupEnabled = siteSettings?.pickup_enabled === true;
