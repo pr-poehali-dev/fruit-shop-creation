@@ -21,12 +21,18 @@ export const useAuth = () => {
       
       try {
         const [balanceResponse, banResponse] = await Promise.all([
-          fetch(`${API_AUTH}?action=balance&user_id=${user.id}`),
-          fetch(`${API_AUTH}?action=ban_status&user_id=${user.id}`)
+          fetch(`${API_AUTH}?action=balance&user_id=${user.id}`, { 
+            signal: AbortSignal.timeout(5000)
+          }).catch(() => null),
+          fetch(`${API_AUTH}?action=ban_status&user_id=${user.id}`, { 
+            signal: AbortSignal.timeout(5000)
+          }).catch(() => null)
         ]);
         
-        const balanceData = await balanceResponse.json();
-        const banData = await banResponse.json();
+        if (!balanceResponse || !banResponse) return;
+        
+        const balanceData = await balanceResponse.json().catch(() => ({}));
+        const banData = await banResponse.json().catch(() => ({}));
         
         if (banData.banned) {
           setBanInfo({
@@ -53,7 +59,7 @@ export const useAuth = () => {
           });
         }
       } catch (error) {
-        console.error('Failed to sync user data:', error);
+        // Тихо игнорируем ошибки синхронизации - не критично для работы сайта
       }
     };
 
