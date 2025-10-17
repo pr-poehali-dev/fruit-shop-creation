@@ -43,6 +43,8 @@ export const useAuth = () => {
           setUser(null);
           localStorage.removeItem('user');
           return;
+        } else if (banInfo?.banned) {
+          setBanInfo(null);
         }
         
         if (balanceData.balance !== undefined) {
@@ -144,6 +146,10 @@ export const useAuth = () => {
     onLogout();
   };
 
+  const clearBanInfo = () => {
+    setBanInfo(null);
+  };
+
   return {
     user,
     setUser,
@@ -151,6 +157,7 @@ export const useAuth = () => {
     setIsRefreshingBalance,
     handleAuth,
     handleLogout,
-    banInfo
+    banInfo,
+    clearBanInfo
   };
 };

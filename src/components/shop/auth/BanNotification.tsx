@@ -14,9 +14,10 @@ interface BanNotificationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   banInfo: BanInfo;
+  onBanExpired?: () => void;
 }
 
-const BanNotification = ({ open, onOpenChange, banInfo }: BanNotificationProps) => {
+const BanNotification = ({ open, onOpenChange, banInfo, onBanExpired }: BanNotificationProps) => {
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
@@ -29,6 +30,9 @@ const BanNotification = ({ open, onOpenChange, banInfo }: BanNotificationProps) 
 
       if (distance < 0) {
         setTimeLeft('Бан истёк');
+        if (onBanExpired) {
+          onBanExpired();
+        }
         return;
       }
 

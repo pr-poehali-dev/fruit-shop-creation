@@ -22,7 +22,7 @@ import { Product } from '@/types/shop';
 
 const Index = () => {
   const { toast } = useToast();
-  const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleLogout, banInfo } = useAuth();
+  const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleLogout, banInfo, clearBanInfo } = useAuth();
   const { cart, addToCart, updateCartQuantity, getTotalPrice, clearCart } = useCart();
   const {
     products,
@@ -202,6 +202,7 @@ const Index = () => {
             pendingAdminUser={pendingAdminUser || undefined}
             onAdminCodeVerify={handleAdminCodeVerify}
             adminCodeError={adminCodeError}
+            onBanExpired={clearBanInfo}
           />
 
           {user && (

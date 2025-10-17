@@ -37,8 +37,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             user_id = params.get('user_id')
             
             if action == 'ban_status' and user_id:
+                from datetime import datetime
+                
                 cur.execute(f"SELECT banned, ban_reason, ban_until FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
+                
+                if user and user['banned'] and user['ban_until']:
+                    ban_until = user['ban_until']
+                    if isinstance(ban_until, str):
+                        ban_until = datetime.fromisoformat(ban_until.replace('Z', '+00:00'))
+                    
+                    if datetime.now(ban_until.tzinfo) >= ban_until:
+                        cur.execute(f"UPDATE users SET banned = false, ban_reason = NULL, ban_until = NULL WHERE id = {user_id}")
+                        conn.commit()
+                        user['banned'] = False
+                        user['ban_reason'] = None
+                        user['ban_until'] = None
                 
                 return {
                     'statusCode': 200,

@@ -22,9 +22,10 @@ interface AuthDialogProps {
   pendingAdminUser?: { id: number; full_name: string };
   onAdminCodeVerify?: (code: string) => void;
   adminCodeError?: string;
+  onBanExpired?: () => void;
 }
 
-const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo, requiresAdminCode, pendingAdminUser, onAdminCodeVerify, adminCodeError }: AuthDialogProps) => {
+const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo, requiresAdminCode, pendingAdminUser, onAdminCodeVerify, adminCodeError, onBanExpired }: AuthDialogProps) => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const formatPhoneInput = (value: string) => {
@@ -64,7 +65,7 @@ const AuthDialog = ({ open, onOpenChange, onSubmit, banInfo, requiresAdminCode, 
   };
 
   if (banInfo?.banned) {
-    return <BanNotification open={open} onOpenChange={onOpenChange} banInfo={banInfo} />;
+    return <BanNotification open={open} onOpenChange={onOpenChange} banInfo={banInfo} onBanExpired={onBanExpired} />;
   }
 
   return (
