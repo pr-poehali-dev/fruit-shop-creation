@@ -146,6 +146,22 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 payment_methods_json = json.dumps(payment_methods)
             payment_methods_json = payment_methods_json.replace("'", "''")
             
+            is_maintenance_mode = bool(body_data.get('is_maintenance_mode', False))
+            maintenance_reason = safe_str(body_data.get('maintenance_reason', 'Сайт временно закрыт на техническое обслуживание'))
+            auto_maintenance_enabled = bool(body_data.get('auto_maintenance_enabled', False))
+            maintenance_start_time = body_data.get('maintenance_start_time')
+            maintenance_end_time = body_data.get('maintenance_end_time')
+            
+            if maintenance_start_time:
+                maintenance_start_time = f"'{maintenance_start_time}'"
+            else:
+                maintenance_start_time = 'NULL'
+            
+            if maintenance_end_time:
+                maintenance_end_time = f"'{maintenance_end_time}'"
+            else:
+                maintenance_end_time = 'NULL'
+            
             cur.execute(
                 f"""INSERT INTO site_settings (
                     id, site_name, logo_url, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, 
@@ -155,7 +171,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     about_title, about_text, care_title, care_watering_title, care_watering_text, care_lighting_title, care_lighting_text,
                     care_pruning_title, care_pruning_text, delivery_title, delivery_courier_title, delivery_courier_text,
                     delivery_transport_title, delivery_transport_text, delivery_pickup_title, delivery_pickup_text,
-                    payment_title, payment_methods
+                    payment_title, payment_methods,
+                    is_maintenance_mode, maintenance_reason, auto_maintenance_enabled, maintenance_start_time, maintenance_end_time
                    )
                    VALUES (1, '{site_name}', '{logo_url}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
                     '{holiday_theme}', {loyalty_card_price}, {loyalty_unlock_amount}, {loyalty_cashback_percent}, {balance_payment_cashback_percent}, '{admin_pin}',
@@ -164,7 +181,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     '{about_title}', '{about_text}', '{care_title}', '{care_watering_title}', '{care_watering_text}', '{care_lighting_title}', '{care_lighting_text}',
                     '{care_pruning_title}', '{care_pruning_text}', '{delivery_title}', '{delivery_courier_title}', '{delivery_courier_text}',
                     '{delivery_transport_title}', '{delivery_transport_text}', '{delivery_pickup_title}', '{delivery_pickup_text}',
-                    '{payment_title}', '{payment_methods_json}'::jsonb
+                    '{payment_title}', '{payment_methods_json}'::jsonb,
+                    {is_maintenance_mode}, '{maintenance_reason}', {auto_maintenance_enabled}, {maintenance_start_time}, {maintenance_end_time}
                    )
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
@@ -210,6 +228,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    delivery_pickup_text = EXCLUDED.delivery_pickup_text,
                    payment_title = EXCLUDED.payment_title,
                    payment_methods = EXCLUDED.payment_methods,
+                   is_maintenance_mode = EXCLUDED.is_maintenance_mode,
+                   maintenance_reason = EXCLUDED.maintenance_reason,
+                   auto_maintenance_enabled = EXCLUDED.auto_maintenance_enabled,
+                   maintenance_start_time = EXCLUDED.maintenance_start_time,
+                   maintenance_end_time = EXCLUDED.maintenance_end_time,
                    updated_at = CURRENT_TIMESTAMP
                    RETURNING *"""
             )
