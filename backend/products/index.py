@@ -88,8 +88,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             name = body_data['name'].replace("'", "''")
             slug = body_data['slug'].replace("'", "''")
             desc = body_data.get('description', '').replace("'", "''")
-            price_val = body_data.get('price')
-            price = price_val if price_val not in [None, ''] else 'NULL'
+            price = body_data['price']
             img = body_data.get('image_url', '').replace("'", "''")
             cat_id = body_data.get('category_id', 'NULL')
             stock_val = body_data.get('stock')
@@ -142,8 +141,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             name = body_data['name'].replace("'", "''")
             desc = body_data.get('description', '').replace("'", "''")
-            price_val = body_data.get('price')
-            price = price_val if price_val not in [None, ''] else 'NULL'
+            price = body_data['price']
             img = body_data.get('image_url', '').replace("'", "''")
             cat_id = body_data.get('category_id', 'NULL')
             stock_val = body_data.get('stock')
