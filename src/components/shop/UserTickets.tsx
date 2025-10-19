@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
@@ -35,6 +38,9 @@ interface Ticket {
   created_at: string;
   updated_at?: string;
   messages?: Message[];
+  rating?: number;
+  rating_comment?: string;
+  attachments?: string[];
 }
 
 const API_TICKETS = 'https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d';
@@ -55,6 +61,9 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [replyMessage, setReplyMessage] = useState('');
   const [isSendingReply, setIsSendingReply] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const { toast } = useToast();
 
   const loadTickets = async () => {
@@ -135,6 +144,47 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       });
     } finally {
       setIsSendingReply(false);
+    }
+  };
+
+  const handleSubmitRating = async () => {
+    if (!selectedTicket || rating === 0) return;
+
+    setIsSubmittingRating(true);
+    try {
+      const response = await fetch(`${API_TICKETS}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': user!.id.toString()
+        },
+        body: JSON.stringify({
+          ticket_id: selectedTicket.id,
+          rating,
+          rating_comment: ratingComment
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Спасибо за оценку!',
+          description: 'Ваш отзыв поможет нам стать лучше'
+        });
+        setIsDialogOpen(false);
+        await loadTickets();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить оценку',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmittingRating(false);
     }
   };
 
@@ -248,6 +298,26 @@ const UserTickets = ({ user }: UserTicketsProps) => {
                       </span>
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{selectedTicket.message}</p>
+                    {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <Label className="text-xs">Вложения:</Label>
+                        <div className="space-y-1">
+                          {selectedTicket.attachments.map((url, idx) => (
+                            <a
+                              key={idx}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 p-2 bg-background rounded hover:bg-muted/80 text-xs transition-colors"
+                            >
+                              <Icon name="Paperclip" size={14} />
+                              Файл {idx + 1}
+                              <Icon name="ExternalLink" size={12} className="ml-auto" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {selectedTicket.messages && selectedTicket.messages.length > 0 && (
@@ -267,6 +337,42 @@ const UserTickets = ({ user }: UserTicketsProps) => {
                 </div>
               </div>
 
+              {(selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') && !selectedTicket.rating && (
+                <div className="border-t pt-4 mt-4 space-y-3">
+                  <Label>Оцените качество поддержки</Label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Icon
+                          name="Star"
+                          size={32}
+                          className={star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <Textarea
+                    value={ratingComment}
+                    onChange={(e) => setRatingComment(e.target.value)}
+                    placeholder="Расскажите о вашем опыте (необязательно)"
+                    rows={3}
+                  />
+                  <Button 
+                    onClick={handleSubmitRating} 
+                    disabled={rating === 0 || isSubmittingRating}
+                    className="w-full"
+                  >
+                    <Icon name="Send" size={16} className="mr-2" />
+                    {isSubmittingRating ? 'Отправка...' : 'Отправить оценку'}
+                  </Button>
+                </div>
+              )}
+
               {selectedTicket.status !== 'closed' && selectedTicket.status !== 'resolved' && (
                 <div className="border-t pt-4 mt-4">
                   <div className="flex gap-2">
@@ -284,6 +390,26 @@ const UserTickets = ({ user }: UserTicketsProps) => {
                       <Icon name="Send" size={18} />
                     </Button>
                   </div>
+                </div>
+              )}
+
+              {selectedTicket.rating && (
+                <div className="border-t pt-4 mt-4 bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg">
+                  <Label>Ваша оценка</Label>
+                  <div className="flex items-center gap-1 mt-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Icon
+                        key={star}
+                        name="Star"
+                        size={20}
+                        className={star <= (selectedTicket.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm font-medium">{selectedTicket.rating} / 5</span>
+                  </div>
+                  {selectedTicket.rating_comment && (
+                    <p className="text-sm text-muted-foreground mt-2">{selectedTicket.rating_comment}</p>
+                  )}
                 </div>
               )}
             </>

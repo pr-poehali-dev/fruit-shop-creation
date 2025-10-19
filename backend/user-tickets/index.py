@@ -16,7 +16,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, PUT, POST, PATCH, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -115,7 +115,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 query = """
                     SELECT id, ticket_number, user_id, name, phone, email, category, 
-                           subject, message, status, priority, created_at, updated_at, attachments
+                           subject, message, status, priority, created_at, updated_at, attachments,
+                           rating, rating_comment
                     FROM t_p77282076_fruit_shop_creation.support_tickets
                 """
                 
@@ -144,7 +145,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'priority': row[10],
                         'created_at': row[11].isoformat() if row[11] else None,
                         'updated_at': row[12].isoformat() if row[12] else None,
-                        'attachments': row[13] if row[13] else []
+                        'attachments': row[13] if row[13] else [],
+                        'rating': row[14],
+                        'rating_comment': row[15]
                     })
                 
                 cur.close()
@@ -399,6 +402,71 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'success': True,
                     'comment_id': comment_id,
                     'message': 'Comment added successfully'
+                })
+            }
+        
+        if method == 'PATCH':
+            user_id = event.get('headers', {}).get('X-User-Id')
+            if not user_id:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 401,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Authentication required'})
+                }
+            
+            body_data = json.loads(event.get('body', '{}'))
+            ticket_id = body_data.get('ticket_id')
+            rating = body_data.get('rating')
+            rating_comment = body_data.get('rating_comment', '')
+            
+            if not ticket_id or not rating:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'ticket_id and rating are required'})
+                }
+            
+            if not (1 <= rating <= 5):
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Rating must be between 1 and 5'})
+                }
+            
+            cur.execute(
+                """
+                UPDATE t_p77282076_fruit_shop_creation.support_tickets 
+                SET rating = %s, rating_comment = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s AND user_id = %s
+                """,
+                (int(rating), rating_comment, int(ticket_id), int(user_id))
+            )
+            
+            if cur.rowcount == 0:
+                cur.close()
+                conn.close()
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Ticket not found or access denied'})
+                }
+            
+            conn.commit()
+            cur.close()
+            conn.close()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'success': True,
+                    'message': 'Rating submitted successfully'
                 })
             }
         

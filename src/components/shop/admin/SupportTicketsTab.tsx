@@ -39,6 +39,8 @@ interface Ticket {
   created_at: string;
   updated_at?: string;
   attachments?: string[];
+  rating?: number;
+  rating_comment?: string;
 }
 
 interface Comment {
@@ -363,6 +365,26 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {selectedTicket.rating && (
+                  <div className="space-y-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                    <Label>Оценка от пользователя</Label>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Icon
+                          key={star}
+                          name="Star"
+                          size={20}
+                          className={star <= (selectedTicket.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                        />
+                      ))}
+                      <span className="ml-2 text-sm font-medium">{selectedTicket.rating} / 5</span>
+                    </div>
+                    {selectedTicket.rating_comment && (
+                      <p className="text-sm text-muted-foreground mt-2">{selectedTicket.rating_comment}</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="adminNotes">Заметки администратора</Label>
