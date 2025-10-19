@@ -171,7 +171,7 @@ const Index = () => {
       });
     };
 
-    await handleDirectLogin(phone, password, authSuccess, authError);
+    await handleDirectLogin(phone, password, authSuccess, authError, true);
   };
 
   const checkScheduledMaintenance = () => {

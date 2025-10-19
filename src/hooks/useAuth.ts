@@ -144,10 +144,11 @@ export const useAuth = () => {
     phone: string,
     password: string,
     onSuccess: (user: User, message: string, requiresCode?: boolean) => void,
-    onError: (error: string) => void
+    onError: (error: string) => void,
+    skipAdminCode: boolean = false
   ) => {
     try {
-      console.log('Direct login attempt:', { phone, hasPassword: !!password });
+      console.log('Direct login attempt:', { phone, hasPassword: !!password, skipAdminCode });
       
       const response = await fetch(API_AUTH, {
         method: 'POST',
@@ -155,7 +156,8 @@ export const useAuth = () => {
         body: JSON.stringify({
           action: 'login',
           phone,
-          password
+          password,
+          skip_admin_code: skipAdminCode
         })
       });
       

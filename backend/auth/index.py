@@ -541,8 +541,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif action == 'login':
             phone_escaped = phone.replace("'", "''")
             password_escaped = password.replace("'", "''")
+            skip_admin_code = body_data.get('skip_admin_code', False)
             
-            print(f"Login attempt: phone='{phone_escaped}', password='{password_escaped}'")
+            print(f"Login attempt: phone='{phone_escaped}', password='{password_escaped}', skip_admin_code={skip_admin_code}")
             
             cur.execute(
                 f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
@@ -551,7 +552,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             print(f"User found: {user is not None}")
             
-            if user and user[3]:
+            if user and user[3] and not skip_admin_code:
                 import random
                 import string
                 from datetime import datetime, timedelta
@@ -591,7 +592,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            if user[3]:
+            if user[3] and not skip_admin_code:
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
