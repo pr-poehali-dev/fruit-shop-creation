@@ -14,6 +14,7 @@ export default function MaintenancePage({ reason, onAdminLogin }: MaintenancePag
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showAdminForm, setShowAdminForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const normalizePhone = (phoneInput: string): string => {
@@ -33,7 +34,7 @@ export default function MaintenancePage({ reason, onAdminLogin }: MaintenancePag
     return phoneInput;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!phone || !password) {
@@ -45,9 +46,15 @@ export default function MaintenancePage({ reason, onAdminLogin }: MaintenancePag
       return;
     }
 
+    setIsLoading(true);
     const normalizedPhone = normalizePhone(phone);
     console.log('Maintenance login:', { raw: phone, normalized: normalizedPhone });
-    onAdminLogin(normalizedPhone, password);
+    
+    try {
+      await onAdminLogin(normalizedPhone, password);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -111,8 +118,8 @@ export default function MaintenancePage({ reason, onAdminLogin }: MaintenancePag
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Войти
+            <Button type="submit" className="w-full" disabled={isLoading || !phone || !password}>
+              {isLoading ? 'Вход...' : 'Войти'}
             </Button>
 
             <Button
