@@ -12,6 +12,7 @@ interface MainContentProps {
   isLoading: boolean;
   currentSection: string;
   products: Product[];
+  categories?: any[];
   favorites: Product[];
   favoriteIds: Set<number>;
   siteSettings: any;
@@ -27,6 +28,7 @@ const MainContent = ({
   isLoading,
   currentSection,
   products,
+  categories,
   favorites,
   favoriteIds,
   siteSettings,
@@ -67,6 +69,7 @@ const MainContent = ({
       {currentSection === 'catalog' && (
         <CatalogSection
           products={products}
+          categories={categories}
           onAddToCart={onAddToCart}
           favoriteIds={favoriteIds}
           onToggleFavorite={onToggleFavorite}

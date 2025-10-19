@@ -26,6 +26,7 @@ const Index = () => {
   const { cart, addToCart, updateCartQuantity, getTotalPrice, clearCart } = useCart();
   const {
     products,
+    categories,
     orders,
     siteSettings,
     isLoading,
@@ -165,6 +166,7 @@ const Index = () => {
               isLoading={isLoading}
               currentSection={currentSection}
               products={products}
+              categories={categories}
               favorites={favorites}
               favoriteIds={favoriteIds}
               siteSettings={siteSettings}

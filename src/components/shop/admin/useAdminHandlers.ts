@@ -124,10 +124,6 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
   };
 
   const handleDeleteCategory = async (category: any) => {
-    if (!confirm(`Удалить категорию "${category.name}"? Это действие необратимо.`)) {
-      return;
-    }
-
     try {
       const response = await fetch(`${props.API_CATEGORIES}?id=${category.id}`, {
         method: 'DELETE'
@@ -141,13 +137,22 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
           description: category.name
         });
         props.loadCategories();
+      } else if (data.error && data.error.includes('products')) {
+        const confirmDelete = confirm(`В категории "${category.name}" есть товары. Удалить категорию и все товары в ней?`);
+        if (confirmDelete) {
+          toast({
+            title: 'Ошибка',
+            description: 'Сначала переместите товары в другую категорию или удалите их',
+            variant: 'destructive'
+          });
+        }
       } else {
         throw new Error(data.error || 'Failed to delete category');
       }
     } catch (error: any) {
       toast({
         title: 'Ошибка',
-        description: error.message || 'Не удалось удалить категорию. Возможно, в ней есть товары.',
+        description: error.message || 'Не удалось удалить категорию',
         variant: 'destructive'
       });
     }

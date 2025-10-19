@@ -25,8 +25,16 @@ interface Product {
   images?: ProductImage[];
 }
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+}
+
 interface CatalogSectionProps {
   products: Product[];
+  categories?: Category[];
   onAddToCart: (product: Product) => void;
   favoriteIds?: Set<number>;
   onToggleFavorite?: (productId: number) => void;
@@ -35,7 +43,7 @@ interface CatalogSectionProps {
   onShowAuth?: () => void;
 }
 
-const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated = false, onShowAuth }: CatalogSectionProps) => {
+const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated = false, onShowAuth }: CatalogSectionProps) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -48,10 +56,9 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
     setIsGalleryOpen(true);
   };
 
-  const categories = [
+  const categoryFilters = [
     { id: 'all', name: 'Все растения' },
-    { id: 'Плодовые культуры', name: 'Плодовые' },
-    { id: 'Декоративные культуры', name: 'Декоративные' },
+    ...categories.map(cat => ({ id: cat.name, name: cat.name }))
   ];
 
   let filteredProducts = activeCategory === 'all' 
@@ -128,7 +135,7 @@ const CatalogSection = ({ products, onAddToCart, favoriteIds, onToggleFavorite, 
       </div>
 
       <div className="flex flex-wrap gap-3 mb-8">
-        {categories.map(category => (
+        {categoryFilters.map(category => (
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
