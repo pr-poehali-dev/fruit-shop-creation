@@ -6,6 +6,7 @@ import UsersTab from './UsersTab';
 import OrdersTab from './OrdersTab';
 import SettingsTab from './SettingsTab';
 import SupportTab from './SupportTab';
+import SupportTicketsTab from './SupportTicketsTab';
 import LoyaltyScannerTab from './LoyaltyScannerTab';
 import PagesTab from './PagesTab';
 import CodesTab from './CodesTab';
@@ -109,6 +110,10 @@ const AdminPanelTabs = ({
           <Icon name="MessageCircle" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Поддержка</span>
         </TabsTrigger>
+        <TabsTrigger value="tickets" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+          <Icon name="Ticket" size={16} className="sm:mr-1" />
+          <span className="hidden sm:inline">Тикеты</span>
+        </TabsTrigger>
         <TabsTrigger value="ratings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Star" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Оценки</span>
@@ -182,6 +187,10 @@ const AdminPanelTabs = ({
           onDeleteTicket={onDeleteTicket}
           onRefreshTickets={onRefreshTickets}
         />
+      </TabsContent>
+
+      <TabsContent value="tickets">
+        <SupportTicketsTab userId={userId} />
       </TabsContent>
 
       <TabsContent value="ratings">
