@@ -17,6 +17,13 @@ interface UserTicketsProps {
   user: User | null;
 }
 
+interface Message {
+  id: number;
+  message: string;
+  is_admin: boolean;
+  created_at: string;
+}
+
 interface Ticket {
   id: number;
   ticket_number: string;
@@ -27,6 +34,7 @@ interface Ticket {
   priority: string;
   created_at: string;
   updated_at?: string;
+  messages?: Message[];
 }
 
 const API_TICKETS = 'https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d';
@@ -45,6 +53,8 @@ const UserTickets = ({ user }: UserTicketsProps) => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
   const { toast } = useToast();
 
   const loadTickets = async () => {
@@ -70,9 +80,62 @@ const UserTickets = ({ user }: UserTicketsProps) => {
     }
   };
 
-  const openTicketDialog = (ticket: Ticket) => {
-    setSelectedTicket(ticket);
-    setIsDialogOpen(true);
+  const openTicketDialog = async (ticket: Ticket) => {
+    try {
+      const response = await fetch(`${API_TICKETS}?ticket_id=${ticket.id}`);
+      const data = await response.json();
+      
+      if (data.success && data.ticket) {
+        setSelectedTicket(data.ticket);
+        setIsDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Failed to load ticket details:', error);
+      setSelectedTicket(ticket);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim() || !selectedTicket) return;
+
+    setIsSendingReply(true);
+    try {
+      const response = await fetch(API_TICKETS, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-User-Id': user!.id.toString()
+        },
+        body: JSON.stringify({
+          action: 'add_message',
+          ticket_id: selectedTicket.id,
+          message: replyMessage,
+          is_admin: false
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Сообщение отправлено',
+          description: 'Ваш ответ добавлен в обращение'
+        });
+        setReplyMessage('');
+        await openTicketDialog(selectedTicket);
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить сообщение',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSendingReply(false);
+    }
   };
 
   useEffect(() => {
@@ -156,27 +219,74 @@ const UserTickets = ({ user }: UserTicketsProps) => {
       />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Обращение #{selectedTicket?.ticket_number}</DialogTitle>
           </DialogHeader>
           {selectedTicket && (
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant={statusColors[selectedTicket.status] as any}>
-                    {selectedTicket.status_text}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(selectedTicket.created_at).toLocaleDateString('ru-RU')}
-                  </span>
+            <>
+              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant={statusColors[selectedTicket.status] as any}>
+                      {selectedTicket.status_text}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(selectedTicket.created_at).toLocaleDateString('ru-RU')}
+                    </span>
+                  </div>
+                  <h4 className="font-semibold">{selectedTicket.subject}</h4>
                 </div>
-                <h4 className="font-semibold">{selectedTicket.subject}</h4>
+                
+                <div className="space-y-3">
+                  <div className="bg-muted p-4 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon name="User" size={14} />
+                      <span className="text-xs font-medium">Вы</span>
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {new Date(selectedTicket.created_at).toLocaleString('ru-RU')}
+                      </span>
+                    </div>
+                    <p className="text-sm whitespace-pre-wrap">{selectedTicket.message}</p>
+                  </div>
+
+                  {selectedTicket.messages && selectedTicket.messages.length > 0 && (
+                    selectedTicket.messages.map((msg) => (
+                      <div key={msg.id} className={`p-4 rounded-lg ${msg.is_admin ? 'bg-blue-50 dark:bg-blue-950' : 'bg-muted'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon name={msg.is_admin ? 'HeadphonesIcon' : 'User'} size={14} />
+                          <span className="text-xs font-medium">{msg.is_admin ? 'Поддержка' : 'Вы'}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {new Date(msg.created_at).toLocaleString('ru-RU')}
+                          </span>
+                        </div>
+                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm whitespace-pre-wrap">{selectedTicket.message}</p>
-              </div>
-            </div>
+
+              {selectedTicket.status !== 'closed' && selectedTicket.status !== 'resolved' && (
+                <div className="border-t pt-4 mt-4">
+                  <div className="flex gap-2">
+                    <Input
+                      value={replyMessage}
+                      onChange={(e) => setReplyMessage(e.target.value)}
+                      placeholder="Написать сообщение..."
+                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendReply()}
+                    />
+                    <Button 
+                      onClick={handleSendReply} 
+                      disabled={!replyMessage.trim() || isSendingReply}
+                      size="icon"
+                    >
+                      <Icon name="Send" size={18} />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </DialogContent>
       </Dialog>
