@@ -5,8 +5,8 @@ from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    Business: Create support ticket for authenticated and non-authenticated users
-    Args: event with httpMethod, body containing name, phone, email (optional), category, subject, message
+    Business: Create support ticket for authenticated and non-authenticated users with attachments
+    Args: event with httpMethod, body containing name, phone, email (optional), category, subject, message, attachments (optional)
     Returns: HTTP response with ticket_id and ticket_number
     '''
     method: str = event.get('httpMethod', 'POST')
@@ -38,6 +38,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         category = body_data.get('category', '').strip()
         subject = body_data.get('subject', '').strip()
         message = body_data.get('message', '').strip()
+        attachments = body_data.get('attachments', [])
         
         user_id = event.get('headers', {}).get('X-User-Id')
         
@@ -107,11 +108,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         insert_query = """
             INSERT INTO t_p77282076_fruit_shop_creation.support_tickets 
-            (user_id, name, phone, email, category, subject, message, status, priority)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'new', 'normal')
+            (user_id, name, phone, email, category, subject, message, status, priority, attachments)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'new', 'normal', %s)
             RETURNING id
         """
-        cur.execute(insert_query, (user_id_to_use, name, phone, email if email else None, category, subject, message))
+        cur.execute(insert_query, (user_id_to_use, name, phone, email if email else None, category, subject, message, attachments if attachments else None))
         
         ticket_id = cur.fetchone()[0]
         ticket_number = f'T{str(ticket_id).zfill(6)}'

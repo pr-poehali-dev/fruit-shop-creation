@@ -56,7 +56,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         if ticket_number:
             cur.execute(
-                """SELECT id, ticket_number, subject, message, status, priority, created_at, updated_at, category, name
+                """SELECT id, ticket_number, subject, message, status, priority, created_at, updated_at, category, name, attachments
                    FROM t_p77282076_fruit_shop_creation.support_tickets 
                    WHERE ticket_number = %s 
                    LIMIT 1""",
@@ -88,7 +88,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'created_at': row[6].isoformat() if row[6] else None,
                 'updated_at': row[7].isoformat() if row[7] else None,
                 'category': row[8],
-                'name': row[9]
+                'name': row[9],
+                'attachments': row[10] if row[10] else []
             }
             
             cur.close()

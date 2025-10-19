@@ -167,14 +167,19 @@ const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
         const createdDate = new Date(t.created_at).toLocaleDateString('ru-RU');
         const statusText = t.status_text || t.status;
         
-        addBotMessage(
+        let messageText = 
           `Обращение #${t.ticket_number}\n\n` +
           `📋 Тема: ${t.subject}\n` +
           `📌 Статус: ${statusText}\n` +
           `📅 Создано: ${createdDate}\n` +
           `👤 Имя: ${t.name}\n\n` +
-          `Описание: ${t.message}`
-        );
+          `Описание: ${t.message}`;
+        
+        if (t.attachments && t.attachments.length > 0) {
+          messageText += `\n\n📎 Вложения: ${t.attachments.length} файл(ов)`;
+        }
+        
+        addBotMessage(messageText);
         return true;
       } else {
         addBotMessage(`Обращение ${ticketNumber} не найдено. Проверьте номер и попробуйте снова.`);

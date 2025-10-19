@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,19 +28,100 @@ interface CreateTicketDialogProps {
 }
 
 const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTicketDialogProps) => {
-  const [name, setName] = useState(userName || '');
-  const [phone, setPhone] = useState(userPhone || '');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [category, setCategory] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [attachments, setAttachments] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (attachments.length + files.length > 5) {
+      toast({
+        title: 'Ограничение',
+        description: 'Максимум 5 файлов',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error(`Файл ${file.name} слишком большой (макс 10 МБ)`);
+        }
+
+        return new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            try {
+              const base64 = event.target?.result as string;
+              const response = await fetch('https://functions.poehali.dev/d33dd9f5-8e0c-4ee9-a4ea-fc2cd06d0d52', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  image: base64,
+                  filename: file.name
+                })
+              });
+
+              const data = await response.json();
+              if (data.success) {
+                resolve(data.url);
+              } else {
+                reject(new Error(data.error || 'Ошибка загрузки'));
+              }
+            } catch (err) {
+              reject(err);
+            }
+          };
+          reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setAttachments(prev => [...prev, ...uploadedUrls]);
+      
+      toast({
+        title: 'Файлы загружены',
+        description: `Загружено файлов: ${uploadedUrls.length}`
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Не удалось загрузить файлы',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !phone.trim() || !category || !subject.trim() || !message.trim()) {
+    const finalName = name.trim() || userName || '';
+    const finalPhone = phone.trim() || userPhone || '';
+
+    if (!finalName || !finalPhone || !category || !subject.trim() || !message.trim()) {
       toast({
         title: 'Ошибка',
         description: 'Пожалуйста, заполните все обязательные поля',
@@ -56,12 +137,13 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
-          phone: phone.trim(),
+          name: finalName,
+          phone: finalPhone,
           email: email.trim() || null,
           category,
           subject: subject.trim(),
-          message: message.trim()
+          message: message.trim(),
+          attachments: attachments.length > 0 ? attachments : null
         })
       });
 
@@ -70,16 +152,17 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
       if (data.success) {
         toast({
           title: 'Обращение создано',
-          description: `Номер обращения: #${data.ticket_id}. Мы свяжемся с вами в ближайшее время.`,
+          description: `Номер обращения: ${data.ticket_number}. Мы свяжемся с вами в ближайшее время.`,
           duration: 5000
         });
         onClose();
-        setName(userName || '');
-        setPhone(userPhone || '');
+        setName('');
+        setPhone('');
         setEmail('');
         setCategory('');
         setSubject('');
         setMessage('');
+        setAttachments([]);
       } else {
         toast({
           title: 'Ошибка',
@@ -118,9 +201,9 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
             </Label>
             <Input
               id="name"
-              value={name}
+              value={name || userName || ''}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Введите ваше имя"
+              placeholder={userName || "Введите ваше имя"}
               required
               className="text-sm"
             />
@@ -132,9 +215,9 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
             </Label>
             <Input
               id="phone"
-              value={phone}
+              value={phone || userPhone || ''}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+7 (XXX) XXX-XX-XX"
+              placeholder={userPhone || "+7 (XXX) XXX-XX-XX"}
               required
               className="text-sm"
             />
@@ -198,6 +281,49 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
               required
               className="text-sm resize-none"
             />
+          </div>
+
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label className="text-xs sm:text-sm">Вложения (необязательно)</Label>
+            <div className="space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading || attachments.length >= 5}
+                className="w-full text-sm h-9"
+              >
+                <Icon name="Paperclip" size={16} className="mr-2" />
+                {isUploading ? 'Загрузка...' : `Прикрепить файлы (${attachments.length}/5)`}
+              </Button>
+              {attachments.length > 0 && (
+                <div className="space-y-1">
+                  {attachments.map((url, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded text-xs">
+                      <Icon name="File" size={14} />
+                      <span className="flex-1 truncate">Файл {index + 1}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeAttachment(index)}
+                        className="h-6 w-6"
+                      >
+                        <Icon name="X" size={14} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
