@@ -9,6 +9,7 @@ import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
 import SupportChatBot from "./components/support/SupportChatBot";
 import CreateTicketDialog from "./components/support/CreateTicketDialog";
+import DecorativeBranch from "./components/DecorativeBranch";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -53,6 +54,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <InstallPrompt />
+        <DecorativeBranch />
         <SupportChatBot 
           onCreateTicket={() => setIsTicketDialogOpen(true)}
           userId={userId}
