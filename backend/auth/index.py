@@ -159,6 +159,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     else:
         phone = phone_raw
     
+    print(f"Phone normalization: raw='{phone_raw}' -> cleaned='{cleaned_phone}' -> formatted='{phone}'")
+    
     if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
