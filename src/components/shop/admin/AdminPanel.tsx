@@ -60,6 +60,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
   const {
     handleSaveProduct,
     handleSaveCategory,
+    handleDeleteCategory,
     handleAddBalance,
     handleAddCashback,
     handleToggleAdmin,
@@ -142,6 +143,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
             setEditingCategory(category);
             setShowCategoryDialog(true);
           }}
+          onDeleteCategory={handleDeleteCategory}
           onAddBalance={handleAddBalance}
           onAddCashback={handleAddCashback}
           onToggleAdmin={handleToggleAdmin}

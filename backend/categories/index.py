@@ -18,7 +18,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
                 'Access-Control-Max-Age': '86400'
             },
@@ -85,6 +85,40 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'success': True, 'category': dict(category) if category else None}, default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'DELETE':
+            params = event.get('queryStringParameters') or {}
+            category_id = params.get('id')
+            
+            if not category_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Category ID required'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(f"SELECT COUNT(*) as count FROM products WHERE category_id = {category_id}")
+            result = cur.fetchone()
+            products_count = result['count']
+            
+            if products_count > 0:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': f'Cannot delete category with {products_count} products'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(f"DELETE FROM categories WHERE id = {category_id}")
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'success': True}),
                 'isBase64Encoded': False
             }
         

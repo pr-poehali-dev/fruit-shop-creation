@@ -123,6 +123,36 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleDeleteCategory = async (category: any) => {
+    if (!confirm(`Удалить категорию "${category.name}"? Это действие необратимо.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${props.API_CATEGORIES}?id=${category.id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Категория удалена',
+          description: category.name
+        });
+        props.loadCategories();
+      } else {
+        throw new Error(data.error || 'Failed to delete category');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Ошибка',
+        description: error.message || 'Не удалось удалить категорию. Возможно, в ней есть товары.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handleAddBalance = async (userId: number, amount: number, description: string) => {
     try {
       const response = await fetch(props.API_AUTH, {
@@ -617,6 +647,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
   return {
     handleSaveProduct,
     handleSaveCategory,
+    handleDeleteCategory,
     handleAddBalance,
     handleAddCashback,
     handleToggleAdmin,

@@ -14,9 +14,10 @@ interface CategoriesTabProps {
   categories: Category[];
   onAddCategory: () => void;
   onEditCategory: (category: Category) => void;
+  onDeleteCategory: (category: Category) => void;
 }
 
-const CategoriesTab = ({ categories, onAddCategory, onEditCategory }: CategoriesTabProps) => {
+const CategoriesTab = ({ categories, onAddCategory, onEditCategory, onDeleteCategory }: CategoriesTabProps) => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -37,10 +38,16 @@ const CategoriesTab = ({ categories, onAddCategory, onEditCategory }: Categories
                   <CardDescription>{category.description}</CardDescription>
                   <Badge variant="outline" className="mt-2">slug: {category.slug}</Badge>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => onEditCategory(category)}>
-                  <Icon name="Pencil" size={16} className="mr-2" />
-                  Изменить
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => onEditCategory(category)}>
+                    <Icon name="Pencil" size={16} className="mr-2" />
+                    Изменить
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => onDeleteCategory(category)}>
+                    <Icon name="Trash2" size={16} className="mr-2" />
+                    Удалить
+                  </Button>
+                </div>
               </div>
             </CardHeader>
           </Card>

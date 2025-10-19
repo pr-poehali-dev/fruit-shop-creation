@@ -29,6 +29,7 @@ interface AdminPanelTabsProps {
   onDeleteProduct: (productId: number) => void;
   onAddCategory: () => void;
   onEditCategory: (category: Category) => void;
+  onDeleteCategory: (category: Category) => void;
   onAddBalance: (userId: number, amount: number, description: string) => void;
   onAddCashback: (userId: number, amount: number, description: string) => void;
   onToggleAdmin: (userId: number, isAdmin: boolean) => void;
@@ -59,6 +60,7 @@ const AdminPanelTabs = ({
   onDeleteProduct,
   onAddCategory,
   onEditCategory,
+  onDeleteCategory,
   onAddBalance,
   onAddCashback,
   onToggleAdmin,
@@ -146,6 +148,7 @@ const AdminPanelTabs = ({
           categories={categories}
           onAddCategory={onAddCategory}
           onEditCategory={onEditCategory}
+          onDeleteCategory={onDeleteCategory}
         />
       </TabsContent>
 
