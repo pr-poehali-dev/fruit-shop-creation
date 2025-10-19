@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 import Icon from '@/components/ui/icon';
 import { CartItem, User } from '@/types/shop';
@@ -34,6 +35,8 @@ const CartContent = ({
   const [deliveryType, setDeliveryType] = useState('pickup');
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+  const [deliveryCity, setDeliveryCity] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   
   const deliveryEnabled = siteSettings?.delivery_enabled === true;
   const pickupEnabled = siteSettings?.pickup_enabled === true;
@@ -221,26 +224,54 @@ const CartContent = ({
                     </Label>
                   </div>
                   
-                  {deliveryType === 'delivery' && deliveryZones.length > 0 && (
-                    <div className="pl-9">
-                      <Label htmlFor="delivery-zone" className="text-xs text-muted-foreground">
-                        Выберите зону доставки
-                      </Label>
-                      <Select
-                        value={selectedZoneId?.toString() || ''}
-                        onValueChange={(value) => setSelectedZoneId(parseInt(value))}
-                      >
-                        <SelectTrigger id="delivery-zone" className="w-full mt-1">
-                          <SelectValue placeholder="Выберите зону" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {deliveryZones.map((zone) => (
-                            <SelectItem key={zone.id} value={zone.id.toString()}>
-                              {zone.zone_name} — {parseFloat(zone.delivery_price).toFixed(0)} ₽
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {deliveryType === 'delivery' && (
+                    <div className="pl-9 space-y-3">
+                      {deliveryZones.length > 0 && (
+                        <div>
+                          <Label htmlFor="delivery-zone" className="text-xs text-muted-foreground">
+                            Выберите зону доставки
+                          </Label>
+                          <Select
+                            value={selectedZoneId?.toString() || ''}
+                            onValueChange={(value) => setSelectedZoneId(parseInt(value))}
+                          >
+                            <SelectTrigger id="delivery-zone" className="w-full mt-1">
+                              <SelectValue placeholder="Выберите зону" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {deliveryZones.map((zone) => (
+                                <SelectItem key={zone.id} value={zone.id.toString()}>
+                                  {zone.zone_name} — {parseFloat(zone.delivery_price).toFixed(0)} ₽
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      <div>
+                        <Label htmlFor="delivery-city" className="text-xs text-muted-foreground">
+                          Город <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="delivery-city"
+                          placeholder="Введите город"
+                          value={deliveryCity}
+                          onChange={(e) => setDeliveryCity(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="delivery-address" className="text-xs text-muted-foreground">
+                          Адрес доставки <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="delivery-address"
+                          placeholder="Улица, дом, квартира"
+                          value={deliveryAddress}
+                          onChange={(e) => setDeliveryAddress(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -283,8 +314,8 @@ const CartContent = ({
               <Button 
                 className="w-full" 
                 variant="default" 
-                onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined)}
-                disabled={!pickupEnabled && !deliveryEnabled}
+                onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
+                disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && (!deliveryCity.trim() || !deliveryAddress.trim()))}
               >
                 <Icon name="Wallet" size={18} className="mr-2" />
                 {preorderEnabled 
@@ -295,8 +326,8 @@ const CartContent = ({
             )}
             <Button 
               className="w-full" 
-              onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined)}
-              disabled={!pickupEnabled && !deliveryEnabled}
+              onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
+              disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && (!deliveryCity.trim() || !deliveryAddress.trim()))}
             >
               <Icon name="CreditCard" size={18} className="mr-2" />
               {preorderEnabled 

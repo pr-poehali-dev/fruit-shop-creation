@@ -35,7 +35,9 @@ export const useCheckout = ({
   const handleCheckout = async (
     paymentMethod: string,
     deliveryType: string = 'pickup',
-    deliveryZoneId?: number
+    deliveryZoneId?: number,
+    deliveryCity?: string,
+    deliveryAddress?: string
   ) => {
     if (!user) {
       toast({
@@ -51,6 +53,15 @@ export const useCheckout = ({
       toast({
         title: 'Корзина пуста',
         description: 'Добавьте товары в корзину',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (deliveryType === 'delivery' && (!deliveryCity?.trim() || !deliveryAddress?.trim())) {
+      toast({
+        title: 'Укажите адрес доставки',
+        description: 'Для доставки необходимо указать город и адрес',
         variant: 'destructive'
       });
       return;
@@ -105,9 +116,9 @@ export const useCheckout = ({
         const data = await response.json();
 
         if (data.success && data.payment_url) {
-          const deliveryAddress = deliveryType === 'pickup'
+          const fullDeliveryAddress = deliveryType === 'pickup'
             ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}`
-            : 'Доставка (адрес уточняется)';
+            : `Доставка: ${deliveryCity}, ${deliveryAddress}`;
 
           const orderResponse = await fetch(API_ORDERS, {
             method: 'POST',
@@ -120,7 +131,7 @@ export const useCheckout = ({
                 price: item.product.price
               })),
               payment_method: paymentMethod,
-              delivery_address: deliveryAddress,
+              delivery_address: fullDeliveryAddress,
               delivery_type: deliveryType,
               delivery_zone_id: deliveryZoneId,
               cashback_percent: siteSettings?.balance_payment_cashback_percent || 5,
@@ -158,9 +169,9 @@ export const useCheckout = ({
     }
 
     try {
-      const deliveryAddress = deliveryType === 'pickup'
+      const fullDeliveryAddress = deliveryType === 'pickup'
         ? `Самовывоз: ${siteSettings?.address || 'Адрес не указан'}`
-        : 'Доставка (адрес уточняется)';
+        : `Доставка: ${deliveryCity}, ${deliveryAddress}`;
 
       const response = await fetch(API_ORDERS, {
         method: 'POST',
@@ -173,7 +184,7 @@ export const useCheckout = ({
             price: item.product.price
           })),
           payment_method: paymentMethod,
-          delivery_address: deliveryAddress,
+          delivery_address: fullDeliveryAddress,
           delivery_type: deliveryType,
           delivery_zone_id: deliveryZoneId,
           cashback_percent: siteSettings?.balance_payment_cashback_percent || 5
