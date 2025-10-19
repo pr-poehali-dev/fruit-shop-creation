@@ -542,10 +542,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             phone_escaped = phone.replace("'", "''")
             password_escaped = password.replace("'", "''")
             
+            print(f"Login attempt: phone='{phone_escaped}', password='{password_escaped}'")
+            
             cur.execute(
                 f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
             )
             user = cur.fetchone()
+            
+            print(f"User found: {user is not None}")
             
             if user and user[3]:
                 import random
