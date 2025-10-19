@@ -16,6 +16,23 @@ export default function MaintenancePage({ reason, onAdminLogin }: MaintenancePag
   const [showAdminForm, setShowAdminForm] = useState(false);
   const { toast } = useToast();
 
+  const normalizePhone = (phoneInput: string): string => {
+    const cleaned = phoneInput.replace(/\D/g, '');
+    
+    let normalized = cleaned;
+    if (normalized.startsWith('8')) {
+      normalized = '7' + normalized.slice(1);
+    } else if (!normalized.startsWith('7')) {
+      normalized = '7' + normalized;
+    }
+    
+    if (normalized.length >= 11) {
+      return `+7 (${normalized.slice(1, 4)}) ${normalized.slice(4, 7)}-${normalized.slice(7, 9)}-${normalized.slice(9, 11)}`;
+    }
+    
+    return phoneInput;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -28,7 +45,9 @@ export default function MaintenancePage({ reason, onAdminLogin }: MaintenancePag
       return;
     }
 
-    onAdminLogin(phone, password);
+    const normalizedPhone = normalizePhone(phone);
+    console.log('Maintenance login:', { raw: phone, normalized: normalizedPhone });
+    onAdminLogin(normalizedPhone, password);
   };
 
   return (
