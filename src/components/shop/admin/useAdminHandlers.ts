@@ -432,6 +432,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       loyalty_cashback_percent: getNumberValue('loyalty_cashback_percent', 5),
       balance_payment_cashback_percent: getNumberValue('balance_payment_cashback_percent', 5),
       holiday_theme: getFormValue('holiday_theme') || 'none',
+      is_maintenance_mode: formData.get('is_maintenance_mode') === 'true',
+      maintenance_reason: getFormValue('maintenance_reason') || 'Сайт временно закрыт на техническое обслуживание',
       delivery_enabled: getCheckboxValue('delivery_enabled'),
       pickup_enabled: getCheckboxValue('pickup_enabled'),
       preorder_enabled: getCheckboxValue('preorder_enabled'),

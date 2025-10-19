@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import Icon from '@/components/ui/icon';
 import { useState, useEffect } from 'react';
 
@@ -14,9 +15,11 @@ interface SettingsTabProps {
 
 const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
   const [holidayTheme, setHolidayTheme] = useState(siteSettings.holiday_theme || 'none');
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(siteSettings.is_maintenance_mode || false);
 
   useEffect(() => {
     setHolidayTheme(siteSettings.holiday_theme || 'none');
+    setIsMaintenanceMode(siteSettings.is_maintenance_mode || false);
   }, [siteSettings]);
 
   return (
@@ -27,6 +30,44 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
       </CardHeader>
       <CardContent>
         <form key={JSON.stringify(siteSettings)} onSubmit={onSaveSettings} className="space-y-4">
+          <div className="border-b pb-4 mb-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Icon name="Construction" size={20} className="text-orange-600" />
+              Режим технического обслуживания
+            </h3>
+            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+              <div className="flex-1">
+                <Label htmlFor="maintenance-mode" className="text-base font-medium">
+                  Закрыть сайт на техническое обслуживание
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Посетители увидят страницу с сообщением. Админы смогут войти по номеру и паролю.
+                </p>
+              </div>
+              <input type="hidden" name="is_maintenance_mode" value={isMaintenanceMode ? 'true' : 'false'} />
+              <Switch
+                id="maintenance-mode"
+                checked={isMaintenanceMode}
+                onCheckedChange={setIsMaintenanceMode}
+              />
+            </div>
+            {isMaintenanceMode && (
+              <div className="mt-4">
+                <Label htmlFor="maintenance-reason">Причина закрытия сайта</Label>
+                <Textarea
+                  id="maintenance-reason"
+                  name="maintenance_reason"
+                  defaultValue={siteSettings.maintenance_reason || 'Сайт временно закрыт на техническое обслуживание'}
+                  rows={3}
+                  placeholder="Сайт временно закрыт на техническое обслуживание"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Это сообщение увидят все посетители сайта
+                </p>
+              </div>
+            )}
+          </div>
+          
           <div className="border-b pb-4 mb-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <span>🎃</span> Праздничная тема сайта <span>🎄</span>

@@ -17,6 +17,7 @@ import ProfileContent from '@/components/shop/ProfileContent';
 import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
 import HolidayThemeRenderer from '@/components/shop/HolidayThemeRenderer';
 import MainContent from '@/components/shop/MainContent';
+import MaintenancePage from '@/components/MaintenancePage';
 import RatingModal from '@/components/RatingModal';
 import { Product } from '@/types/shop';
 
@@ -125,6 +126,27 @@ const Index = () => {
       scrollToSupport={scrollToSupport}
     />
   );
+
+  const handleMaintenanceAdminLogin = async (phone: string, password: string) => {
+    try {
+      await handleAuth(phone, password, onAuthSuccess, onAuthError);
+    } catch (error) {
+      toast({
+        title: 'Ошибка входа',
+        description: 'Неверный номер или пароль',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  if (siteSettings?.is_maintenance_mode && !user?.is_admin) {
+    return (
+      <MaintenancePage
+        reason={siteSettings.maintenance_reason || 'Сайт временно закрыт на техническое обслуживание'}
+        onAdminLogin={handleMaintenanceAdminLogin}
+      />
+    );
+  }
 
   return (
     <div className={`min-h-screen ${getBackgroundStyle(siteSettings?.holiday_theme)} relative`}>
