@@ -23,6 +23,7 @@ interface UserTicket {
   ticket_number: string;
   subject: string;
   status: string;
+  status_text?: string;
   created_at: string;
 }
 
@@ -146,7 +147,7 @@ const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
       addBotMessage('У вас пока нет обращений. Хотите создать новое?');
     } else {
       const ticketsText = userTickets.map(t => 
-        `#${t.ticket_number} - ${t.subject} (${t.status_text || t.status})`
+        `#${t.ticket_number} - ${t.subject} (${t.status_text})`
       ).join('\n');
       addBotMessage(`Ваши обращения:\n\n${ticketsText}\n\nЧтобы узнать подробности, введите номер обращения (например: T000001)`);
     }
@@ -165,12 +166,11 @@ const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
       if (data.success && data.ticket) {
         const t = data.ticket;
         const createdDate = new Date(t.created_at).toLocaleDateString('ru-RU');
-        const statusText = t.status_text || t.status;
         
         let messageText = 
           `Обращение #${t.ticket_number}\n\n` +
           `📋 Тема: ${t.subject}\n` +
-          `📌 Статус: ${statusText}\n` +
+          `📌 Статус: ${t.status_text}\n` +
           `📅 Создано: ${createdDate}\n` +
           `👤 Имя: ${t.name}\n\n` +
           `Описание: ${t.message}`;

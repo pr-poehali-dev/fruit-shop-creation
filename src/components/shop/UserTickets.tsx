@@ -1,210 +1,185 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
-import CreateTicketDialog from './tickets/CreateTicketDialog';
-import TicketCard from './tickets/TicketCard';
+import SupportDialog from './SupportDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface UserTicketsProps {
   user: User | null;
 }
 
-const API_SUPPORT = 'https://functions.poehali.dev/a833bb69-e590-4a5f-a513-450a69314192';
+interface Ticket {
+  id: number;
+  ticket_number: string;
+  subject: string;
+  message: string;
+  status: string;
+  status_text: string;
+  priority: string;
+  created_at: string;
+  updated_at?: string;
+}
 
-const statusLabels: Record<string, string> = {
-  'open': '🟢 Открыт',
-  'in_progress': '🟡 В работе',
-  'resolved': '✅ Решён',
-  'closed': '⚫ Закрыт'
+const API_TICKETS = 'https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d';
+
+const statusColors: Record<string, string> = {
+  'new': 'destructive',
+  'open': 'default',
+  'in_progress': 'secondary',
+  'resolved': 'outline',
+  'closed': 'outline'
 };
 
 const UserTickets = ({ user }: UserTicketsProps) => {
-  const [activeTicket, setActiveTicket] = useState<any>(null);
-  const [replyMessage, setReplyMessage] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [closedTicket, setClosedTicket] = useState<any>(null);
-  const [ratedTicket, setRatedTicket] = useState<any>(null);
-  const [dismissedTickets, setDismissedTickets] = useState<Set<number>>(() => {
-    const saved = localStorage.getItem('dismissedTickets');
-    return saved ? new Set(JSON.parse(saved)) : new Set();
-  });
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const loadActiveTicket = async (shouldScroll: boolean = false) => {
+  const loadTickets = async () => {
     if (!user) return;
     
+    setIsLoading(true);
     try {
-      const response = await fetch(`${API_SUPPORT}?user_id=${user.id}`);
+      const response = await fetch(`${API_TICKETS}?user_id=${user.id}`);
       const data = await response.json();
-      console.log('Support response:', data);
       
-      if (data.active_ticket && data.active_ticket.status !== 'closed' && data.active_ticket.status !== 'resolved') {
-        console.log('Active ticket found:', data.active_ticket);
-        setActiveTicket(data.active_ticket);
-        setRatedTicket(null);
-        setUnreadCount(data.active_ticket.unread_count || 0);
-        if (shouldScroll) {
-          setTimeout(scrollToBottom, 100);
-        }
-      } else if (data.active_ticket && (data.active_ticket.status === 'closed' || data.active_ticket.status === 'resolved')) {
-        console.log('Ticket closed, checking rating status');
-        const needsRating = !data.active_ticket.rating;
-        const hasRating = !!data.active_ticket.rating;
-        const isDismissed = dismissedTickets.has(data.active_ticket.id);
-        
-        if (needsRating) {
-          setClosedTicket(data.active_ticket);
-          setActiveTicket(data.active_ticket);
-        } else if (hasRating && !isDismissed) {
-          setRatedTicket(data.active_ticket);
-          setActiveTicket(null);
-          setClosedTicket(null);
-        } else {
-          setRatedTicket(null);
-          setActiveTicket(null);
-          setClosedTicket(null);
-        }
-        setUnreadCount(0);
-      } else {
-        console.log('No active ticket');
-        setActiveTicket(null);
-        setRatedTicket(null);
-        setUnreadCount(0);
+      if (data.success && data.tickets) {
+        setTickets(data.tickets);
       }
     } catch (error) {
-      console.error('Failed to load ticket:', error);
+      console.error('Failed to load tickets:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить обращения',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSendReply = async () => {
-    if (!replyMessage.trim() || !activeTicket) return;
-
-    try {
-      const response = await fetch(API_SUPPORT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'add_message',
-          ticket_id: activeTicket.id,
-          user_id: user?.id,
-          message: replyMessage,
-          is_admin: false
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Сообщение отправлено',
-          description: 'Ваш ответ добавлен в тикет'
-        });
-        setReplyMessage('');
-        await loadActiveTicket(false);
-        setTimeout(scrollToBottom, 100);
-      } else {
-        throw new Error(data.error);
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось отправить сообщение',
-        variant: 'destructive'
-      });
-    }
+  const openTicketDialog = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setIsDialogOpen(true);
   };
 
   useEffect(() => {
-    loadActiveTicket();
-    
-    const interval = setInterval(() => loadActiveTicket(false), 10000);
-    
-    return () => clearInterval(interval);
+    loadTickets();
   }, [user]);
 
-  if (!user) {
-    console.log('UserTickets: No user');
-    return null;
-  }
-
-  console.log('UserTickets render - user:', user.id, 'activeTicket:', activeTicket);
+  if (!user) return null;
 
   return (
     <>
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold">Техподдержка</h3>
-          {unreadCount > 0 ? (
-            <Badge variant="destructive">
-              {unreadCount} новых
-            </Badge>
-          ) : (activeTicket && !activeTicket.rating && (activeTicket.status === 'closed' || activeTicket.status === 'resolved')) ? (
-            <Badge variant="outline" className="border-orange-500 text-orange-700 dark:text-orange-400">
-              <Icon name="AlertCircle" size={12} className="mr-1" />
-              Требуется оценка
-            </Badge>
-          ) : null}
+          <h3 className="font-semibold">Мои обращения</h3>
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            size="sm"
+          >
+            <Icon name="Plus" size={16} className="mr-1" />
+            Создать
+          </Button>
         </div>
         
-        {activeTicket || ratedTicket ? (
-          <TicketCard
-            ticket={activeTicket || ratedTicket}
-            unreadCount={unreadCount}
-            statusLabels={statusLabels}
-            replyMessage={replyMessage}
-            onReplyChange={setReplyMessage}
-            onSendReply={handleSendReply}
-            onShowRating={loadActiveTicket}
-            onDismiss={ratedTicket ? () => {
-              const newDismissed = new Set(dismissedTickets);
-              newDismissed.add(ratedTicket.id);
-              setDismissedTickets(newDismissed);
-              localStorage.setItem('dismissedTickets', JSON.stringify(Array.from(newDismissed)));
-              setRatedTicket(null);
-            } : undefined}
-            apiUrl={API_SUPPORT}
-            messagesEndRef={messagesEndRef}
-            userId={user?.id}
-          />
-        ) : (
+        {isLoading ? (
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              <Icon name="Loader2" size={24} className="mx-auto animate-spin" />
+            </CardContent>
+          </Card>
+        ) : tickets.length === 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Нужна помощь?</CardTitle>
+              <CardTitle className="text-sm">Нет обращений</CardTitle>
               <CardDescription className="text-xs">
-                Создайте обращение в техподдержку
+                У вас пока нет обращений в поддержку
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => setShowCreateForm(true)}
+                onClick={() => setShowCreateDialog(true)}
                 className="w-full"
                 variant="outline"
               >
                 <Icon name="MessageCircle" size={18} className="mr-2" />
-                Создать обращение
+                Создать первое обращение
               </Button>
             </CardContent>
           </Card>
+        ) : (
+          <div className="space-y-3">
+            {tickets.map((ticket) => (
+              <Card key={ticket.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openTicketDialog(ticket)}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-sm font-medium">#{ticket.ticket_number}</CardTitle>
+                    <Badge variant={statusColors[ticket.status] as any}>
+                      {ticket.status_text}
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-xs line-clamp-1">{ticket.subject}</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-xs text-muted-foreground line-clamp-2">{ticket.message}</p>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                    <Icon name="Calendar" size={12} />
+                    {new Date(ticket.created_at).toLocaleDateString('ru-RU')}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
 
-      <CreateTicketDialog
-        open={showCreateForm}
-        onOpenChange={setShowCreateForm}
-        userId={user.id}
-        apiUrl={API_SUPPORT}
-        onTicketCreated={loadActiveTicket}
+      <SupportDialog
+        open={showCreateDialog}
+        onOpenChange={(open) => {
+          setShowCreateDialog(open);
+          if (!open) loadTickets();
+        }}
+        user={user}
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Обращение #{selectedTicket?.ticket_number}</DialogTitle>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant={statusColors[selectedTicket.status] as any}>
+                    {selectedTicket.status_text}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(selectedTicket.created_at).toLocaleDateString('ru-RU')}
+                  </span>
+                </div>
+                <h4 className="font-semibold">{selectedTicket.subject}</h4>
+              </div>
+              <div className="bg-muted p-4 rounded-lg">
+                <p className="text-sm whitespace-pre-wrap">{selectedTicket.message}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

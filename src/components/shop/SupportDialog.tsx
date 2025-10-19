@@ -22,7 +22,7 @@ const SupportDialog = ({ open, onOpenChange, user }: SupportDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const API_SUPPORT = 'https://functions.poehali.dev/a833bb69-e590-4a5f-a513-450a69314192';
+  const API_SUPPORT_TICKET = 'https://functions.poehali.dev/ad233746-6bc7-475c-9eff-4547fd9394a5';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,12 +39,17 @@ const SupportDialog = ({ open, onOpenChange, user }: SupportDialogProps) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(API_SUPPORT, {
+      const response = await fetch(API_SUPPORT_TICKET, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-User-Id': user.id.toString()
+        },
         body: JSON.stringify({
-          action: 'create_ticket',
-          user_id: user.id,
+          name: user.full_name || user.phone,
+          phone: user.phone,
+          email: user.email || '',
+          category: 'general',
           subject,
           message,
           priority
