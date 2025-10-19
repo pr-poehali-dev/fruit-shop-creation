@@ -1,4 +1,5 @@
 {
+  "content-manager": "https://functions.poehali.dev/56deea36-35f7-4c07-becc-dedeaa3de78d",
   "user-tickets": "https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d",
   "support-ticket": "https://functions.poehali.dev/ad233746-6bc7-475c-9eff-4547fd9394a5",
   "upload-pdf": "https://functions.poehali.dev/1dd9da2d-583e-4678-9e8a-b647fdb30eea",
@@ -6,7 +7,6 @@
   "alfabank-webhook": "https://functions.poehali.dev/563d9333-4b51-4637-82a8-c2a66058792a",
   "alfabank-payment": "https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb",
   "delivery-zones": "https://functions.poehali.dev/8c8e301f-2323-4f3b-85f0-14a3c210e670",
-  "admin-reset-codes": "https://functions.poehali.dev/e343c1bf-14b9-4373-a620-36d059062d82",
   "password-reset": "https://functions.poehali.dev/c7d83bd6-2027-4170-8c35-7f6462c5274a",
   "notifications": "https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35",
   "ratings": "https://functions.poehali.dev/91674d2e-1306-4ae6-9c23-ab0938e8ce5c",

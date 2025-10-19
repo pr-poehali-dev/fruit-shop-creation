@@ -1,64 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface GalleryImage {
   id: number;
-  url: string;
+  image_url: string;
   title: string;
   description: string;
 }
 
-const galleryImages: GalleryImage[] = [
-  {
-    id: 1,
-    url: 'https://cdn.poehali.dev/projects/999e341c-34c8-439f-a5a7-6cab243ccc11/files/d0355945-8f9e-4481-b185-9c4664060422.jpg',
-    title: 'Наш питомник',
-    description: 'Широкий ассортимент декоративных и плодовых культур'
-  },
-  {
-    id: 2,
-    url: 'https://cdn.poehali.dev/projects/999e341c-34c8-439f-a5a7-6cab243ccc11/files/21628348-c6b1-44ed-943b-0f0a3fe711a5.jpg',
-    title: 'Яблони в саду',
-    description: 'Плодовые деревья с крупными сочными плодами'
-  },
-  {
-    id: 3,
-    url: 'https://cdn.poehali.dev/projects/999e341c-34c8-439f-a5a7-6cab243ccc11/files/fe15436f-8b9a-4b1d-913a-a954b3e05042.jpg',
-    title: 'Цветущая вишня',
-    description: 'Декоративные деревья для вашего участка'
-  }
-];
+const API_CONTENT = 'https://functions.poehali.dev/56deea36-35f7-4c07-becc-dedeaa3de78d';
 
 const GallerySection = () => {
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadGallery = async () => {
+      try {
+        const response = await fetch(`${API_CONTENT}?resource=gallery`);
+        const data = await response.json();
+        setGalleryImages(data.images || []);
+      } catch (error) {
+        console.error('Failed to load gallery:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadGallery();
+  }, []);
 
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0,
-      rotateY: direction > 0 ? 45 : -45,
-      scale: 0.8
+      x: direction > 0 ? 300 : -300,
+      opacity: 0
     }),
     center: {
       zIndex: 1,
       x: 0,
-      opacity: 1,
-      rotateY: 0,
-      scale: 1
+      opacity: 1
     },
     exit: (direction: number) => ({
       zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0,
-      rotateY: direction < 0 ? 45 : -45,
-      scale: 0.8
+      x: direction < 0 ? 300 : -300,
+      opacity: 0
     })
   };
 
-  const swipeConfidenceThreshold = 10000;
+  const swipeConfidenceThreshold = 5000;
   const swipePower = (offset: number, velocity: number) => {
     return Math.abs(offset) * velocity;
   };
@@ -73,6 +65,22 @@ const GallerySection = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+        <p className="text-muted-foreground">Загрузка галереи...</p>
+      </div>
+    );
+  }
+
+  if (galleryImages.length === 0) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+        <p className="text-muted-foreground">Галерея пуста</p>
+      </div>
+    );
+  }
+
   const currentImage = galleryImages[currentIndex];
 
   return (
@@ -83,7 +91,7 @@ const GallerySection = () => {
           <p className="text-muted-foreground">Фотографии нашего питомника и растений</p>
         </div>
 
-        <div className="relative w-full max-w-5xl mx-auto aspect-[4/3] mb-4">
+        <div className="relative w-full max-w-5xl mx-auto aspect-[4/3] mb-4 touch-pan-y">
           <div className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white font-medium text-sm">
             {currentIndex + 1} / {galleryImages.length}
           </div>
@@ -97,14 +105,12 @@ const GallerySection = () => {
               animate="center"
               exit="exit"
               transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.3 },
-                rotateY: { duration: 0.3 },
-                scale: { duration: 0.3 }
+                x: { type: "spring", stiffness: 200, damping: 25 },
+                opacity: { duration: 0.2 }
               }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={1}
+              dragElastic={0.2}
               onDragEnd={(e, { offset, velocity }) => {
                 const swipe = swipePower(offset.x, velocity.x);
 
@@ -115,13 +121,12 @@ const GallerySection = () => {
                 }
               }}
               className="absolute inset-0 w-full h-full"
-              style={{ transformStyle: 'preserve-3d' }}
             >
               <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-card">
                 <img
-                  src={currentImage.url}
+                  src={currentImage.image_url}
                   alt={currentImage.title}
-                  className="w-full h-full object-contain select-none"
+                  className="w-full h-full object-contain select-none pointer-events-none"
                   draggable="false"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 sm:p-8 text-white">
