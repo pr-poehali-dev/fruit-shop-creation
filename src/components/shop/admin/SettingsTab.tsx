@@ -31,7 +31,7 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
         <CardDescription>Настройте основную информацию</CardDescription>
       </CardHeader>
       <CardContent>
-        <form key={JSON.stringify(siteSettings)} onSubmit={onSaveSettings} className="space-y-4">
+        <form onSubmit={onSaveSettings} className="space-y-4">
           <div className="border-b pb-4 mb-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Icon name="Construction" size={20} className="text-orange-600" />

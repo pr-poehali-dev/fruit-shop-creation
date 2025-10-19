@@ -474,7 +474,11 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     console.log('Saving settings:', {
       delivery_enabled: settingsData.delivery_enabled,
       pickup_enabled: settingsData.pickup_enabled,
-      preorder_enabled: settingsData.preorder_enabled
+      preorder_enabled: settingsData.preorder_enabled,
+      is_maintenance_mode: settingsData.is_maintenance_mode,
+      auto_maintenance_enabled: settingsData.auto_maintenance_enabled,
+      maintenance_start_time: settingsData.maintenance_start_time,
+      maintenance_end_time: settingsData.maintenance_end_time
     });
 
     try {
