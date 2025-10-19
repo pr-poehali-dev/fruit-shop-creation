@@ -1,0 +1,34 @@
+{
+  "tests": [
+    {
+      "name": "Create ticket successfully",
+      "method": "POST",
+      "body": {
+        "name": "Иван Тестовый",
+        "phone": "+79991234567",
+        "email": "test@example.com",
+        "category": "order",
+        "subject": "Вопрос по заказу",
+        "message": "Хочу уточнить статус моего заказа"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Missing required field returns error",
+      "method": "POST",
+      "body": {
+        "name": "Иван Тестовый",
+        "phone": "+79991234567"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

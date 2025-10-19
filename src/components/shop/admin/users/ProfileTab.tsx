@@ -144,13 +144,33 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
         
         <div className="space-y-2">
           <Label htmlFor="newPassword">Новый пароль</Label>
-          <Input
-            id="newPassword"
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Оставьте пустым, если не хотите менять"
-          />
+          <div className="flex gap-2">
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Оставьте пустым, если не хотите менять"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-2).toUpperCase();
+                setNewPassword(randomPassword);
+                setConfirmPassword(randomPassword);
+                toast({
+                  title: 'Пароль сгенерирован',
+                  description: `Новый пароль: ${randomPassword}`,
+                  duration: 10000
+                });
+              }}
+              title="Генерировать случайный пароль"
+            >
+              <Icon name="RefreshCw" size={16} />
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2">

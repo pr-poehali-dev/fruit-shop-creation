@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
+import SupportChatBot from "./components/support/SupportChatBot";
+import CreateTicketDialog from "./components/support/CreateTicketDialog";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -19,6 +21,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showLoading, setShowLoading] = useState(true);
+  const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
@@ -39,6 +42,11 @@ const App = () => {
         <Toaster />
         <Sonner />
         <InstallPrompt />
+        <SupportChatBot onCreateTicket={() => setIsTicketDialogOpen(true)} />
+        <CreateTicketDialog 
+          isOpen={isTicketDialogOpen} 
+          onClose={() => setIsTicketDialogOpen(false)} 
+        />
         <BrowserRouter>
           <Suspense fallback={<LoadingScreen onComplete={() => {}} />}>
             <Routes>
