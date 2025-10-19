@@ -18,6 +18,14 @@ interface FAQ {
   answer: string;
 }
 
+interface UserTicket {
+  id: number;
+  ticket_number: string;
+  subject: string;
+  status: string;
+  created_at: string;
+}
+
 const faqs: FAQ[] = [
   {
     keywords: ['доставка', 'доставить', 'привезти', 'доставят', 'привозите'],
@@ -55,42 +63,51 @@ const faqs: FAQ[] = [
     answer: 'Выберите букет в каталоге, добавьте в корзину, укажите адрес и время доставки, оплатите. После оплаты с вами свяжется флорист для подтверждения.'
   },
   {
-    keywords: ['открытка', 'записка', 'поздравление', 'текст', 'пожелание'],
-    question: 'Можно ли добавить открытку?',
-    answer: 'Да, при оформлении заказа можно указать текст поздравления. Мы бесплатно добавим открытку с вашими словами.'
-  },
-  {
-    keywords: ['фото', 'картинка', 'как выглядит', 'показать', 'посмотреть'],
-    question: 'Букет будет точно как на фото?',
-    answer: 'Мы максимально придерживаемся фотографий, но состав может немного отличаться в зависимости от сезона. Всегда согласовываем замены с клиентом.'
-  },
-  {
-    keywords: ['контакты', 'связаться', 'телефон', 'написать', 'позвонить'],
-    question: 'Как с вами связаться?',
-    answer: 'Напишите нам через форму обратной связи или позвоните по телефону +7 (XXX) XXX-XX-XX. Отвечаем в течение 15 минут в рабочее время.'
+    keywords: ['тикет', 'обращение', 'заявка', 'мои обращения', 'статус'],
+    question: 'Мои обращения',
+    answer: 'SHOW_TICKETS'
   }
 ];
 
 interface SupportChatBotProps {
   onCreateTicket: () => void;
+  userId?: number;
 }
 
-const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
+const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [userTickets, setUserTickets] = useState<UserTicket[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       addBotMessage('Здравствуйте! 👋 Я бот-помощник. Задайте вопрос о доставке, оплате, работе магазина или создайте обращение в поддержку.');
+      if (userId) {
+        loadUserTickets();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, userId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const loadUserTickets = async () => {
+    if (!userId) return;
+    
+    try {
+      const response = await fetch(`https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d?user_id=${userId}`);
+      const data = await response.json();
+      if (data.success && data.tickets) {
+        setUserTickets(data.tickets);
+      }
+    } catch (error) {
+      console.error('Failed to load tickets:', error);
+    }
+  };
 
   const addBotMessage = (text: string) => {
     const message: Message = {
@@ -124,6 +141,17 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
     return null;
   };
 
+  const showTickets = () => {
+    if (userTickets.length === 0) {
+      addBotMessage('У вас пока нет обращений. Хотите создать новое?');
+    } else {
+      const ticketsText = userTickets.map(t => 
+        `#${t.ticket_number} - ${t.subject} (${t.status})`
+      ).join('\n');
+      addBotMessage(`Ваши обращения:\n\n${ticketsText}`);
+    }
+  };
+
   const handleSend = () => {
     if (!inputValue.trim()) return;
 
@@ -131,7 +159,9 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
     const answer = findAnswer(inputValue);
 
     setTimeout(() => {
-      if (answer) {
+      if (answer === 'SHOW_TICKETS') {
+        showTickets();
+      } else if (answer) {
         addBotMessage(answer);
         setTimeout(() => {
           addBotMessage('Есть ещё вопросы? Или могу помочь создать обращение в поддержку.');
@@ -149,7 +179,11 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
     if (faq) {
       addUserMessage(question);
       setTimeout(() => {
-        addBotMessage(faq.answer);
+        if (faq.answer === 'SHOW_TICKETS') {
+          showTickets();
+        } else {
+          addBotMessage(faq.answer);
+        }
       }, 500);
     }
   };
@@ -159,7 +193,7 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+          className="fixed bottom-4 right-4 h-12 w-12 sm:h-14 sm:w-14 sm:bottom-6 sm:right-6 rounded-full shadow-lg z-50"
           size="icon"
         >
           <Icon name="MessageCircle" size={24} />
@@ -167,9 +201,9 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
       )}
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-            <CardTitle className="text-lg flex items-center gap-2">
+        <Card className="fixed bottom-0 right-0 left-0 sm:bottom-6 sm:right-6 sm:left-auto w-full sm:w-96 h-[100dvh] sm:h-[600px] shadow-2xl z-50 flex flex-col sm:rounded-lg rounded-none">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 sm:pb-4 border-b px-4 py-3">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
               <Icon name="Bot" size={20} />
               Помощник
             </CardTitle>
@@ -177,26 +211,27 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
+              className="h-8 w-8"
             >
               <Icon name="X" size={20} />
             </Button>
           </CardHeader>
 
-          <CardContent className="flex-1 flex flex-col p-4 overflow-hidden">
-            <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+          <CardContent className="flex-1 flex flex-col p-3 sm:p-4 overflow-hidden">
+            <div className="flex-1 overflow-y-auto space-y-3 sm:space-y-4 mb-3 sm:mb-4">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                    className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 py-2 sm:px-4 ${
                       msg.isBot
                         ? 'bg-muted text-foreground'
                         : 'bg-primary text-primary-foreground'
                     }`}
                   >
-                    <p className="text-sm">{msg.text}</p>
+                    <p className="text-sm whitespace-pre-line">{msg.text}</p>
                     <span className="text-xs opacity-70 mt-1 block">
                       {msg.timestamp.toLocaleTimeString('ru-RU', {
                         hour: '2-digit',
@@ -210,19 +245,22 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
             </div>
 
             {messages.length === 1 && (
-              <div className="mb-4 space-y-2">
+              <div className="mb-3 sm:mb-4 space-y-2">
                 <p className="text-xs text-muted-foreground mb-2">Популярные вопросы:</p>
-                {faqs.slice(0, 3).map((faq, idx) => (
-                  <Button
-                    key={idx}
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start text-left h-auto py-2 px-3"
-                    onClick={() => handleQuickQuestion(faq.question)}
-                  >
-                    <span className="text-xs">{faq.question}</span>
-                  </Button>
-                ))}
+                {faqs.slice(0, userId ? 4 : 3).map((faq, idx) => {
+                  if (faq.answer === 'SHOW_TICKETS' && !userId) return null;
+                  return (
+                    <Button
+                      key={idx}
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start text-left h-auto py-2 px-3"
+                      onClick={() => handleQuickQuestion(faq.question)}
+                    >
+                      <span className="text-xs">{faq.question}</span>
+                    </Button>
+                  );
+                })}
               </div>
             )}
 
@@ -233,9 +271,9 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Напишите ваш вопрос..."
-                  className="flex-1"
+                  className="flex-1 text-sm"
                 />
-                <Button onClick={handleSend} size="icon">
+                <Button onClick={handleSend} size="icon" className="h-10 w-10 shrink-0">
                   <Icon name="Send" size={18} />
                 </Button>
               </div>
@@ -243,7 +281,7 @@ const SupportChatBot = ({ onCreateTicket }: SupportChatBotProps) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full text-xs sm:text-sm h-9"
                 onClick={onCreateTicket}
               >
                 <Icon name="Ticket" size={16} className="mr-2" />

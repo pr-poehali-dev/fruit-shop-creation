@@ -22,6 +22,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [showLoading, setShowLoading] = useState(true);
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
+  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
@@ -29,6 +30,16 @@ const App = () => {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserId(user.id);
+      } catch (e) {
+        console.error('Failed to parse user:', e);
+      }
     }
   }, []);
 
@@ -42,7 +53,10 @@ const App = () => {
         <Toaster />
         <Sonner />
         <InstallPrompt />
-        <SupportChatBot onCreateTicket={() => setIsTicketDialogOpen(true)} />
+        <SupportChatBot 
+          onCreateTicket={() => setIsTicketDialogOpen(true)}
+          userId={userId}
+        />
         <CreateTicketDialog 
           isOpen={isTicketDialogOpen} 
           onClose={() => setIsTicketDialogOpen(false)} 

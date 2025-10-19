@@ -100,20 +100,20 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Icon name="Ticket" size={20} />
             Создать обращение в поддержку
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Заполните форму, и наши специалисты свяжутся с вами в ближайшее время
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="name" className="text-xs sm:text-sm">
               Ваше имя <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -122,11 +122,12 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
               onChange={(e) => setName(e.target.value)}
               placeholder="Введите ваше имя"
               required
+              className="text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="phone" className="text-xs sm:text-sm">
               Телефон <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -135,41 +136,43 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+7 (XXX) XXX-XX-XX"
               required
+              className="text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email (необязательно)</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="email" className="text-xs sm:text-sm">Email (необязательно)</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="example@mail.com"
+              className="text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="category">
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="category" className="text-xs sm:text-sm">
               Категория <span className="text-destructive">*</span>
             </Label>
             <Select value={category} onValueChange={setCategory} required>
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="order">Вопрос по заказу</SelectItem>
-                <SelectItem value="delivery">Доставка</SelectItem>
-                <SelectItem value="payment">Оплата</SelectItem>
-                <SelectItem value="quality">Качество товара</SelectItem>
-                <SelectItem value="technical">Технические проблемы</SelectItem>
-                <SelectItem value="other">Другое</SelectItem>
+                <SelectItem value="order" className="text-sm">Вопрос по заказу</SelectItem>
+                <SelectItem value="delivery" className="text-sm">Доставка</SelectItem>
+                <SelectItem value="payment" className="text-sm">Оплата</SelectItem>
+                <SelectItem value="quality" className="text-sm">Качество товара</SelectItem>
+                <SelectItem value="technical" className="text-sm">Технические проблемы</SelectItem>
+                <SelectItem value="other" className="text-sm">Другое</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="subject">
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="subject" className="text-xs sm:text-sm">
               Тема обращения <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -178,11 +181,12 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Кратко опишите проблему"
               required
+              className="text-sm"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="message">
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="message" className="text-xs sm:text-sm">
               Описание <span className="text-destructive">*</span>
             </Label>
             <Textarea
@@ -190,17 +194,18 @@ const CreateTicketDialog = ({ isOpen, onClose, userPhone, userName }: CreateTick
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Подробно опишите вашу проблему или вопрос..."
-              rows={5}
+              rows={4}
               required
+              className="text-sm resize-none"
             />
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={isLoading} className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <Button type="submit" disabled={isLoading} className="flex-1 text-sm h-10">
               <Icon name="Send" size={16} className="mr-2" />
-              {isLoading ? 'Отправка...' : 'Отправить обращение'}
+              {isLoading ? 'Отправка...' : 'Отправить'}
             </Button>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} className="text-sm h-10">
               Отмена
             </Button>
           </div>
