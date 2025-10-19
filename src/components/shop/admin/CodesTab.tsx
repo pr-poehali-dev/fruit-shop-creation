@@ -42,7 +42,7 @@ const CodesTab = ({ userId }: CodesTabProps) => {
   const loadCodes = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://functions.poehali.dev/e343c1bf-14b9-4373-a620-36d059062d82', {
+      const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=codes&user_id=' + userId, {
         headers: {
           'X-User-Id': userId.toString()
         }

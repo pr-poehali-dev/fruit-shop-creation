@@ -173,7 +173,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             code_id = int(code_record[0])
             
             # Обновляем пароль
-            cursor.execute(f"UPDATE users SET password_hash = '{hash_escaped}' WHERE id = {user_id}")
+            cursor.execute(f"UPDATE users SET password = '{hash_escaped}' WHERE id = {user_id}")
             
             # Отмечаем код как использованный
             used_at_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

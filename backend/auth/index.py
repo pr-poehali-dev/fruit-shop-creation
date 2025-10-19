@@ -94,6 +94,96 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'codes' and user_id:
+                cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                
+                if not user or not user['is_admin']:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Admin access required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute("""
+                    SELECT 
+                        lc.id,
+                        lc.login_code,
+                        lc.created_at,
+                        lc.used_at,
+                        lc.expires_at,
+                        u.full_name as user_name,
+                        u.phone,
+                        (lc.expires_at < NOW()) as is_expired,
+                        (lc.used_at IS NOT NULL) as is_used
+                    FROM admin_login_codes lc
+                    LEFT JOIN users u ON lc.user_id = u.id
+                    ORDER BY lc.created_at DESC
+                    LIMIT 100
+                """)
+                
+                login_codes_rows = cur.fetchall()
+                login_codes = []
+                
+                for row in login_codes_rows:
+                    login_codes.append({
+                        'id': row[0],
+                        'login_code': row[1],
+                        'created_at': row[2].isoformat() if row[2] else None,
+                        'used_at': row[3].isoformat() if row[3] else None,
+                        'expires_at': row[4].isoformat() if row[4] else None,
+                        'user_name': row[5] or 'Неизвестный',
+                        'phone': row[6] or '',
+                        'is_expired': row[7],
+                        'is_used': row[8]
+                    })
+                
+                cur.execute("""
+                    SELECT 
+                        pr.id,
+                        pr.phone,
+                        pr.reset_code,
+                        pr.created_at,
+                        pr.used_at,
+                        pr.expires_at,
+                        u.full_name as user_name,
+                        u.phone as user_phone,
+                        (pr.expires_at < NOW()) as is_expired,
+                        (pr.used_at IS NOT NULL) as is_used
+                    FROM password_reset_codes pr
+                    LEFT JOIN users u ON pr.user_id = u.id
+                    ORDER BY pr.created_at DESC
+                    LIMIT 100
+                """)
+                
+                reset_codes_rows = cur.fetchall()
+                reset_codes = []
+                
+                for row in reset_codes_rows:
+                    reset_codes.append({
+                        'id': row[0],
+                        'phone': row[1] or '',
+                        'reset_code': row[2],
+                        'created_at': row[3].isoformat() if row[3] else None,
+                        'used_at': row[4].isoformat() if row[4] else None,
+                        'expires_at': row[5].isoformat() if row[5] else None,
+                        'user_name': row[6] or 'Неизвестный',
+                        'user_email': row[7] or row[1] or '',
+                        'is_expired': row[8],
+                        'is_used': row[9]
+                    })
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'login_codes': login_codes,
+                        'reset_codes': reset_codes
+                    }),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'balance' and user_id:
                 cur.execute(f"SELECT balance, cashback, is_admin, avatar FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
