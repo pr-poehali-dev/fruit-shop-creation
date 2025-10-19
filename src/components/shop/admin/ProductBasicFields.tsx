@@ -61,14 +61,14 @@ const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStock
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <Label htmlFor="product-price" className="text-sm">Цена (₽) *</Label>
+          <Label htmlFor="product-price" className="text-sm">Цена (₽)</Label>
           <Input 
             id="product-price" 
             name="price" 
             type="number" 
             step="0.01"
             defaultValue={editingProduct?.price} 
-            required
+            placeholder="Не указано"
             className="mt-1 text-sm"
           />
         </div>

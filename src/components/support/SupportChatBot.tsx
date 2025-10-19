@@ -142,14 +142,19 @@ const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
     return null;
   };
 
+  const handleTicketClick = (ticketNumber: string) => {
+    setInputValue(ticketNumber);
+    handleSend();
+  };
+
   const showTickets = () => {
     if (userTickets.length === 0) {
       addBotMessage('У вас пока нет обращений. Хотите создать новое?');
     } else {
       const ticketsText = userTickets.map(t => 
-        `#${t.ticket_number} - ${t.subject} (${t.status_text})`
+        `#${t.ticket_number} - ${t.subject} (${t.status_text || t.status})`
       ).join('\n');
-      addBotMessage(`Ваши обращения:\n\n${ticketsText}\n\nЧтобы узнать подробности, введите номер обращения (например: T000001)`);
+      addBotMessage(`Ваши обращения:\n\n${ticketsText}\n\nНажмите на обращение ниже, чтобы узнать подробности:`);
     }
   };
 
@@ -287,6 +292,26 @@ const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
                   </div>
                 </div>
               ))}
+              
+              {userTickets.length > 0 && messages.some(m => m.text.includes('Ваши обращения:')) && (
+                <div className="space-y-2 mb-3">
+                  {userTickets.map((ticket) => (
+                    <Button
+                      key={ticket.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleTicketClick(ticket.ticket_number)}
+                      className="w-full text-xs h-auto py-2 px-3 whitespace-normal text-left justify-start"
+                    >
+                      <div className="flex flex-col items-start gap-1 w-full">
+                        <span className="font-medium">#{ticket.ticket_number}</span>
+                        <span className="text-muted-foreground line-clamp-1">{ticket.subject}</span>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
 
