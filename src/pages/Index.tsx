@@ -139,10 +139,29 @@ const Index = () => {
     }
   };
 
-  if (siteSettings?.is_maintenance_mode && !user?.is_admin) {
+  const checkScheduledMaintenance = () => {
+    if (!siteSettings?.auto_maintenance_enabled) {
+      return siteSettings?.is_maintenance_mode;
+    }
+
+    const now = new Date();
+    const startTime = siteSettings.maintenance_start_time ? new Date(siteSettings.maintenance_start_time) : null;
+    const endTime = siteSettings.maintenance_end_time ? new Date(siteSettings.maintenance_end_time) : null;
+
+    if (startTime && endTime) {
+      const isInMaintenanceWindow = now >= startTime && now <= endTime;
+      return isInMaintenanceWindow;
+    }
+
+    return siteSettings?.is_maintenance_mode;
+  };
+
+  const isMaintenanceActive = checkScheduledMaintenance();
+
+  if (isMaintenanceActive && !user?.is_admin) {
     return (
       <MaintenancePage
-        reason={siteSettings.maintenance_reason || 'Сайт временно закрыт на техническое обслуживание'}
+        reason={siteSettings?.maintenance_reason || 'Сайт временно закрыт на техническое обслуживание'}
         onAdminLogin={handleMaintenanceAdminLogin}
       />
     );

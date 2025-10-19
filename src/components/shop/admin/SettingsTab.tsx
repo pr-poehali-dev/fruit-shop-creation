@@ -16,10 +16,12 @@ interface SettingsTabProps {
 const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
   const [holidayTheme, setHolidayTheme] = useState(siteSettings.holiday_theme || 'none');
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(siteSettings.is_maintenance_mode || false);
+  const [autoMaintenanceEnabled, setAutoMaintenanceEnabled] = useState(siteSettings.auto_maintenance_enabled || false);
 
   useEffect(() => {
     setHolidayTheme(siteSettings.holiday_theme || 'none');
     setIsMaintenanceMode(siteSettings.is_maintenance_mode || false);
+    setAutoMaintenanceEnabled(siteSettings.auto_maintenance_enabled || false);
   }, [siteSettings]);
 
   return (
@@ -66,6 +68,58 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
                 </p>
               </div>
             )}
+            
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex-1">
+                  <Label htmlFor="auto-maintenance" className="text-base font-medium flex items-center gap-2">
+                    <Icon name="Clock" size={18} className="text-blue-600" />
+                    Автоматическое включение/выключение
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Сайт автоматически закроется и откроется в указанное время
+                  </p>
+                </div>
+                <input type="hidden" name="auto_maintenance_enabled" value={autoMaintenanceEnabled ? 'true' : 'false'} />
+                <Switch
+                  id="auto-maintenance"
+                  checked={autoMaintenanceEnabled}
+                  onCheckedChange={setAutoMaintenanceEnabled}
+                />
+              </div>
+              
+              {autoMaintenanceEnabled && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-blue-200">
+                  <div>
+                    <Label htmlFor="maintenance-start" className="text-sm">Начало обслуживания</Label>
+                    <Input
+                      id="maintenance-start"
+                      name="maintenance_start_time"
+                      type="datetime-local"
+                      defaultValue={siteSettings.maintenance_start_time ? new Date(siteSettings.maintenance_start_time).toISOString().slice(0, 16) : ''}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Сайт закроется в это время
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="maintenance-end" className="text-sm">Окончание обслуживания</Label>
+                    <Input
+                      id="maintenance-end"
+                      name="maintenance_end_time"
+                      type="datetime-local"
+                      defaultValue={siteSettings.maintenance_end_time ? new Date(siteSettings.maintenance_end_time).toISOString().slice(0, 16) : ''}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Сайт откроется в это время
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="border-b pb-4 mb-4">
