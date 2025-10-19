@@ -140,6 +140,66 @@ export const useAuth = () => {
     }
   };
 
+  const handleDirectLogin = async (
+    phone: string,
+    password: string,
+    onSuccess: (user: User, message: string, requiresCode?: boolean) => void,
+    onError: (error: string) => void
+  ) => {
+    try {
+      console.log('Direct login attempt:', { phone, hasPassword: !!password });
+      
+      const response = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'login',
+          phone,
+          password
+        })
+      });
+      
+      const data = await response.json();
+      console.log('Direct login response:', { status: response.status, data });
+      
+      if (data.banned) {
+        setBanInfo({
+          banned: true,
+          ban_reason: data.ban_reason,
+          ban_until: data.ban_until
+        });
+        onError(data.ban_reason || 'Аккаунт заблокирован');
+        return;
+      }
+      
+      if (!response.ok) {
+        const errorMsg = data.error || `Ошибка ${response.status}`;
+        console.error('Direct login failed:', errorMsg);
+        onError(errorMsg);
+        return;
+      }
+      
+      if (data.requires_code) {
+        const message = 'Введите код доступа';
+        onSuccess(data.user, message, true);
+        setBanInfo(null);
+      } else if (data.success && data.user) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        const message = 'Вы вошли в систему';
+        onSuccess(data.user, message, false);
+        setBanInfo(null);
+      } else {
+        const errorMsg = data.error || 'Неизвестная ошибка. Проверьте данные';
+        console.error('Direct login error:', errorMsg, data);
+        onError(errorMsg);
+      }
+    } catch (error) {
+      console.error('Direct login exception:', error);
+      onError('Не удалось подключиться к серверу');
+    }
+  };
+
   const handleLogout = (onLogout: () => void) => {
     setUser(null);
     localStorage.removeItem('user');
@@ -156,6 +216,7 @@ export const useAuth = () => {
     isRefreshingBalance,
     setIsRefreshingBalance,
     handleAuth,
+    handleDirectLogin,
     handleLogout,
     banInfo,
     clearBanInfo

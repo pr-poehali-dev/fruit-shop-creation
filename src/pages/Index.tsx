@@ -23,7 +23,7 @@ import { Product } from '@/types/shop';
 
 const Index = () => {
   const { toast } = useToast();
-  const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleLogout, banInfo, clearBanInfo } = useAuth();
+  const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleDirectLogin, handleLogout, banInfo, clearBanInfo } = useAuth();
   const { cart, addToCart, updateCartQuantity, getTotalPrice, clearCart } = useCart();
   const {
     products,
@@ -142,15 +142,36 @@ const Index = () => {
   );
 
   const handleMaintenanceAdminLogin = async (phone: string, password: string) => {
-    try {
-      await handleAuth(phone, password, onAuthSuccess, onAuthError);
-    } catch (error) {
+    const authSuccess = (userData: any, message: string, requiresCode?: boolean) => {
+      if (!userData.is_admin) {
+        toast({
+          title: 'Доступ запрещён',
+          description: 'Только администраторы могут войти во время технических работ',
+          variant: 'destructive'
+        });
+        handleLogout(() => {});
+        return;
+      }
+      
+      if (requiresCode) {
+        onAuthSuccess(userData, message, requiresCode);
+      } else {
+        toast({
+          title: 'Добро пожаловать!',
+          description: 'Вы успешно вошли как администратор',
+        });
+      }
+    };
+
+    const authError = (error: string) => {
       toast({
         title: 'Ошибка входа',
-        description: 'Неверный номер или пароль',
+        description: error,
         variant: 'destructive'
       });
-    }
+    };
+
+    await handleDirectLogin(phone, password, authSuccess, authError);
   };
 
   const checkScheduledMaintenance = () => {
