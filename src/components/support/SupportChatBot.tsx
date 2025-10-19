@@ -146,16 +146,57 @@ const SupportChatBot = ({ onCreateTicket, userId }: SupportChatBotProps) => {
       addBotMessage('У вас пока нет обращений. Хотите создать новое?');
     } else {
       const ticketsText = userTickets.map(t => 
-        `#${t.ticket_number} - ${t.subject} (${t.status})`
+        `#${t.ticket_number} - ${t.subject} (${t.status_text || t.status})`
       ).join('\n');
-      addBotMessage(`Ваши обращения:\n\n${ticketsText}`);
+      addBotMessage(`Ваши обращения:\n\n${ticketsText}\n\nЧтобы узнать подробности, введите номер обращения (например: T000001)`);
     }
   };
 
-  const handleSend = () => {
+  const checkTicketNumber = async (text: string) => {
+    const ticketMatch = text.match(/T\d{6}|#T\d{6}/i);
+    if (!ticketMatch) return false;
+
+    const ticketNumber = ticketMatch[0].replace('#', '').toUpperCase();
+    
+    try {
+      const response = await fetch(`https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d?ticket_number=${ticketNumber}`);
+      const data = await response.json();
+      
+      if (data.success && data.ticket) {
+        const t = data.ticket;
+        const createdDate = new Date(t.created_at).toLocaleDateString('ru-RU');
+        const statusText = t.status_text || t.status;
+        
+        addBotMessage(
+          `Обращение #${t.ticket_number}\n\n` +
+          `📋 Тема: ${t.subject}\n` +
+          `📌 Статус: ${statusText}\n` +
+          `📅 Создано: ${createdDate}\n` +
+          `👤 Имя: ${t.name}\n\n` +
+          `Описание: ${t.message}`
+        );
+        return true;
+      } else {
+        addBotMessage(`Обращение ${ticketNumber} не найдено. Проверьте номер и попробуйте снова.`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Failed to fetch ticket:', error);
+      return false;
+    }
+  };
+
+  const handleSend = async () => {
     if (!inputValue.trim()) return;
 
     addUserMessage(inputValue);
+    
+    const isTicketNumber = await checkTicketNumber(inputValue);
+    if (isTicketNumber) {
+      setInputValue('');
+      return;
+    }
+
     const answer = findAnswer(inputValue);
 
     setTimeout(() => {
