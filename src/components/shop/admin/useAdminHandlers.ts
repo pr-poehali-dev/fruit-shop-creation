@@ -34,13 +34,14 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     
     const primaryImage = images.find(img => img.is_primary);
     const stockValue = formData.get('stock') as string;
+    const priceValue = formData.get('price') as string;
     
     const productData = {
       id: props.editingProduct?.id,
       name: formData.get('name') as string,
       slug: (formData.get('name') as string).toLowerCase().replace(/\s+/g, '-'),
       description: formData.get('description') as string,
-      price: parseFloat(formData.get('price') as string),
+      price: priceValue && priceValue.trim() !== '' ? parseFloat(priceValue) : null,
       image_url: primaryImage?.image_url || images[0]?.image_url || '',
       category_id: parseInt(formData.get('category_id') as string),
       stock: stockValue && stockValue.trim() !== '' ? parseInt(stockValue) : null,
