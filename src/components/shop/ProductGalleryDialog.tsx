@@ -87,12 +87,29 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="relative group">
+          <div 
+            className="relative group touch-pan-y"
+            onTouchStart={(e) => {
+              if (!hasMultipleImages) return;
+              const touchStartX = e.touches[0].clientX;
+              const handleTouchEnd = (e: TouchEvent) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > 50) {
+                  if (diff > 0) handleNextImage();
+                  else handlePrevImage();
+                }
+                document.removeEventListener('touchend', handleTouchEnd);
+              };
+              document.addEventListener('touchend', handleTouchEnd, { once: true });
+            }}
+          >
             {currentImage && (
               <img 
                 src={currentImage} 
                 alt={product.name}
-                className="w-full h-[400px] object-cover rounded-lg"
+                className="w-full h-[400px] object-cover rounded-lg pointer-events-none select-none"
+                draggable="false"
               />
             )}
             
@@ -101,7 +118,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   onClick={handlePrevImage}
                 >
                   <Icon name="ChevronLeft" size={24} />
@@ -109,7 +126,7 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   onClick={handleNextImage}
                 >
                   <Icon name="ChevronRight" size={24} />
