@@ -1,12 +1,13 @@
 import json
 import os
 import psycopg2
+import hashlib
 from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
-    Business: Update user profile (name and phone) by admin
-    Args: event with httpMethod, body containing user_id, full_name, phone
+    Business: Update user profile (name, phone, and optionally password) by admin
+    Args: event with httpMethod, body containing user_id, full_name, phone, new_password (optional)
     Returns: HTTP response with success status
     '''
     method: str = event.get('httpMethod', 'POST')
@@ -35,6 +36,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         user_id = body_data.get('user_id')
         full_name = body_data.get('full_name', '').strip()
         phone = body_data.get('phone', '').strip()
+        new_password = body_data.get('new_password', '').strip()
         
         if not user_id:
             return {
@@ -68,10 +70,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         conn = psycopg2.connect(dsn)
         cur = conn.cursor()
         
-        cur.execute(
-            "UPDATE users SET full_name = %s, phone = %s WHERE id = %s",
-            (full_name, phone, user_id)
-        )
+        if new_password:
+            password_hash = hashlib.sha256(new_password.encode()).hexdigest()
+            cur.execute(
+                "UPDATE users SET full_name = %s, phone = %s, password_hash = %s WHERE id = %s",
+                (full_name, phone, password_hash, user_id)
+            )
+        else:
+            cur.execute(
+                "UPDATE users SET full_name = %s, phone = %s WHERE id = %s",
+                (full_name, phone, user_id)
+            )
         
         conn.commit()
         cur.close()

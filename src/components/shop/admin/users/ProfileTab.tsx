@@ -24,6 +24,8 @@ interface ProfileTabProps {
 const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
   const [fullName, setFullName] = useState(selectedUser?.full_name || '');
   const [phone, setPhone] = useState(selectedUser?.phone || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -48,16 +50,40 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
       return;
     }
 
+    if (newPassword && newPassword !== confirmPassword) {
+      toast({
+        title: 'Ошибка',
+        description: 'Пароли не совпадают',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (newPassword && newPassword.length < 6) {
+      toast({
+        title: 'Ошибка',
+        description: 'Пароль должен быть не менее 6 символов',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
+      const requestBody: any = {
+        user_id: selectedUser?.id,
+        full_name: fullName.trim(),
+        phone: phone.trim()
+      };
+
+      if (newPassword) {
+        requestBody.new_password = newPassword;
+      }
+
       const response = await fetch('https://functions.poehali.dev/4986919b-8daf-4d91-b11a-b3bde148f13f', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: selectedUser?.id,
-          full_name: fullName.trim(),
-          phone: phone.trim()
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -65,8 +91,10 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
       if (data.success) {
         toast({
           title: 'Успешно',
-          description: 'Данные пользователя обновлены'
+          description: newPassword ? 'Данные и пароль пользователя обновлены' : 'Данные пользователя обновлены'
         });
+        setNewPassword('');
+        setConfirmPassword('');
         onUpdate();
       } else {
         toast({
@@ -106,6 +134,36 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+7 (XXX) XXX-XX-XX"
         />
+      </div>
+
+      <div className="space-y-4 border-t pt-4">
+        <h4 className="text-sm font-medium flex items-center gap-2">
+          <Icon name="Key" size={16} />
+          Изменить пароль
+        </h4>
+        
+        <div className="space-y-2">
+          <Label htmlFor="newPassword">Новый пароль</Label>
+          <Input
+            id="newPassword"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Оставьте пустым, если не хотите менять"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Повторите новый пароль"
+            disabled={!newPassword}
+          />
+        </div>
       </div>
 
       <div className="bg-muted p-4 rounded-lg space-y-2">
