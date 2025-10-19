@@ -81,6 +81,20 @@ const Index = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const isMaintenanceActive = checkScheduledMaintenance();
+    
+    if (isMaintenanceActive && user && !user.is_admin) {
+      handleLogout(() => {
+        toast({
+          title: 'Технические работы',
+          description: 'Сайт закрыт на техническое обслуживание',
+          variant: 'destructive'
+        });
+      });
+    }
+  }, [siteSettings?.is_maintenance_mode, siteSettings?.auto_maintenance_enabled, user]);
+
   const handleAddToCart = (product: Product) => {
     addToCart(product);
     toast({
