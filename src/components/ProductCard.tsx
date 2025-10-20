@@ -25,7 +25,7 @@ const ProductCard = ({ product, onAddToCart, showStock = false }: ProductCardPro
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        {product.stock === 0 && (
+        {product.stock !== null && product.stock <= 0 && (
           <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-semibold">
             <div className="flex flex-col gap-0.5">
               <span>Нет в наличии</span>

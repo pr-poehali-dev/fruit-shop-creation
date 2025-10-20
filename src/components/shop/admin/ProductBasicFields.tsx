@@ -79,7 +79,7 @@ const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStock
             id="product-stock" 
             name="stock" 
             type="number" 
-            defaultValue={editingProduct?.stock || ''} 
+            defaultValue={editingProduct?.stock !== null && editingProduct?.stock !== undefined ? editingProduct.stock : ''} 
             placeholder="Не указано - всегда в наличии"
             className="mt-1 text-sm"
           />
