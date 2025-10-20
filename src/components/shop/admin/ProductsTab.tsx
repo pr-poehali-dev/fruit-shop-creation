@@ -14,6 +14,7 @@ interface Product {
   category_name: string;
   stock: number;
   is_active: boolean;
+  expected_date?: string;
 }
 
 interface ProductsTabProps {

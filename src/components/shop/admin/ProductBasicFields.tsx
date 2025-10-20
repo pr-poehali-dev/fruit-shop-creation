@@ -22,6 +22,7 @@ interface Product {
   stock: number;
   is_active: boolean;
   show_stock?: boolean;
+  expected_date?: string;
 }
 
 interface ProductBasicFieldsProps {
@@ -83,6 +84,20 @@ const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStock
             className="mt-1 text-sm"
           />
         </div>
+      </div>
+      <div>
+        <Label htmlFor="expected-date" className="text-sm">Дата поступления (если нет в наличии)</Label>
+        <Input 
+          id="expected-date" 
+          name="expected_date" 
+          type="date" 
+          defaultValue={editingProduct?.expected_date || ''} 
+          placeholder="Укажите дату поступления"
+          className="mt-1 text-sm"
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Отображается на карточке, если товара нет в наличии
+        </p>
       </div>
       <div>
         <Label htmlFor="product-category" className="text-sm">Категория *</Label>

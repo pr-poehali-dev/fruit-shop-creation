@@ -12,6 +12,7 @@ interface Product {
   image_url: string;
   category_name: string;
   stock: number;
+  expected_date?: string;
 }
 
 interface ProductCardProps {
@@ -23,7 +24,21 @@ interface ProductCardProps {
 const ProductCard = ({ product, onAddToCart, showStock = false }: ProductCardProps) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <img src={product.image_url} alt={product.name} className="w-full h-48 object-cover" />
+      <div className="relative">
+        {product.stock === 0 && (
+          <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-semibold">
+            <div className="flex flex-col gap-0.5">
+              <span>Нет в наличии</span>
+              {product.expected_date && (
+                <span className="text-[10px] opacity-90">
+                  Ожидается {new Date(product.expected_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        <img src={product.image_url} alt={product.name} className="w-full h-48 object-cover" />
+      </div>
       <CardHeader>
         <CardTitle className="font-display">{product.name}</CardTitle>
         <CardDescription>{product.category_name}</CardDescription>
