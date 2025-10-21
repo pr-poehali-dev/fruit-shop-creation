@@ -11,6 +11,7 @@ import ProfileHeader from './profile/ProfileHeader';
 import OrdersTab from './profile/OrdersTab';
 import TransactionsTab from './profile/TransactionsTab';
 import SettingsTab from './profile/SettingsTab';
+import MyTicketsDialog from './MyTicketsDialog';
 
 interface ProfileContentProps {
   user: User | null;
@@ -27,6 +28,7 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
   const supportRef = useRef<HTMLDivElement>(null);
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
+  const [showMyTickets, setShowMyTickets] = useState(false);
 
 
 
@@ -127,7 +129,17 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
       
       <Separator />
       
-      <div ref={supportRef}>
+      <div ref={supportRef} className="space-y-3">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="flex-1 text-sm sm:text-base h-10 sm:h-11" 
+            onClick={() => setShowMyTickets(true)}
+          >
+            <Icon name="Inbox" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
+            Мои обращения
+          </Button>
+        </div>
         <UserTickets user={user} />
       </div>
       
@@ -137,6 +149,12 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
         <Icon name="LogOut" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
         Выйти
       </Button>
+
+      <MyTicketsDialog 
+        open={showMyTickets} 
+        onOpenChange={setShowMyTickets} 
+        user={user} 
+      />
     </div>
   );
 };

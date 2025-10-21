@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 
@@ -38,6 +39,9 @@ interface Ticket {
   priority: string;
   created_at: string;
   updated_at?: string;
+  assigned_admin_id?: number;
+  assigned_at?: string;
+  admin_name?: string;
   attachments?: string[];
   rating?: number;
   rating_comment?: string;
@@ -60,11 +64,9 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [newStatus, setNewStatus] = useState('');
-  const [adminNotes, setAdminNotes] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('new');
   const { toast } = useToast();
 
   const loadTickets = async (status?: string) => {
@@ -106,19 +108,55 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
   };
 
   useEffect(() => {
-    loadTickets(statusFilter);
-  }, [userId, statusFilter]);
+    loadTickets(activeTab);
+  }, [userId, activeTab]);
 
   const openTicketDialog = async (ticket: Ticket) => {
     setSelectedTicket(ticket);
-    setNewStatus(ticket.status);
-    setAdminNotes('');
     setNewComment('');
     setIsDialogOpen(true);
     await loadComments(ticket.id);
   };
 
-  const handleUpdateStatus = async () => {
+  const handleAssignToMe = async () => {
+    if (!selectedTicket) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': userId.toString()
+        },
+        body: JSON.stringify({
+          ticket_id: selectedTicket.id,
+          action: 'assign_to_me'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: 'Успешно',
+          description: 'Тикет взят в работу'
+        });
+        loadTickets(activeTab);
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось взять тикет',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (newStatus: string) => {
     if (!selectedTicket) return;
 
     setIsLoading(true);
@@ -131,8 +169,7 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
         },
         body: JSON.stringify({
           ticket_id: selectedTicket.id,
-          status: newStatus,
-          admin_notes: adminNotes || undefined
+          status: newStatus
         })
       });
 
@@ -141,17 +178,15 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
       if (data.success) {
         toast({
           title: 'Успешно',
-          description: 'Тикет обновлён'
+          description: 'Статус обновлён'
         });
-        loadTickets(statusFilter);
-        setIsDialogOpen(false);
-      } else {
-        throw new Error(data.error);
+        loadTickets(activeTab);
+        setSelectedTicket({ ...selectedTicket, status: newStatus });
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось обновить тикет',
+        description: 'Не удалось обновить статус',
         variant: 'destructive'
       });
     } finally {
@@ -181,17 +216,15 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
       if (data.success) {
         toast({
           title: 'Успешно',
-          description: 'Комментарий добавлен'
+          description: 'Ответ отправлен'
         });
         setNewComment('');
         await loadComments(selectedTicket.id);
-      } else {
-        throw new Error(data.error);
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось добавить комментарий',
+        description: 'Не удалось добавить ответ',
         variant: 'destructive'
       });
     } finally {
@@ -202,252 +235,287 @@ const SupportTicketsTab = ({ userId }: SupportTicketsTabProps) => {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'new': return 'destructive';
-      case 'open': return 'default';
-      case 'in_progress': return 'secondary';
+      case 'in_progress': return 'default';
       case 'resolved': return 'outline';
-      case 'closed': return 'outline';
-      default: return 'default';
+      default: return 'secondary';
     }
   };
 
-  const getPriorityBadgeVariant = (priority: string) => {
+  const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case 'high': return 'destructive';
-      case 'normal': return 'default';
-      case 'low': return 'secondary';
-      default: return 'default';
+      case 'high': return 'AlertCircle';
+      case 'normal': return 'Clock';
+      case 'low': return 'Info';
+      default: return 'Clock';
     }
   };
+
+  const filteredTickets = tickets;
+
+  const newTicketsCount = tickets.filter(t => t.status === 'new').length;
+  const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
+  const resolvedCount = tickets.filter(t => t.status === 'resolved').length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Обращения в поддержку</h2>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Фильтр" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            <SelectItem value="new">Новые</SelectItem>
-            <SelectItem value="open">Открытые</SelectItem>
-            <SelectItem value="in_progress">В обработке</SelectItem>
-            <SelectItem value="resolved">Решено</SelectItem>
-            <SelectItem value="closed">Закрыто</SelectItem>
-          </SelectContent>
-        </Select>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Тикеты поддержки</h2>
+          <p className="text-muted-foreground mt-1">Управление обращениями клиентов</p>
+        </div>
       </div>
 
-      <div className="grid gap-4">
-        {tickets.map((ticket) => (
-          <Card key={ticket.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => openTicketDialog(ticket)}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">#{ticket.ticket_number} - {ticket.subject}</CardTitle>
-                  <CardDescription>{ticket.name} • {ticket.phone}</CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Badge variant={getStatusBadgeVariant(ticket.status)}>
-                    {ticket.status_text}
-                  </Badge>
-                  <Badge variant={getPriorityBadgeVariant(ticket.priority)}>
-                    {ticket.priority}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-2">{ticket.message}</p>
-              <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Icon name="Calendar" size={14} />
-                  {new Date(ticket.created_at).toLocaleDateString('ru-RU')}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Icon name="Tag" size={14} />
-                  {ticket.category}
-                </span>
-                {ticket.attachments && ticket.attachments.length > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Icon name="Paperclip" size={14} />
-                    {ticket.attachments.length}
-                  </span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsTrigger value="new" className="flex flex-col gap-1 py-3">
+            <div className="flex items-center gap-2">
+              <Icon name="Bell" size={16} />
+              <span>Новые</span>
+            </div>
+            {newTicketsCount > 0 && (
+              <Badge variant="destructive" className="rounded-full px-2 py-0 text-xs">
+                {newTicketsCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="in_progress" className="flex flex-col gap-1 py-3">
+            <div className="flex items-center gap-2">
+              <Icon name="Clock" size={16} />
+              <span>В работе</span>
+            </div>
+            {inProgressCount > 0 && (
+              <Badge variant="secondary" className="rounded-full px-2 py-0 text-xs">
+                {inProgressCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="resolved" className="flex flex-col gap-1 py-3">
+            <div className="flex items-center gap-2">
+              <Icon name="CheckCircle2" size={16} />
+              <span>Решено</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="all" className="flex flex-col gap-1 py-3">
+            <div className="flex items-center gap-2">
+              <Icon name="List" size={16} />
+              <span>Все</span>
+            </div>
+            <Badge variant="outline" className="rounded-full px-2 py-0 text-xs">
+              {tickets.length}
+            </Badge>
+          </TabsTrigger>
+        </TabsList>
 
-        {tickets.length === 0 && (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Нет обращений
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        <div className="mt-6">
+          {filteredTickets.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Icon name="Inbox" size={48} className="text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Нет тикетов</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {filteredTickets.map((ticket) => (
+                <Card 
+                  key={ticket.id} 
+                  className="cursor-pointer hover:shadow-md transition-all border-l-4"
+                  style={{
+                    borderLeftColor: ticket.status === 'new' ? 'hsl(var(--destructive))' : 
+                                    ticket.status === 'in_progress' ? 'hsl(var(--primary))' : 
+                                    'hsl(var(--muted))'
+                  }}
+                  onClick={() => openTicketDialog(ticket)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="font-mono text-xs">
+                            #{ticket.ticket_number}
+                          </Badge>
+                          <Badge variant={getStatusBadgeVariant(ticket.status)}>
+                            {ticket.status_text}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-xl">{ticket.subject}</CardTitle>
+                        <CardDescription className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Icon name="User" size={14} />
+                            {ticket.name}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Icon name="Phone" size={14} />
+                            {ticket.phone}
+                          </span>
+                          {ticket.email && (
+                            <span className="flex items-center gap-1">
+                              <Icon name="Mail" size={14} />
+                              {ticket.email}
+                            </span>
+                          )}
+                        </CardDescription>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <Icon name={getPriorityIcon(ticket.priority)} 
+                              size={20} 
+                              className={ticket.priority === 'high' ? 'text-destructive' : 'text-muted-foreground'} 
+                        />
+                        {ticket.assigned_admin_id && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Icon name="UserCheck" size={12} className="mr-1" />
+                            {ticket.admin_name || 'Назначен'}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{ticket.message}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Icon name="Calendar" size={12} />
+                          {new Date(ticket.created_at).toLocaleDateString('ru-RU')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Icon name="Tag" size={12} />
+                          {ticket.category}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </Tabs>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Обращение #{selectedTicket?.ticket_number}</DialogTitle>
+            <DialogTitle className="flex items-center gap-3">
+              <Badge variant="outline" className="font-mono">#{selectedTicket?.ticket_number}</Badge>
+              {selectedTicket?.subject}
+            </DialogTitle>
             <DialogDescription>
-              {selectedTicket?.name} • {selectedTicket?.phone}
-              {selectedTicket?.email && ` • ${selectedTicket.email}`}
+              <div className="flex flex-wrap gap-3 mt-2">
+                <span className="flex items-center gap-1">
+                  <Icon name="User" size={14} />
+                  {selectedTicket?.name}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon name="Phone" size={14} />
+                  {selectedTicket?.phone}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon name="Calendar" size={14} />
+                  {selectedTicket && new Date(selectedTicket.created_at).toLocaleString('ru-RU')}
+                </span>
+              </div>
             </DialogDescription>
           </DialogHeader>
 
-          {selectedTicket && (
-            <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="details">Детали</TabsTrigger>
-                <TabsTrigger value="comments">Комментарии ({comments.length})</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="details" className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Тема</Label>
-                  <p className="text-sm font-medium">{selectedTicket.subject}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Описание</Label>
-                  <p className="text-sm whitespace-pre-wrap">{selectedTicket.message}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Категория</Label>
-                    <p className="text-sm">{selectedTicket.category}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Приоритет</Label>
-                    <Badge variant={getPriorityBadgeVariant(selectedTicket.priority)}>
-                      {selectedTicket.priority}
-                    </Badge>
-                  </div>
-                </div>
-
-                {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Вложения</Label>
-                    <div className="space-y-2">
-                      {selectedTicket.attachments.map((url, idx) => (
-                        <a 
-                          key={idx} 
-                          href={url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 p-2 bg-muted rounded hover:bg-muted/80 text-sm"
-                        >
-                          <Icon name="File" size={16} />
-                          Файл {idx + 1}
-                          <Icon name="ExternalLink" size={14} className="ml-auto" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="status">Статус</Label>
-                  <Select value={newStatus} onValueChange={setNewStatus}>
-                    <SelectTrigger id="status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="new">Новое</SelectItem>
-                      <SelectItem value="open">Открыто</SelectItem>
-                      <SelectItem value="in_progress">В обработке</SelectItem>
-                      <SelectItem value="resolved">Решено</SelectItem>
-                      <SelectItem value="closed">Закрыто</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {selectedTicket.rating && (
-                  <div className="space-y-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                    <Label>Оценка от пользователя</Label>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Icon
-                          key={star}
-                          name="Star"
-                          size={20}
-                          className={star <= (selectedTicket.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                        />
-                      ))}
-                      <span className="ml-2 text-sm font-medium">{selectedTicket.rating} / 5</span>
-                    </div>
-                    {selectedTicket.rating_comment && (
-                      <p className="text-sm text-muted-foreground mt-2">{selectedTicket.rating_comment}</p>
-                    )}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="adminNotes">Заметки администратора</Label>
-                  <Textarea
-                    id="adminNotes"
-                    value={adminNotes}
-                    onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="Внутренние заметки..."
-                    rows={3}
-                  />
-                </div>
-
-                <Button onClick={handleUpdateStatus} disabled={isLoading} className="w-full">
-                  <Icon name="Save" size={16} className="mr-2" />
-                  {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+          <div className="space-y-6">
+            <div className="flex gap-2">
+              {!selectedTicket?.assigned_admin_id && selectedTicket?.status === 'new' && (
+                <Button onClick={handleAssignToMe} disabled={isLoading} className="flex-1">
+                  <Icon name="UserCheck" size={16} className="mr-2" />
+                  Взять в работу
                 </Button>
-              </TabsContent>
+              )}
+              
+              <Select 
+                value={selectedTicket?.status} 
+                onValueChange={handleUpdateStatus}
+                disabled={isLoading}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">Новое</SelectItem>
+                  <SelectItem value="in_progress">В работе</SelectItem>
+                  <SelectItem value="resolved">Решено</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <TabsContent value="comments" className="space-y-4">
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {comments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      className={`p-3 rounded-lg ${
-                        comment.is_admin ? 'bg-primary/10 ml-8' : 'bg-muted mr-8'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
-                          {comment.is_admin && <Icon name="Shield" size={14} className="inline mr-1" />}
-                          {comment.author_name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(comment.created_at).toLocaleString('ru-RU')}
-                        </span>
+            <Card className="bg-muted/50">
+              <CardHeader>
+                <CardTitle className="text-sm">Описание проблемы</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm whitespace-pre-wrap">{selectedTicket?.message}</p>
+              </CardContent>
+            </Card>
+
+            <div>
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Icon name="MessageSquare" size={18} />
+                История переписки ({comments.length})
+              </h4>
+              <ScrollArea className="h-[300px] rounded-md border p-4">
+                <div className="space-y-4">
+                  {comments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">Нет комментариев</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className={`flex gap-3 ${comment.is_admin ? 'flex-row-reverse' : ''}`}
+                      >
+                        <div className={`rounded-lg p-3 max-w-[80%] ${
+                          comment.is_admin 
+                            ? 'bg-primary text-primary-foreground ml-auto' 
+                            : 'bg-muted'
+                        }`}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Icon 
+                              name={comment.is_admin ? 'Shield' : 'User'} 
+                              size={14} 
+                            />
+                            <span className="text-xs font-medium">
+                              {comment.author_name}
+                            </span>
+                            <span className="text-xs opacity-70">
+                              {new Date(comment.created_at).toLocaleString('ru-RU', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{comment.comment}</p>
+                        </div>
                       </div>
-                      <p className="text-sm whitespace-pre-wrap">{comment.comment}</p>
-                    </div>
-                  ))}
-                  {comments.length === 0 && (
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                      Комментариев пока нет
-                    </p>
+                    ))
                   )}
                 </div>
+              </ScrollArea>
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="newComment">Добавить комментарий</Label>
-                  <Textarea
-                    id="newComment"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Напишите ответ клиенту..."
-                    rows={3}
-                  />
-                  <Button onClick={handleAddComment} disabled={isLoading || !newComment.trim()} className="w-full">
-                    <Icon name="Send" size={16} className="mr-2" />
-                    {isLoading ? 'Отправка...' : 'Отправить'}
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-          )}
+            <div className="space-y-3">
+              <Label>Ответить клиенту</Label>
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Введите ваш ответ..."
+                rows={4}
+                disabled={isLoading}
+              />
+              <Button 
+                onClick={handleAddComment} 
+                disabled={isLoading || !newComment.trim()}
+                className="w-full"
+              >
+                <Icon name="Send" size={16} className="mr-2" />
+                Отправить ответ
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
