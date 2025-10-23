@@ -28,7 +28,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
-    username = os.environ.get('ALFABANK_USERNAME')
+    username = os.environ.get('ALFABANK_LOGIN')
     password = os.environ.get('ALFABANK_PASSWORD')
     
     if not username or not password:
