@@ -86,7 +86,19 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
         body: JSON.stringify(requestBody)
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('JSON parse error:', e);
+        throw new Error('Ошибка парсинга ответа сервера');
+      }
+      
+      console.log('Parsed data:', data);
 
       if (data.success) {
         toast({
