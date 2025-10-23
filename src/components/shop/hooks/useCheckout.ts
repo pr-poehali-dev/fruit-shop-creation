@@ -58,10 +58,28 @@ export const useCheckout = ({
       return;
     }
 
-    if (deliveryType === 'delivery' && (!deliveryCity?.trim() || !deliveryAddress?.trim())) {
+    if (!deliveryCity?.trim()) {
+      toast({
+        title: 'Укажите город',
+        description: 'Выберите город из списка',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (paymentMethod === 'cash' && deliveryCity !== 'Барнаул') {
+      toast({
+        title: 'Оплата наличными недоступна',
+        description: 'Оплата наличными доступна только для города Барнаул. Выберите другой способ оплаты.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (deliveryType === 'delivery' && !deliveryAddress?.trim()) {
       toast({
         title: 'Укажите адрес доставки',
-        description: 'Для доставки необходимо указать город и адрес',
+        description: 'Для доставки необходимо указать адрес',
         variant: 'destructive'
       });
       return;

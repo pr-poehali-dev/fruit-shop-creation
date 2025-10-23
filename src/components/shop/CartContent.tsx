@@ -4,6 +4,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 import Icon from '@/components/ui/icon';
 import { CartItem, User } from '@/types/shop';
@@ -37,6 +39,9 @@ const CartContent = ({
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   const [deliveryCity, setDeliveryCity] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [isCityDialogOpen, setIsCityDialogOpen] = useState(false);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [citySearchQuery, setCitySearchQuery] = useState('');
   
   const deliveryEnabled = siteSettings?.delivery_enabled === true;
   const pickupEnabled = siteSettings?.pickup_enabled === true;
@@ -120,6 +125,48 @@ const CartContent = ({
     return isFreeDelivery ? 0 : getZoneDeliveryPrice();
   };
 
+  const russianCities = [
+    'Москва', 'Санкт-Петербург', 'Новосибирск', 'Екатеринбург', 'Казань',
+    'Нижний Новгород', 'Челябинск', 'Самара', 'Омск', 'Ростов-на-Дону',
+    'Уфа', 'Красноярск', 'Воронеж', 'Пермь', 'Волгоград',
+    'Краснодар', 'Саратов', 'Тюмень', 'Тольятти', 'Ижевск',
+    'Барнаул', 'Ульяновск', 'Иркутск', 'Хабаровск', 'Ярославль',
+    'Владивосток', 'Махачкала', 'Томск', 'Оренбург', 'Кемерово',
+    'Новокузнецк', 'Рязань', 'Набережные Челны', 'Астрахань', 'Пенза',
+    'Липецк', 'Киров', 'Чебоксары', 'Тула', 'Калининград',
+    'Курск', 'Улан-Удэ', 'Ставрополь', 'Магнитогорск', 'Сочи',
+    'Белгород', 'Нижний Тагил', 'Владимир', 'Архангельск', 'Калуга',
+    'Сургут', 'Севастополь', 'Симферополь', 'Тверь', 'Чита',
+    'Смоленск', 'Курган', 'Орёл', 'Владикавказ', 'Грозный',
+    'Мурманск', 'Тамбов', 'Петрозаводск', 'Нижневартовск', 'Йошкар-Ола',
+    'Новороссийск', 'Кострома', 'Таганрог', 'Комсомольск-на-Амуре', 'Стерлитамак',
+    'Братск', 'Нальчик', 'Дзержинск', 'Орск', 'Сыктывкар',
+    'Нижнекамск', 'Ангарск', 'Шахты', 'Старый Оскол', 'Великий Новгород',
+    'Благовещенск', 'Энгельс', 'Псков', 'Бийск', 'Прокопьевск',
+    'Рыбинск', 'Балаково', 'Армавир', 'Северодвинск', 'Королёв',
+    'Петропавловск-Камчатский', 'Мытищи', 'Люберцы', 'Южно-Сахалинск', 'Волжский',
+    'Подольск', 'Саранск', 'Абакан', 'Вологда', 'Норильск',
+    'Якутск', 'Черкесск', 'Каменск-Уральский', 'Красногорск', 'Химки',
+    'Электросталь', 'Майкоп', 'Салават', 'Альметьевск', 'Пятигорск',
+    'Назрань', 'Одинцово', 'Миасс', 'Березники', 'Рубцовск',
+    'Уссурийск', 'Новочеркасск', 'Копейск', 'Находка', 'Домодедово',
+    'Первоуральск', 'Серпухов', 'Новомосковск', 'Дербент', 'Щёлково',
+    'Черкесск', 'Новочебоксарск', 'Каспийск', 'Сызрань', 'Обнинск'
+  ];
+
+  const filteredCities = russianCities.filter(city =>
+    city.toLowerCase().includes(citySearchQuery.toLowerCase())
+  );
+
+  const handleCitySelect = (city: string) => {
+    setSelectedCity(city);
+    setDeliveryCity(city);
+    setIsCityDialogOpen(false);
+    setCitySearchQuery('');
+  };
+
+  const isCashPaymentAvailable = selectedCity === 'Барнаул';
+
   return (
     <div className="mt-6 space-y-4">
       {cart.length === 0 ? (
@@ -178,8 +225,26 @@ const CartContent = ({
           <div className="space-y-3 bg-muted/30 p-3 rounded-lg">
             <h4 className="font-semibold text-sm flex items-center gap-2">
               <Icon name="MapPin" size={16} />
-              Способ получения
+              Город и способ получения
             </h4>
+            
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Выберите город</Label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCityDialogOpen(true)}
+                className="w-full justify-start"
+              >
+                <Icon name="MapPin" size={16} className="mr-2" />
+                {selectedCity || 'Выберите город доставки'}
+              </Button>
+              {selectedCity && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedCity === 'Барнаул' ? '✓ Доступна оплата наличными' : 'Доступна только онлайн-оплата'}
+                </p>
+              )}
+            </div>
             {!pickupEnabled && !deliveryEnabled ? (
               <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-300 dark:border-yellow-700 rounded p-3">
                 <p className="text-sm text-yellow-900 dark:text-yellow-100">
@@ -249,18 +314,6 @@ const CartContent = ({
                         </div>
                       )}
                       <div>
-                        <Label htmlFor="delivery-city" className="text-xs text-muted-foreground">
-                          Город <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="delivery-city"
-                          placeholder="Введите город"
-                          value={deliveryCity}
-                          onChange={(e) => setDeliveryCity(e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
                         <Label htmlFor="delivery-address" className="text-xs text-muted-foreground">
                           Адрес доставки <span className="text-red-500">*</span>
                         </Label>
@@ -309,44 +362,119 @@ const CartContent = ({
             )}
           </div>
           
-          <div className="space-y-2">
-            {user && (
-              <Button 
-                className="w-full" 
-                variant="default" 
-                onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
-                disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && (!deliveryCity.trim() || !deliveryAddress.trim()))}
-              >
-                <Icon name="Wallet" size={18} className="mr-2" />
-                {preorderEnabled 
-                  ? `Оплатить 50% балансом (${(getFinalPrice() * 0.5).toFixed(2)}₽)`
-                  : `Оплатить балансом (${(user.balance || 0).toFixed(2)}₽)`
-                }
-              </Button>
+          <div className="space-y-3 bg-muted/30 p-3 rounded-lg">
+            <h4 className="font-semibold text-sm flex items-center gap-2">
+              <Icon name="CreditCard" size={16} />
+              Способ оплаты
+            </h4>
+            {!selectedCity && (
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
+                <p className="text-sm text-yellow-900 dark:text-yellow-100">
+                  Сначала выберите город доставки
+                </p>
+              </div>
             )}
-            <Button 
-              className="w-full" 
-              onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
-              disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && (!deliveryCity.trim() || !deliveryAddress.trim()))}
-            >
-              <Icon name="CreditCard" size={18} className="mr-2" />
-              {preorderEnabled 
-                ? `Оплатить 50% через Альфа-Банк (${(getFinalPrice() * 0.5).toFixed(2)}₽)`
-                : 'Оплатить через Альфа-Банк'
-              }
-            </Button>
-            <Button 
-              className="w-full" 
-              variant="outline" 
-              onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined)}
-              disabled={!pickupEnabled && !deliveryEnabled}
-            >
-              <Icon name="Coins" size={18} className="mr-2" />
-              Наличными при получении
-            </Button>
+            {selectedCity && (
+              <div className="space-y-2">
+                {user ? (
+                  <Button
+                    onClick={() => handleCheckout('balance', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
+                    variant="outline"
+                    className="w-full justify-start h-auto py-3"
+                    disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && !deliveryAddress.trim())}
+                  >
+                    <Icon name="Wallet" size={18} className="mr-2 flex-shrink-0" />
+                    <div className="text-left flex-1">
+                      <div className="font-semibold text-sm">Балансом сайта</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {preorderEnabled
+                          ? `Доступно: ${user.balance?.toFixed(2) || 0}₽ (требуется ${(getFinalPrice() * 0.5).toFixed(2)}₽ - 50% предоплата)`
+                          : `Доступно: ${user.balance?.toFixed(2) || 0}₽`}
+                      </div>
+                    </div>
+                  </Button>
+                ) : (
+                  <div className="p-3 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/30">
+                    <p className="text-sm text-muted-foreground text-center">
+                      Войдите, чтобы использовать баланс
+                    </p>
+                  </div>
+                )}
+                
+                {isCashPaymentAvailable && (
+                  <Button
+                    onClick={() => handleCheckout('cash', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
+                    variant="outline"
+                    className="w-full justify-start h-auto py-3"
+                    disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && !deliveryAddress.trim())}
+                  >
+                    <Icon name="Banknote" size={18} className="mr-2 flex-shrink-0" />
+                    <div className="text-left flex-1">
+                      <div className="font-semibold text-sm">Наличными при получении</div>
+                      {preorderEnabled && (
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          Предоплата 50%: {(getFinalPrice() * 0.5).toFixed(2)}₽, остальное при получении
+                        </div>
+                      )}
+                    </div>
+                  </Button>
+                )}
+                
+                <Button
+                  onClick={() => handleCheckout('alfabank', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3"
+                  disabled={!pickupEnabled && !deliveryEnabled || (deliveryType === 'delivery' && !deliveryAddress.trim())}
+                >
+                  <Icon name="CreditCard" size={18} className="mr-2 flex-shrink-0" />
+                  <div className="text-left flex-1">
+                    <div className="font-semibold text-sm">Банковской картой (Alfabank)</div>
+                    {preorderEnabled && (
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        Предоплата 50%: {(getFinalPrice() * 0.5).toFixed(2)}₽
+                      </div>
+                    )}
+                  </div>
+                </Button>
+              </div>
+            )}
           </div>
         </>
       )}
+      
+      <Dialog open={isCityDialogOpen} onOpenChange={setIsCityDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Выберите город</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Поиск города..."
+              value={citySearchQuery}
+              onChange={(e) => setCitySearchQuery(e.target.value)}
+              className="w-full"
+            />
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-1">
+                {filteredCities.map((city) => (
+                  <Button
+                    key={city}
+                    variant={selectedCity === city ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => handleCitySelect(city)}
+                  >
+                    <Icon name="MapPin" size={16} className="mr-2" />
+                    {city}
+                    {city === 'Барнаул' && (
+                      <span className="ml-auto text-xs text-green-600 dark:text-green-400">💵 Наличные</span>
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
