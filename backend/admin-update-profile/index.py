@@ -70,17 +70,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         conn = psycopg2.connect(dsn)
         cur = conn.cursor()
         
+        full_name_escaped = full_name.replace("'", "''")
+        phone_escaped = phone.replace("'", "''")
+        
         if new_password:
             password_hash = hashlib.sha256(new_password.encode()).hexdigest()
-            cur.execute(
-                "UPDATE users SET full_name = %s, phone = %s, password_hash = %s WHERE id = %s",
-                (full_name, phone, password_hash, user_id)
-            )
+            query = f"UPDATE users SET full_name = '{full_name_escaped}', phone = '{phone_escaped}', password_hash = '{password_hash}' WHERE id = {user_id}"
+            cur.execute(query)
         else:
-            cur.execute(
-                "UPDATE users SET full_name = %s, phone = %s WHERE id = %s",
-                (full_name, phone, user_id)
-            )
+            query = f"UPDATE users SET full_name = '{full_name_escaped}', phone = '{phone_escaped}' WHERE id = {user_id}"
+            cur.execute(query)
         
         conn.commit()
         cur.close()
