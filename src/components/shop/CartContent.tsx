@@ -169,7 +169,16 @@ const CartContent = ({
 
   return (
     <div className="mt-6 space-y-4">
-      {cart.length === 0 ? (
+      {!user ? (
+        <div className="text-center py-8 space-y-4">
+          <Icon name="ShoppingCart" size={48} className="mx-auto text-muted-foreground" />
+          <p className="text-muted-foreground">Войдите, чтобы оформить заказ</p>
+          <Button onClick={() => window.location.reload()} className="mx-auto">
+            <Icon name="LogIn" size={18} className="mr-2" />
+            Войти для покупки
+          </Button>
+        </div>
+      ) : cart.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">Корзина пуста</p>
       ) : (
         <>
