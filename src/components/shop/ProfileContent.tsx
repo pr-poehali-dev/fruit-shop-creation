@@ -129,12 +129,6 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
         <Icon name="LogOut" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
         Выйти
       </Button>
-
-      <MyTicketsDialog 
-        open={showMyTickets} 
-        onOpenChange={setShowMyTickets} 
-        user={user} 
-      />
     </div>
   );
 };
