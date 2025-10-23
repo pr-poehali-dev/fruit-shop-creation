@@ -119,7 +119,7 @@ const Index = () => {
     />
   );
 
-  const renderProfileContent = (scrollToSupport: boolean = false) => (
+  const renderProfileContent = () => (
     <ProfileContent
       user={user}
       orders={orders}
@@ -131,7 +131,6 @@ const Index = () => {
         loadOrders();
       }}
       onUserUpdate={(updatedUser) => setUser(updatedUser)}
-      scrollToSupport={scrollToSupport}
     />
   );
 

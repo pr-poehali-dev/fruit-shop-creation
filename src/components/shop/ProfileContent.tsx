@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,11 +19,10 @@ interface ProfileContentProps {
   onLogout: () => void;
   onBalanceUpdate: () => void;
   onUserUpdate: (updatedUser: User) => void;
-  scrollToSupport?: boolean;
+
 }
 
-const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout, onBalanceUpdate, onUserUpdate, scrollToSupport = false }: ProfileContentProps) => {
-  const supportRef = useRef<HTMLDivElement>(null);
+const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout, onBalanceUpdate, onUserUpdate }: ProfileContentProps) => {
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
 

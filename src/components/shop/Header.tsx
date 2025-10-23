@@ -34,7 +34,7 @@ interface HeaderProps {
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
-  renderProfileContent: (scrollToSupport?: boolean) => React.ReactNode;
+  renderProfileContent: () => React.ReactNode;
 }
 
 interface BeforeInstallPromptEvent extends Event {
