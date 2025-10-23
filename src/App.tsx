@@ -7,8 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
-import SupportChatBot from "./components/support/SupportChatBot";
-import CreateTicketDialog from "./components/support/CreateTicketDialog";
 import DecorativeBranch from "./components/DecorativeBranch";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -22,8 +20,6 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showLoading, setShowLoading] = useState(true);
-  const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
-  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
@@ -31,16 +27,6 @@ const App = () => {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
-    }
-
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        setUserId(user.id);
-      } catch (e) {
-        console.error('Failed to parse user:', e);
-      }
     }
   }, []);
 
@@ -55,14 +41,6 @@ const App = () => {
         <Sonner />
         <InstallPrompt />
         <DecorativeBranch />
-        <SupportChatBot 
-          onCreateTicket={() => setIsTicketDialogOpen(true)}
-          userId={userId}
-        />
-        <CreateTicketDialog 
-          isOpen={isTicketDialogOpen} 
-          onClose={() => setIsTicketDialogOpen(false)} 
-        />
         <BrowserRouter>
           <Suspense fallback={<LoadingScreen onComplete={() => {}} />}>
             <Routes>

@@ -7,14 +7,12 @@ interface UseAdminHandlersProps {
   API_CATEGORIES: string;
   API_AUTH: string;
   API_ORDERS: string;
-  API_SUPPORT: string;
   API_SETTINGS: string;
   siteSettings: any;
   loadProducts: () => void;
   loadCategories: () => void;
   loadUsers: () => void;
   loadOrders: () => void;
-  loadTickets: () => void;
   loadSettings: () => void;
   onSettingsUpdate?: () => void;
   editingProduct: Product | null;
@@ -340,63 +338,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
-  const handleReplyToTicket = async (ticketId: number, message: string) => {
-    try {
-      const response = await fetch(props.API_SUPPORT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'add_message',
-          ticket_id: ticketId,
-          user_id: props.user?.id || 1,
-          message,
-          is_admin: true
-        })
-      });
 
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Ответ отправлен',
-          description: 'Пользователь получит уведомление'
-        });
-        props.loadTickets();
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось отправить ответ',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const handleUpdateTicketStatus = async (ticketId: number, status: string) => {
-    try {
-      const response = await fetch(props.API_SUPPORT, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticket_id: ticketId, status })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Статус обновлён',
-          description: `Тикет #${ticketId} теперь: ${status}`
-        });
-        props.loadTickets();
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить статус',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const handleSaveSettings = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -539,33 +481,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
-  const handleDeleteTicket = async (ticketId: number) => {
-    if (!confirm('Удалить обращение? Это действие нельзя отменить.')) return;
-    
-    try {
-      const response = await fetch(props.API_SUPPORT, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticket_id: ticketId })
-      });
 
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Обращение удалено',
-          description: `Тикет #${ticketId} был удалён`
-        });
-        props.loadTickets();
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось удалить обращение',
-        variant: 'destructive'
-      });
-    }
-  };
 
   const handleUpdateItemStock = async (orderId: number, itemId: number, isOutOfStock: boolean) => {
     try {
@@ -669,11 +585,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleToggleAdmin,
     handleIssueLoyaltyCard,
     handleUpdateOrderStatus,
-    handleReplyToTicket,
-    handleUpdateTicketStatus,
     handleSaveSettings,
     handleDeleteOrder,
-    handleDeleteTicket,
     handleUpdateItemStock,
     handleUpdateItemAvailability,
     handleDeleteProduct

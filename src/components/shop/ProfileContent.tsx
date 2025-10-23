@@ -4,14 +4,12 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { User, Order } from '@/types/shop';
-import UserTickets from './UserTickets';
 import LoyaltyCard from './LoyaltyCard';
 import CashbackExchange from './CashbackExchange';
 import ProfileHeader from './profile/ProfileHeader';
 import OrdersTab from './profile/OrdersTab';
 import TransactionsTab from './profile/TransactionsTab';
 import SettingsTab from './profile/SettingsTab';
-import MyTicketsDialog from './MyTicketsDialog';
 
 interface ProfileContentProps {
   user: User | null;
@@ -28,7 +26,6 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
   const supportRef = useRef<HTMLDivElement>(null);
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
-  const [showMyTickets, setShowMyTickets] = useState(false);
 
 
 
@@ -126,22 +123,6 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
           <SettingsTab user={user} onUserUpdate={onUserUpdate} />
         </TabsContent>
       </Tabs>
-      
-      <Separator />
-      
-      <div ref={supportRef} className="space-y-3">
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            className="flex-1 text-sm sm:text-base h-10 sm:h-11" 
-            onClick={() => setShowMyTickets(true)}
-          >
-            <Icon name="Inbox" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
-            Мои обращения
-          </Button>
-        </div>
-        <UserTickets user={user} />
-      </div>
       
       <Separator className="my-3 sm:my-4" />
       

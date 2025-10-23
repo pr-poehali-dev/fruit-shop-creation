@@ -5,8 +5,6 @@ import CategoriesTab from './CategoriesTab';
 import UsersTab from './UsersTab';
 import OrdersTab from './OrdersTab';
 import SettingsTab from './SettingsTab';
-import SupportTab from './SupportTab';
-import SupportTicketsTab from './SupportTicketsTab';
 import LoyaltyScannerTab from './LoyaltyScannerTab';
 import PagesTab from './PagesTab';
 import CodesTab from './CodesTab';
@@ -15,7 +13,6 @@ import PlantsInventoryTab from './PlantsInventoryTab';
 import BotFaqTab from './BotFaqTab';
 import GalleryTab from './GalleryTab';
 import OrdersStatsCard from './OrdersStatsCard';
-import SupportStatsCard from './SupportStatsCard';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -23,7 +20,6 @@ interface AdminPanelTabsProps {
   categories: Category[];
   users: User[];
   orders: any[];
-  tickets: any[];
   siteSettings: any;
   userId: number;
   onAddProduct: () => void;
@@ -37,16 +33,11 @@ interface AdminPanelTabsProps {
   onToggleAdmin: (userId: number, isAdmin: boolean) => void;
   onIssueLoyaltyCard: (userId: number) => Promise<void>;
   onUpdateOrderStatus: (orderId: number, status: string, rejectionReason?: string) => void;
-  onReplyToTicket: (ticketId: number, message: string) => void;
-  onUpdateTicketStatus: (ticketId: number, status: string) => void;
-  onLoadTicket: (ticketId: number) => Promise<any>;
   onSaveSettings: (e: React.FormEvent<HTMLFormElement>) => void;
   onDeleteOrder: (orderId: number) => void;
-  onDeleteTicket: (ticketId: number) => void;
   onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
   onUpdateItemAvailability?: (itemId: number, availableQuantity: number, availablePrice?: number) => void;
   onRefreshUsers?: () => void;
-  onRefreshTickets?: () => void;
 }
 
 const AdminPanelTabs = ({
@@ -54,7 +45,6 @@ const AdminPanelTabs = ({
   categories,
   users,
   orders,
-  tickets,
   siteSettings,
   userId,
   onAddProduct,
@@ -76,12 +66,11 @@ const AdminPanelTabs = ({
   onDeleteTicket,
   onUpdateItemStock,
   onUpdateItemAvailability,
-  onRefreshUsers,
-  onRefreshTickets
+  onRefreshUsers
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-14 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -118,18 +107,7 @@ const AdminPanelTabs = ({
           <Icon name="Bot" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Бот FAQ</span>
         </TabsTrigger>
-        <TabsTrigger value="support" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="MessageCircle" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Поддержка</span>
-        </TabsTrigger>
-        <TabsTrigger value="tickets" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Ticket" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Тикеты</span>
-        </TabsTrigger>
-        <TabsTrigger value="ratings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Star" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Оценки</span>
-        </TabsTrigger>
+
         <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="FileText" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Страницы</span>
@@ -191,20 +169,7 @@ const AdminPanelTabs = ({
         <LoyaltyScannerTab />
       </TabsContent>
 
-      <TabsContent value="support">
-        <SupportTab 
-          tickets={tickets}
-          onReply={onReplyToTicket}
-          onUpdateStatus={onUpdateTicketStatus}
-          onLoadTicket={onLoadTicket}
-          onDeleteTicket={onDeleteTicket}
-          onRefreshTickets={onRefreshTickets}
-        />
-      </TabsContent>
 
-      <TabsContent value="tickets">
-        <SupportTicketsTab userId={userId} />
-      </TabsContent>
 
       <TabsContent value="gallery">
         <GalleryTab />
@@ -212,13 +177,6 @@ const AdminPanelTabs = ({
 
       <TabsContent value="bot-faq">
         <BotFaqTab />
-      </TabsContent>
-
-      <TabsContent value="ratings">
-        <div className="space-y-4">
-          <OrdersStatsCard orders={orders} />
-          <SupportStatsCard tickets={tickets} />
-        </div>
       </TabsContent>
 
       <TabsContent value="pages">

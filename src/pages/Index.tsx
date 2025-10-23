@@ -3,7 +3,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { useShopData } from '@/hooks/useShopData';
-import { useTicketNotifications } from '@/hooks/useTicketNotifications';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCheckout } from '@/components/shop/hooks/useCheckout';
 import { useAdminAuth } from '@/components/shop/hooks/useAdminAuth';
@@ -18,7 +17,6 @@ import ProductGalleryDialog from '@/components/shop/ProductGalleryDialog';
 import HolidayThemeRenderer from '@/components/shop/HolidayThemeRenderer';
 import MainContent from '@/components/shop/MainContent';
 import MaintenancePage from '@/components/MaintenancePage';
-import RatingModal from '@/components/RatingModal';
 import { Product } from '@/types/shop';
 
 const Index = () => {
@@ -37,7 +35,6 @@ const Index = () => {
     refreshUserBalance,
     API_ORDERS
   } = useShopData();
-  const { unreadCount, needsRating } = useTicketNotifications(user);
   const { favorites, favoriteIds, toggleFavorite } = useFavorites(user?.id || null);
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -45,9 +42,6 @@ const Index = () => {
   const [currentSection, setCurrentSection] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductGalleryOpen, setIsProductGalleryOpen] = useState(false);
-  const [ratingModalOpen, setRatingModalOpen] = useState(false);
-  const [ratingEntityType, setRatingEntityType] = useState('');
-  const [ratingEntityId, setRatingEntityId] = useState(0);
 
   const { handleCheckout } = useCheckout({
     user,
@@ -223,18 +217,12 @@ const Index = () => {
             user={user}
             currentSection={currentSection}
             siteSettings={siteSettings}
-            unreadTickets={unreadCount}
-            needsRating={needsRating}
             favoritesCount={favorites.length}
             onSectionChange={setCurrentSection}
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
             renderProfileContent={renderProfileContent}
-            onRatingRequest={(entityType: string, entityId: number) => {
-              setRatingEntityType(entityType);
-              setRatingEntityId(entityId);
-              setRatingModalOpen(true);
-            }}
+
           />
 
           <main className="container mx-auto px-4 py-8">
@@ -282,16 +270,6 @@ const Index = () => {
             adminCodeError={adminCodeError}
             onBanExpired={clearBanInfo}
           />
-
-          {user && (
-            <RatingModal
-              isOpen={ratingModalOpen}
-              onClose={() => setRatingModalOpen(false)}
-              userId={user.id}
-              entityType={ratingEntityType}
-              entityId={ratingEntityId}
-            />
-          )}
         </>
       )}
     </div>

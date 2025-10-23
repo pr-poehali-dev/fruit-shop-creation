@@ -5,7 +5,7 @@ import Icon from '@/components/ui/icon';
 import SideMenu from './SideMenu';
 import SnowEffect from './SnowEffect';
 import LeafyTitle from './LeafyTitle';
-import NotificationsDropdown from '../NotificationsDropdown';
+
 import { useState, useEffect } from 'react';
 
 interface User {
@@ -30,14 +30,11 @@ interface HeaderProps {
   user: User | null;
   currentSection: string;
   siteSettings?: { site_name?: string; holiday_theme?: string; logo_url?: string };
-  unreadTickets?: number;
-  needsRating?: boolean;
   favoritesCount?: number;
   onSectionChange: (section: string) => void;
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
   renderProfileContent: (scrollToSupport?: boolean) => React.ReactNode;
-  onRatingRequest?: (entityType: string, entityId: number) => void;
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -50,14 +47,11 @@ const Header = ({
   user, 
   currentSection, 
   siteSettings,
-  unreadTickets = 0,
-  needsRating = false,
   favoritesCount = 0,
   onSectionChange, 
   onShowAuth,
   renderCartContent,
-  renderProfileContent,
-  onRatingRequest
+  renderProfileContent
 }: HeaderProps) => {
   const isNewYear = siteSettings?.holiday_theme === 'new_year';
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -164,10 +158,6 @@ const Header = ({
               <Icon name="Download" size={16} />
               <span className="hidden xl:inline">Установить</span>
             </Button>
-          )}
-
-          {user && onRatingRequest && (
-            <NotificationsDropdown userId={user.id} onRatingRequest={onRatingRequest} />
           )}
 
           {user && (

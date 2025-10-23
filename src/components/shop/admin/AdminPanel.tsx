@@ -40,21 +40,17 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     categories,
     users,
     orders,
-    tickets,
     siteSettings,
     loadProducts,
     loadCategories,
     loadSettings,
     loadUsers,
     loadOrders,
-    loadTickets,
-    loadSingleTicket,
     API_PRODUCTS,
     API_CATEGORIES,
     API_SETTINGS,
     API_AUTH,
-    API_ORDERS,
-    API_SUPPORT
+    API_ORDERS
   } = useAdminData();
 
   const {
@@ -66,11 +62,8 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     handleToggleAdmin,
     handleIssueLoyaltyCard,
     handleUpdateOrderStatus,
-    handleReplyToTicket,
-    handleUpdateTicketStatus,
     handleSaveSettings,
     handleDeleteOrder,
-    handleDeleteTicket,
     handleUpdateItemStock,
     handleUpdateItemAvailability,
     handleDeleteProduct
@@ -80,14 +73,12 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     API_CATEGORIES,
     API_AUTH,
     API_ORDERS,
-    API_SUPPORT,
     API_SETTINGS,
     siteSettings,
     loadProducts,
     loadCategories,
     loadUsers,
     loadOrders,
-    loadTickets,
     loadSettings,
     onSettingsUpdate,
     editingProduct,
@@ -132,7 +123,6 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           categories={categories}
           users={users}
           orders={orders}
-          tickets={tickets}
           siteSettings={siteSettings}
           userId={user.id}
           onAddProduct={() => openProductDialog()}
@@ -149,16 +139,11 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           onToggleAdmin={handleToggleAdmin}
           onIssueLoyaltyCard={handleIssueLoyaltyCard}
           onUpdateOrderStatus={handleUpdateOrderStatus}
-          onReplyToTicket={handleReplyToTicket}
-          onUpdateTicketStatus={handleUpdateTicketStatus}
-          onLoadTicket={loadSingleTicket}
           onSaveSettings={handleSaveSettings}
           onDeleteOrder={handleDeleteOrder}
-          onDeleteTicket={handleDeleteTicket}
           onUpdateItemStock={handleUpdateItemStock}
           onUpdateItemAvailability={handleUpdateItemAvailability}
           onRefreshUsers={loadUsers}
-          onRefreshTickets={loadTickets}
         />
       </div>
 
