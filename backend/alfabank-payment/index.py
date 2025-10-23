@@ -11,6 +11,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
           context with request_id
     Returns: HTTP response with payment_url or error
     '''
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    
     method: str = event.get('httpMethod', 'GET')
     
     if method == 'OPTIONS':
@@ -34,6 +37,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
+    db_url = os.environ.get('DATABASE_URL')
+    conn = psycopg2.connect(db_url)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        cur.execute("SELECT alfabank_login, alfabank_password FROM site_settings WHERE id = 1")
+        settings = cur.fetchone()
+        
+        if not settings or not settings.get('alfabank_login') or not settings.get('alfabank_password'):
+            return {
+                'statusCode': 500,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'error': 'Alfabank credentials not configured',
+                    'message': 'Необходимо добавить данные для доступа к API Альфа-Банка в настройках проекта'
+                }),
+                'isBase64Encoded': False
+            }
+        
+        username = settings['alfabank_login']
+        password = settings['alfabank_password']
+    finally:
+        cur.close()
+        conn.close()
+    
     body_data = json.loads(event.get('body', '{}'))
     amount = body_data.get('amount')
     user_id = body_data.get('user_id')
@@ -54,20 +82,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 400,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({'error': 'Amount must be positive'}),
-            'isBase64Encoded': False
-        }
-    
-    username = os.environ.get('ALFABANK_LOGIN')
-    password = os.environ.get('ALFABANK_PASSWORD')
-    
-    if not username or not password:
-        return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({
-                'error': 'Alfabank credentials not configured',
-                'message': 'Необходимо добавить данные для доступа к API Альфа-Банка в настройках проекта'
-            }),
             'isBase64Encoded': False
         }
     

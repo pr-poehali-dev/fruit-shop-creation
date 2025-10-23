@@ -1,0 +1,3 @@
+ALTER TABLE site_settings 
+ADD COLUMN IF NOT EXISTS alfabank_login TEXT DEFAULT '',
+ADD COLUMN IF NOT EXISTS alfabank_password TEXT DEFAULT '';

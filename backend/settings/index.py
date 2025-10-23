@@ -100,6 +100,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             loyalty_cashback_percent = body_data.get('loyalty_cashback_percent', 5) if body_data.get('loyalty_cashback_percent') is not None else 5
             balance_payment_cashback_percent = body_data.get('balance_payment_cashback_percent', 5) if body_data.get('balance_payment_cashback_percent') is not None else 5
             admin_pin = safe_str(body_data.get('admin_pin', '0000')) if body_data.get('admin_pin') else '0000'
+            alfabank_login = safe_str(body_data.get('alfabank_login', ''))
+            alfabank_password = safe_str(body_data.get('alfabank_password', ''))
             delivery_enabled = bool(body_data.get('delivery_enabled', False))
             pickup_enabled = bool(body_data.get('pickup_enabled', False))
             preorder_enabled = bool(body_data.get('preorder_enabled', False))
@@ -166,6 +168,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"""INSERT INTO site_settings (
                     id, site_name, logo_url, site_description, phone, email, address, work_hours, promotions, additional_info, price_list_url, 
                     holiday_theme, loyalty_card_price, loyalty_unlock_amount, loyalty_cashback_percent, balance_payment_cashback_percent, admin_pin,
+                    alfabank_login, alfabank_password,
                     delivery_enabled, pickup_enabled, preorder_enabled, preorder_message, preorder_start_date, preorder_end_date, 
                     delivery_price, free_delivery_min, courier_delivery_price,
                     about_title, about_text, care_title, care_watering_title, care_watering_text, care_lighting_title, care_lighting_text,
@@ -176,6 +179,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    )
                    VALUES (1, '{site_name}', '{logo_url}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
                     '{holiday_theme}', {loyalty_card_price}, {loyalty_unlock_amount}, {loyalty_cashback_percent}, {balance_payment_cashback_percent}, '{admin_pin}',
+                    '{alfabank_login}', '{alfabank_password}',
                     {delivery_enabled}, {pickup_enabled}, {preorder_enabled}, '{preorder_message}', {preorder_start_date}, {preorder_end_date},
                     {delivery_price}, {free_delivery_min}, {courier_delivery_price},
                     '{about_title}', '{about_text}', '{care_title}', '{care_watering_title}', '{care_watering_text}', '{care_lighting_title}', '{care_lighting_text}',
@@ -201,6 +205,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    loyalty_cashback_percent = EXCLUDED.loyalty_cashback_percent,
                    balance_payment_cashback_percent = EXCLUDED.balance_payment_cashback_percent,
                    admin_pin = EXCLUDED.admin_pin,
+                   alfabank_login = EXCLUDED.alfabank_login,
+                   alfabank_password = EXCLUDED.alfabank_password,
                    delivery_enabled = EXCLUDED.delivery_enabled,
                    pickup_enabled = EXCLUDED.pickup_enabled,
                    preorder_enabled = EXCLUDED.preorder_enabled,

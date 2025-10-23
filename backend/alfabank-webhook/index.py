@@ -28,16 +28,27 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
-    username = os.environ.get('ALFABANK_LOGIN')
-    password = os.environ.get('ALFABANK_PASSWORD')
+    db_url = os.environ.get('DATABASE_URL')
+    conn = psycopg2.connect(db_url)
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    if not username or not password:
-        return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': 'Alfabank credentials not configured'}),
-            'isBase64Encoded': False
-        }
+    try:
+        cur.execute("SELECT alfabank_login, alfabank_password FROM site_settings WHERE id = 1")
+        settings = cur.fetchone()
+        
+        if not settings or not settings.get('alfabank_login') or not settings.get('alfabank_password'):
+            return {
+                'statusCode': 500,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Alfabank credentials not configured'}),
+                'isBase64Encoded': False
+            }
+        
+        username = settings['alfabank_login']
+        password = settings['alfabank_password']
+    finally:
+        cur.close()
+        conn.close()
     
     alfabank_status_url = 'https://web.rbsuat.com/ab/rest/getOrderStatusExtended.do'
     
