@@ -202,11 +202,6 @@ const Header = ({
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
                   <Icon name="User" size={20} className="sm:w-7 sm:h-7" />
-                  {unreadTickets > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 text-xs rounded-full p-0 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
-                      {unreadTickets}
-                    </Badge>
-                  )}
                   {isNewYear && <div className="icon-snow-sparkle">🎅</div>}
                 </Button>
               </SheetTrigger>
