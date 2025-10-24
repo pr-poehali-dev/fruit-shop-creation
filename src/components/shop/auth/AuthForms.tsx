@@ -2,6 +2,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 interface AuthFormsProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>, action: 'login' | 'register') => void;
@@ -10,6 +13,18 @@ interface AuthFormsProps {
 }
 
 const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsProps) => {
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+
+  const handleRegisterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!agreedToTerms || !agreedToPrivacy) {
+      alert('Пожалуйста, примите все соглашения для продолжения регистрации');
+      return;
+    }
+    onSubmit(e, 'register');
+  };
+
   return (
     <Tabs defaultValue="login">
       <TabsList className="grid w-full grid-cols-2">
@@ -50,7 +65,7 @@ const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsP
         </form>
       </TabsContent>
       <TabsContent value="register">
-        <form onSubmit={(e) => onSubmit(e, 'register')} className="space-y-4" autoComplete="on">
+        <form onSubmit={handleRegisterSubmit} className="space-y-4" autoComplete="on">
           <div>
             <Label htmlFor="register-phone">Телефон</Label>
             <Input 
@@ -75,7 +90,50 @@ const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsP
             <Label htmlFor="register-password">Пароль</Label>
             <Input id="register-password" name="password" type="password" autoComplete="new-password" required />
           </div>
-          <Button type="submit" className="w-full">Зарегистрироваться</Button>
+          
+          <div className="space-y-3 pt-2">
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="terms" 
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Я принимаю{' '}
+                <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                  пользовательское соглашение
+                </Link>
+              </label>
+            </div>
+            
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="privacy" 
+                checked={agreedToPrivacy}
+                onCheckedChange={(checked) => setAgreedToPrivacy(checked as boolean)}
+              />
+              <label
+                htmlFor="privacy"
+                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Я согласен с{' '}
+                <Link to="/privacy-policy" className="text-primary hover:underline" target="_blank">
+                  политикой обработки персональных данных
+                </Link>
+              </label>
+            </div>
+          </div>
+          
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={!agreedToTerms || !agreedToPrivacy}
+          >
+            Зарегистрироваться
+          </Button>
         </form>
       </TabsContent>
     </Tabs>
