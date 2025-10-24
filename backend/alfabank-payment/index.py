@@ -2,7 +2,7 @@ import json
 import os
 import requests
 from typing import Dict, Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
@@ -97,17 +97,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         'orderNumber': order_number,
         'amount': amount_in_kopecks,
         'returnUrl': return_url,
+        'failUrl': return_url,
         'description': description,
-        'jsonParams': json.dumps({
-            'user_id': user_id,
-            'order_id': order_id
-        })
+        'language': 'ru',
+        'pageView': 'MOBILE'
     }
     
     try:
         print(f"Creating payment: amount={amount_in_kopecks} kopecks, order={order_number}")
         print(f"Using credentials: username={username}")
-        response = requests.post(alfabank_api_url, data=payload, timeout=10)
+        
+        # URL-encode manually to ensure proper encoding of special characters
+        payload_encoded = {
+            'userName': username,
+            'password': password,  # requests handles encoding automatically
+            'orderNumber': order_number,
+            'amount': str(amount_in_kopecks),
+            'returnUrl': return_url,
+            'failUrl': return_url,
+            'description': description,
+            'language': 'ru',
+            'pageView': 'MOBILE'
+        }
+        
+        print(f"Request payload keys: {list(payload_encoded.keys())}")
+        response = requests.post(alfabank_api_url, data=payload_encoded, timeout=10)
         print(f"Alfabank response status: {response.status_code}")
         print(f"Alfabank response text: {response.text[:500]}")
         
