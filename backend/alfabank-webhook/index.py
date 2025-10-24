@@ -33,24 +33,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     try:
-        cur.execute("SELECT alfabank_login, alfabank_password FROM site_settings WHERE id = 1")
+        cur.execute("SELECT alfabank_password FROM site_settings WHERE id = 1")
         settings = cur.fetchone()
         
-        if not settings or not settings.get('alfabank_login') or not settings.get('alfabank_password'):
+        if not settings or not settings.get('alfabank_password'):
             return {
                 'statusCode': 500,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({'error': 'Alfabank credentials not configured'}),
+                'body': json.dumps({'error': 'Alfabank token not configured'}),
                 'isBase64Encoded': False
             }
         
-        username = settings['alfabank_login']
-        password = settings['alfabank_password']
+        api_token = settings['alfabank_password']
     finally:
         cur.close()
         conn.close()
     
-    alfabank_status_url = 'https://web.rbsuat.com/ab/rest/getOrderStatusExtended.do'
+    alfabank_status_url = 'https://payment.alfabank.ru/payment/rest/getOrderStatusExtended.do'
     
     if method == 'GET':
         params = event.get('queryStringParameters') or {}
@@ -66,8 +65,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         try:
             response = requests.post(alfabank_status_url, data={
-                'userName': username,
-                'password': password,
+                'token': api_token,
                 'orderId': alfa_order_id
             }, timeout=10)
             response.raise_for_status()
@@ -91,14 +89,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     try:
                         if order_id:
                             cur.execute(
-                                f"UPDATE orders SET status = 'confirmed', payment_verified = true WHERE id = {order_id}"
+                                "UPDATE orders SET status = 'confirmed', payment_verified = true WHERE id = %s",
+                                (order_id,)
                             )
                         else:
                             cur.execute(
-                                f"UPDATE users SET balance = balance + {amount} WHERE id = {user_id}"
+                                "UPDATE users SET balance = balance + %s WHERE id = %s",
+                                (amount, user_id)
                             )
                             cur.execute(
-                                f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'deposit', {amount}, 'Пополнение через Альфа-Банк')"
+                                "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, 'deposit', %s, 'Пополнение через Альфа-Банк')",
+                                (user_id, amount)
                             )
                         
                         conn.commit()

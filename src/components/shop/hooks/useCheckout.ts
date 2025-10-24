@@ -123,10 +123,11 @@ export const useCheckout = ({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount: totalAmount,
+            user_id: user.id,
+            order_id: Date.now(),
             description: isPreorder 
               ? `Предзаказ (50% предоплата) - ${cart.length} товар${cart.length > 1 ? 'а' : ''}`
               : `Оплата заказа (${cart.length} товар${cart.length > 1 ? 'а' : ''})`,
-            user_id: user.id.toString(),
             return_url: `${window.location.origin}/payment/success`
           })
         });

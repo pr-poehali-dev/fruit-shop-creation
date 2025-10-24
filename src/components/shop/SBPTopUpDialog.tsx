@@ -55,8 +55,8 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: numAmount,
+          user_id: userId,
           description: 'Пополнение баланса',
-          user_id: userId.toString(),
           return_url: `${window.location.origin}/payment/success`
         })
       });
