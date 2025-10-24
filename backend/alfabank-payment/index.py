@@ -85,7 +85,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'isBase64Encoded': False
         }
     
-    alfabank_api_url = 'https://web.rbsuat.com/ab/rest/register.do'
+    alfabank_api_url = 'https://payment.alfabank.ru/payment/rest/register.do'
     
     amount_in_kopecks = int(float(amount) * 100)
     order_number = f"{order_id or 'topup'}_{user_id}_{context.request_id[:8]}"
@@ -104,10 +104,26 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     }
     
     try:
+        print(f"Creating payment: amount={amount_in_kopecks} kopecks, order={order_number}")
         response = requests.post(alfabank_api_url, data=payload, timeout=10)
-        response.raise_for_status()
+        print(f"Alfabank response status: {response.status_code}")
+        print(f"Alfabank response text: {response.text[:500]}")
         
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError as json_error:
+            print(f"Failed to parse JSON: {str(json_error)}")
+            return {
+                'statusCode': 500,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'error': 'Invalid response from payment gateway',
+                    'details': response.text[:200]
+                }),
+                'isBase64Encoded': False
+            }
+        
+        print(f"Alfabank response data: {json.dumps(data)}")
         
         if 'formUrl' in data:
             return {
@@ -123,23 +139,38 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         else:
             error_message = data.get('errorMessage', 'Unknown error from Alfabank')
+            error_code = data.get('errorCode', 'UNKNOWN')
+            print(f"Alfabank error: {error_code} - {error_message}")
             return {
                 'statusCode': 400,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'success': False,
                     'error': error_message,
+                    'error_code': error_code,
                     'details': data
                 }),
                 'isBase64Encoded': False
             }
     
     except requests.exceptions.RequestException as e:
+        print(f"Request failed: {str(e)}")
         return {
             'statusCode': 500,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({
                 'error': 'Failed to connect to Alfabank API',
+                'details': str(e)
+            }),
+            'isBase64Encoded': False
+        }
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({
+                'error': 'Internal server error',
                 'details': str(e)
             }),
             'isBase64Encoded': False
