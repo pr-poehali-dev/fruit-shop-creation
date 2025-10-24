@@ -15,6 +15,8 @@ export const useCart = () => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  const MAX_QUANTITY = 99;
+
   const addToCart = (product: Product) => {
     const productKey = (product as any).selectedSize 
       ? `${product.id}-${(product as any).selectedSize}` 
@@ -28,12 +30,15 @@ export const useCart = () => {
     });
     
     if (existingItem) {
+      if (existingItem.quantity >= MAX_QUANTITY) {
+        return;
+      }
       setCart(cart.map(item => {
         const itemKey = (item.product as any).selectedSize 
           ? `${item.product.id}-${(item.product as any).selectedSize}` 
           : `${item.product.id}`;
         return itemKey === productKey
-          ? { ...item, quantity: item.quantity + 1 }
+          ? { ...item, quantity: Math.min(item.quantity + 1, MAX_QUANTITY) }
           : item;
       }));
     } else {
@@ -50,13 +55,14 @@ export const useCart = () => {
         return item.product.id !== productId;
       }));
     } else {
+      const limitedQuantity = Math.min(quantity, MAX_QUANTITY);
       setCart(cart.map(item => {
         if (selectedSize) {
           return (item.product.id === productId && (item.product as any).selectedSize === selectedSize) 
-            ? { ...item, quantity } 
+            ? { ...item, quantity: limitedQuantity } 
             : item;
         }
-        return item.product.id === productId ? { ...item, quantity } : item;
+        return item.product.id === productId ? { ...item, quantity: limitedQuantity } : item;
       }));
     }
   };
