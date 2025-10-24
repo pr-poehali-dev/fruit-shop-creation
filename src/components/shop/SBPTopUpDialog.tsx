@@ -10,9 +10,10 @@ interface SBPTopUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: number;
+  userEmail?: string;
 }
 
-const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, userId }) => {
+const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, userId, userEmail }) => {
   const { toast } = useToast();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +57,7 @@ const SBPTopUpDialog: React.FC<SBPTopUpDialogProps> = ({ open, onOpenChange, use
         body: JSON.stringify({
           amount: numAmount,
           user_id: userId,
+          email: userEmail,
           description: 'Пополнение баланса',
           return_url: `${window.location.origin}/payment/success`
         })

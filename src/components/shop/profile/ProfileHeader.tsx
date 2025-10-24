@@ -159,6 +159,7 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: P
         open={showTopUpDialog}
         onOpenChange={setShowTopUpDialog}
         userId={user?.id || 0}
+        userEmail={user?.email}
       />
     </>
   );

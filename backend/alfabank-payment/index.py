@@ -66,6 +66,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     amount = body_data.get('amount')
     user_id = body_data.get('user_id')
     order_id = body_data.get('order_id')
+    email = body_data.get('email')
     description = body_data.get('description', 'Оплата заказа')
     return_url = body_data.get('return_url', 'https://your-site.com/payment/success')
     
@@ -100,6 +101,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         'language': 'ru',
         'pageView': 'MOBILE'
     }
+    
+    if email:
+        payload['email'] = email
+        payload['jsonParams'] = json.dumps({'email': email})
+        print(f"Adding email to payment: {email}")
     
     try:
         print(f"Creating payment: amount={amount_in_kopecks} kopecks, order={order_number}")
