@@ -105,9 +105,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         print(f"Creating payment: amount={amount_in_kopecks} kopecks, order={order_number}")
-        print(f"Using credentials: username={username}")
+        print(f"Testing: username={username}, password_len={len(password)}")
         
-        # URL-encode manually to ensure proper encoding of special characters
+        # Prepare request payload
         payload_encoded = {
             'userName': username,
             'password': password,  # requests handles encoding automatically
