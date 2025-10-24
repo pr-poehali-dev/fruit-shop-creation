@@ -43,22 +43,21 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
     try:
-        cur.execute("SELECT alfabank_login, alfabank_password FROM site_settings WHERE id = 1")
+        cur.execute("SELECT alfabank_password FROM site_settings WHERE id = 1")
         settings = cur.fetchone()
         
-        if not settings or not settings.get('alfabank_login') or not settings.get('alfabank_password'):
+        if not settings or not settings.get('alfabank_password'):
             return {
                 'statusCode': 500,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
-                    'error': 'Alfabank credentials not configured',
-                    'message': 'Необходимо добавить данные для доступа к API Альфа-Банка в настройках проекта'
+                    'error': 'Alfabank token not configured',
+                    'message': 'Необходимо добавить токен API Альфа-Банка в настройках проекта'
                 }),
                 'isBase64Encoded': False
             }
         
-        username = settings['alfabank_login']
-        password = settings['alfabank_password']
+        api_token = settings['alfabank_password']
     finally:
         cur.close()
         conn.close()
@@ -92,8 +91,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     order_number = f"{order_id or 'topup'}_{user_id}_{context.request_id[:8]}"
     
     payload = {
-        'userName': username,
-        'password': password,
+        'token': api_token,
         'orderNumber': order_number,
         'amount': amount_in_kopecks,
         'returnUrl': return_url,
@@ -105,23 +103,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         print(f"Creating payment: amount={amount_in_kopecks} kopecks, order={order_number}")
-        print(f"Testing: username={username}, password_len={len(password)}")
+        print(f"Using API token: {api_token[:8]}...{api_token[-4:]} (len={len(api_token)})")
         
-        # Prepare request payload
-        payload_encoded = {
-            'userName': username,
-            'password': password,  # requests handles encoding automatically
-            'orderNumber': order_number,
-            'amount': str(amount_in_kopecks),
-            'returnUrl': return_url,
-            'failUrl': return_url,
-            'description': description,
-            'language': 'ru',
-            'pageView': 'MOBILE'
-        }
-        
-        print(f"Request payload keys: {list(payload_encoded.keys())}")
-        response = requests.post(alfabank_api_url, data=payload_encoded, timeout=10)
+        print(f"Request payload keys: {list(payload.keys())}")
+        response = requests.post(alfabank_api_url, data=payload, timeout=10)
         print(f"Alfabank response status: {response.status_code}")
         print(f"Alfabank response text: {response.text[:500]}")
         
