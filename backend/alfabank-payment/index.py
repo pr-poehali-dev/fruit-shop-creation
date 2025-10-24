@@ -10,7 +10,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     Args: event with httpMethod, body (amount, user_id, order_id, description)
           context with request_id
     Returns: HTTP response with payment_url or error
-    Note: Uses production Alfabank API with merchant credentials
+    Note: Uses production Alfabank API with API credentials
     '''
     import psycopg2
     from psycopg2.extras import RealDictCursor
@@ -106,6 +106,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         print(f"Creating payment: amount={amount_in_kopecks} kopecks, order={order_number}")
+        print(f"Using credentials: username={username}")
         response = requests.post(alfabank_api_url, data=payload, timeout=10)
         print(f"Alfabank response status: {response.status_code}")
         print(f"Alfabank response text: {response.text[:500]}")
