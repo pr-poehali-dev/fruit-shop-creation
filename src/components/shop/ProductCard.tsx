@@ -76,6 +76,15 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
     onAddToCart(productWithVariant);
   };
 
+  const handleAddToCartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      onShowAuth?.();
+      return;
+    }
+    onAddToCart(product);
+  };
+
   return (
     <Card className={`overflow-hidden transition-all relative ${isHalloween ? 'halloween-card hover:shadow-[0_0_30px_rgba(255,120,0,0.5)] border-2 border-orange-500/30' : 'hover:shadow-lg'}`}>
       {isNewYear && <div className="snow-cap"></div>}
