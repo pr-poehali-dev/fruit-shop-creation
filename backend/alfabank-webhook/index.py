@@ -76,22 +76,26 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             order_status = status_data.get('orderStatus')
             
             if order_status == 2:
-                merchant_params = status_data.get('merchantOrderParams', [])
+                order_number = status_data.get('orderNumber', '')
+                print(f"Order number: {order_number}")
+                
                 user_id = None
                 order_id = None
                 
-                if merchant_params and len(merchant_params) > 0:
-                    try:
-                        json_params = json.loads(merchant_params[0].get('value', '{}'))
-                        user_id = json_params.get('user_id')
-                        order_id = json_params.get('order_id')
-                        print(f"Parsed params: user_id={user_id}, order_id={order_id}")
-                    except (json.JSONDecodeError, KeyError, IndexError) as e:
-                        print(f"Failed to parse merchant params: {e}")
+                if order_number.startswith('topup_'):
+                    parts = order_number.split('_')
+                    if len(parts) >= 2:
+                        user_id = parts[1]
+                        print(f"Extracted user_id from order_number: {user_id}")
+                elif order_number.startswith('order_'):
+                    parts = order_number.split('_')
+                    if len(parts) >= 2:
+                        order_id = parts[1]
+                        print(f"Extracted order_id from order_number: {order_id}")
                 
                 amount_kopecks = status_data.get('amount', 0)
                 amount = float(amount_kopecks) / 100
-                print(f"Payment amount: {amount} RUB")
+                print(f"Payment amount: {amount} RUB, user_id: {user_id}, order_id: {order_id}")
                 
                 if user_id and amount > 0:
                     db_url = os.environ.get('DATABASE_URL')
