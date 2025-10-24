@@ -10,6 +10,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     Args: event with httpMethod, body (amount, user_id, order_id, description)
           context with request_id
     Returns: HTTP response with payment_url or error
+    Note: Uses production Alfabank API with merchant credentials
     '''
     import psycopg2
     from psycopg2.extras import RealDictCursor
