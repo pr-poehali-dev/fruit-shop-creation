@@ -75,7 +75,74 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             order_status = status_data.get('orderStatus')
             
-            if order_status == 2:
+            if order_status == 4:
+                order_number = status_data.get('orderNumber', '')
+                print(f"Refund detected for order number: {order_number}")
+                
+                user_id = None
+                order_id = None
+                is_preorder_payment = False
+                
+                if order_number.startswith('topup_'):
+                    parts = order_number.split('_')
+                    if len(parts) >= 2:
+                        user_id = parts[1]
+                        print(f"Extracted user_id from order_number: {user_id}")
+                elif order_number.startswith('preorder_'):
+                    parts = order_number.split('_')
+                    if len(parts) >= 3:
+                        order_id = parts[1]
+                        user_id = parts[2]
+                        is_preorder_payment = True
+                        print(f"Extracted preorder order_id: {order_id}, user_id: {user_id}")
+                elif order_number.startswith('order_'):
+                    parts = order_number.split('_')
+                    if len(parts) >= 2:
+                        order_id = parts[1]
+                        print(f"Extracted order_id from order_number: {order_id}")
+                
+                amount_kopecks = status_data.get('amount', 0)
+                amount = float(amount_kopecks) / 100
+                print(f"Refund amount: {amount} RUB, user_id: {user_id}, order_id: {order_id}")
+                
+                if user_id and amount > 0:
+                    db_url = os.environ.get('DATABASE_URL')
+                    conn = psycopg2.connect(db_url)
+                    cur = conn.cursor(cursor_factory=RealDictCursor)
+                    
+                    try:
+                        if order_id and is_preorder_payment:
+                            cur.execute(
+                                "UPDATE orders SET amount_paid = GREATEST(amount_paid - %s, 0) WHERE id = %s",
+                                (amount, order_id)
+                            )
+                            cur.execute(
+                                "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, 'refund', %s, 'Возврат доплаты предзаказа через Альфа-Банк')",
+                                (user_id, -amount)
+                            )
+                            print(f"Preorder refund completed: order_id={order_id}, amount={amount}")
+                        elif order_id:
+                            cur.execute(
+                                "UPDATE orders SET status = 'cancelled', payment_verified = false WHERE id = %s",
+                                (order_id,)
+                            )
+                        else:
+                            cur.execute(
+                                "UPDATE users SET balance = GREATEST(balance - %s, 0) WHERE id = %s",
+                                (amount, user_id)
+                            )
+                            cur.execute(
+                                "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, 'refund', %s, 'Возврат средств через Альфа-Банк')",
+                                (user_id, -amount)
+                            )
+                            print(f"Balance refund completed: user_id={user_id}, amount={amount}")
+                        
+                        conn.commit()
+                    finally:
+                        cur.close()
+                        conn.close()
+            
+            elif order_status == 2:
                 order_number = status_data.get('orderNumber', '')
                 print(f"Order number: {order_number}")
                 
