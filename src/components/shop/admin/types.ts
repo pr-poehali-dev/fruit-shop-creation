@@ -42,5 +42,7 @@ export interface User {
   phone: string;
   full_name: string;
   is_admin: boolean;
+  is_super_admin?: boolean;
+  admin_permissions?: string[];
   created_at: string;
 }

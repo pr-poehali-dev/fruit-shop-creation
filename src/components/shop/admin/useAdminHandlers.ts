@@ -576,6 +576,42 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
+  const handleUpdatePermissions = async (userId: number, permissions: string[], isSuperAdmin: boolean) => {
+    try {
+      const response = await fetch(`${props.API_AUTH}?action=update_permissions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          permissions,
+          is_super_admin: isSuperAdmin
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Права обновлены',
+          description: 'Права доступа успешно изменены'
+        });
+        props.loadUsers();
+      } else {
+        toast({
+          title: 'Ошибка',
+          description: data.error || 'Не удалось обновить права',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить права доступа',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return {
     handleSaveProduct,
     handleSaveCategory,
@@ -589,6 +625,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     handleDeleteOrder,
     handleUpdateItemStock,
     handleUpdateItemAvailability,
-    handleDeleteProduct
+    handleDeleteProduct,
+    handleUpdatePermissions
   };
 };

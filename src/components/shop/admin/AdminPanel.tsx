@@ -66,7 +66,8 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     handleDeleteOrder,
     handleUpdateItemStock,
     handleUpdateItemAvailability,
-    handleDeleteProduct
+    handleDeleteProduct,
+    handleUpdatePermissions
   } = useAdminHandlers({
     user,
     API_PRODUCTS,
@@ -93,6 +94,8 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
     setEditingProduct(product || null);
     setShowProductDialog(true);
   };
+
+  const currentUser = users.find(u => u.id === user.id);
 
   const handlePinSuccess = () => {
     setIsPinVerified(true);
@@ -125,6 +128,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           orders={orders}
           siteSettings={siteSettings}
           userId={user.id}
+          currentUser={currentUser!}
           onAddProduct={() => openProductDialog()}
           onEditProduct={openProductDialog}
           onDeleteProduct={handleDeleteProduct}
@@ -144,6 +148,7 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           onUpdateItemStock={handleUpdateItemStock}
           onUpdateItemAvailability={handleUpdateItemAvailability}
           onRefreshUsers={loadUsers}
+          onUpdatePermissions={handleUpdatePermissions}
         />
       </div>
 

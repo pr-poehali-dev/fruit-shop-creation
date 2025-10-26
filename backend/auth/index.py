@@ -17,7 +17,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Auth-Token, X-Session-Id, X-Api-Key',
                 'Access-Control-Max-Age': '86400'
             },
@@ -207,7 +207,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             cur.execute(
-                """SELECT id, phone, full_name, is_admin, balance, cashback, avatar, created_at 
+                """SELECT id, phone, full_name, is_admin, is_super_admin, admin_permissions, balance, cashback, avatar, created_at 
                    FROM users 
                    ORDER BY created_at DESC"""
             )
@@ -217,6 +217,47 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'users': [dict(u) for u in users]}, default=str),
+                'isBase64Encoded': False
+            }
+        finally:
+            cur.close()
+            conn.close()
+    
+    if method == 'PUT':
+        from psycopg2.extras import RealDictCursor
+        db_url = os.environ.get('DATABASE_URL')
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        try:
+            body_data = json.loads(event.get('body', '{}'))
+            user_id = body_data.get('user_id')
+            permissions = body_data.get('permissions', [])
+            is_super_admin = body_data.get('is_super_admin', False)
+            
+            if not user_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'user_id is required'}),
+                    'isBase64Encoded': False
+                }
+            
+            permissions_str = '{' + ','.join(f'"{p}"' for p in permissions) + '}'
+            
+            cur.execute(
+                f"UPDATE users SET admin_permissions = ARRAY{permissions_str}::TEXT[], is_super_admin = {str(is_super_admin).lower()} WHERE id = {user_id} RETURNING id, admin_permissions, is_super_admin"
+            )
+            conn.commit()
+            user = cur.fetchone()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'success': True,
+                    'user': dict(user)
+                }, default=str),
                 'isBase64Encoded': False
             }
         finally:
@@ -371,6 +412,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }),
                     'isBase64Encoded': False
                 }
+            
+
             
             user_id = body_data.get('user_id')
             amount = body_data.get('amount')

@@ -10,7 +10,7 @@ import PagesTab from './PagesTab';
 import CodesTab from './CodesTab';
 import DeliveryZonesTab from './DeliveryZonesTab';
 import PlantsInventoryTab from './PlantsInventoryTab';
-
+import PermissionsTab from './PermissionsTab';
 import GalleryTab from './GalleryTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import { Product, Category, User } from './types';
@@ -22,6 +22,7 @@ interface AdminPanelTabsProps {
   orders: any[];
   siteSettings: any;
   userId: number;
+  currentUser: User;
   onAddProduct: () => void;
   onEditProduct: (product: Product) => void;
   onDeleteProduct: (productId: number) => void;
@@ -38,6 +39,7 @@ interface AdminPanelTabsProps {
   onUpdateItemStock?: (orderId: number, itemId: number, isOutOfStock: boolean) => void;
   onUpdateItemAvailability?: (itemId: number, availableQuantity: number, availablePrice?: number) => void;
   onRefreshUsers?: () => void;
+  onUpdatePermissions: (userId: number, permissions: string[], isSuperAdmin: boolean) => void;
 }
 
 const AdminPanelTabs = ({
@@ -47,6 +49,7 @@ const AdminPanelTabs = ({
   orders,
   siteSettings,
   userId,
+  currentUser,
   onAddProduct,
   onEditProduct,
   onDeleteProduct,
@@ -66,56 +69,106 @@ const AdminPanelTabs = ({
   onDeleteTicket,
   onUpdateItemStock,
   onUpdateItemAvailability,
-  onRefreshUsers
+  onRefreshUsers,
+  onUpdatePermissions
 }: AdminPanelTabsProps) => {
+  const isSuperAdmin = currentUser?.is_super_admin || false;
+  const userPermissions = currentUser?.admin_permissions || [];
+
+  const hasPermission = (permission: string) => {
+    return isSuperAdmin || userPermissions.includes(permission);
+  };
+
+  const visibleTabsCount = [
+    hasPermission('products'),
+    hasPermission('categories'),
+    hasPermission('plants'),
+    hasPermission('users'),
+    hasPermission('orders'),
+    hasPermission('delivery-zones'),
+    hasPermission('loyalty'),
+    hasPermission('gallery'),
+    hasPermission('pages'),
+    hasPermission('codes'),
+    hasPermission('settings'),
+    isSuperAdmin
+  ].filter(Boolean).length;
+
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10 h-auto">
-        <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Package" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Товары</span>
-        </TabsTrigger>
-        <TabsTrigger value="categories" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="FolderTree" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Категории</span>
-        </TabsTrigger>
-        <TabsTrigger value="plants" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Sprout" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Растения</span>
-        </TabsTrigger>
-        <TabsTrigger value="users" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Users" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Пользователи</span>
-        </TabsTrigger>
-        <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="ShoppingCart" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Заказы</span>
-        </TabsTrigger>
-        <TabsTrigger value="delivery-zones" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="MapPin" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Зоны</span>
-        </TabsTrigger>
-        <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="ScanLine" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">QR-Сканер</span>
-        </TabsTrigger>
-        <TabsTrigger value="gallery" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Image" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Галерея</span>
-        </TabsTrigger>
-
-        <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="FileText" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Страницы</span>
-        </TabsTrigger>
-        <TabsTrigger value="codes" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="KeyRound" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Коды</span>
-        </TabsTrigger>
-        <TabsTrigger value="settings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Settings" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Настройки</span>
-        </TabsTrigger>
+      <TabsList className={`grid w-full grid-cols-4 lg:grid-cols-${Math.min(visibleTabsCount, 12)} h-auto`}>
+        {hasPermission('products') && (
+          <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Package" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Товары</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('categories') && (
+          <TabsTrigger value="categories" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="FolderTree" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Категории</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('plants') && (
+          <TabsTrigger value="plants" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Sprout" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Растения</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('users') && (
+          <TabsTrigger value="users" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Users" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Пользователи</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('orders') && (
+          <TabsTrigger value="orders" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="ShoppingCart" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Заказы</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('delivery-zones') && (
+          <TabsTrigger value="delivery-zones" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="MapPin" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Зоны</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('loyalty') && (
+          <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="ScanLine" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">QR-Сканер</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('gallery') && (
+          <TabsTrigger value="gallery" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Image" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Галерея</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('pages') && (
+          <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="FileText" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Страницы</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('codes') && (
+          <TabsTrigger value="codes" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="KeyRound" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Коды</span>
+          </TabsTrigger>
+        )}
+        {hasPermission('settings') && (
+          <TabsTrigger value="settings" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Settings" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Настройки</span>
+          </TabsTrigger>
+        )}
+        {isSuperAdmin && (
+          <TabsTrigger value="permissions" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Shield" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Права</span>
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <TabsContent value="products">
@@ -193,6 +246,16 @@ const AdminPanelTabs = ({
           onSaveSettings={onSaveSettings}
         />
       </TabsContent>
+
+      {isSuperAdmin && (
+        <TabsContent value="permissions">
+          <PermissionsTab
+            users={users}
+            currentUserId={userId}
+            onUpdatePermissions={onUpdatePermissions}
+          />
+        </TabsContent>
+      )}
     </Tabs>
   );
 };
