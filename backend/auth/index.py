@@ -386,10 +386,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
-                permissions_str = '{' + ','.join(f'"{p}"' for p in permissions) + '}'
+                permissions_escaped = [p.replace("'", "''") for p in permissions]
+                permissions_str = "'{" + ','.join(f'{p}' for p in permissions_escaped) + "}'"
                 
                 cur.execute(
-                    f"UPDATE users SET admin_permissions = ARRAY{permissions_str}::TEXT[], is_super_admin = {str(is_super_admin).lower()} WHERE id = {user_id} RETURNING id, admin_permissions, is_super_admin"
+                    f"UPDATE users SET admin_permissions = {permissions_str}::TEXT[], is_super_admin = {str(is_super_admin).lower()} WHERE id = {user_id} RETURNING id, admin_permissions, is_super_admin"
                 )
                 conn.commit()
                 user = cur.fetchone()
