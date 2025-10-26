@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Dict, Any
+import bcrypt
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
@@ -626,7 +627,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             full_name = body_data.get('full_name', '')
             
             phone_escaped = phone.replace("'", "''")
-            password_escaped = password.replace("'", "''")
             full_name_escaped = full_name.replace("'", "''")
             
             cur.execute(f"SELECT id FROM users WHERE phone = '{phone_escaped}'")
@@ -638,8 +638,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            password_hash_escaped = password_hash.replace("'", "''")
+            
             cur.execute(
-                f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar) VALUES ('{phone_escaped}', '{password_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
+                f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar) VALUES ('{phone_escaped}', '{password_hash_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
             )
             conn.commit()
             user = cur.fetchone()
@@ -664,17 +667,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif action == 'login':
             phone_escaped = phone.replace("'", "''")
-            password_escaped = password.replace("'", "''")
             skip_admin_code = body_data.get('skip_admin_code', False)
             
-            print(f"Login attempt: phone='{phone_escaped}', password='{password_escaped}', skip_admin_code={skip_admin_code}")
+            print(f"Login attempt: phone='{phone_escaped}', skip_admin_code={skip_admin_code}")
             
             cur.execute(
-                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar FROM users WHERE phone = '{phone_escaped}' AND password = '{password_escaped}'"
+                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar, password FROM users WHERE phone = '{phone_escaped}'"
             )
-            user = cur.fetchone()
+            user_row = cur.fetchone()
             
-            print(f"User found: {user is not None}")
+            if not user_row:
+                print(f"User not found for phone: {phone_escaped}")
+                return {
+                    'statusCode': 401,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Неверный телефон или пароль'}),
+                    'isBase64Encoded': False
+                }
+            
+            stored_password = user_row[10]
+            
+            if stored_password.startswith('$2b$') or stored_password.startswith('$2a$') or stored_password.startswith('$2y$'):
+                if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+                    print(f"Password check failed (bcrypt)")
+                    return {
+                        'statusCode': 401,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Неверный телефон или пароль'}),
+                        'isBase64Encoded': False
+                    }
+            else:
+                if stored_password != password:
+                    print(f"Password check failed (plain text)")
+                    return {
+                        'statusCode': 401,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Неверный телефон или пароль'}),
+                        'isBase64Encoded': False
+                    }
+            
+            user = user_row[:10]
+            
+            print(f"User authenticated successfully")
             
             if user and user[3] and not skip_admin_code:
                 import random
