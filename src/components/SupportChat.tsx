@@ -41,7 +41,7 @@ export default function SupportChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId') || null;
 
   useEffect(() => {
     if (!userId) {
@@ -110,7 +110,8 @@ export default function SupportChat() {
     if (!chatUserId) return;
 
     try {
-      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${!userId}`);
+      const isGuest = !userId;
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
       const data = await response.json();
       setChat(data.chat);
       setMessages(data.messages || []);
@@ -133,7 +134,8 @@ export default function SupportChat() {
     if (!chatUserId) return;
 
     try {
-      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${!userId}`);
+      const isGuest = !userId;
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
       const data = await response.json();
       
       // Обновляем статус чата
@@ -179,7 +181,7 @@ export default function SupportChat() {
           user_id: chatUserId,
           chat_id: chat.id,
           message: messageText,
-          is_guest: !userId,
+          is_guest: !userId || chatUserId === guestId,
         }),
       });
 
@@ -225,9 +227,11 @@ export default function SupportChat() {
           return [...prev, botMessage];
         });
         
-        // Если бот ответил (не перевел на оператора) - показываем FAQ снова
+        // Если бот ответил (не перевел на оператора) - показываем FAQ через 2 секунды
         if (!data.status_changed) {
-          setShowFaqs(true);
+          setTimeout(() => {
+            setShowFaqs(true);
+          }, 2000);
         }
       }
 

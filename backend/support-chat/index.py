@@ -149,6 +149,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'user_phone': row[7],
                     'user_name': row[8] if row[8] else (f'Гость ({row[9][:8]}...)' if row[9] else 'Гость'),
                     'is_guest': row[9] is not None,
+                    'guest_id': row[9],
                     'unread_count': row[10]
                 } for row in rows]
                 

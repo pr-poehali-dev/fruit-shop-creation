@@ -35,6 +35,8 @@ interface ChatItem {
   user_phone?: string;
   user_name?: string;
   unread_count: number;
+  is_guest?: boolean;
+  guest_id?: string;
 }
 
 interface SupportChatTabProps {
@@ -118,7 +120,8 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
       const chat = chats.find((c) => c.id === chatId);
       if (!chat) return;
 
-      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chat.user_id}`);
+      const userId = chat.is_guest ? chat.guest_id : chat.user_id;
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${userId}&is_guest=${chat.is_guest || false}`);
       const data = await response.json();
       setMessages(data.messages || []);
       setSelectedChat(chat);
@@ -132,7 +135,8 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
       const chat = chats.find((c) => c.id === chatId);
       if (!chat) return;
 
-      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chat.user_id}`);
+      const userId = chat.is_guest ? chat.guest_id : chat.user_id;
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${userId}&is_guest=${chat.is_guest || false}`);
       const data = await response.json();
       
       // Добавляем только новые сообщения
