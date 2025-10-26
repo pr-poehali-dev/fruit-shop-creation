@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { logUserAction } from '@/utils/userLogger';
 
 const API_LOYALTY = 'https://functions.poehali.dev/ed127250-fe9d-4c7e-9a93-fb8b7fdc038a';
 
@@ -88,6 +89,14 @@ const LoyaltyCard = ({ userId, userBalance, onBalanceUpdate }: LoyaltyCardProps)
       const data = await response.json();
 
       if (data.success) {
+        await logUserAction(
+          userId,
+          'loyalty_card_purchase',
+          unlockFree ? 'Разблокировка карты лояльности за сумму покупок' : `Покупка карты лояльности за ${cardPrice}₽`,
+          'loyalty_card',
+          data.card.id,
+          { unlock_free: unlockFree, price: unlockFree ? 0 : cardPrice }
+        );
         setCard(data.card);
         onBalanceUpdate();
         toast({

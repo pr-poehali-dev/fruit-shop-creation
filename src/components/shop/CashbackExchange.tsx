@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
+import { logUserAction } from '@/utils/userLogger';
 
 interface CashbackExchangeProps {
   userCashback: number;
@@ -49,6 +50,14 @@ const CashbackExchange = ({ userCashback, userId, onExchangeSuccess }: CashbackE
       console.log('Exchange response:', data);
 
       if (data.success) {
+        await logUserAction(
+          userId,
+          'cashback_exchange',
+          `Обмен ${cashbackValue}₽ кэшбэка на ${rubleValue.toFixed(2)}₽`,
+          'transaction',
+          undefined,
+          { cashback: cashbackValue, balance: rubleValue }
+        );
         setCashbackAmount('');
         onExchangeSuccess();
       } else {

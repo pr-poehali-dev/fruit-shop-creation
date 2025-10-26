@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import Icon from '@/components/ui/icon';
+import { logUserAction } from '@/utils/userLogger';
 
 const API_ORDERS = 'https://functions.poehali.dev/b35bef37-8423-4939-b43b-0fb565cc8853';
 const API_ALFABANK = 'https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb';
@@ -64,6 +65,14 @@ const PreorderPaymentDialog: React.FC<PreorderPaymentDialogProps> = ({
         const data = await response.json();
 
         if (data.success) {
+          await logUserAction(
+            userId,
+            'order_payment',
+            `Доплата за предзаказ #${orderId} - ${remainingAmount}₽`,
+            'order',
+            orderId,
+            { payment_method: 'balance', amount: remainingAmount }
+          );
           toast.success('Оплата успешно завершена!');
           onPaymentComplete();
           onOpenChange(false);

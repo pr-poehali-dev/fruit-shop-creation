@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
+import { logUserAction } from '@/utils/userLogger';
 
 interface SettingsTabProps {
   user: User | null;
@@ -35,9 +36,20 @@ const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
     }
   }, [user]);
 
-  const toggleTheme = () => {
+  const toggleTheme = async () => {
     const newTheme = !isDarkTheme;
     setIsDarkTheme(newTheme);
+    
+    if (user) {
+      await logUserAction(
+        user.id,
+        'theme_change',
+        `Смена темы на ${newTheme ? 'тёмную' : 'светлую'}`,
+        'settings',
+        undefined,
+        { theme: newTheme ? 'dark' : 'light' }
+      );
+    }
     
     if (newTheme) {
       document.documentElement.classList.add('dark');
