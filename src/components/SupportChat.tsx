@@ -79,12 +79,12 @@ export default function SupportChat() {
     }
   }, [isOpen, userId, guestId]);
 
-  // Автообновление чата каждые 3 секунды
+  // Автообновление чата каждые 5 секунд
   useEffect(() => {
     if (isOpen && chat) {
       pollingIntervalRef.current = setInterval(() => {
         loadChatSilent();
-      }, 3000);
+      }, 5000);
 
       return () => {
         if (pollingIntervalRef.current) {

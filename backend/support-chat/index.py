@@ -423,7 +423,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 
                 cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'admin', %s, %s, true)",
+                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, true, 1)",
                     (int(chat_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?')
                 )
                 conn.commit()

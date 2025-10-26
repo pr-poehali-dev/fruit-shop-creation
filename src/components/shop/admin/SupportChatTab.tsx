@@ -65,12 +65,12 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
     return () => clearInterval(interval);
   }, [activeTab]);
 
-  // Автообновление сообщений открытого чата каждые 3 секунды
+  // Автообновление сообщений открытого чата каждые 5 секунд
   useEffect(() => {
     if (selectedChat) {
       const interval = setInterval(() => {
         loadChatMessagesSilent(selectedChat.id);
-      }, 3000);
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [selectedChat]);
@@ -165,6 +165,17 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
         }),
       });
       toast({ title: 'Чат взят в работу' });
+      
+      // Обновляем selectedChat сразу
+      if (selectedChat) {
+        setSelectedChat({
+          ...selectedChat,
+          status: 'active',
+          admin_id: userId,
+          admin_name: userName
+        });
+      }
+      
       loadChats();
       loadChatMessages(chatId);
     } catch (error) {
@@ -363,17 +374,22 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
                       </div>
                     ))}
                   </div>
-                  {selectedChat.status === 'active' && selectedChat.admin_id === userId && (
+                  {(selectedChat.status === 'active' && selectedChat.admin_id === userId) && (
                     <div className="flex gap-2">
                       <Input
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                         placeholder="Введите сообщение..."
                       />
-                      <Button onClick={sendMessage}>
+                      <Button onClick={sendMessage} disabled={!messageInput.trim()}>
                         <Icon name="Send" size={20} />
                       </Button>
+                    </div>
+                  )}
+                  {selectedChat.status === 'waiting' && (
+                    <div className="text-center text-muted-foreground py-4">
+                      Нажмите "Взять в работу" чтобы начать общение
                     </div>
                   )}
                 </>
