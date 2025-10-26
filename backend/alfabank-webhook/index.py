@@ -120,11 +120,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                                 "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, 'refund', %s, 'Возврат доплаты предзаказа через Альфа-Банк')",
                                 (user_id, -amount)
                             )
+                            cur.execute(
+                                "INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id) VALUES (%s, 'refund', 'Возврат средств', %s, 'order', %s)",
+                                (user_id, f'Возврат доплаты предзаказа: {amount} ₽', order_id)
+                            )
                             print(f"Preorder refund completed: order_id={order_id}, amount={amount}")
                         elif order_id:
                             cur.execute(
                                 "UPDATE orders SET status = 'cancelled', payment_verified = false WHERE id = %s",
                                 (order_id,)
+                            )
+                            cur.execute(
+                                "INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id) VALUES (%s, 'refund', 'Заказ отменён', 'Заказ отменён, платёж возвращён', 'order', %s)",
+                                (user_id, order_id)
                             )
                         else:
                             cur.execute(
@@ -134,6 +142,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             cur.execute(
                                 "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, 'refund', %s, 'Возврат средств через Альфа-Банк')",
                                 (user_id, -amount)
+                            )
+                            cur.execute(
+                                "INSERT INTO notifications (user_id, type, title, message) VALUES (%s, 'refund', 'Возврат средств', %s)",
+                                (user_id, f'Возврат пополнения: {amount} ₽')
                             )
                             print(f"Balance refund completed: user_id={user_id}, amount={amount}")
                         
