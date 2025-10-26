@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
+import { logAdminAction } from '@/utils/adminLogger';
 
 interface User {
   id: number;
@@ -79,70 +80,49 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
     try {
       setIsLoading(true);
       
-      const escapeSql = (str: string) => str.replace(/'/g, "''");
-      
-      const updates: string[] = [];
-      updates.push(`full_name = '${escapeSql(fullName.trim())}'`);
-      updates.push(`phone = '${escapeSql(phone.trim())}'`);
+      const requestBody: any = {
+        user_id: selectedUser?.id,
+        full_name: fullName.trim(),
+        phone: phone.trim()
+      };
 
       if (newPassword) {
-        const hashedPassword = await hashPassword(newPassword);
-        updates.push(`password_hash = '${hashedPassword}'`);
+        requestBody.new_password = newPassword;
       }
 
-      updates.push('updated_at = CURRENT_TIMESTAMP');
-
-      const updateQuery = `
-        UPDATE users 
-        SET ${updates.join(', ')}
-        WHERE id = ${selectedUser?.id}
-        RETURNING id, full_name, phone, balance, loyalty_points as cashback
-      `;
-
-      const response = await fetch('https://poehali.dev/api/internal/sql-query', {
+      const response = await fetch('https://functions.poehali.dev/4986919b-8daf-4d91-b11a-b3bde148f13f', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: updateQuery })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
 
-      if (data.rows && data.rows.length > 0) {
+      if (data.success) {
         const currentUserStr = localStorage.getItem('user');
         if (currentUserStr) {
           const currentUser = JSON.parse(currentUserStr);
-          const adminId = currentUser.id;
-
+          
           const logDescription = [
             `Обновление пользователя ${selectedUser?.full_name}`,
             `Новое имя: ${fullName.trim()}`,
             `Новый телефон: ${phone.trim()}`,
             newPassword ? 'Пароль изменен' : null
-          ].filter(Boolean).join(', ').replace(/'/g, "''");
+          ].filter(Boolean).join(', ');
           
-          const metadataJson = JSON.stringify({
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-            password_changed: !!newPassword
-          }).replace(/'/g, "''");
-
-          const logQuery = `
-            INSERT INTO admin_logs 
-            (admin_id, action_type, action_description, target_user_id, metadata)
-            VALUES (
-              ${adminId}, 
-              'user_update', 
-              '${logDescription}', 
-              ${selectedUser?.id}, 
-              '${metadataJson}'::jsonb
-            )
-          `;
-          
-          await fetch('https://poehali.dev/api/internal/sql-query', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: logQuery })
-          }).catch(err => console.error('Failed to log action:', err));
+          await logAdminAction(
+            currentUser.id,
+            'user_update',
+            logDescription,
+            selectedUser?.id,
+            'user',
+            selectedUser?.id,
+            {
+              full_name: fullName.trim(),
+              phone: phone.trim(),
+              password_changed: !!newPassword
+            }
+          );
         }
 
         toast({

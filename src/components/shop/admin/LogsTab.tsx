@@ -38,56 +38,22 @@ const LogsTab = () => {
   const loadLogs = async () => {
     setLoading(true);
     
-    const limit = 50;
-    const offset = (page - 1) * limit;
+    const params = new URLSearchParams({
+      type: 'admin',
+      page: page.toString(),
+      limit: '50'
+    });
     
-    const whereClause = filterType !== 'all' ? `AND al.action_type = '${filterType}'` : '';
-    
-    const query = `
-      SELECT 
-        al.id,
-        al.admin_id,
-        au.full_name as admin_name,
-        au.phone as admin_phone,
-        al.action_type,
-        al.action_description,
-        al.target_user_id,
-        tu.full_name as target_user_name,
-        tu.phone as target_user_phone,
-        al.target_entity_type,
-        al.target_entity_id,
-        al.metadata,
-        al.created_at
-      FROM admin_logs al
-      LEFT JOIN users au ON al.admin_id = au.id
-      LEFT JOIN users tu ON al.target_user_id = tu.id
-      WHERE 1=1 ${whereClause}
-      ORDER BY al.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
-    
-    const countQuery = `SELECT COUNT(*) as total FROM admin_logs al WHERE 1=1 ${whereClause}`;
+    if (filterType !== 'all') {
+      params.append('action_type', filterType);
+    }
     
     try {
-      const [logsResponse, countResponse] = await Promise.all([
-        fetch('https://poehali.dev/api/internal/sql-query', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query })
-        }),
-        fetch('https://poehali.dev/api/internal/sql-query', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: countQuery })
-        })
-      ]);
+      const response = await fetch(`https://functions.poehali.dev/e5bdda57-9d9d-4506-b4a8-6a4d2bbcd778?${params.toString()}`);
+      const data = await response.json();
       
-      const logsData = await logsResponse.json();
-      const countData = await countResponse.json();
-      
-      setLogs(logsData.rows || []);
-      const total = countData.rows?.[0]?.total || 0;
-      setTotalPages(Math.ceil(total / limit));
+      setLogs(data.logs || []);
+      setTotalPages(data.pagination?.pages || 1);
     } catch (error) {
       console.error('Failed to load logs:', error);
       setLogs([]);

@@ -7,26 +7,18 @@ export const logUserAction = async (
   metadata?: any
 ) => {
   try {
-    const metadataJson = metadata ? JSON.stringify(metadata).replace(/'/g, "''") : '{}';
-    const description = actionDescription.replace(/'/g, "''");
-    
-    const query = `
-      INSERT INTO user_logs 
-      (user_id, action_type, action_description, target_entity_type, target_entity_id, metadata)
-      VALUES (
-        ${userId}, 
-        '${actionType}', 
-        '${description}', 
-        ${targetEntityType ? `'${targetEntityType}'` : 'NULL'}, 
-        ${targetEntityId || 'NULL'}, 
-        '${metadataJson}'::jsonb
-      )
-    `;
-    
-    await fetch('https://poehali.dev/api/internal/sql-query', {
+    await fetch('https://functions.poehali.dev/e5bdda57-9d9d-4506-b4a8-6a4d2bbcd778', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({
+        type: 'user',
+        user_id: userId,
+        action_type: actionType,
+        action_description: actionDescription,
+        target_entity_type: targetEntityType,
+        target_entity_id: targetEntityId,
+        metadata: metadata || {}
+      })
     });
   } catch (error) {
     console.error('Failed to log user action:', error);

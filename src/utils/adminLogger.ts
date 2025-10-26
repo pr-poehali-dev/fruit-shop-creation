@@ -8,27 +8,19 @@ export const logAdminAction = async (
   metadata?: any
 ) => {
   try {
-    const metadataJson = metadata ? JSON.stringify(metadata).replace(/'/g, "''") : '{}';
-    const description = actionDescription.replace(/'/g, "''");
-    
-    const query = `
-      INSERT INTO admin_logs 
-      (admin_id, action_type, action_description, target_user_id, target_entity_type, target_entity_id, metadata)
-      VALUES (
-        ${adminId}, 
-        '${actionType}', 
-        '${description}', 
-        ${targetUserId || 'NULL'}, 
-        ${targetEntityType ? `'${targetEntityType}'` : 'NULL'}, 
-        ${targetEntityId || 'NULL'}, 
-        '${metadataJson}'::jsonb
-      )
-    `;
-    
-    await fetch('https://poehali.dev/api/internal/sql-query', {
+    await fetch('https://functions.poehali.dev/e5bdda57-9d9d-4506-b4a8-6a4d2bbcd778', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({
+        type: 'admin',
+        admin_id: adminId,
+        action_type: actionType,
+        action_description: actionDescription,
+        target_user_id: targetUserId,
+        target_entity_type: targetEntityType,
+        target_entity_id: targetEntityId,
+        metadata: metadata || {}
+      })
     });
   } catch (error) {
     console.error('Failed to log admin action:', error);
