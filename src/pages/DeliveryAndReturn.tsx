@@ -52,20 +52,6 @@ const DeliveryAndReturn = () => {
             <div className="space-y-6">
               <div className="bg-card p-6 rounded-lg border">
                 <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
-                  <Icon name="Store" size={20} className="text-primary" />
-                  Самовывоз из питомника
-                </h3>
-                <p className="mb-2"><strong className="text-foreground">Стоимость:</strong> Бесплатно</p>
-                <p className="mb-2"><strong className="text-foreground">Срок:</strong> В день заказа или на следующий день</p>
-                <p>
-                  Вы можете забрать заказ самостоятельно из нашего питомника. Адрес и график работы 
-                  указаны в разделе «Контакты». При получении обязательно проверьте комплектность 
-                  и состояние растений.
-                </p>
-              </div>
-
-              <div className="bg-card p-6 rounded-lg border">
-                <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
                   <Icon name="Car" size={20} className="text-primary" />
                   Курьерская доставка по городу
                 </h3>

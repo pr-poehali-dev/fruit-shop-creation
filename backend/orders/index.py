@@ -284,7 +284,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 if status == 'processing' and is_preorder:
                     title = 'Необходима доплата за заказ'
-                    message = 'Ваш предзаказ обрабатывается! Пожалуйста, оплатите оставшиеся 50% стоимости заказа'
+                    message = 'Ваш предзаказ обрабатывается! Пожалуйста, оплатите оставшиеся 50% стоимости заказа в течение 3 дней'
+                    cur.execute(
+                        f"UPDATE orders SET payment_deadline = CURRENT_TIMESTAMP + INTERVAL '3 days' WHERE id = {order_id}"
+                    )
                 else:
                     title = 'Статус заказа изменён'
                     message = status_messages.get(status, f'Статус заказа изменён на {status}')

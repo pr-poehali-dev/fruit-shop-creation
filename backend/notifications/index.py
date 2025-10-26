@@ -131,6 +131,45 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'success': True})
                 }
             
+            elif action == 'check_expired_preorders':
+                cur.execute(
+                    """SELECT id, user_id, total_amount 
+                       FROM orders 
+                       WHERE is_preorder = TRUE 
+                       AND status = 'processing' 
+                       AND payment_deadline IS NOT NULL 
+                       AND payment_deadline < CURRENT_TIMESTAMP 
+                       AND amount_paid < total_amount"""
+                )
+                expired_orders = cur.fetchall()
+                
+                cancelled_count = 0
+                for order in expired_orders:
+                    order_id_val = order[0]
+                    user_id_val = order[1]
+                    
+                    cur.execute(
+                        f"UPDATE orders SET status = 'cancelled', cancelled_by = 'system', cancellation_reason = 'Не оплачен в течение 3 дней', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id_val}"
+                    )
+                    
+                    cur.execute(
+                        f"INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id) VALUES ({user_id_val}, 'order_status', 'Заказ отменён', 'Ваш предзаказ был автоматически отменён из-за отсутствия оплаты в течение 3 дней', 'order', {order_id_val})"
+                    )
+                    
+                    cancelled_count += 1
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'isBase64Encoded': False,
+                    'body': json.dumps({
+                        'success': True,
+                        'cancelled_orders': cancelled_count
+                    })
+                }
+            
             return {
                 'statusCode': 400,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
