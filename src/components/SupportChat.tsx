@@ -26,9 +26,21 @@ export default function SupportChat() {
   const [chat, setChat] = useState<Chat | null>(null);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [guestId, setGuestId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const userId = localStorage.getItem('userId');
+
+  useEffect(() => {
+    if (!userId) {
+      let storedGuestId = localStorage.getItem('guestChatId');
+      if (!storedGuestId) {
+        storedGuestId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('guestChatId', storedGuestId);
+      }
+      setGuestId(storedGuestId);
+    }
+  }, [userId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,16 +51,17 @@ export default function SupportChat() {
   }, [messages]);
 
   useEffect(() => {
-    if (isOpen && userId && !chat) {
+    if (isOpen && (userId || guestId) && !chat) {
       loadChat();
     }
-  }, [isOpen, userId]);
+  }, [isOpen, userId, guestId]);
 
   const loadChat = async () => {
-    if (!userId) return;
+    const chatUserId = userId || guestId;
+    if (!chatUserId) return;
 
     try {
-      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${userId}`);
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${!userId}`);
       const data = await response.json();
       setChat(data.chat);
       setMessages(data.messages || []);
@@ -58,7 +71,8 @@ export default function SupportChat() {
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !chat || !userId) return;
+    const chatUserId = userId || guestId;
+    if (!inputMessage.trim() || !chat || !chatUserId) return;
 
     const messageText = inputMessage.trim();
     setInputMessage('');
@@ -70,9 +84,10 @@ export default function SupportChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'send_message',
-          user_id: parseInt(userId),
+          user_id: chatUserId,
           chat_id: chat.id,
           message: messageText,
+          is_guest: !userId,
         }),
       });
 
@@ -149,8 +164,6 @@ export default function SupportChat() {
         return null;
     }
   };
-
-  if (!userId) return null;
 
   return (
     <>

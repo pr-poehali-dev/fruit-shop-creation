@@ -121,7 +121,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if admin_view:
                 cur.execute("""
                     SELECT c.id, c.user_id, c.status, c.admin_id, c.admin_name, c.created_at, c.updated_at,
-                           u.phone, u.full_name,
+                           u.phone, u.full_name, c.guest_id,
                            (SELECT COUNT(*) FROM t_p77282076_fruit_shop_creation.support_messages 
                             WHERE chat_id = c.id AND is_read = false AND sender_type = 'user') as unread_count
                     FROM t_p77282076_fruit_shop_creation.support_chats c
@@ -140,8 +140,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'created_at': row[5].isoformat() if row[5] else None,
                     'updated_at': row[6].isoformat() if row[6] else None,
                     'user_phone': row[7],
-                    'user_name': row[8],
-                    'unread_count': row[9]
+                    'user_name': row[8] if row[8] else (f'Гость ({row[9][:8]}...)' if row[9] else 'Гость'),
+                    'is_guest': row[9] is not None,
+                    'unread_count': row[10]
                 } for row in rows]
                 
                 return {
@@ -159,17 +160,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            cur.execute(
-                "SELECT id, status, admin_id, admin_name FROM t_p77282076_fruit_shop_creation.support_chats WHERE user_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
-                (int(user_id),)
-            )
+            is_guest = params.get('is_guest') == 'true'
+            
+            if is_guest:
+                cur.execute(
+                    "SELECT id, status, admin_id, admin_name FROM t_p77282076_fruit_shop_creation.support_chats WHERE guest_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
+                    (str(user_id),)
+                )
+            else:
+                cur.execute(
+                    "SELECT id, status, admin_id, admin_name FROM t_p77282076_fruit_shop_creation.support_chats WHERE user_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
+                    (int(user_id),)
+                )
             chat_row = cur.fetchone()
             
             if not chat_row:
-                cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (user_id, status) VALUES (%s, 'bot') RETURNING id",
-                    (int(user_id),)
-                )
+                if is_guest:
+                    cur.execute(
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (guest_id, status) VALUES (%s, 'bot') RETURNING id",
+                        (str(user_id),)
+                    )
+                else:
+                    cur.execute(
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (user_id, status) VALUES (%s, 'bot') RETURNING id",
+                        (int(user_id),)
+                    )
                 conn.commit()
                 chat_id = cur.fetchone()[0]
                 
@@ -251,6 +266,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 user_id = body_data.get('user_id')
                 chat_id = body_data.get('chat_id')
                 message = body_data.get('message', '').strip()
+                is_guest = body_data.get('is_guest', False)
                 
                 if not message:
                     return {
@@ -266,15 +282,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 chat_status = cur.fetchone()[0]
                 
-                cur.execute(
-                    "SELECT full_name FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
-                    (int(user_id),)
-                )
-                user_name = cur.fetchone()[0]
+                if is_guest:
+                    user_name = 'Гость'
+                    sender_id = None
+                else:
+                    cur.execute(
+                        "SELECT full_name FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                        (int(user_id),)
+                    )
+                    user_name = cur.fetchone()[0]
+                    sender_id = int(user_id)
                 
                 cur.execute(
                     "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message) VALUES (%s, 'user', %s, %s, %s) RETURNING id",
-                    (int(chat_id), int(user_id), user_name, message)
+                    (int(chat_id), sender_id, user_name, message)
                 )
                 conn.commit()
                 message_id = cur.fetchone()[0]

@@ -52,6 +52,7 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
   const [newFaq, setNewFaq] = useState({ question: '', answer: '', keywords: '' });
+  const [prevWaitingCount, setPrevWaitingCount] = useState(0);
 
   useEffect(() => {
     loadChats();
@@ -66,6 +67,26 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
     try {
       const response = await fetch(`${SUPPORT_CHAT_URL}?admin_view=true`);
       const data = await response.json();
+      
+      const waitingChats = data.filter((c: ChatItem) => c.status === 'waiting');
+      const waitingCount = waitingChats.length;
+      
+      if (waitingCount > prevWaitingCount && prevWaitingCount > 0) {
+        toast({
+          title: '🔔 Новый запрос в поддержку!',
+          description: `Ожидает ${waitingCount} чат(ов)`,
+          duration: 5000,
+        });
+        
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Новый запрос в поддержку', {
+            body: `Ожидает ${waitingCount} чат(ов)`,
+            icon: '/icon-192.png',
+          });
+        }
+      }
+      
+      setPrevWaitingCount(waitingCount);
       setChats(data);
     } catch (error) {
       console.error('Ошибка загрузки чатов:', error);
