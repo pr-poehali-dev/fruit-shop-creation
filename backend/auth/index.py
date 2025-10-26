@@ -223,47 +223,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur.close()
             conn.close()
     
-    if method == 'PUT':
-        from psycopg2.extras import RealDictCursor
-        db_url = os.environ.get('DATABASE_URL')
-        conn = psycopg2.connect(db_url)
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        try:
-            body_data = json.loads(event.get('body', '{}'))
-            user_id = body_data.get('user_id')
-            permissions = body_data.get('permissions', [])
-            is_super_admin = body_data.get('is_super_admin', False)
-            
-            if not user_id:
-                return {
-                    'statusCode': 400,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'error': 'user_id is required'}),
-                    'isBase64Encoded': False
-                }
-            
-            permissions_str = '{' + ','.join(f'"{p}"' for p in permissions) + '}'
-            
-            cur.execute(
-                f"UPDATE users SET admin_permissions = ARRAY{permissions_str}::TEXT[], is_super_admin = {str(is_super_admin).lower()} WHERE id = {user_id} RETURNING id, admin_permissions, is_super_admin"
-            )
-            conn.commit()
-            user = cur.fetchone()
-            
-            return {
-                'statusCode': 200,
-                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                'body': json.dumps({
-                    'success': True,
-                    'user': dict(user)
-                }, default=str),
-                'isBase64Encoded': False
-            }
-        finally:
-            cur.close()
-            conn.close()
-    
+
     if method != 'POST':
         return {
             'statusCode': 405,
@@ -292,7 +252,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     print(f"Phone normalization: raw='{phone_raw}' -> cleaned='{cleaned_phone}' -> formatted='{phone}'")
     
-    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar']:
+    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar', 'update_permissions']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(db_url)
@@ -413,6 +373,36 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'update_permissions':
+                user_id = body_data.get('user_id')
+                permissions = body_data.get('permissions', [])
+                is_super_admin = body_data.get('is_super_admin', False)
+                
+                if not user_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id is required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                permissions_str = '{' + ','.join(f'"{p}"' for p in permissions) + '}'
+                
+                cur.execute(
+                    f"UPDATE users SET admin_permissions = ARRAY{permissions_str}::TEXT[], is_super_admin = {str(is_super_admin).lower()} WHERE id = {user_id} RETURNING id, admin_permissions, is_super_admin"
+                )
+                conn.commit()
+                user = cur.fetchone()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'success': True,
+                        'user': dict(user)
+                    }, default=str),
+                    'isBase64Encoded': False
+                }
 
             
             user_id = body_data.get('user_id')
