@@ -14,7 +14,11 @@ def get_db_connection():
     return psycopg2.connect(dsn)
 
 def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
-    question_lower = question.lower()
+    question_lower = question.lower().strip()
+    
+    operator_keywords = ['оператор', 'администратор', 'человек', 'живой', 'сотрудник', 'менеджер', 'помощь', 'помогите']
+    if any(keyword in question_lower for keyword in operator_keywords):
+        return None
     
     cur.execute(
         "SELECT id, question, answer, keywords FROM t_p77282076_fruit_shop_creation.faq WHERE is_active = true"
@@ -30,11 +34,14 @@ def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
         
         if keywords:
             for keyword in keywords:
-                if keyword.lower() in question_lower:
-                    score += 2
+                keyword_lower = keyword.lower().strip()
+                if keyword_lower in question_lower:
+                    score += 3
         
-        if any(word in question_lower for word in faq_question.lower().split()):
-            score += 1
+        question_words = faq_question.lower().split()
+        for word in question_words:
+            if len(word) > 3 and word in question_lower:
+                score += 1
         
         if score > best_score:
             best_score = score
@@ -44,7 +51,7 @@ def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
                 'answer': faq_answer
             }
     
-    if best_score >= 2:
+    if best_score >= 1:
         return best_match
     return None
 
