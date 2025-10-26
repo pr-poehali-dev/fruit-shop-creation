@@ -13,6 +13,7 @@ import PlantsInventoryTab from './PlantsInventoryTab';
 import PermissionsTab from './PermissionsTab';
 import GalleryTab from './GalleryTab';
 import LogsTab from './LogsTab';
+import SupportChatTab from './SupportChatTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import { Product, Category, User } from './types';
 
@@ -92,6 +93,7 @@ const AdminPanelTabs = ({
     hasPermission('pages'),
     hasPermission('codes'),
     hasPermission('settings'),
+    isSuperAdmin,
     isSuperAdmin,
     isSuperAdmin
   ].filter(Boolean).length;
@@ -175,6 +177,12 @@ const AdminPanelTabs = ({
           <TabsTrigger value="logs" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="ScrollText" size={16} className="sm:mr-1" />
             <span className="hidden sm:inline">Логи</span>
+          </TabsTrigger>
+        )}
+        {isSuperAdmin && (
+          <TabsTrigger value="support-chat" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="MessageCircle" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Поддержка</span>
           </TabsTrigger>
         )}
       </TabsList>
@@ -268,6 +276,15 @@ const AdminPanelTabs = ({
       {isSuperAdmin && (
         <TabsContent value="logs">
           <LogsTab />
+        </TabsContent>
+      )}
+
+      {isSuperAdmin && (
+        <TabsContent value="support-chat">
+          <SupportChatTab 
+            userId={userId}
+            userName={currentUser?.full_name || 'Администратор'}
+          />
         </TabsContent>
       )}
     </Tabs>

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
 import DecorativeBranch from "./components/DecorativeBranch";
+import SupportChat from "./components/SupportChat";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -58,6 +59,7 @@ const App = () => {
         <Sonner />
         <InstallPrompt />
         <DecorativeBranch />
+        <SupportChat />
         <BrowserRouter>
           <Suspense fallback={<LoadingScreen onComplete={() => {}} />}>
             <Routes>

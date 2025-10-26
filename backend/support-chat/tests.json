@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "Get admin chat view",
+      "method": "GET",
+      "path": "/?admin_view=true",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial",
+      "expectedBody": []
+    }
+  ]
+}
