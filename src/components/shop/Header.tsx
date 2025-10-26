@@ -36,7 +36,7 @@ interface HeaderProps {
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
   renderProfileContent: () => React.ReactNode;
-  onNotificationClick?: () => void;
+  onNotificationClick?: (notification: any) => void;
 }
 
 interface BeforeInstallPromptEvent extends Event {

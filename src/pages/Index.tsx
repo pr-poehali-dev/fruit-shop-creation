@@ -221,9 +221,16 @@ const Index = () => {
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
             renderProfileContent={renderProfileContent}
-            onNotificationClick={() => {
+            onNotificationClick={(notification) => {
               refreshUserBalance(user, setUser, setIsRefreshingBalance);
               loadOrders();
+              
+              if (notification.type === 'payment' && notification.entity_type === 'order' && notification.entity_id) {
+                const order = orders.find(o => o.id === notification.entity_id);
+                if (order && order.is_preorder && order.status === 'processing') {
+                  setCurrentSection('profile');
+                }
+              }
             }}
           />
 
