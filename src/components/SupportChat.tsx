@@ -110,7 +110,7 @@ export default function SupportChat() {
     if (!chatUserId) return;
 
     try {
-      const isGuest = !userId;
+      const isGuest = !userId;  // Если нет userId - значит гость
       const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
       const data = await response.json();
       setChat(data.chat);
@@ -134,7 +134,7 @@ export default function SupportChat() {
     if (!chatUserId) return;
 
     try {
-      const isGuest = !userId;
+      const isGuest = !userId;  // Если нет userId - значит гость
       const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
       const data = await response.json();
       
@@ -172,6 +172,18 @@ export default function SupportChat() {
     setInputMessage('');
     setIsLoading(true);
 
+    // Оптимистичное обновление - показываем сообщение сразу
+    const tempId = Date.now();
+    const optimisticMessage: Message = {
+      id: tempId,
+      sender_type: 'user',
+      sender_name: 'Вы',
+      message: messageText,
+      created_at: new Date().toISOString(),
+      is_read: false,
+    };
+    setMessages((prev) => [...prev, optimisticMessage]);
+
     try {
       const response = await fetch(SUPPORT_CHAT_URL, {
         method: 'POST',
@@ -181,7 +193,7 @@ export default function SupportChat() {
           user_id: chatUserId,
           chat_id: chat.id,
           message: messageText,
-          is_guest: !userId || chatUserId === guestId,
+          is_guest: !userId,  // Просто проверяем есть ли userId
         }),
       });
 
@@ -192,22 +204,10 @@ export default function SupportChat() {
         setShowFaqs(false);
       }
 
-      const newUserMessage: Message = {
-        id: data.message_id,
-        sender_type: 'user',
-        sender_name: 'Вы',
-        message: messageText,
-        created_at: new Date().toISOString(),
-        is_read: false,
-      };
-
-      setMessages((prev) => {
-        // Проверяем, нет ли уже этого сообщения
-        if (prev.some(m => m.id === data.message_id)) {
-          return prev;
-        }
-        return [...prev, newUserMessage];
-      });
+      // Заменяем временное сообщение на настоящее с ID от сервера
+      setMessages((prev) => 
+        prev.map(msg => msg.id === tempId ? { ...msg, id: data.message_id } : msg)
+      );
 
       if (data.bot_response) {
         const botMessageId = data.bot_message_id || Date.now();

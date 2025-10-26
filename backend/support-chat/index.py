@@ -60,11 +60,8 @@ def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
             best_match = {
                 'id': faq_id,
                 'question': faq_question,
-                'answer': faq_answer,
-                'score': score
+                'answer': faq_answer
             }
-    
-    print(f"Best match: {best_match}, score: {best_score}")
     
     # Порог понижен до 3 (раньше 1, но теперь очки больше)
     if best_score >= 3:
@@ -325,9 +322,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 message_id = cur.fetchone()[0]
                 
                 if chat_status == 'bot':
-                    print(f"Bot mode: searching FAQ for message: {message}")
                     faq_answer = search_faq(message, cur)
-                    print(f"FAQ search result: {faq_answer}")
                     
                     if faq_answer:
                         cur.execute(

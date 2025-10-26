@@ -166,18 +166,19 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
       });
       toast({ title: 'Чат взят в работу' });
       
-      // Обновляем selectedChat сразу
-      if (selectedChat) {
-        setSelectedChat({
-          ...selectedChat,
+      // Сразу обновляем список чатов и selectedChat
+      await loadChats();
+      
+      // Обновляем selectedChat из обновленного списка чатов
+      setSelectedChat(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
           status: 'active',
           admin_id: userId,
           admin_name: userName
-        });
-      }
-      
-      loadChats();
-      loadChatMessages(chatId);
+        };
+      });
     } catch (error) {
       toast({ title: 'Ошибка', description: 'Не удалось взять чат', variant: 'destructive' });
     }
