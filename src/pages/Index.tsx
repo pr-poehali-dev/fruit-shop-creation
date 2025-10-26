@@ -221,7 +221,10 @@ const Index = () => {
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
             renderProfileContent={renderProfileContent}
-
+            onNotificationClick={() => {
+              refreshUserBalance(user, setUser, setIsRefreshingBalance);
+              loadOrders();
+            }}
           />
 
           <main className="container mx-auto px-4 py-8">

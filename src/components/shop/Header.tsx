@@ -5,6 +5,7 @@ import Icon from '@/components/ui/icon';
 import SideMenu from './SideMenu';
 import SnowEffect from './SnowEffect';
 import LeafyTitle from './LeafyTitle';
+import NotificationBell from './NotificationBell';
 
 import { useState, useEffect } from 'react';
 
@@ -35,6 +36,7 @@ interface HeaderProps {
   onShowAuth: () => void;
   renderCartContent: () => React.ReactNode;
   renderProfileContent: () => React.ReactNode;
+  onNotificationClick?: () => void;
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -51,7 +53,8 @@ const Header = ({
   onSectionChange, 
   onShowAuth,
   renderCartContent,
-  renderProfileContent
+  renderProfileContent,
+  onNotificationClick
 }: HeaderProps) => {
   const isNewYear = siteSettings?.holiday_theme === 'new_year';
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -161,20 +164,26 @@ const Header = ({
           )}
 
           {user && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
-              onClick={() => onSectionChange('favorites')}
-            >
-              <Icon name="Heart" size={20} className="sm:w-7 sm:h-7" />
-              {favoritesCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 min-w-[20px] h-5 sm:min-w-[24px] sm:h-6 px-1 text-[10px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
-                  {favoritesCount}
-                </Badge>
-              )}
-              {isNewYear && <div className="icon-snow-sparkle">❄️</div>}
-            </Button>
+            <>
+              <NotificationBell 
+                userId={user.id} 
+                onNotificationClick={onNotificationClick}
+              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border-2 border-red-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}
+                onClick={() => onSectionChange('favorites')}
+              >
+                <Icon name="Heart" size={20} className="sm:w-7 sm:h-7" />
+                {favoritesCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 min-w-[20px] h-5 sm:min-w-[24px] sm:h-6 px-1 text-[10px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
+                    {favoritesCount}
+                  </Badge>
+                )}
+                {isNewYear && <div className="icon-snow-sparkle">❄️</div>}
+              </Button>
+            </>
           )}
 
           <Sheet>
