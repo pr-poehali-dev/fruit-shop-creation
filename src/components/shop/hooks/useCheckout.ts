@@ -154,7 +154,9 @@ export const useCheckout = ({
               delivery_type: deliveryType,
               delivery_zone_id: deliveryZoneId,
               cashback_percent: siteSettings?.balance_payment_cashback_percent || 5,
-              alfabank_order_id: data.order_id
+              alfabank_order_id: data.order_id,
+              is_preorder: isPreorder,
+              total_amount: fullTotalAmount
             })
           });
 
@@ -206,7 +208,9 @@ export const useCheckout = ({
           delivery_address: fullDeliveryAddress,
           delivery_type: deliveryType,
           delivery_zone_id: deliveryZoneId,
-          cashback_percent: siteSettings?.balance_payment_cashback_percent || 5
+          cashback_percent: siteSettings?.balance_payment_cashback_percent || 5,
+          is_preorder: isPreorder,
+          total_amount: fullTotalAmount
         })
       });
 

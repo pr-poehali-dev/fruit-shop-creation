@@ -253,8 +253,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             delivery_type = body_data.get('delivery_type', 'pickup')
             delivery_zone_id = body_data.get('delivery_zone_id')
             cashback_percent_input = body_data.get('cashback_percent', 5)
+            is_preorder = body_data.get('is_preorder', False)
             
-            total_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
+            total_amount_full = body_data.get('total_amount')
+            if total_amount_full is None:
+                total_amount_full = sum(float(item['price']) * int(item['quantity']) for item in items)
+            else:
+                total_amount_full = float(total_amount_full)
+            
+            total_amount = total_amount_full if not is_preorder else total_amount_full * 0.5
             
             cashback_percent = float(cashback_percent_input) / 100
             
@@ -295,7 +302,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             zone_id_sql = f", {delivery_zone_id}" if delivery_zone_id else ", NULL"
             
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid) VALUES ({user_id}, {total_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}) RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder) VALUES ({user_id}, {total_amount_full}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             
