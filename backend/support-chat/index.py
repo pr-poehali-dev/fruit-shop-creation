@@ -196,7 +196,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 chat_id = cur.fetchone()[0]
                 
                 cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true)",
+                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1)",
                     (chat_id, 'Здравствуйте! Я Анфиса, бот-помощник. Чем могу помочь? 😊')
                 )
                 conn.commit()
@@ -301,7 +301,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     sender_id = int(user_id)
                 
                 cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message) VALUES (%s, 'user', %s, %s, %s) RETURNING id",
+                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, ticket_id) VALUES (%s, 'user', %s, %s, %s, 1) RETURNING id",
                     (int(chat_id), sender_id, user_name, message)
                 )
                 conn.commit()
@@ -312,7 +312,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     
                     if faq_answer:
                         cur.execute(
-                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true) RETURNING id",
+                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
                             (int(chat_id), faq_answer['answer'])
                         )
                         bot_message_id = cur.fetchone()[0]
@@ -322,7 +322,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         bot_response = 'Извините, я не нашла ответа на ваш вопрос. Сейчас переведу вас на администратора...'
                         
                         cur.execute(
-                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true) RETURNING id",
+                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
                             (int(chat_id), bot_response)
                         )
                         bot_message_id = cur.fetchone()[0]
@@ -389,7 +389,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 admin_name = cur.fetchone()[0]
                 
                 cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, is_read) VALUES (%s, 'admin', %s, %s, %s, true)",
+                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, true, 1)",
                     (int(chat_id), int(admin_id), admin_name, message)
                 )
                 
