@@ -28,6 +28,23 @@ const App = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    const checkExpiredPreorders = async () => {
+      try {
+        await fetch('https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-User-Id': '0' },
+          body: JSON.stringify({ action: 'check_expired_preorders' })
+        });
+      } catch (error) {
+        console.error('Failed to check expired preorders:', error);
+      }
+    };
+
+    checkExpiredPreorders();
+    const interval = setInterval(checkExpiredPreorders, 24 * 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (showLoading) {
