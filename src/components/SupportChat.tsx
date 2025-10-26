@@ -21,7 +21,10 @@ interface Chat {
 }
 
 export default function SupportChat() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => {
+    const chatClosed = sessionStorage.getItem('supportChatClosed');
+    return chatClosed !== 'true';
+  });
   const [messages, setMessages] = useState<Message[]>([]);
   const [chat, setChat] = useState<Chat | null>(null);
   const [inputMessage, setInputMessage] = useState('');
@@ -41,6 +44,16 @@ export default function SupportChat() {
       setGuestId(storedGuestId);
     }
   }, [userId]);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    sessionStorage.setItem('supportChatClosed', 'true');
+  };
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    sessionStorage.removeItem('supportChatClosed');
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -169,7 +182,7 @@ export default function SupportChat() {
     <>
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={handleOpen}
           className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-50"
           aria-label="Открыть чат поддержки"
         >
@@ -184,7 +197,7 @@ export default function SupportChat() {
               <h3 className="font-semibold">Поддержка</h3>
               {getStatusBadge()}
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+            <Button variant="ghost" size="icon" onClick={handleClose}>
               <X size={20} />
             </Button>
           </div>
