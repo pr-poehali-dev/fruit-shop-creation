@@ -64,54 +64,52 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }:
           </div>
         ) : (
           filteredProducts.map(product => (
-          <Card key={product.id}>
-            <CardHeader className="p-3 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                <img 
-                  src={product.image_url} 
-                  alt={product.name} 
-                  className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded flex-shrink-0" 
-                />
-                <div className="flex-1 min-w-0 w-full">
-                  <CardTitle className="text-base sm:text-lg">{product.name}</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm mt-1">{product.category_name}</CardDescription>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="secondary" className="text-xs">{product.price} ₽</Badge>
-                    <Badge variant="outline" className="text-xs">Склад: {product.stock}</Badge>
+            <Card key={product.id}>
+              <CardHeader className="p-3 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <img 
+                    src={product.image_url} 
+                    alt={product.name} 
+                    className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded flex-shrink-0" 
+                  />
+                  <div className="flex-1 min-w-0 w-full">
+                    <CardTitle className="text-base sm:text-lg">{product.name}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm mt-1">{product.category_name}</CardDescription>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="secondary" className="text-xs">{product.price} ₽</Badge>
+                      <Badge variant="outline" className="text-xs">Склад: {product.stock}</Badge>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onEditProduct(product)}
+                      className="w-full sm:w-auto"
+                    >
+                      <Icon name="Pencil" size={16} className="mr-2" />
+                      <span>Изменить</span>
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      onClick={() => {
+                        if (window.confirm('Удалить товар? Это действие нельзя отменить.')) {
+                          onDeleteProduct(product.id);
+                        }
+                      }}
+                      style={{ backgroundColor: '#dc2626', color: 'white' }}
+                      className="w-full sm:w-auto hover:opacity-90"
+                    >
+                      <Icon name="Trash2" size={16} className="mr-2" />
+                      <span>Удалить товар</span>
+                    </Button>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => onEditProduct(product)}
-                    className="w-full sm:w-auto"
-                  >
-                    <Icon name="Pencil" size={16} className="mr-2" />
-                    <span>Изменить</span>
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    onClick={() => {
-                      if (window.confirm('Удалить товар? Это действие нельзя отменить.')) {
-                        onDeleteProduct(product.id);
-                      }
-                    }}
-                    style={{ backgroundColor: '#dc2626', color: 'white' }}
-                    className="w-full sm:w-auto hover:opacity-90"
-                  >
-                    <Icon name="Trash2" size={16} className="mr-2" />
-                    <span>Удалить товар</span>
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-        ))
+              </CardHeader>
+            </Card>
+          ))
         )}
-      </div>
-
       </div>
     </div>
   );
