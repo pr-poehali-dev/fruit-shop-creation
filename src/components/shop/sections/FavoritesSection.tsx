@@ -39,9 +39,11 @@ interface FavoritesSectionProps {
   onToggleFavorite: (productId: number) => void;
   siteSettings?: any;
   onClose?: () => void;
+  isAuthenticated?: boolean;
+  onShowAuth?: () => void;
 }
 
-const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorite, siteSettings, onClose }: FavoritesSectionProps) => {
+const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorite, siteSettings, onClose, isAuthenticated, onShowAuth }: FavoritesSectionProps) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -100,6 +102,8 @@ const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorit
                 isFavorite={favoriteIds.has(fav.product_id)}
                 onToggleFavorite={onToggleFavorite}
                 siteSettings={siteSettings}
+                isAuthenticated={isAuthenticated}
+                onShowAuth={onShowAuth}
               />
             );
           })}
@@ -111,6 +115,8 @@ const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorit
         open={isGalleryOpen}
         onOpenChange={setIsGalleryOpen}
         onAddToCart={onAddToCart}
+        isAuthenticated={isAuthenticated}
+        onShowAuth={onShowAuth}
       />
     </div>
   );

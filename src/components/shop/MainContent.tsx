@@ -87,6 +87,8 @@ const MainContent = ({
           onToggleFavorite={onToggleFavorite}
           siteSettings={siteSettings}
           onClose={() => onSectionChange('catalog')}
+          isAuthenticated={isAuthenticated}
+          onShowAuth={onShowAuth}
         />
       )}
 
