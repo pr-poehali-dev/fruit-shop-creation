@@ -1,5 +1,6 @@
 import { useToast } from '@/hooks/use-toast';
 import { CartItem } from '@/types/shop';
+import { logUserAction } from '@/utils/userLogger';
 
 interface CheckoutParams {
   user: any;
@@ -217,6 +218,21 @@ export const useCheckout = ({
       const data = await response.json();
 
       if (data.success) {
+        await logUserAction(
+          user.id,
+          'order_create',
+          `Создание заказа #${data.order_id}`,
+          'order',
+          data.order_id,
+          {
+            payment_method: paymentMethod,
+            delivery_type: deliveryType,
+            total_amount: totalAmount,
+            is_preorder: isPreorder,
+            items_count: cart.length
+          }
+        );
+        
         const orderMessage = paymentMethod === 'balance'
           ? isPreorder
             ? `Заказ #${data.order_id}. Оплачено 50% (${totalAmount.toFixed(2)}₽). Остальное при получении. Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`

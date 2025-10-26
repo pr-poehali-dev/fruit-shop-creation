@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User } from '@/types/shop';
+import { logUserAction } from '@/utils/userLogger';
 
 const API_AUTH = 'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc';
 
@@ -126,6 +127,16 @@ export const useAuth = () => {
       } else if (data.success && data.user) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
+        await logUserAction(
+          data.user.id,
+          action === 'login' ? 'auth_login' : 'auth_register',
+          action === 'login' ? 'Вход в систему' : 'Регистрация нового аккаунта',
+          undefined,
+          undefined,
+          { phone: data.user.phone }
+        );
+        
         const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
         onSuccess(data.user, message, false);
         setBanInfo(null);
@@ -202,7 +213,17 @@ export const useAuth = () => {
     }
   };
 
-  const handleLogout = (onLogout: () => void) => {
+  const handleLogout = async (onLogout: () => void) => {
+    if (user?.id) {
+      await logUserAction(
+        user.id,
+        'auth_logout',
+        'Выход из системы',
+        undefined,
+        undefined,
+        { phone: user.phone }
+      );
+    }
     setUser(null);
     localStorage.removeItem('user');
     onLogout();
