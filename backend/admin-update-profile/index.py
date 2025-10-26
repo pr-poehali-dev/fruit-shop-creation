@@ -1,7 +1,7 @@
 import json
 import os
 import psycopg2
-import hashlib
+import bcrypt
 from typing import Dict, Any
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -80,8 +80,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         phone_escaped = phone.replace("'", "''")
         
         if new_password:
-            password_hash = hashlib.sha256(new_password.encode()).hexdigest()
-            query = f"UPDATE users SET full_name = '{full_name_escaped}', phone = '{phone_escaped}', password_hash = '{password_hash}' WHERE id = {user_id}"
+            password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            password_hash_escaped = password_hash.replace("'", "''")
+            query = f"UPDATE users SET full_name = '{full_name_escaped}', phone = '{phone_escaped}', password = '{password_hash_escaped}' WHERE id = {user_id}"
             cur.execute(query)
         else:
             query = f"UPDATE users SET full_name = '{full_name_escaped}', phone = '{phone_escaped}' WHERE id = {user_id}"
