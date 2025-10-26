@@ -86,11 +86,13 @@ const PreorderPaymentDialog: React.FC<PreorderPaymentDialogProps> = ({
         });
 
         const data = await response.json();
+        console.log('Alfabank payment response:', data);
 
         if (data.payment_url) {
           window.location.href = data.payment_url;
         } else {
-          toast.error('Ошибка создания платежа');
+          console.error('No payment_url in response:', data);
+          toast.error(data.error || data.message || 'Ошибка создания платежа');
         }
       }
     } catch (error) {
