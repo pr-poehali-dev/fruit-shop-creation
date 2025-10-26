@@ -32,26 +32,42 @@ def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
         faq_id, faq_question, faq_answer, keywords = faq
         score = 0
         
+        # Ключевые слова дают больше очков
         if keywords:
             for keyword in keywords:
                 keyword_lower = keyword.lower().strip()
                 if keyword_lower in question_lower:
-                    score += 3
+                    score += 5
         
+        # Слова из вопроса FAQ ищем в сообщении пользователя
         question_words = faq_question.lower().split()
         for word in question_words:
-            if len(word) > 3 and word in question_lower:
-                score += 1
+            # Убираем знаки препинания
+            word_clean = word.strip('?!.,;:')
+            # Ищем слова длиннее 3 символов
+            if len(word_clean) > 3 and word_clean in question_lower:
+                score += 2
+        
+        # Слова из сообщения пользователя ищем в вопросе FAQ
+        user_words = question_lower.split()
+        for word in user_words:
+            word_clean = word.strip('?!.,;:')
+            if len(word_clean) > 3 and word_clean in faq_question.lower():
+                score += 2
         
         if score > best_score:
             best_score = score
             best_match = {
                 'id': faq_id,
                 'question': faq_question,
-                'answer': faq_answer
+                'answer': faq_answer,
+                'score': score
             }
     
-    if best_score >= 1:
+    print(f"Best match: {best_match}, score: {best_score}")
+    
+    # Порог понижен до 3 (раньше 1, но теперь очки больше)
+    if best_score >= 3:
         return best_match
     return None
 
@@ -309,7 +325,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 message_id = cur.fetchone()[0]
                 
                 if chat_status == 'bot':
+                    print(f"Bot mode: searching FAQ for message: {message}")
                     faq_answer = search_faq(message, cur)
+                    print(f"FAQ search result: {faq_answer}")
                     
                     if faq_answer:
                         cur.execute(
