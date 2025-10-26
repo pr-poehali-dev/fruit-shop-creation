@@ -29,6 +29,14 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const hashPassword = async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -70,38 +78,73 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
 
     try {
       setIsLoading(true);
-      const requestBody: any = {
-        user_id: selectedUser?.id,
-        full_name: fullName.trim(),
-        phone: phone.trim()
-      };
+      
+      const escapeSql = (str: string) => str.replace(/'/g, "''");
+      
+      const updates: string[] = [];
+      updates.push(`full_name = '${escapeSql(fullName.trim())}'`);
+      updates.push(`phone = '${escapeSql(phone.trim())}'`);
 
       if (newPassword) {
-        requestBody.new_password = newPassword;
+        const hashedPassword = await hashPassword(newPassword);
+        updates.push(`password_hash = '${hashedPassword}'`);
       }
 
-      const response = await fetch('https://functions.poehali.dev/4986919b-8daf-4d91-b11a-b3bde148f13f', {
+      updates.push('updated_at = CURRENT_TIMESTAMP');
+
+      const updateQuery = `
+        UPDATE users 
+        SET ${updates.join(', ')}
+        WHERE id = ${selectedUser?.id}
+        RETURNING id, full_name, phone, balance, loyalty_points as cashback
+      `;
+
+      const response = await fetch('https://poehali.dev/api/internal/sql-query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify({ query: updateQuery })
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
+      const data = await response.json();
 
-      const responseText = await response.text();
-      console.log('Response body (raw):', responseText);
+      if (data.rows && data.rows.length > 0) {
+        const currentUserStr = localStorage.getItem('user');
+        if (currentUserStr) {
+          const currentUser = JSON.parse(currentUserStr);
+          const adminId = currentUser.id;
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('Parsed data:', data);
-      } catch (e) {
-        console.error('Failed to parse response:', e);
-        throw new Error('Ошибка парсинга ответа сервера');
-      }
+          const logDescription = [
+            `Обновление пользователя ${selectedUser?.full_name}`,
+            `Новое имя: ${fullName.trim()}`,
+            `Новый телефон: ${phone.trim()}`,
+            newPassword ? 'Пароль изменен' : null
+          ].filter(Boolean).join(', ').replace(/'/g, "''");
+          
+          const metadataJson = JSON.stringify({
+            full_name: fullName.trim(),
+            phone: phone.trim(),
+            password_changed: !!newPassword
+          }).replace(/'/g, "''");
 
-      if (data.success) {
+          const logQuery = `
+            INSERT INTO admin_logs 
+            (admin_id, action_type, action_description, target_user_id, metadata)
+            VALUES (
+              ${adminId}, 
+              'user_update', 
+              '${logDescription}', 
+              ${selectedUser?.id}, 
+              '${metadataJson}'::jsonb
+            )
+          `;
+          
+          await fetch('https://poehali.dev/api/internal/sql-query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: logQuery })
+          }).catch(err => console.error('Failed to log action:', err));
+        }
+
         toast({
           title: 'Успешно',
           description: newPassword ? 'Данные и пароль пользователя обновлены' : 'Данные пользователя обновлены'
@@ -117,6 +160,7 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
         });
       }
     } catch (error) {
+      console.error('Update error:', error);
       toast({
         title: 'Ошибка',
         description: 'Не удалось обновить данные',

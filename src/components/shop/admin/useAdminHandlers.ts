@@ -1,5 +1,6 @@
 import { useToast } from '@/hooks/use-toast';
 import { Product, Category } from './types';
+import { logAdminAction } from '@/utils/adminLogger';
 
 interface UseAdminHandlersProps {
   user: any;
@@ -175,6 +176,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       const data = await response.json();
 
       if (data.success) {
+        await logAdminAction(
+          props.user.id,
+          amount > 0 ? 'balance_add' : 'balance_subtract',
+          `${amount > 0 ? 'Пополнение' : 'Списание'} баланса: ${Math.abs(amount)}₽. ${description}`,
+          userId,
+          'balance',
+          userId,
+          { amount, description }
+        );
         toast({
           title: 'Баланс пополнен',
           description: `Начислено ${amount}₽`
@@ -214,6 +224,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       const data = await response.json();
 
       if (data.success) {
+        await logAdminAction(
+          props.user.id,
+          isDeduct ? 'loyalty_subtract' : 'loyalty_add',
+          `${isDeduct ? 'Списание' : 'Начисление'} баллов лояльности: ${Math.abs(amount)} баллов. ${description}`,
+          userId,
+          'loyalty',
+          userId,
+          { amount, description }
+        );
         toast({
           title: isDeduct ? 'Кэшбэк списан' : 'Кэшбэк начислен',
           description: `${isDeduct ? 'Списано' : 'Начислено'} ${Math.abs(amount)}₽`
@@ -250,6 +269,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       const data = await response.json();
 
       if (data.success) {
+        await logAdminAction(
+          props.user.id,
+          isAdmin ? 'admin_grant' : 'admin_revoke',
+          `${isAdmin ? 'Назначение администратором' : 'Снятие прав администратора'}`,
+          userId,
+          'admin',
+          userId,
+          { is_admin: isAdmin }
+        );
         toast({
           title: 'Права изменены',
           description: isAdmin ? 'Пользователь теперь администратор' : 'Права администратора удалены'
@@ -323,6 +351,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       const data = await response.json();
 
       if (data.success) {
+        await logAdminAction(
+          props.user.id,
+          'order_update',
+          `Обновление статуса заказа #${orderId}: ${status}${rejectionReason ? `. Причина: ${rejectionReason}` : ''}`,
+          undefined,
+          'order',
+          orderId,
+          { status, rejection_reason: rejectionReason }
+        );
         toast({
           title: 'Статус обновлён',
           description: `Заказ #${orderId} теперь: ${status}`
@@ -435,6 +472,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       const data = await response.json();
 
       if (data.success) {
+        await logAdminAction(
+          props.user.id,
+          'settings_update',
+          'Обновление настроек сайта',
+          undefined,
+          'settings',
+          1,
+          settingsData
+        );
         toast({
           title: 'Настройки сохранены',
           description: 'Изменения применены на сайте'
@@ -591,6 +637,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       const data = await response.json();
 
       if (data.success) {
+        await logAdminAction(
+          props.user.id,
+          'permissions_update',
+          `Обновление прав доступа${isSuperAdmin ? ' (назначен супер-администратор)' : ''}`,
+          userId,
+          'permissions',
+          userId,
+          { permissions, is_super_admin: isSuperAdmin }
+        );
         toast({
           title: 'Права обновлены',
           description: 'Права доступа успешно изменены'
