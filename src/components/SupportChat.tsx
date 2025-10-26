@@ -39,6 +39,7 @@ export default function SupportChat() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [showFaqs, setShowFaqs] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const userId = localStorage.getItem('userId');
 
@@ -78,6 +79,21 @@ export default function SupportChat() {
     }
   }, [isOpen, userId, guestId]);
 
+  // Автообновление чата каждые 3 секунды
+  useEffect(() => {
+    if (isOpen && chat) {
+      pollingIntervalRef.current = setInterval(() => {
+        loadChatSilent();
+      }, 3000);
+
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+        }
+      };
+    }
+  }, [isOpen, chat]);
+
   const loadFaqs = async () => {
     try {
       const response = await fetch(`${SUPPORT_CHAT_URL}?faq=true`);
@@ -111,6 +127,41 @@ export default function SupportChat() {
     }
   };
 
+  // Тихое обновление без перезагрузки UI
+  const loadChatSilent = async () => {
+    const chatUserId = userId || guestId;
+    if (!chatUserId) return;
+
+    try {
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${!userId}`);
+      const data = await response.json();
+      
+      // Обновляем статус чата
+      setChat(prevChat => {
+        if (prevChat && prevChat.status !== data.chat.status) {
+          // Если перешли на оператора - скрываем FAQ
+          if (data.chat.status === 'active' || data.chat.status === 'waiting') {
+            setShowFaqs(false);
+          }
+          return data.chat;
+        }
+        return prevChat || data.chat;
+      });
+      
+      // Добавляем только новые сообщения
+      setMessages(prev => {
+        const existingIds = new Set(prev.map(m => m.id));
+        const newMessages = (data.messages || []).filter((m: Message) => !existingIds.has(m.id));
+        if (newMessages.length > 0) {
+          return [...prev, ...newMessages];
+        }
+        return prev;
+      });
+    } catch (error) {
+      console.error('Ошибка обновления чата:', error);
+    }
+  };
+
   const sendMessage = async () => {
     const chatUserId = userId || guestId;
     if (!inputMessage.trim() || !chat || !chatUserId) return;
@@ -133,10 +184,9 @@ export default function SupportChat() {
       });
 
       const data = await response.json();
-      console.log('Ответ от сервера:', data);
 
-      // Сразу скрываем FAQ после первого сообщения пользователя
-      if (showFaqs) {
+      // Скрываем FAQ только если переводим на оператора
+      if (data.status_changed === 'waiting') {
         setShowFaqs(false);
       }
 
@@ -174,31 +224,17 @@ export default function SupportChat() {
           }
           return [...prev, botMessage];
         });
+        
+        // Если бот ответил (не перевел на оператора) - показываем FAQ снова
+        if (!data.status_changed) {
+          setShowFaqs(true);
+        }
       }
 
       if (data.status_changed === 'waiting') {
         setChat((prev) => (prev ? { ...prev, status: 'waiting' } : null));
         setShowFaqs(false);
       }
-
-      // Обновляем чат без полной перезагрузки, чтобы не терять сообщения
-      setTimeout(() => {
-        if (chat) {
-          fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${!userId}`)
-            .then(res => res.json())
-            .then(data => {
-              setChat(data.chat);
-              // Обновляем только новые сообщения
-              setMessages(prev => {
-                const newMessages = data.messages || [];
-                const existingIds = new Set(prev.map(m => m.id));
-                const toAdd = newMessages.filter((m: Message) => !existingIds.has(m.id));
-                return [...prev, ...toAdd];
-              });
-            })
-            .catch(err => console.error('Ошибка обновления чата:', err));
-        }
-      }, 1000);
     } catch (error) {
       console.error('Ошибка отправки сообщения:', error);
     } finally {

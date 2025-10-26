@@ -63,6 +63,16 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
     return () => clearInterval(interval);
   }, [activeTab]);
 
+  // Автообновление сообщений открытого чата каждые 3 секунды
+  useEffect(() => {
+    if (selectedChat) {
+      const interval = setInterval(() => {
+        loadChatMessagesSilent(selectedChat.id);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedChat]);
+
   const loadChats = async () => {
     try {
       const response = await fetch(`${SUPPORT_CHAT_URL}?admin_view=true`);
@@ -114,6 +124,28 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
       setSelectedChat(chat);
     } catch (error) {
       console.error('Ошибка загрузки сообщений:', error);
+    }
+  };
+
+  const loadChatMessagesSilent = async (chatId: number) => {
+    try {
+      const chat = chats.find((c) => c.id === chatId);
+      if (!chat) return;
+
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chat.user_id}`);
+      const data = await response.json();
+      
+      // Добавляем только новые сообщения
+      setMessages(prev => {
+        const existingIds = new Set(prev.map(m => m.id));
+        const newMessages = (data.messages || []).filter((m: ChatMessage) => !existingIds.has(m.id));
+        if (newMessages.length > 0) {
+          return [...prev, ...newMessages];
+        }
+        return prev;
+      });
+    } catch (error) {
+      console.error('Ошибка обновления сообщений:', error);
     }
   };
 
