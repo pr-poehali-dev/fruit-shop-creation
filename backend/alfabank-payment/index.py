@@ -89,7 +89,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     alfabank_api_url = 'https://payment.alfabank.ru/payment/rest/register.do'
     
     amount_in_kopecks = int(float(amount) * 100)
-    order_number = f"{order_id or 'topup'}_{user_id}_{context.request_id[:8]}"
+    is_preorder = body_data.get('is_preorder_payment', False)
+    
+    if order_id and is_preorder:
+        order_number = f"preorder_{order_id}_{user_id}_{context.request_id[:8]}"
+    elif order_id:
+        order_number = f"order_{order_id}_{user_id}_{context.request_id[:8]}"
+    else:
+        order_number = f"topup_{user_id}_{context.request_id[:8]}"
     
     payload = {
         'token': api_token,

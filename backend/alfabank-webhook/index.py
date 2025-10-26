@@ -81,12 +81,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 user_id = None
                 order_id = None
+                is_preorder_payment = False
                 
                 if order_number.startswith('topup_'):
                     parts = order_number.split('_')
                     if len(parts) >= 2:
                         user_id = parts[1]
                         print(f"Extracted user_id from order_number: {user_id}")
+                elif order_number.startswith('preorder_'):
+                    parts = order_number.split('_')
+                    if len(parts) >= 3:
+                        order_id = parts[1]
+                        user_id = parts[2]
+                        is_preorder_payment = True
+                        print(f"Extracted preorder order_id: {order_id}, user_id: {user_id}")
                 elif order_number.startswith('order_'):
                     parts = order_number.split('_')
                     if len(parts) >= 2:
@@ -103,7 +111,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     cur = conn.cursor(cursor_factory=RealDictCursor)
                     
                     try:
-                        if order_id:
+                        if order_id and is_preorder_payment:
+                            cur.execute(
+                                "UPDATE orders SET amount_paid = amount_paid + %s, payment_verified = true WHERE id = %s",
+                                (amount, order_id)
+                            )
+                            cur.execute(
+                                "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, 'preorder_payment', %s, 'Доплата предзаказа через Альфа-Банк')",
+                                (user_id, amount)
+                            )
+                            print(f"Preorder payment completed: order_id={order_id}, amount={amount}")
+                        elif order_id:
                             cur.execute(
                                 "UPDATE orders SET status = 'confirmed', payment_verified = true WHERE id = %s",
                                 (order_id,)

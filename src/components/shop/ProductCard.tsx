@@ -56,6 +56,10 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAuthenticated) {
+      onShowAuth?.();
+      return;
+    }
     if (onToggleFavorite) {
       onToggleFavorite(product.id);
     }
