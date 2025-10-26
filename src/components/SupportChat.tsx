@@ -133,6 +133,7 @@ export default function SupportChat() {
       });
 
       const data = await response.json();
+      console.log('Ответ от сервера:', data);
 
       // Сразу скрываем FAQ после первого сообщения пользователя
       if (showFaqs) {

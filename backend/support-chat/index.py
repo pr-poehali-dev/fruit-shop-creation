@@ -315,8 +315,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true) RETURNING id",
                             (int(chat_id), faq_answer['answer'])
                         )
-                        conn.commit()
                         bot_message_id = cur.fetchone()[0]
+                        conn.commit()
                         bot_response = faq_answer['answer']
                     else:
                         bot_response = 'Извините, я не нашла ответа на ваш вопрос. Сейчас переведу вас на администратора...'
