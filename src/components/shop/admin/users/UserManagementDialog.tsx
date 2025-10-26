@@ -40,6 +40,8 @@ interface UserManagementDialogProps {
   operationType: string;
   amount: string;
   description: string;
+  cashbackAmount: string;
+  cashbackDescription: string;
   transactions: Transaction[];
   loadingTransactions: boolean;
   loyaltyCard: LoyaltyCard | null;
@@ -48,7 +50,11 @@ interface UserManagementDialogProps {
   onOperationTypeChange: (type: string) => void;
   onAmountChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  onCashbackAmountChange: (value: string) => void;
+  onCashbackDescriptionChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onAddCashback: () => void;
+  onSubtractCashback: () => void;
   onRefreshTransactions: () => void;
   onRevokeLoyaltyCard: () => void;
   onIssueLoyaltyCard: () => void;
@@ -60,6 +66,8 @@ const UserManagementDialog = ({
   operationType,
   amount,
   description,
+  cashbackAmount,
+  cashbackDescription,
   transactions,
   loadingTransactions,
   loyaltyCard,
@@ -68,7 +76,11 @@ const UserManagementDialog = ({
   onOperationTypeChange,
   onAmountChange,
   onDescriptionChange,
+  onCashbackAmountChange,
+  onCashbackDescriptionChange,
   onSubmit,
+  onAddCashback,
+  onSubtractCashback,
   onRefreshTransactions,
   onRevokeLoyaltyCard,
   onIssueLoyaltyCard,
@@ -133,21 +145,22 @@ const UserManagementDialog = ({
           </TabsContent>
 
           <TabsContent value="cashback">
-            <CashbackTab
-              selectedUser={selectedUser}
-              amount={amount}
-              description={description}
-              onAmountChange={onAmountChange}
-              onDescriptionChange={onDescriptionChange}
-              onSubmit={onSubmit}
-              onCancel={onClose}
-            />
+            <div className="text-sm text-muted-foreground mb-4">
+              Используйте вкладку "Карта" для управления кэшбэком
+            </div>
           </TabsContent>
 
           <TabsContent value="loyalty">
             <LoyaltyTab
               loadingLoyalty={loadingLoyalty}
               loyaltyCard={loyaltyCard}
+              selectedUser={selectedUser}
+              cashbackAmount={cashbackAmount}
+              cashbackDescription={cashbackDescription}
+              onCashbackAmountChange={onCashbackAmountChange}
+              onCashbackDescriptionChange={onCashbackDescriptionChange}
+              onAddCashback={onAddCashback}
+              onSubtractCashback={onSubtractCashback}
               onRevokeLoyaltyCard={onRevokeLoyaltyCard}
               onIssueLoyaltyCard={onIssueLoyaltyCard}
             />

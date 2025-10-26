@@ -45,6 +45,8 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [cashbackAmount, setCashbackAmount] = useState('');
+  const [cashbackDescription, setCashbackDescription] = useState('');
   const [operationType, setOperationType] = useState<'profile' | 'balance' | 'cashback' | 'loyalty'>('profile');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
@@ -175,14 +177,32 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
   const handleSubmit = async (e: React.FormEvent, finalAmount?: number) => {
     e.preventDefault();
     if (selectedUser && amount) {
+      const target = e.target as HTMLFormElement;
+      const isSubtract = target.getAttribute('data-action') === 'subtract';
       const amountToUse = finalAmount !== undefined ? finalAmount : parseFloat(amount);
-      if (operationType === 'balance') {
-        await onAddBalance(selectedUser.id, amountToUse, description);
-      } else {
-        await onAddCashback(selectedUser.id, amountToUse, description);
-      }
+      const finalAmountValue = isSubtract ? -Math.abs(amountToUse) : Math.abs(amountToUse);
+      
+      await onAddBalance(selectedUser.id, finalAmountValue, description || (isSubtract ? 'Списание баланса администратором' : 'Пополнение баланса администратором'));
       setAmount('');
       setDescription('');
+    }
+  };
+
+  const handleAddCashback = async () => {
+    if (selectedUser && cashbackAmount) {
+      const amountValue = Math.abs(parseFloat(cashbackAmount));
+      await onAddCashback(selectedUser.id, amountValue, cashbackDescription || 'Начисление кэшбэка администратором');
+      setCashbackAmount('');
+      setCashbackDescription('');
+    }
+  };
+
+  const handleSubtractCashback = async () => {
+    if (selectedUser && cashbackAmount) {
+      const amountValue = -Math.abs(parseFloat(cashbackAmount));
+      await onAddCashback(selectedUser.id, amountValue, cashbackDescription || 'Списание кэшбэка администратором');
+      setCashbackAmount('');
+      setCashbackDescription('');
     }
   };
 
@@ -232,6 +252,8 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
         operationType={operationType}
         amount={amount}
         description={description}
+        cashbackAmount={cashbackAmount}
+        cashbackDescription={cashbackDescription}
         transactions={transactions}
         loadingTransactions={loadingTransactions}
         loyaltyCard={loyaltyCard}
@@ -240,7 +262,11 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
         onOperationTypeChange={(v) => setOperationType(v as 'profile' | 'balance' | 'cashback' | 'loyalty')}
         onAmountChange={setAmount}
         onDescriptionChange={setDescription}
+        onCashbackAmountChange={setCashbackAmount}
+        onCashbackDescriptionChange={setCashbackDescription}
         onSubmit={handleSubmit}
+        onAddCashback={handleAddCashback}
+        onSubtractCashback={handleSubtractCashback}
         onRefreshTransactions={() => selectedUser && loadTransactions(selectedUser.id)}
         onRevokeLoyaltyCard={handleRevokeLoyaltyCard}
         onIssueLoyaltyCard={handleIssueLoyaltyCard}

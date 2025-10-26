@@ -33,14 +33,21 @@ const BalanceTab = ({
   onSubmit,
   onCancel
 }: BalanceTabProps) => {
+  const handleSubmit = (e: React.FormEvent, isSubtract: boolean) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    form.setAttribute('data-action', isSubtract ? 'subtract' : 'add');
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <div className="space-y-4">
       <div>
         <Label>Текущий баланс</Label>
         <p className="text-2xl font-bold text-primary">{Number(selectedUser?.balance || 0).toFixed(2)}₽</p>
       </div>
       <div>
-        <Label htmlFor="amount">Сумма пополнения (₽) *</Label>
+        <Label htmlFor="amount">Сумма (₽) *</Label>
         <Input
           id="amount"
           type="number"
@@ -58,7 +65,7 @@ const BalanceTab = ({
           id="description"
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder="Пополнение баланса администратором"
+          placeholder="Операция с балансом"
           rows={2}
         />
       </div>
@@ -66,12 +73,25 @@ const BalanceTab = ({
         <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
           Отмена
         </Button>
-        <Button type="submit" className="w-full sm:w-auto">
+        <Button 
+          type="button" 
+          variant="destructive"
+          onClick={(e) => handleSubmit(e as any, true)}
+          className="w-full sm:w-auto"
+        >
+          <Icon name="Minus" size={18} className="mr-2" />
+          Списать {amount ? `${amount}₽` : ''}
+        </Button>
+        <Button 
+          type="button"
+          onClick={(e) => handleSubmit(e as any, false)}
+          className="w-full sm:w-auto"
+        >
           <Icon name="Plus" size={18} className="mr-2" />
           Начислить {amount ? `${amount}₽` : ''}
         </Button>
       </div>
-    </form>
+    </div>
   );
 };
 

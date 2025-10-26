@@ -624,10 +624,11 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
 
   const handleUpdatePermissions = async (userId: number, permissions: string[], isSuperAdmin: boolean) => {
     try {
-      const response = await fetch(`${props.API_AUTH}?action=update_permissions`, {
-        method: 'PUT',
+      const response = await fetch(props.API_AUTH, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'update_permissions',
           user_id: userId,
           permissions,
           is_super_admin: isSuperAdmin

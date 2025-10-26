@@ -1,5 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 
 interface LoyaltyCard {
@@ -13,6 +16,13 @@ interface LoyaltyCard {
 interface LoyaltyTabProps {
   loadingLoyalty: boolean;
   loyaltyCard: LoyaltyCard | null;
+  selectedUser: any;
+  cashbackAmount: string;
+  cashbackDescription: string;
+  onCashbackAmountChange: (value: string) => void;
+  onCashbackDescriptionChange: (value: string) => void;
+  onAddCashback: () => void;
+  onSubtractCashback: () => void;
   onRevokeLoyaltyCard: () => void;
   onIssueLoyaltyCard: () => void;
 }
@@ -20,13 +30,72 @@ interface LoyaltyTabProps {
 const LoyaltyTab = ({
   loadingLoyalty,
   loyaltyCard,
+  selectedUser,
+  cashbackAmount,
+  cashbackDescription,
+  onCashbackAmountChange,
+  onCashbackDescriptionChange,
+  onAddCashback,
+  onSubtractCashback,
   onRevokeLoyaltyCard,
   onIssueLoyaltyCard
 }: LoyaltyTabProps) => {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold">Карта лояльности</h3>
-      {loadingLoyalty ? (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-semibold mb-4">Управление кэшбэком</h3>
+        <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+          <div>
+            <Label>Текущий кэшбэк</Label>
+            <p className="text-2xl font-bold text-green-600">{Number(selectedUser?.cashback || 0).toFixed(2)}₽</p>
+          </div>
+          <div>
+            <Label htmlFor="cashback-amount">Сумма (₽) *</Label>
+            <Input
+              id="cashback-amount"
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={cashbackAmount}
+              onChange={(e) => onCashbackAmountChange(e.target.value)}
+              placeholder="100"
+            />
+          </div>
+          <div>
+            <Label htmlFor="cashback-description">Описание операции</Label>
+            <Textarea
+              id="cashback-description"
+              value={cashbackDescription}
+              onChange={(e) => onCashbackDescriptionChange(e.target.value)}
+              placeholder="Операция с кэшбэком"
+              rows={2}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="destructive"
+              onClick={onSubtractCashback}
+              className="flex-1"
+              disabled={!cashbackAmount || parseFloat(cashbackAmount) <= 0}
+            >
+              <Icon name="Minus" size={18} className="mr-2" />
+              Списать {cashbackAmount ? `${cashbackAmount}₽` : ''}
+            </Button>
+            <Button 
+              onClick={onAddCashback}
+              className="flex-1"
+              disabled={!cashbackAmount || parseFloat(cashbackAmount) <= 0}
+            >
+              <Icon name="Plus" size={18} className="mr-2" />
+              Начислить {cashbackAmount ? `${cashbackAmount}₽` : ''}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold mb-4">Карта лояльности</h3>
+        {loadingLoyalty ? (
         <p className="text-center text-muted-foreground py-8">Загрузка...</p>
       ) : loyaltyCard ? (
         <div className="space-y-4">
@@ -86,6 +155,7 @@ const LoyaltyTab = ({
           </Button>
         </div>
       )}
+      </div>
     </div>
   );
 };
