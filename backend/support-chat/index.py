@@ -305,18 +305,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     
                     if faq_answer:
                         cur.execute(
-                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true)",
+                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true) RETURNING id",
                             (int(chat_id), faq_answer['answer'])
                         )
                         conn.commit()
+                        bot_message_id = cur.fetchone()[0]
                         bot_response = faq_answer['answer']
                     else:
                         bot_response = 'Извините, я не нашла ответа на ваш вопрос. Сейчас переведу вас на администратора...'
                         
                         cur.execute(
-                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true)",
+                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read) VALUES (%s, 'bot', 'Анфиса', %s, true) RETURNING id",
                             (int(chat_id), bot_response)
                         )
+                        bot_message_id = cur.fetchone()[0]
                         
                         cur.execute(
                             "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'waiting', updated_at = CURRENT_TIMESTAMP WHERE id = %s",
@@ -329,6 +331,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                             'body': json.dumps({
                                 'message_id': message_id,
+                                'bot_message_id': bot_message_id,
                                 'bot_response': bot_response,
                                 'status_changed': 'waiting'
                             }, ensure_ascii=False),
@@ -340,6 +343,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                         'body': json.dumps({
                             'message_id': message_id,
+                            'bot_message_id': bot_message_id,
                             'bot_response': bot_response
                         }, ensure_ascii=False),
                         'isBase64Encoded': False

@@ -13,6 +13,12 @@ interface Message {
   is_read: boolean;
 }
 
+interface FAQ {
+  id: number;
+  question: string;
+  answer: string;
+}
+
 interface Chat {
   id: number;
   status: 'bot' | 'waiting' | 'active' | 'closed';
@@ -30,6 +36,8 @@ export default function SupportChat() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [guestId, setGuestId] = useState<string | null>(null);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [showFaqs, setShowFaqs] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const userId = localStorage.getItem('userId');
@@ -66,8 +74,20 @@ export default function SupportChat() {
   useEffect(() => {
     if (isOpen && (userId || guestId) && !chat) {
       loadChat();
+      loadFaqs();
     }
   }, [isOpen, userId, guestId]);
+
+  const loadFaqs = async () => {
+    try {
+      const response = await fetch(`${SUPPORT_CHAT_URL}?faq=true`);
+      const data = await response.json();
+      const activeFaqs = Array.isArray(data) ? data.filter((f: any) => f.is_active) : [];
+      setFaqs(activeFaqs);
+    } catch (error) {
+      console.error('Ошибка загрузки FAQ:', error);
+    }
+  };
 
   const loadChat = async () => {
     const chatUserId = userId || guestId;
@@ -78,6 +98,14 @@ export default function SupportChat() {
       const data = await response.json();
       setChat(data.chat);
       setMessages(data.messages || []);
+      
+      // Показываем FAQ только если статус 'bot' и нет пользовательских сообщений
+      if (data.chat?.status === 'bot') {
+        const hasUserMessages = (data.messages || []).some((m: Message) => m.sender_type === 'user');
+        setShowFaqs(!hasUserMessages);
+      } else {
+        setShowFaqs(false);
+      }
     } catch (error) {
       console.error('Ошибка загрузки чата:', error);
     }
@@ -106,6 +134,11 @@ export default function SupportChat() {
 
       const data = await response.json();
 
+      // Сразу скрываем FAQ после первого сообщения пользователя
+      if (showFaqs) {
+        setShowFaqs(false);
+      }
+
       const newUserMessage: Message = {
         id: data.message_id,
         sender_type: 'user',
@@ -115,25 +148,56 @@ export default function SupportChat() {
         is_read: false,
       };
 
-      setMessages((prev) => [...prev, newUserMessage]);
+      setMessages((prev) => {
+        // Проверяем, нет ли уже этого сообщения
+        if (prev.some(m => m.id === data.message_id)) {
+          return prev;
+        }
+        return [...prev, newUserMessage];
+      });
 
       if (data.bot_response) {
+        const botMessageId = data.bot_message_id || Date.now();
         const botMessage: Message = {
-          id: Date.now(),
+          id: botMessageId,
           sender_type: 'bot',
           sender_name: 'Анфиса',
           message: data.bot_response,
           created_at: new Date().toISOString(),
           is_read: true,
         };
-        setMessages((prev) => [...prev, botMessage]);
+        setMessages((prev) => {
+          // Проверяем, нет ли уже этого сообщения
+          if (prev.some(m => m.id === botMessageId)) {
+            return prev;
+          }
+          return [...prev, botMessage];
+        });
       }
 
       if (data.status_changed === 'waiting') {
         setChat((prev) => (prev ? { ...prev, status: 'waiting' } : null));
+        setShowFaqs(false);
       }
 
-      setTimeout(loadChat, 2000);
+      // Обновляем чат без полной перезагрузки, чтобы не терять сообщения
+      setTimeout(() => {
+        if (chat) {
+          fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${!userId}`)
+            .then(res => res.json())
+            .then(data => {
+              setChat(data.chat);
+              // Обновляем только новые сообщения
+              setMessages(prev => {
+                const newMessages = data.messages || [];
+                const existingIds = new Set(prev.map(m => m.id));
+                const toAdd = newMessages.filter((m: Message) => !existingIds.has(m.id));
+                return [...prev, ...toAdd];
+              });
+            })
+            .catch(err => console.error('Ошибка обновления чата:', err));
+        }
+      }, 1000);
     } catch (error) {
       console.error('Ошибка отправки сообщения:', error);
     } finally {
@@ -230,6 +294,24 @@ export default function SupportChat() {
                 </div>
               </div>
             ))}
+            
+            {showFaqs && chat?.status === 'bot' && faqs.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <div className="text-sm font-semibold text-muted-foreground">Популярные вопросы:</div>
+                {faqs.map((faq) => (
+                  <button
+                    key={faq.id}
+                    onClick={() => {
+                      setInputMessage(faq.question);
+                    }}
+                    className="w-full text-left text-sm p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                  >
+                    {faq.question}
+                  </button>
+                ))}
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
 
