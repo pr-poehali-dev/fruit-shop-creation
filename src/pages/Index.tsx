@@ -244,6 +244,7 @@ const Index = () => {
               favoriteIds={favoriteIds}
               siteSettings={siteSettings}
               isAuthenticated={!!user}
+              userId={user?.id}
               onSectionChange={setCurrentSection}
               onAddToCart={handleAddToCart}
               onViewDetails={handleViewDetails}

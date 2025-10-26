@@ -17,6 +17,7 @@ interface MainContentProps {
   favoriteIds: Set<number>;
   siteSettings: any;
   isAuthenticated: boolean;
+  userId?: number;
   onSectionChange: (section: string) => void;
   onAddToCart: (product: Product) => void;
   onViewDetails: (product: Product) => void;
@@ -33,6 +34,7 @@ const MainContent = ({
   favoriteIds,
   siteSettings,
   isAuthenticated,
+  userId,
   onSectionChange,
   onAddToCart,
   onViewDetails,
@@ -62,6 +64,7 @@ const MainContent = ({
           onToggleFavorite={onToggleFavorite}
           siteSettings={siteSettings}
           isAuthenticated={isAuthenticated}
+          userId={userId}
           onShowAuth={onShowAuth}
         />
       )}
@@ -75,6 +78,7 @@ const MainContent = ({
           onToggleFavorite={onToggleFavorite}
           siteSettings={siteSettings}
           isAuthenticated={isAuthenticated}
+          userId={userId}
           onShowAuth={onShowAuth}
         />
       )}
@@ -88,6 +92,7 @@ const MainContent = ({
           siteSettings={siteSettings}
           onClose={() => onSectionChange('catalog')}
           isAuthenticated={isAuthenticated}
+          userId={userId}
           onShowAuth={onShowAuth}
         />
       )}

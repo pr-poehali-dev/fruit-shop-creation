@@ -40,10 +40,11 @@ interface CatalogSectionProps {
   onToggleFavorite?: (productId: number) => void;
   siteSettings?: any;
   isAuthenticated?: boolean;
+  userId?: number;
   onShowAuth?: () => void;
 }
 
-const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated = false, onShowAuth }: CatalogSectionProps) => {
+const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated = false, userId, onShowAuth }: CatalogSectionProps) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -168,6 +169,7 @@ const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, o
             onToggleFavorite={onToggleFavorite}
             siteSettings={siteSettings}
             isAuthenticated={isAuthenticated}
+            userId={userId}
             onShowAuth={onShowAuth}
           />
         ))}

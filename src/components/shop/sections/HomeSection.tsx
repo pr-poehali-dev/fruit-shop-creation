@@ -23,10 +23,11 @@ interface HomeSectionProps {
   onToggleFavorite?: (productId: number) => void;
   siteSettings?: any;
   isAuthenticated?: boolean;
+  userId?: number;
   onShowAuth?: () => void;
 }
 
-const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated, onShowAuth }: HomeSectionProps) => {
+const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated, userId, onShowAuth }: HomeSectionProps) => {
   const showNewYearBanner = siteSettings?.holiday_theme === 'new_year';
   const holidayTheme = siteSettings?.holiday_theme || 'none';
   
@@ -186,6 +187,7 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
               onToggleFavorite={onToggleFavorite}
               siteSettings={siteSettings}
               isAuthenticated={isAuthenticated}
+              userId={userId}
               onShowAuth={onShowAuth}
             />
           ))}

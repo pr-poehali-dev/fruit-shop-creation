@@ -106,7 +106,11 @@ const LogsTab = () => {
       'cashback_exchange': 'ArrowLeftRight',
       'loyalty_card_purchase': 'CreditCard',
       'order_payment': 'Wallet',
-      'theme_change': 'Palette'
+      'theme_change': 'Palette',
+      'view_product': 'Eye',
+      'add_to_cart': 'ShoppingCart',
+      'add_to_favorites': 'Heart',
+      'remove_from_favorites': 'HeartOff'
     };
     return icons[actionType] || 'Activity';
   };
@@ -127,7 +131,11 @@ const LogsTab = () => {
       'cashback_exchange': 'text-green-600',
       'loyalty_card_purchase': 'text-purple-600',
       'order_payment': 'text-blue-600',
-      'theme_change': 'text-slate-600'
+      'theme_change': 'text-slate-600',
+      'view_product': 'text-cyan-600',
+      'add_to_cart': 'text-indigo-600',
+      'add_to_favorites': 'text-pink-600',
+      'remove_from_favorites': 'text-gray-600'
     };
     return colors[actionType] || 'text-gray-600';
   };

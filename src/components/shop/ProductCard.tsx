@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { logUserAction } from '@/utils/userLogger';
 
 interface ProductImage {
   id?: number;
@@ -43,9 +44,10 @@ interface ProductCardProps {
   siteSettings?: any;
   isAuthenticated?: boolean;
   onShowAuth?: () => void;
+  userId?: number;
 }
 
-const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite, siteSettings, isAuthenticated = false, onShowAuth }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, onToggleFavorite, siteSettings, isAuthenticated = false, onShowAuth, userId }: ProductCardProps) => {
   const primaryImage = product.images?.find(img => img.is_primary)?.image_url || product.image_url;
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasVariants = product.variants && product.variants.length > 0;
@@ -54,7 +56,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
   const isNewYear = siteSettings?.holiday_theme === 'new_year';
   const isHalloween = siteSettings?.holiday_theme === 'halloween';
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       onShowAuth?.();
@@ -62,10 +64,20 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
     }
     if (onToggleFavorite) {
       onToggleFavorite(product.id);
+      if (userId) {
+        await logUserAction(
+          userId,
+          isFavorite ? 'remove_from_favorites' : 'add_to_favorites',
+          `${isFavorite ? 'Удаление из' : 'Добавление в'} избранное: ${product.name}`,
+          'product',
+          product.id,
+          { product_name: product.name, price: product.price }
+        );
+      }
     }
   };
 
-  const handleAddVariantToCart = (e: React.MouseEvent, variant: ProductVariant) => {
+  const handleAddVariantToCart = async (e: React.MouseEvent, variant: ProductVariant) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       onShowAuth?.();
@@ -78,15 +90,35 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
       selectedSize: variant.size
     };
     onAddToCart(productWithVariant);
+    if (userId) {
+      await logUserAction(
+        userId,
+        'add_to_cart',
+        `Добавление в корзину: ${product.name} (${variant.size})`,
+        'product',
+        product.id,
+        { product_name: product.name, variant: variant.size, price: variant.price }
+      );
+    }
   };
 
-  const handleAddToCartClick = (e: React.MouseEvent) => {
+  const handleAddToCartClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       onShowAuth?.();
       return;
     }
     onAddToCart(product);
+    if (userId) {
+      await logUserAction(
+        userId,
+        'add_to_cart',
+        `Добавление в корзину: ${product.name}`,
+        'product',
+        product.id,
+        { product_name: product.name, price: product.price }
+      );
+    }
   };
 
   return (
@@ -99,7 +131,19 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           <div className="halloween-corner halloween-corner-tr">🦇</div>
         </>
       )}
-      <div className="relative group cursor-pointer" onClick={() => onViewDetails(product)}>
+      <div className="relative group cursor-pointer" onClick={async () => {
+        onViewDetails(product);
+        if (userId && isAuthenticated) {
+          await logUserAction(
+            userId,
+            'view_product',
+            `Просмотр товара: ${product.name}`,
+            'product',
+            product.id,
+            { product_name: product.name, price: product.price, category: product.category_name }
+          );
+        }
+      }}>
         {product.stock !== null && product.stock <= 0 && (
           <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-semibold">
             <div className="flex flex-col gap-0.5">
