@@ -2,6 +2,7 @@ export interface User {
   id: number;
   phone: string;
   full_name: string;
+  email?: string;
   is_admin: boolean;
   balance?: number;
   cashback?: number;
@@ -31,6 +32,9 @@ export interface Order {
   payment_method: string;
   created_at: string;
   rejection_reason?: string;
+  is_preorder?: boolean;
+  amount_paid?: string;
+  payment_deadline?: string;
   items: Array<{
     product_name: string;
     quantity: number;

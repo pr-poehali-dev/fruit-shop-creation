@@ -172,6 +172,80 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'complete_preorder_payment':
+                order_id = body_data.get('order_id')
+                user_id = body_data.get('user_id')
+                payment_method = body_data.get('payment_method', 'balance')
+                
+                if not order_id or not user_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'order_id and user_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"SELECT total_amount, amount_paid, is_preorder, user_id FROM orders WHERE id = {order_id}"
+                )
+                order = cur.fetchone()
+                
+                if not order:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Order not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                if not order['is_preorder']:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Not a preorder'}),
+                        'isBase64Encoded': False
+                    }
+                
+                remaining_amount = float(order['total_amount']) - float(order['amount_paid'] or 0)
+                
+                if payment_method == 'balance':
+                    cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
+                    user = cur.fetchone()
+                    
+                    if not user or float(user['balance']) < remaining_amount:
+                        return {
+                            'statusCode': 400,
+                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                            'body': json.dumps({'error': 'Недостаточно средств на балансе'}),
+                            'isBase64Encoded': False
+                        }
+                    
+                    cur.execute(
+                        f"UPDATE users SET balance = balance - {remaining_amount} WHERE id = {user_id}"
+                    )
+                    cur.execute(
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {remaining_amount}, 'Доплата за предзаказ #{order_id}')"
+                    )
+                    cur.execute(
+                        f"UPDATE orders SET amount_paid = total_amount, payment_deadline = NULL WHERE id = {order_id}"
+                    )
+                    
+                    conn.commit()
+                    
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': True}),
+                        'isBase64Encoded': False
+                    }
+                
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Invalid payment method'}),
+                    'isBase64Encoded': False
+                }
+            
             user_id = body_data.get('user_id')
             items = body_data.get('items', [])
             payment_method = body_data.get('payment_method', 'card')

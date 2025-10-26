@@ -8,6 +8,7 @@ import LoyaltyCard from './LoyaltyCard';
 import CashbackExchange from './CashbackExchange';
 import ProfileHeader from './profile/ProfileHeader';
 import OrdersTab from './profile/OrdersTab';
+import PreorderPaymentDialog from './PreorderPaymentDialog';
 import TransactionsTab from './profile/TransactionsTab';
 import SettingsTab from './profile/SettingsTab';
 
@@ -25,8 +26,37 @@ interface ProfileContentProps {
 const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout, onBalanceUpdate, onUserUpdate }: ProfileContentProps) => {
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
+  const [preorderPaymentDialog, setPreorderPaymentDialog] = useState<{
+    open: boolean;
+    orderId: number;
+    remainingAmount: number;
+  } | null>(null);
 
 
+
+  useEffect(() => {
+    const checkPreorderPayment = () => {
+      if (!user || !orders) return;
+      
+      const preorderNeedingPayment = orders.find(
+        order => order.is_preorder && 
+                 order.status === 'processing' && 
+                 order.payment_deadline &&
+                 parseFloat(order.amount_paid || '0') < parseFloat(order.total_amount)
+      );
+      
+      if (preorderNeedingPayment) {
+        const remaining = parseFloat(preorderNeedingPayment.total_amount) - parseFloat(preorderNeedingPayment.amount_paid || '0');
+        setPreorderPaymentDialog({
+          open: true,
+          orderId: preorderNeedingPayment.id,
+          remainingAmount: remaining
+        });
+      }
+    };
+    
+    checkPreorderPayment();
+  }, [user, orders]);
 
   useEffect(() => {
     const checkLoyaltyCard = async () => {
@@ -129,6 +159,19 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
         <Icon name="LogOut" size={16} className="mr-2 sm:w-[18px] sm:h-[18px]" />
         Выйти
       </Button>
+
+      {preorderPaymentDialog && user && (
+        <PreorderPaymentDialog
+          open={preorderPaymentDialog.open}
+          onOpenChange={(open) => setPreorderPaymentDialog(open ? preorderPaymentDialog : null)}
+          orderId={preorderPaymentDialog.orderId}
+          remainingAmount={preorderPaymentDialog.remainingAmount}
+          userBalance={user.balance || 0}
+          userId={user.id}
+          userEmail={user.email}
+          onPaymentComplete={onBalanceUpdate}
+        />
+      )}
     </div>
   );
 };
