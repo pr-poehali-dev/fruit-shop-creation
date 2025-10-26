@@ -1,7 +1,9 @@
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { useState } from 'react';
 
 interface Product {
   id: number;
@@ -25,6 +27,14 @@ interface ProductsTabProps {
 }
 
 const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }: ProductsTabProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.category_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -36,8 +46,24 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }:
         </Button>
       </div>
 
+      <div className="relative">
+        <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input 
+          placeholder="Поиск товаров по названию, категории, описанию..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
       <div className="grid gap-3 sm:gap-4">
-        {products.map(product => (
+        {filteredProducts.length === 0 && searchQuery ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Icon name="SearchX" size={48} className="mx-auto mb-2 opacity-50" />
+            <p>Товары не найдены</p>
+          </div>
+        ) : (
+          filteredProducts.map(product => (
           <Card key={product.id}>
             <CardHeader className="p-3 sm:p-6">
               <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
@@ -82,7 +108,10 @@ const ProductsTab = ({ products, onAddProduct, onEditProduct, onDeleteProduct }:
               </div>
             </CardHeader>
           </Card>
-        ))}
+        ))
+        )}
+      </div>
+
       </div>
     </div>
   );

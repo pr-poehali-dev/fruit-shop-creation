@@ -10,7 +10,7 @@ import PagesTab from './PagesTab';
 import CodesTab from './CodesTab';
 import DeliveryZonesTab from './DeliveryZonesTab';
 import PlantsInventoryTab from './PlantsInventoryTab';
-import BotFaqTab from './BotFaqTab';
+
 import GalleryTab from './GalleryTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import { Product, Category, User } from './types';
@@ -70,7 +70,7 @@ const AdminPanelTabs = ({
 }: AdminPanelTabsProps) => {
   return (
     <Tabs defaultValue="products">
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11 h-auto">
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10 h-auto">
         <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Package" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Товары</span>
@@ -102,10 +102,6 @@ const AdminPanelTabs = ({
         <TabsTrigger value="gallery" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
           <Icon name="Image" size={16} className="sm:mr-1" />
           <span className="hidden sm:inline">Галерея</span>
-        </TabsTrigger>
-        <TabsTrigger value="bot-faq" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-          <Icon name="Bot" size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline">Бот FAQ</span>
         </TabsTrigger>
 
         <TabsTrigger value="pages" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
@@ -175,9 +171,6 @@ const AdminPanelTabs = ({
         <GalleryTab />
       </TabsContent>
 
-      <TabsContent value="bot-faq">
-        <BotFaqTab />
-      </TabsContent>
 
       <TabsContent value="pages">
         <PagesTab 

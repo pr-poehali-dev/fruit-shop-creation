@@ -31,6 +31,14 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
   const [newStatus, setNewStatus] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [itemAvailability, setItemAvailability] = useState<Record<number, { quantity: number; price: string }>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredOrders = orders.filter(order =>
+    order.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.user_phone?.includes(searchQuery) ||
+    order.id.toString().includes(searchQuery) ||
+    order.delivery_address?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const openStatusDialog = (order: any) => {
     setEditingOrder(order);
@@ -68,8 +76,23 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
           <CardDescription>Все заказы пользователей</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="relative mb-4">
+            <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input 
+              placeholder="Поиск по номеру, имени, телефону, адресу..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <div className="space-y-4">
-            {orders.map(order => (
+            {filteredOrders.length === 0 && searchQuery ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Icon name="SearchX" size={48} className="mx-auto mb-2 opacity-50" />
+                <p>Заказы не найдены</p>
+              </div>
+            ) : (
+              filteredOrders.map(order => (
               <div key={order.id} className="p-3 sm:p-4 border rounded-lg space-y-3">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                   <div className="flex-1">
@@ -193,7 +216,8 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                   </Button>
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

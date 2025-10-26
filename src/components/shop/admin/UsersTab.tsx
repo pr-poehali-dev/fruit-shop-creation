@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import Icon from '@/components/ui/icon';
 import UserCard from './users/UserCard';
 import UserManagementDialog from './users/UserManagementDialog';
 
@@ -48,6 +50,12 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loyaltyCard, setLoyaltyCard] = useState<LoyaltyCard | null>(null);
   const [loadingLoyalty, setLoadingLoyalty] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredUsers = users.filter(user =>
+    user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.phone.includes(searchQuery)
+  );
 
   useEffect(() => {
     if (selectedUser) {
@@ -190,15 +198,31 @@ const UsersTab = ({ users, onAddBalance, onAddCashback, onToggleAdmin, onIssueLo
           <CardDescription>Список всех зарегистрированных пользователей</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="relative mb-4">
+            <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input 
+              placeholder="Поиск по имени или телефону..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <div className="space-y-3">
-            {users.map(user => (
-              <UserCard
-                key={user.id}
-                user={user}
-                onToggleAdmin={handleToggleAdmin}
-                onUserClick={handleUserClick}
-              />
-            ))}
+            {filteredUsers.length === 0 && searchQuery ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Icon name="UserX" size={48} className="mx-auto mb-2 opacity-50" />
+                <p>Пользователи не найдены</p>
+              </div>
+            ) : (
+              filteredUsers.map(user => (
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  onToggleAdmin={handleToggleAdmin}
+                  onUserClick={handleUserClick}
+                />
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
