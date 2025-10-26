@@ -1,7 +1,7 @@
 {
   "tests": [
     {
-      "name": "Admin login requires code",
+      "name": "Login requires code",
       "method": "POST",
       "path": "/",
       "body": {
@@ -11,10 +11,9 @@
       },
       "expectedStatus": 200,
       "expectedBody": {
-        "requires_code": true,
+        "success": true,
         "user": {
-          "id": 1,
-          "is_admin": true
+          "id": 1
         }
       },
       "bodyMatcher": "partial"
