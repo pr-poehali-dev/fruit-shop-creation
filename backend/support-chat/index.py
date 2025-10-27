@@ -585,6 +585,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
         
+        elif method == 'DELETE':
+            params = event.get('queryStringParameters') or {}
+            faq_id = params.get('id')
+            
+            if not faq_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'ID FAQ обязателен'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute(
+                "DELETE FROM t_p77282076_fruit_shop_creation.faq WHERE id = %s",
+                (int(faq_id),)
+            )
+            conn.commit()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'message': 'FAQ удален'}),
+                'isBase64Encoded': False
+            }
+        
         return {
             'statusCode': 405,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
