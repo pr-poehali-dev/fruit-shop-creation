@@ -93,7 +93,7 @@ const AdminPanelTabs = ({
     hasPermission('pages'),
     hasPermission('codes'),
     hasPermission('settings'),
-    isSuperAdmin,
+    hasPermission('support'),
     isSuperAdmin,
     isSuperAdmin
   ].filter(Boolean).length;
@@ -179,7 +179,7 @@ const AdminPanelTabs = ({
             <span className="hidden sm:inline">Логи</span>
           </TabsTrigger>
         )}
-        {isSuperAdmin && (
+        {hasPermission('support') && (
           <TabsTrigger value="support-chat" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="MessageCircle" size={16} className="sm:mr-1" />
             <span className="hidden sm:inline">Поддержка</span>
@@ -279,7 +279,7 @@ const AdminPanelTabs = ({
         </TabsContent>
       )}
 
-      {isSuperAdmin && (
+      {hasPermission('support') && (
         <TabsContent value="support-chat">
           <SupportChatTab 
             userId={userId}

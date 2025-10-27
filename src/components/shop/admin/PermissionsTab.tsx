@@ -24,7 +24,8 @@ const ALL_PERMISSIONS = [
   { id: 'gallery', label: 'Галерея', icon: 'Image' },
   { id: 'pages', label: 'Страницы', icon: 'FileText' },
   { id: 'codes', label: 'Коды', icon: 'KeyRound' },
-  { id: 'settings', label: 'Настройки', icon: 'Settings' }
+  { id: 'settings', label: 'Настройки', icon: 'Settings' },
+  { id: 'support', label: 'Поддержка', icon: 'MessageSquare' }
 ];
 
 const PermissionsTab = ({ users, currentUserId, onUpdatePermissions }: PermissionsTabProps) => {
