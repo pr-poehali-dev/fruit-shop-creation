@@ -32,6 +32,7 @@ interface ChatWindowProps {
   userId: number;
   onMessageInputChange: (value: string) => void;
   onSendMessage: () => void;
+  isMobile?: boolean;
 }
 
 export default function ChatWindow({
@@ -41,25 +42,26 @@ export default function ChatWindow({
   userId,
   onMessageInputChange,
   onSendMessage,
+  isMobile = false,
 }: ChatWindowProps) {
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-shrink-0">
+        <CardTitle className="text-base sm:text-lg truncate">
           {selectedChat ? `Чат #${selectedChat.id} - ${selectedChat.user_name}` : 'Выберите чат'}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col min-h-0">
         {selectedChat ? (
           <>
-            <div className="h-96 overflow-y-auto mb-4 space-y-2 border rounded p-4">
+            <div className="flex-1 overflow-y-auto mb-4 space-y-2 border rounded p-2 sm:p-4 max-h-[calc(100vh-300px)] sm:max-h-96">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.sender_type === 'admin' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
+                    className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-2 sm:p-3 ${
                       msg.sender_type === 'admin'
                         ? 'bg-primary text-primary-foreground'
                         : msg.sender_type === 'bot'
@@ -77,27 +79,28 @@ export default function ChatWindow({
               ))}
             </div>
             {(selectedChat.status === 'active' && selectedChat.admin_id === userId) && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <Input
                   value={messageInput}
                   onChange={(e) => onMessageInputChange(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && onSendMessage()}
-                  placeholder="Введите сообщение..."
+                  placeholder="Сообщение..."
+                  className="text-sm sm:text-base"
                 />
-                <Button onClick={onSendMessage} disabled={!messageInput.trim()}>
-                  <Icon name="Send" size={20} />
+                <Button onClick={onSendMessage} disabled={!messageInput.trim()} size="icon" className="flex-shrink-0">
+                  <Icon name="Send" size={18} />
                 </Button>
               </div>
             )}
             {selectedChat.status === 'waiting' && (
-              <div className="text-center text-muted-foreground py-4">
+              <div className="text-center text-muted-foreground py-4 text-sm sm:text-base">
                 Нажмите "Взять в работу" чтобы начать общение
               </div>
             )}
           </>
         ) : (
-          <div className="text-center text-muted-foreground py-20">
-            Выберите чат из списка слева
+          <div className="text-center text-muted-foreground py-10 sm:py-20 text-sm sm:text-base">
+            Выберите чат из списка
           </div>
         )}
       </CardContent>

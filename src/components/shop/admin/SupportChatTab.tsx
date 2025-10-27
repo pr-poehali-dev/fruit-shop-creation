@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import Icon from '@/components/ui/icon';
 import ChatList from './ChatList';
 import ChatWindow from './ChatWindow';
 import FaqManager from './FaqManager';
@@ -40,9 +41,10 @@ interface ChatItem {
 interface SupportChatTabProps {
   userId: number;
   userName: string;
+  isSuperAdmin?: boolean;
 }
 
-export default function SupportChatTab({ userId, userName }: SupportChatTabProps) {
+export default function SupportChatTab({ userId, userName, isSuperAdmin = false }: SupportChatTabProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'chats' | 'faq'>('chats');
   const [chats, setChats] = useState<ChatItem[]>([]);
@@ -51,6 +53,7 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
   const [messageInput, setMessageInput] = useState('');
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [prevWaitingCount, setPrevWaitingCount] = useState(0);
+  const [showMobileChat, setShowMobileChat] = useState(false);
 
   useEffect(() => {
     loadChats();
@@ -282,46 +285,136 @@ export default function SupportChatTab({ userId, userName }: SupportChatTabProps
     }
   };
 
+  const downloadChatHistory = () => {
+    if (!selectedChat || messages.length === 0) {
+      toast({ title: 'Нет сообщений для сохранения', variant: 'destructive' });
+      return;
+    }
+
+    const chatText = messages
+      .map(msg => {
+        const date = new Date(msg.created_at).toLocaleString('ru-RU');
+        return `[${date}] ${msg.sender_name} (${msg.sender_type}):\n${msg.message}\n`;
+      })
+      .join('\n---\n\n');
+
+    const header = `Чат #${selectedChat.id} - ${selectedChat.user_name}\n`;
+    const info = `Телефон: ${selectedChat.user_phone || 'не указан'}\n`;
+    const status = `Статус: ${selectedChat.status}\n`;
+    const admin = selectedChat.admin_name ? `Администратор: ${selectedChat.admin_name}\n` : '';
+    const fullText = `${header}${info}${status}${admin}\n${'='.repeat(50)}\n\n${chatText}`;
+
+    const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `chat_${selectedChat.id}_${selectedChat.user_name}_${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({ title: 'История чата сохранена' });
+  };
+
+  const handleSelectChat = (chatId: number) => {
+    loadChatMessages(chatId);
+    setShowMobileChat(true);
+  };
+
+  const handleBackToList = () => {
+    setShowMobileChat(false);
+  };
+
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={activeTab === 'chats' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('chats')}
+          onClick={() => { setActiveTab('chats'); setShowMobileChat(false); }}
+          className="flex-1 sm:flex-none"
         >
+          <Icon name="MessageSquare" size={16} className="mr-2" />
           Чаты
         </Button>
         <Button
           variant={activeTab === 'faq' ? 'default' : 'outline'}
           onClick={() => setActiveTab('faq')}
+          className="flex-1 sm:flex-none"
         >
+          <Icon name="HelpCircle" size={16} className="mr-2" />
           FAQ
         </Button>
+        {isSuperAdmin && selectedChat && activeTab === 'chats' && (
+          <Button
+            variant="outline"
+            onClick={downloadChatHistory}
+            className="flex-1 sm:flex-none"
+          >
+            <Icon name="Download" size={16} className="mr-2" />
+            <span className="hidden sm:inline">Сохранить переписку</span>
+            <span className="sm:hidden">Сохранить</span>
+          </Button>
+        )}
       </div>
 
       {activeTab === 'chats' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ChatList
-            chats={chats}
-            selectedChat={selectedChat}
-            userId={userId}
-            onSelectChat={loadChatMessages}
-            onTakeChat={takeChat}
-            onCloseChat={closeChat}
-          />
-          <ChatWindow
-            selectedChat={selectedChat}
-            messages={messages}
-            messageInput={messageInput}
-            userId={userId}
-            onMessageInputChange={setMessageInput}
-            onSendMessage={sendMessage}
-          />
-        </div>
+        <>
+          <div className="hidden md:grid md:grid-cols-2 gap-4">
+            <ChatList
+              chats={chats}
+              selectedChat={selectedChat}
+              userId={userId}
+              onSelectChat={handleSelectChat}
+              onTakeChat={takeChat}
+              onCloseChat={closeChat}
+            />
+            <ChatWindow
+              selectedChat={selectedChat}
+              messages={messages}
+              messageInput={messageInput}
+              userId={userId}
+              onMessageInputChange={setMessageInput}
+              onSendMessage={sendMessage}
+            />
+          </div>
+
+          <div className="md:hidden">
+            {!showMobileChat ? (
+              <ChatList
+                chats={chats}
+                selectedChat={selectedChat}
+                userId={userId}
+                onSelectChat={handleSelectChat}
+                onTakeChat={takeChat}
+                onCloseChat={closeChat}
+              />
+            ) : (
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  onClick={handleBackToList}
+                  className="w-full"
+                >
+                  <Icon name="ArrowLeft" size={16} className="mr-2" />
+                  Назад к списку
+                </Button>
+                <ChatWindow
+                  selectedChat={selectedChat}
+                  messages={messages}
+                  messageInput={messageInput}
+                  userId={userId}
+                  onMessageInputChange={setMessageInput}
+                  onSendMessage={sendMessage}
+                />
+              </div>
+            )}
+          </div>
+        </>
       ) : (
         <FaqManager
           faqs={faqs}

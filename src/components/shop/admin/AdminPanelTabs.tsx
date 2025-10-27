@@ -284,6 +284,7 @@ const AdminPanelTabs = ({
           <SupportChatTab 
             userId={userId}
             userName={currentUser?.full_name || 'Администратор'}
+            isSuperAdmin={isSuperAdmin}
           />
         </TabsContent>
       )}

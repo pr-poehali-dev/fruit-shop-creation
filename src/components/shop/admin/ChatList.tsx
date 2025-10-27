@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Icon from '@/components/ui/icon';
 
 interface ChatItem {
   id: number;
@@ -53,7 +54,7 @@ export default function ChatList({
         <CardTitle>Список чатов</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+        <div className="space-y-2 max-h-[600px] md:max-h-[70vh] overflow-y-auto">
           {chats.map((chat) => (
             <div
               key={chat.id}
@@ -62,14 +63,16 @@ export default function ChatList({
               }`}
               onClick={() => onSelectChat(chat.id)}
             >
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <div className="font-semibold">{chat.user_name || 'Пользователь'}</div>
+              <div className="flex justify-between items-start mb-2 gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold truncate">{chat.user_name || 'Пользователь'}</div>
                   {chat.user_phone && (
-                    <div className="text-sm text-muted-foreground">{chat.user_phone}</div>
+                    <div className="text-sm text-muted-foreground truncate">{chat.user_phone}</div>
                   )}
                 </div>
-                {getStatusBadge(chat.status)}
+                <div className="flex-shrink-0">
+                  {getStatusBadge(chat.status)}
+                </div>
               </div>
 
               {chat.unread_count > 0 && (
@@ -84,10 +87,12 @@ export default function ChatList({
                 </div>
               )}
 
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {chat.status === 'waiting' && (
-                  <Button size="sm" onClick={(e) => { e.stopPropagation(); onTakeChat(chat.id); }}>
-                    Взять в работу
+                  <Button size="sm" onClick={(e) => { e.stopPropagation(); onTakeChat(chat.id); }} className="flex-1 sm:flex-none">
+                    <Icon name="UserPlus" size={14} className="mr-1" />
+                    <span className="hidden sm:inline">Взять в работу</span>
+                    <span className="sm:hidden">Взять</span>
                   </Button>
                 )}
                 {chat.status === 'active' && chat.admin_id === userId && (
@@ -95,8 +100,11 @@ export default function ChatList({
                     size="sm"
                     variant="outline"
                     onClick={(e) => { e.stopPropagation(); onCloseChat(chat.id); }}
+                    className="flex-1 sm:flex-none"
                   >
-                    Закрыть чат
+                    <Icon name="X" size={14} className="mr-1" />
+                    <span className="hidden sm:inline">Закрыть чат</span>
+                    <span className="sm:hidden">Закрыть</span>
                   </Button>
                 )}
               </div>
