@@ -91,7 +91,7 @@ const GallerySection = () => {
           <p className="text-muted-foreground">Фотографии нашего питомника и растений</p>
         </div>
 
-        <div className="relative w-full max-w-5xl mx-auto aspect-[4/3] mb-4 touch-pan-y">
+        <div className="relative w-full max-w-5xl mx-auto aspect-[4/3] mb-4 overflow-hidden" style={{ touchAction: 'pan-y' }}>
           <div className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white font-medium text-sm">
             {currentIndex + 1} / {galleryImages.length}
           </div>
@@ -111,6 +111,7 @@ const GallerySection = () => {
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
+              dragDirectionLock={true}
               onDragEnd={(e, { offset, velocity }) => {
                 const swipe = swipePower(offset.x, velocity.x);
 
@@ -121,6 +122,7 @@ const GallerySection = () => {
                 }
               }}
               className="absolute inset-0 w-full h-full"
+              style={{ touchAction: 'none' }}
             >
               <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-card">
                 <img

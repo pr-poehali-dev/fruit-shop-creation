@@ -81,26 +81,47 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="text-2xl">{product.name}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           <div 
-            className="relative group touch-pan-y"
+            className="relative group"
+            style={{ touchAction: 'pan-y' }}
             onTouchStart={(e) => {
               if (!hasMultipleImages) return;
-              const touchStartX = e.touches[0].clientX;
-              const handleTouchEnd = (e: TouchEvent) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                const diff = touchStartX - touchEndX;
-                if (Math.abs(diff) > 50) {
+              const touch = e.touches[0];
+              const startX = touch.clientX;
+              const startY = touch.clientY;
+              let moved = false;
+
+              const handleTouchMove = (moveEvent: TouchEvent) => {
+                const moveTouch = moveEvent.touches[0];
+                const diffX = Math.abs(moveTouch.clientX - startX);
+                const diffY = Math.abs(moveTouch.clientY - startY);
+                
+                if (diffX > diffY && diffX > 10) {
+                  moveEvent.preventDefault();
+                  moved = true;
+                }
+              };
+
+              const handleTouchEnd = (endEvent: TouchEvent) => {
+                const touchEndX = endEvent.changedTouches[0].clientX;
+                const diff = startX - touchEndX;
+                
+                if (moved && Math.abs(diff) > 50) {
                   if (diff > 0) handleNextImage();
                   else handlePrevImage();
                 }
+                
+                document.removeEventListener('touchmove', handleTouchMove);
                 document.removeEventListener('touchend', handleTouchEnd);
               };
+
+              document.addEventListener('touchmove', handleTouchMove, { passive: false });
               document.addEventListener('touchend', handleTouchEnd, { once: true });
             }}
           >
@@ -108,8 +129,9 @@ const ProductGalleryDialog = ({ product, open, onOpenChange, onAddToCart, isAuth
               <img 
                 src={currentImage} 
                 alt={product.name}
-                className="w-full h-[400px] object-cover rounded-lg pointer-events-none select-none"
+                className="w-full h-[300px] sm:h-[400px] object-cover rounded-lg pointer-events-none select-none"
                 draggable="false"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               />
             )}
             

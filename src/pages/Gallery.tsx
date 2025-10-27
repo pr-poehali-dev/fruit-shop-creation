@@ -80,7 +80,7 @@ const Gallery = () => {
   const currentImage = galleryImages[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden" style={{ overflowX: 'hidden' }}>
       <div className="fixed top-4 left-4 z-50">
         <Button
           variant="ghost"
@@ -96,8 +96,8 @@ const Gallery = () => {
         {currentIndex + 1} / {galleryImages.length}
       </div>
 
-      <div className="h-screen flex items-center justify-center px-4 perspective-1000">
-        <div className="relative w-full max-w-5xl aspect-[4/3]">
+      <div className="h-screen flex items-center justify-center px-4 perspective-1000" style={{ touchAction: 'pan-y' }}>
+        <div className="relative w-full max-w-5xl aspect-[4/3] overflow-hidden">
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={currentIndex}
@@ -115,6 +115,7 @@ const Gallery = () => {
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={1}
+              dragDirectionLock={true}
               onDragEnd={(e, { offset, velocity }) => {
                 const swipe = swipePower(offset.x, velocity.x);
 
@@ -125,7 +126,7 @@ const Gallery = () => {
                 }
               }}
               className="absolute inset-0 w-full h-full"
-              style={{ transformStyle: 'preserve-3d' }}
+              style={{ transformStyle: 'preserve-3d', touchAction: 'none' }}
             >
               <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-800 to-gray-900">
                 <img
