@@ -59,6 +59,7 @@ export const useAdminAuth = ({ setUser, setShowAuthDialog }: AdminAuthParams) =>
       if (data.success) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('userId', data.user.id.toString());
         setShowAuthDialog(false);
         setRequiresAdminCode(false);
         setPendingAdminUser(null);

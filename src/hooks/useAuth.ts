@@ -12,7 +12,9 @@ export const useAuth = () => {
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      localStorage.setItem('userId', parsedUser.id.toString());
     }
   }, []);
 
@@ -43,6 +45,7 @@ export const useAuth = () => {
           });
           setUser(null);
           localStorage.removeItem('user');
+          localStorage.removeItem('userId');
           return;
         } else if (banInfo?.banned) {
           setBanInfo(null);
@@ -58,6 +61,7 @@ export const useAuth = () => {
               is_admin: balanceData.is_admin
             };
             localStorage.setItem('user', JSON.stringify(updatedUser));
+            localStorage.setItem('userId', updatedUser.id.toString());
             return updatedUser;
           });
         }
@@ -127,6 +131,7 @@ export const useAuth = () => {
       } else if (data.success && data.user) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('userId', data.user.id.toString());
         
         await logUserAction(
           data.user.id,
@@ -199,6 +204,7 @@ export const useAuth = () => {
       } else if (data.success && data.user) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('userId', data.user.id.toString());
         const message = 'Вы вошли в систему';
         onSuccess(data.user, message, false);
         setBanInfo(null);
@@ -226,6 +232,7 @@ export const useAuth = () => {
     }
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
     onLogout();
   };
 
