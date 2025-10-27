@@ -160,7 +160,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'created_at': row[5].isoformat() if row[5] else None,
                     'updated_at': row[6].isoformat() if row[6] else None,
                     'user_phone': row[7],
-                    'user_name': (f'Гость ({row[9][:8]}...)' if row[9] else (row[8] if row[8] else (row[7] if row[7] else 'Пользователь'))),
+                    'user_name': (row[8] if row[8] else (row[7] if row[7] else 'Пользователь')),
                     'is_guest': row[9] is not None,
                     'guest_id': row[9],
                     'unread_count': row[10]

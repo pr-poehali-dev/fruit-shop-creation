@@ -296,7 +296,7 @@ export default function SupportChat() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
+        <div className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-96 h-full sm:h-[600px] bg-background border sm:rounded-lg shadow-2xl flex flex-col z-50">
           <div className="flex items-center justify-between p-4 border-b bg-muted/50">
             <div>
               <h3 className="font-semibold">Поддержка</h3>
