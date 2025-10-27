@@ -30,6 +30,9 @@ interface Favorite {
   price: number;
   image_url: string;
   slug: string;
+  stock: number;
+  show_stock?: boolean;
+  expected_date?: string;
 }
 
 interface FavoritesSectionProps {
@@ -61,7 +64,9 @@ const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorit
     price: fav.price,
     image_url: fav.image_url,
     category_name: '',
-    stock: 0
+    stock: fav.stock,
+    show_stock: fav.show_stock,
+    expected_date: fav.expected_date
   });
 
   return (

@@ -48,7 +48,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             cur.execute(
                 f"""SELECT f.id, f.product_id, f.created_at, 
-                          p.name, p.description, p.price, p.image_url, p.slug
+                          p.name, p.description, p.price, p.image_url, p.slug,
+                          p.stock, p.show_stock, p.expected_date
                    FROM t_p77282076_fruit_shop_creation.favorites f
                    JOIN t_p77282076_fruit_shop_creation.products p ON f.product_id = p.id
                    WHERE f.user_id = {user_id}

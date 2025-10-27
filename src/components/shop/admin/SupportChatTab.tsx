@@ -202,6 +202,10 @@ export default function SupportChatTab({ userId, userName, isSuperAdmin = false 
 
   const closeChat = async (chatId: number) => {
     try {
+      if (isSuperAdmin && messages.length > 0) {
+        downloadChatHistory();
+      }
+
       await fetch(SUPPORT_CHAT_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
