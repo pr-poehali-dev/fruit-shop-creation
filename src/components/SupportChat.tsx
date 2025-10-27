@@ -400,10 +400,10 @@ export default function SupportChat() {
             href="https://vk.com/sad_mehti"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:scale-110 transition-all flex items-center justify-center z-50"
+            className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-[#0077FF] hover:bg-[#0066DD] shadow-lg hover:scale-110 transition-all flex items-center justify-center z-50"
             aria-label="ВКонтакте"
           >
-            <svg className="h-7 w-7 text-primary-foreground" viewBox="0 0 48 48" fill="currentColor">
+            <svg className="h-7 w-7 text-white" viewBox="0 0 48 48" fill="currentColor">
               <path d="M25.2,32.9h2.4c0,0,0.7-0.1,1.1-0.5c0.3-0.4,0.3-1.1,0.3-1.1s0-3.3,1.5-3.8c1.5-0.5,3.4,3.2,5.4,4.6c1.5,1.1,2.7,0.8,2.7,0.8l5.4-0.1c0,0,2.8-0.2,1.5-2.4c-0.1-0.2-0.8-1.7-4.2-4.8c-3.5-3.2-3-2.7,1.2-8.3c2.5-3.4,3.6-5.5,3.2-6.4c-0.3-0.8-2.4-0.6-2.4-0.6l-6.1,0c0,0-0.5-0.1-0.8,0.1c-0.3,0.2-0.5,0.7-0.5,0.7s-0.9,2.4-2.1,4.5c-2.5,4.3-3.5,4.5-3.9,4.2c-0.9-0.6-0.7-2.3-0.7-3.5c0-3.8,0.6-5.4-1.1-5.8c-0.6-0.1-1-0.2-2.4-0.2c-1.8,0-3.4,0-4.2,0.4c-0.6,0.3-1,0.9-0.7,0.9c0.3,0,1.1,0.2,1.5,0.8c0.5,0.7,0.5,2.4,0.5,2.4s0.3,4.5-0.7,5.1c-0.7,0.4-1.6-0.4-3.6-4.4c-1-2-1.8-4.3-1.8-4.3s-0.1-0.5-0.4-0.7c-0.4-0.3-0.9-0.4-0.9-0.4l-5.8,0c0,0-0.9,0-1.2,0.4c-0.3,0.3-0.0,1,0,1s4.3,10.1,9.2,15.2C19.7,32.7,25.2,32.9,25.2,32.9z"/>
             </svg>
           </a>
