@@ -526,13 +526,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 if status == 'closed':
                     # Получаем информацию о чате
                     cur.execute(
-                        "SELECT user_id, admin_id, admin_name, status, is_guest, guest_id FROM t_p77282076_fruit_shop_creation.support_chats WHERE id = %s",
+                        "SELECT user_id, admin_id, admin_name, status, guest_id FROM t_p77282076_fruit_shop_creation.support_chats WHERE id = %s",
                         (int(chat_id),)
                     )
                     chat_info = cur.fetchone()
-                    user_id, admin_id, admin_name, old_status, is_guest, guest_id = chat_info
+                    user_id, admin_id, admin_name, old_status, guest_id = chat_info
                     
                     # Получаем имя и телефон пользователя
+                    is_guest = guest_id is not None
                     if is_guest or not user_id:
                         user_name = "Гость"
                         user_phone = None
