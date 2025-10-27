@@ -158,6 +158,12 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       return;
     }
     
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('Размер файла не должен превышать 10 МБ');
+      return;
+    }
+    
     if (images.length >= 10) {
       alert('Можно добавить максимум 10 изображений');
       return;

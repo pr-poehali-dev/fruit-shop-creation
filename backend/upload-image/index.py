@@ -3,6 +3,7 @@ import base64
 import uuid
 import os
 from typing import Dict, Any
+from io import BytesIO
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
@@ -51,15 +52,42 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         image_bytes = base64.b64decode(image_data)
         
-        file_extension = 'jpg'
-        if body_data.get('filename'):
-            filename = body_data['filename'].lower()
-            if filename.endswith('.png'):
-                file_extension = 'png'
-            elif filename.endswith('.webp'):
-                file_extension = 'webp'
-            elif filename.endswith('.gif'):
-                file_extension = 'gif'
+        from PIL import Image
+        import io
+        
+        try:
+            img = Image.open(io.BytesIO(image_bytes))
+            
+            if hasattr(img, '_getexif') and img._getexif() is not None:
+                from PIL import ImageOps
+                img = ImageOps.exif_transpose(img)
+            
+            if img.mode in ('RGBA', 'LA', 'P'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            max_size = 1920
+            if img.width > max_size or img.height > max_size:
+                img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+            
+            output = io.BytesIO()
+            img.save(output, format='JPEG', quality=85, optimize=True)
+            image_bytes = output.getvalue()
+            
+            file_extension = 'jpg'
+            
+        except Exception as e:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': f'Invalid image format: {str(e)}'}),
+                'isBase64Encoded': False
+            }
         
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
         
