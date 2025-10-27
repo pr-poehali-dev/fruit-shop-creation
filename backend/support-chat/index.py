@@ -586,8 +586,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
         
         elif method == 'DELETE':
-            params = event.get('queryStringParameters') or {}
-            faq_id = params.get('id')
+            body_data = json.loads(event.get('body', '{}'))
+            faq_id = body_data.get('faq_id')
             
             if not faq_id:
                 return {

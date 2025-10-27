@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nursery-v3-install-btn';
+const CACHE_NAME = 'nursery-v4-cors-fix';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -13,6 +13,13 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  if (url.hostname === 'functions.poehali.dev' || url.hostname === 'api.poehali.dev') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
