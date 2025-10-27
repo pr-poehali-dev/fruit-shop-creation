@@ -533,7 +533,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     user_id, admin_id, admin_name, old_status, is_guest, guest_id = chat_info
                     
                     # Получаем имя и телефон пользователя
-                    if is_guest:
+                    if is_guest or not user_id:
                         user_name = "Гость"
                         user_phone = None
                     else:
