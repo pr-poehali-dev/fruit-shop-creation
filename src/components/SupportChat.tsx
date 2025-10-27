@@ -296,7 +296,7 @@ export default function SupportChat() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-96 h-full sm:h-[600px] bg-background border sm:rounded-lg shadow-2xl flex flex-col z-50">
+        <div className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-96 h-[85vh] sm:h-[600px] bg-background border sm:rounded-lg shadow-2xl flex flex-col z-50">
           <div className="flex items-center justify-between p-4 border-b bg-muted/50">
             <div>
               <h3 className="font-semibold">Поддержка</h3>
@@ -356,7 +356,7 @@ export default function SupportChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 border-t">
+          <div className="p-4 border-t space-y-3">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -371,6 +371,17 @@ export default function SupportChat() {
                 <Send size={20} />
               </Button>
             </div>
+            <a
+              href="https://vk.com/sad_mehti"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14c5.6 0 6.93-1.33 6.93-6.93V8.93C22 3.33 20.67 2 15.07 2zm3.15 14.38c-.37.8-1.38 1.15-2.42 1.15-1.21 0-1.93-.42-2.69-1.31-.58-.66-1.12-1.28-1.91-1.28-.79 0-1.33.61-1.91 1.28-.76.89-1.48 1.31-2.69 1.31-1.04 0-2.05-.35-2.42-1.15-.16-.35-.07-.75.21-.99.28-.24.7-.21.95.07.09.1.54.57 1.26.57.45 0 .78-.18 1.42-.92.81-.94 1.82-2.11 3.68-2.11 1.86 0 2.87 1.17 3.68 2.11.64.74.97.92 1.42.92.72 0 1.17-.47 1.26-.57.25-.28.67-.31.95-.07.28.24.37.64.21.99z"/>
+              </svg>
+              Мы ВКонтакте
+            </a>
           </div>
         </div>
       )}

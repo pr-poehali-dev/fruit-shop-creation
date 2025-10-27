@@ -138,6 +138,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if params.get('archive') == 'true':
+                cur.execute("""
+                    SELECT id, chat_id, user_name, user_phone, admin_name, closed_at, messages_json
+                    FROM t_p77282076_fruit_shop_creation.archived_chats
+                    ORDER BY closed_at DESC
+                    LIMIT 100
+                """)
+                
+                archived = [{
+                    'id': row[0],
+                    'chat_id': row[1],
+                    'user_name': row[2],
+                    'user_phone': row[3],
+                    'admin_name': row[4],
+                    'closed_at': row[5].isoformat() if row[5] else None,
+                    'messages_json': row[6]
+                } for row in cur.fetchall()]
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps(archived, ensure_ascii=False),
+                    'isBase64Encoded': False
+                }
+            
             if admin_view:
                 cur.execute("""
                     SELECT c.id, c.user_id, c.status, c.admin_id, c.admin_name, c.created_at, c.updated_at,
@@ -499,6 +524,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 if status == 'closed':
+                    # Получаем информацию о чате
+                    cur.execute(
+                        "SELECT user_id, admin_id, admin_name, status, is_guest, guest_id FROM t_p77282076_fruit_shop_creation.support_chats WHERE id = %s",
+                        (int(chat_id),)
+                    )
+                    chat_info = cur.fetchone()
+                    user_id, admin_id, admin_name, old_status, is_guest, guest_id = chat_info
+                    
+                    # Получаем имя и телефон пользователя
+                    if is_guest:
+                        user_name = "Гость"
+                        user_phone = None
+                    else:
+                        cur.execute(
+                            "SELECT full_name, phone FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                            (int(user_id),)
+                        )
+                        user_data = cur.fetchone()
+                        user_name = user_data[0] if user_data else "Пользователь"
+                        user_phone = user_data[1] if user_data else None
+                    
+                    # Получаем все сообщения чата
+                    cur.execute(
+                        "SELECT sender_type, sender_name, message, created_at FROM t_p77282076_fruit_shop_creation.support_messages WHERE chat_id = %s ORDER BY created_at ASC",
+                        (int(chat_id),)
+                    )
+                    messages = []
+                    for msg in cur.fetchall():
+                        messages.append({
+                            'sender_type': msg[0],
+                            'sender_name': msg[1],
+                            'message': msg[2],
+                            'created_at': msg[3].isoformat() if msg[3] else None
+                        })
+                    
+                    # Сохраняем в архив
+                    cur.execute(
+                        "INSERT INTO t_p77282076_fruit_shop_creation.archived_chats (chat_id, user_id, user_name, user_phone, admin_id, admin_name, status, messages_json, is_guest, guest_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        (int(chat_id), user_id, user_name, user_phone, admin_id, admin_name, old_status, json.dumps(messages, ensure_ascii=False), is_guest, guest_id)
+                    )
+                    
+                    # Закрываем чат
                     cur.execute(
                         "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = %s, closed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = %s",
                         (status, int(chat_id))
