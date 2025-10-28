@@ -65,16 +65,16 @@ const OrdersTab = ({ orders, userId, userBalance, userEmail, onOrderUpdate }: Or
             />
           ))}
         </div>
-        
-        <DeliveryPaymentDialog
-          order={payingDeliveryOrder}
-          userId={userId}
-          userBalance={userBalance}
-          userEmail={userEmail}
-          onClose={() => setPayingDeliveryOrder(null)}
-          onSuccess={onOrderUpdate}
-        />
       )}
+      
+      <DeliveryPaymentDialog
+        order={payingDeliveryOrder}
+        userId={userId}
+        userBalance={userBalance}
+        userEmail={userEmail}
+        onClose={() => setPayingDeliveryOrder(null)}
+        onSuccess={onOrderUpdate}
+      />
     </div>
   );
 };
