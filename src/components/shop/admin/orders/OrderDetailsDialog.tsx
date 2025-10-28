@@ -232,7 +232,7 @@ export const OrderDetailsDialog = ({
             {order.is_preorder && order.amount_paid && (
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-900 dark:text-blue-100 font-bold text-base">Оплачено полностью (50%):</span>
+                  <span className="text-blue-900 dark:text-blue-100 font-bold text-base">Клиент оплатил (предоплата 50%):</span>
                   <span className="text-blue-900 dark:text-blue-100 font-bold text-lg">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
                 </div>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Остальное клиент оплатит при получении</p>
