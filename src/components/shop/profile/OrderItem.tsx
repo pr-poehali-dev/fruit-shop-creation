@@ -10,10 +10,11 @@ interface OrderItemProps {
   isExpanded: boolean;
   onToggle: () => void;
   onCancel: (orderId: number) => void;
+  onPayDelivery: (order: Order) => void;
   isCancelling: boolean;
 }
 
-const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: OrderItemProps) => {
+const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCancelling }: OrderItemProps) => {
   return (
     <Card className="border">
       <CardHeader 
@@ -198,7 +199,7 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
                 className="w-full text-xs sm:text-sm h-9 sm:h-10"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.location.href = `/profile?pay_delivery=${order.id}`;
+                  onPayDelivery(order);
                 }}
               >
                 <Icon name="CreditCard" size={14} className="mr-1.5" />

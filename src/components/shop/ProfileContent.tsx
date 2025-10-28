@@ -103,6 +103,8 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
             <OrdersTab 
               orders={orders} 
               userId={user.id}
+              userBalance={user.balance || 0}
+              userEmail={user.email}
               onOrderUpdate={onBalanceUpdate}
             />
           )}

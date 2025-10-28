@@ -172,6 +172,80 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'pay_delivery':
+                order_id = body_data.get('order_id')
+                user_id = body_data.get('user_id')
+                payment_method = body_data.get('payment_method', 'balance')
+                
+                if not order_id or not user_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'order_id and user_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(
+                    f"SELECT custom_delivery_price, delivery_price_set_by_admin, user_id, status FROM orders WHERE id = {order_id}"
+                )
+                order = cur.fetchone()
+                
+                if not order:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Order not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                if not order['delivery_price_set_by_admin'] or not order['custom_delivery_price']:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Delivery price not set'}),
+                        'isBase64Encoded': False
+                    }
+                
+                delivery_amount = float(order['custom_delivery_price'])
+                
+                if payment_method == 'balance':
+                    cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
+                    user = cur.fetchone()
+                    
+                    if not user or float(user['balance']) < delivery_amount:
+                        return {
+                            'statusCode': 400,
+                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                            'body': json.dumps({'error': 'Недостаточно средств на балансе'}),
+                            'isBase64Encoded': False
+                        }
+                    
+                    cur.execute(
+                        f"UPDATE users SET balance = balance - {delivery_amount} WHERE id = {user_id}"
+                    )
+                    cur.execute(
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'delivery_payment', {delivery_amount}, 'Оплата доставки для заказа #{order_id}')"
+                    )
+                    cur.execute(
+                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, payment_deadline = NULL WHERE id = {order_id}"
+                    )
+                    
+                    conn.commit()
+                    
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'success': True, 'payment_method': 'balance'}),
+                        'isBase64Encoded': False
+                    }
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'payment_method': 'card', 'amount': delivery_amount}),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'complete_preorder_payment':
                 order_id = body_data.get('order_id')
                 user_id = body_data.get('user_id')

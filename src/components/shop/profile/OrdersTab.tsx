@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { Order } from '@/types/shop';
 import OrderItem from './OrderItem';
+import DeliveryPaymentDialog from './DeliveryPaymentDialog';
 
 interface OrdersTabProps {
   orders: Order[];
   userId: number;
+  userBalance: number;
+  userEmail?: string;
   onOrderUpdate: () => void;
 }
 
-const OrdersTab = ({ orders, userId, onOrderUpdate }: OrdersTabProps) => {
+const OrdersTab = ({ orders, userId, userBalance, userEmail, onOrderUpdate }: OrdersTabProps) => {
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  const [payingDeliveryOrder, setPayingDeliveryOrder] = useState<Order | null>(null);
 
   const handleCancelOrder = async (orderId: number) => {
     if (!confirm('Вы уверены, что хотите отменить этот заказ?')) return;
@@ -56,10 +60,20 @@ const OrdersTab = ({ orders, userId, onOrderUpdate }: OrdersTabProps) => {
               isExpanded={expandedOrderId === order.id}
               onToggle={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
               onCancel={handleCancelOrder}
+              onPayDelivery={(ord) => setPayingDeliveryOrder(ord)}
               isCancelling={cancellingOrderId === order.id}
             />
           ))}
         </div>
+        
+        <DeliveryPaymentDialog
+          order={payingDeliveryOrder}
+          userId={userId}
+          userBalance={userBalance}
+          userEmail={userEmail}
+          onClose={() => setPayingDeliveryOrder(null)}
+          onSuccess={onOrderUpdate}
+        />
       )}
     </div>
   );
