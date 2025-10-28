@@ -24,7 +24,7 @@ export const CartItemsList = ({ cart, updateCartQuantity }: CartItemsListProps) 
             <Button size="icon" variant="outline" onClick={() => updateCartQuantity(item.product.id, item.quantity - 1, (item.product as any).selectedSize)}>
               <Icon name="Minus" size={16} />
             </Button>
-            <span className="w-8 text-center">{item.quantity}</span>
+            <span className="w-10 text-center font-semibold text-base relative z-10">{item.quantity}</span>
             <Button size="icon" variant="outline" onClick={() => updateCartQuantity(item.product.id, item.quantity + 1, (item.product as any).selectedSize)}>
               <Icon name="Plus" size={16} />
             </Button>
