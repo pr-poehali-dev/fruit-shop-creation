@@ -177,7 +177,7 @@ const Header = ({
               >
                 <Icon name="Heart" size={20} className="sm:w-7 sm:h-7" />
                 {favoritesCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 min-w-[20px] h-5 sm:min-w-[24px] sm:h-6 px-1 text-[10px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
+                  <Badge className="absolute -top-1 -right-1 min-w-[22px] h-[22px] sm:min-w-[26px] sm:h-[26px] px-1.5 text-[11px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-red-500 to-red-600 text-white font-bold shadow-lg animate-pulse">
                     {favoritesCount}
                   </Badge>
                 )}
@@ -191,7 +191,7 @@ const Header = ({
               <Button variant="ghost" size="icon" className={`relative text-primary-foreground hover:bg-primary/90 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/30 hover:to-amber-500/30 border-2 border-yellow-200/30 backdrop-blur-sm transition-all hover:scale-110 ${isNewYear ? 'snow-icon-button' : ''}`}>
                 <Icon name="ShoppingCart" size={20} className="sm:w-7 sm:h-7" />
                 {cart.length > 0 && (
-                  <Badge className="absolute -top-1 -right-1 min-w-[20px] h-5 sm:min-w-[24px] sm:h-6 px-1 text-[10px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg animate-pulse">
+                  <Badge className="absolute -top-1 -right-1 min-w-[22px] h-[22px] sm:min-w-[26px] sm:h-[26px] px-1.5 text-[11px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-yellow-500 to-amber-600 text-white font-bold shadow-lg animate-pulse">
                     {cart.length}
                   </Badge>
                 )}
