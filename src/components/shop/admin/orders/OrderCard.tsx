@@ -1,0 +1,137 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import Icon from '@/components/ui/icon';
+
+interface OrderCardProps {
+  order: any;
+  statusLabels: Record<string, string>;
+  getStatusBadgeVariant: (status: string) => string;
+  onViewDetails: (order: any) => void;
+  onEditStatus: (order: any) => void;
+  onDelete: (orderId: number) => void;
+}
+
+export const OrderCard = ({
+  order,
+  statusLabels,
+  getStatusBadgeVariant,
+  onViewDetails,
+  onEditStatus,
+  onDelete
+}: OrderCardProps) => {
+  return (
+    <div className="p-3 sm:p-4 border rounded-lg space-y-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+        <div className="flex-1">
+          <div className="font-medium text-sm sm:text-base">Заказ #{order.id}</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">
+            {order.user_name} ({order.user_phone})
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            {new Date(order.created_at).toLocaleString('ru-RU', { 
+              day: '2-digit', 
+              month: '2-digit', 
+              year: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}
+          </div>
+        </div>
+        <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:text-right">
+          <div className="font-bold text-base sm:text-lg">
+            {order.items ? 
+              order.items
+                .filter((i: any) => i.product_name)
+                .reduce((sum: number, i: any) => {
+                  if (i.is_out_of_stock) {
+                    if (i.available_quantity > 0) {
+                      const price = parseFloat(i.available_price) || parseFloat(i.price);
+                      const qty = parseInt(i.available_quantity);
+                      return sum + (price * qty);
+                    }
+                    return sum;
+                  }
+                  return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                }, 0).toFixed(2)
+              : parseFloat(order.total_amount).toFixed(2)
+            }₽
+          </div>
+          <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
+            {statusLabels[order.status] || order.status}
+          </Badge>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+        <div>
+          <div className="font-medium">Способ оплаты:</div>
+          <div className="text-muted-foreground">
+            {order.payment_method === 'balance' ? 'Баланс' : 
+             order.payment_method === 'card' ? 'Карта' : 
+             order.payment_method === 'sber_qr' ? 'СберБанк QR' :
+             'При получении'}
+          </div>
+        </div>
+        <div>
+          <div className="font-medium">Доставка:</div>
+          <div className="text-muted-foreground">
+            {order.delivery_type === 'delivery' ? '🚚 Доставка' : '🏪 Самовывоз'}
+            {order.delivery_zone_id && (
+              <span className="ml-1 text-xs text-primary">
+                (Зона #{order.delivery_zone_id})
+              </span>
+            )}
+            {order.custom_delivery_price && (
+              <span className="ml-1 text-xs font-bold text-primary">
+                {order.custom_delivery_price}₽
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="sm:col-span-2">
+          <div className="font-medium">Адрес:</div>
+          <div className="text-muted-foreground break-words">{order.delivery_address}</div>
+        </div>
+      </div>
+
+      {order.rejection_reason && (
+        <div className="text-sm bg-destructive/10 p-2 rounded">
+          <div className="font-medium text-destructive">Причина отказа:</div>
+          <div className="text-muted-foreground">{order.rejection_reason}</div>
+        </div>
+      )}
+
+      {order.status === 'cancelled' && order.cancellation_reason && (
+        <div className="text-sm bg-orange-50 dark:bg-orange-950/20 p-2 rounded border border-orange-200 dark:border-orange-800">
+          <div className="font-medium text-orange-700 dark:text-orange-300">
+            Отменён {order.cancelled_by === 'admin' ? '(администратором)' : '(пользователем)'}:
+          </div>
+          <div className="text-muted-foreground">{order.cancellation_reason}</div>
+        </div>
+      )}
+
+      {order.items && order.items.some((i: any) => i.is_out_of_stock) && (
+        <div className="text-sm bg-amber-50 dark:bg-amber-950/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <div className="font-medium text-amber-700 dark:text-amber-300">
+            ⚠️ Товары недоступны в нужном количестве
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => onViewDetails(order)} variant="outline" size="sm">
+          <Icon name="Eye" size={16} className="mr-1" />
+          Детали
+        </Button>
+        <Button onClick={() => onEditStatus(order)} variant="outline" size="sm">
+          <Icon name="Edit" size={16} className="mr-1" />
+          Изменить статус
+        </Button>
+        <Button onClick={() => onDelete(order.id)} variant="destructive" size="sm">
+          <Icon name="Trash2" size={16} className="mr-1" />
+          Удалить
+        </Button>
+      </div>
+    </div>
+  );
+};
