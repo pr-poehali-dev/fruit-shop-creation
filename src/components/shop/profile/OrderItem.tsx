@@ -37,21 +37,23 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCan
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
-              {order.items ? 
-                order.items
-                  .filter((i: any) => i.product_name)
-                  .reduce((sum: number, i: any) => {
-                    if (i.is_out_of_stock) {
-                      if (i.available_quantity > 0) {
-                        const price = parseFloat(i.available_price) || parseFloat(i.price);
-                        const qty = parseInt(i.available_quantity);
-                        return sum + (price * qty);
+              {order.is_preorder && order.amount_paid ? 
+                parseFloat(order.amount_paid).toFixed(2)
+                : order.items ? 
+                  order.items
+                    .filter((i: any) => i.product_name)
+                    .reduce((sum: number, i: any) => {
+                      if (i.is_out_of_stock) {
+                        if (i.available_quantity > 0) {
+                          const price = parseFloat(i.available_price) || parseFloat(i.price);
+                          const qty = parseInt(i.available_quantity);
+                          return sum + (price * qty);
+                        }
+                        return sum;
                       }
-                      return sum;
-                    }
-                    return sum + (parseFloat(i.price) * parseInt(i.quantity));
-                  }, 0).toFixed(2)
-                : parseFloat(order.total_amount).toFixed(2)
+                      return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                    }, 0).toFixed(2)
+                  : parseFloat(order.total_amount).toFixed(2)
               } ₽
             </span>
             <Badge variant="outline" className="text-base sm:text-xs px-1 py-0 sm:px-2 sm:py-1">
@@ -152,24 +154,35 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCan
                   </div>
                 );
               })}
-              <div className="flex justify-between items-center pt-2 border-t text-xs sm:text-sm font-bold">
-                <span>Итого:</span>
-                <span>
-                  {order.items
-                    .filter((i: any) => i.product_name)
-                    .reduce((sum: number, i: any) => {
-                      if (i.is_out_of_stock) {
-                        if (i.available_quantity > 0) {
-                          const price = parseFloat(i.available_price) || parseFloat(i.price);
-                          const qty = parseInt(i.available_quantity);
-                          return sum + (price * qty);
+              <div className="space-y-2">
+                <div className="flex justify-between items-center pt-2 border-t text-xs sm:text-sm">
+                  <span className={order.is_preorder ? 'text-muted-foreground' : 'font-bold'}>Итого:</span>
+                  <span className={order.is_preorder ? 'text-muted-foreground line-through' : 'font-bold'}>
+                    {order.items
+                      .filter((i: any) => i.product_name)
+                      .reduce((sum: number, i: any) => {
+                        if (i.is_out_of_stock) {
+                          if (i.available_quantity > 0) {
+                            const price = parseFloat(i.available_price) || parseFloat(i.price);
+                            const qty = parseInt(i.available_quantity);
+                            return sum + (price * qty);
+                          }
+                          return sum;
                         }
-                        return sum;
-                      }
-                      return sum + (parseFloat(i.price) * parseInt(i.quantity));
-                    }, 0).toFixed(2)
-                  }₽
-                </span>
+                        return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                      }, 0).toFixed(2)
+                    }₽
+                  </span>
+                </div>
+                {order.is_preorder && order.amount_paid && (
+                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Оплачено (50%):</span>
+                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
+                    </div>
+                    <p className="text-[10px] text-blue-700 dark:text-blue-300 mt-1">Остальное оплатите при получении</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
