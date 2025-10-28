@@ -104,9 +104,14 @@ const CartContent = ({
   }, [deliveryEnabled]);
   
   const getZoneDeliveryPrice = () => {
-    if (!selectedZoneId) return deliveryPrice + courierDeliveryPrice;
-    const zone = deliveryZones.find(z => z.id === selectedZoneId);
-    return zone ? parseFloat(zone.delivery_price) : deliveryPrice + courierDeliveryPrice;
+    // Для Барнаула - стандартная цена или по зоне
+    if (selectedCity === 'Барнаул') {
+      if (!selectedZoneId) return deliveryPrice + courierDeliveryPrice;
+      const zone = deliveryZones.find(z => z.id === selectedZoneId);
+      return zone ? parseFloat(zone.delivery_price) : deliveryPrice + courierDeliveryPrice;
+    }
+    // Для других городов - 0, доставка оплачивается отдельно
+    return 0;
   };
   
   const getFinalPrice = () => {
@@ -120,6 +125,9 @@ const CartContent = ({
   };
   
   const getDeliveryFee = () => {
+    // Для не-Барнаула доставка всегда 0 (оплата отдельно)
+    if (selectedCity !== 'Барнаул') return 0;
+    
     const basePrice = getTotalPrice();
     const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
     return isFreeDelivery ? 0 : getZoneDeliveryPrice();
@@ -290,9 +298,15 @@ const CartContent = ({
                         <div className="flex-1">
                           <p className="font-semibold">Доставка</p>
                           <p className="text-xs text-muted-foreground mt-1">Доставим по указанному адресу</p>
-                          <p className="text-sm font-medium text-primary mt-1">
-                            {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
-                          </p>
+                          {selectedCity === 'Барнаул' ? (
+                            <p className="text-sm font-medium text-primary mt-1">
+                              {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                              Стоимость рассчитает администратор
+                            </p>
+                          )}
                         </div>
                       </div>
                     </Label>
