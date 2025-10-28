@@ -139,16 +139,18 @@ export default function SupportChat() {
       const data = await response.json();
       
       // Обновляем статус чата
-      setChat(prevChat => {
-        if (prevChat && prevChat.status !== data.chat.status) {
-          // Если перешли на оператора - скрываем FAQ
-          if (data.chat.status === 'active' || data.chat.status === 'waiting') {
-            setShowFaqs(false);
+      if (data.chat) {
+        setChat(prevChat => {
+          if (prevChat && prevChat.status !== data.chat.status) {
+            // Если перешли на оператора - скрываем FAQ
+            if (data.chat.status === 'active' || data.chat.status === 'waiting') {
+              setShowFaqs(false);
+            }
+            return data.chat;
           }
-          return data.chat;
-        }
-        return prevChat || data.chat;
-      });
+          return prevChat || data.chat;
+        });
+      }
       
       // Добавляем только новые сообщения
       setMessages(prev => {
