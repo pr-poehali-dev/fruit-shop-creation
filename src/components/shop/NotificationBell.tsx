@@ -130,7 +130,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNotificat
         >
           <Icon name="Bell" size={20} className="sm:w-7 sm:h-7" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 min-w-[20px] h-5 sm:min-w-[24px] sm:h-6 px-1 text-[10px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold shadow-lg animate-pulse">
+            <Badge className="absolute -top-1 -right-1 min-w-[22px] h-[22px] sm:min-w-[26px] sm:h-[26px] px-1.5 text-[11px] sm:text-xs rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold shadow-lg animate-pulse">
               {unreadCount}
             </Badge>
           )}
