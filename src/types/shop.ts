@@ -35,6 +35,10 @@ export interface Order {
   is_preorder?: boolean;
   amount_paid?: string;
   payment_deadline?: string;
+  custom_delivery_price?: number;
+  delivery_price_set_by_admin?: boolean;
+  delivery_type?: string;
+  delivery_address?: string;
   items: Array<{
     product_name: string;
     quantity: number;

@@ -95,6 +95,12 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
                 </span>
               </div>
             )}
+            {order.custom_delivery_price !== null && order.custom_delivery_price !== undefined && (
+              <div className="flex justify-between text-xs sm:text-sm gap-2">
+                <span className="text-muted-foreground">Доставка:</span>
+                <span className="font-bold text-primary">{order.custom_delivery_price}₽</span>
+              </div>
+            )}
           </div>
           
           {order.items && order.items.length > 0 && (
@@ -179,6 +185,25 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, isCancelling }: Orde
                 {order.cancelled_by === 'admin' ? 'Отменён админом' : 'Отменён вами'}:
               </span>
               <span className="text-muted-foreground ml-1">{order.cancellation_reason}</span>
+            </div>
+          )}
+          
+          {order.status === 'processing' && order.delivery_price_set_by_admin && order.custom_delivery_price && (
+            <div className="p-3 bg-primary/10 border border-primary/30 rounded space-y-2">
+              <div className="text-xs sm:text-sm font-medium">
+                Стоимость доставки: <span className="text-lg font-bold text-primary">{order.custom_delivery_price}₽</span>
+              </div>
+              <Button 
+                size="sm" 
+                className="w-full text-xs sm:text-sm h-9 sm:h-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = `/profile?pay_delivery=${order.id}`;
+                }}
+              >
+                <Icon name="CreditCard" size={14} className="mr-1.5" />
+                Оплатить доставку
+              </Button>
             </div>
           )}
           

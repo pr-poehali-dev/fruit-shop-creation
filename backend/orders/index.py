@@ -328,6 +328,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             order_id = body_data.get('order_id')
             status = body_data.get('status', 'pending').replace("'", "''")
             rejection_reason = body_data.get('rejection_reason', '').replace("'", "''")
+            custom_delivery_price = body_data.get('custom_delivery_price')
             
             if not order_id:
                 return {
@@ -336,6 +337,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'error': 'order_id required'}),
                     'isBase64Encoded': False
                 }
+            
+            if custom_delivery_price is not None:
+                cur.execute(
+                    f"UPDATE orders SET custom_delivery_price = {custom_delivery_price}, delivery_price_set_by_admin = TRUE WHERE id = {order_id}"
+                )
             
             if status == 'cancelled':
                 cancellation_reason = rejection_reason if rejection_reason else 'Отменён администратором'
@@ -351,11 +357,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE orders SET status = '{status}', updated_at = CURRENT_TIMESTAMP WHERE id = {order_id}"
                 )
             
-            cur.execute(f"SELECT user_id, is_preorder FROM orders WHERE id = {order_id}")
+            cur.execute(f"SELECT user_id, is_preorder, custom_delivery_price, delivery_price_set_by_admin, delivery_type FROM orders WHERE id = {order_id}")
             order_user = cur.fetchone()
             if order_user and status in ['delivered', 'cancelled', 'confirmed', 'processing']:
                 user_id_for_notif = order_user['user_id']
                 is_preorder = order_user['is_preorder']
+                delivery_price_set = order_user['delivery_price_set_by_admin']
+                delivery_price = order_user['custom_delivery_price']
+                delivery_type_val = order_user['delivery_type']
                 
                 status_messages = {
                     'delivered': 'Ваш заказ доставлен! Оцените качество обслуживания',
@@ -366,6 +375,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 if status == 'processing' and is_preorder:
                     title = 'Необходима доплата за заказ'
                     message = 'Ваш предзаказ обрабатывается! Пожалуйста, оплатите оставшиеся 50% стоимости заказа в течение 3 дней'
+                    cur.execute(
+                        f"UPDATE orders SET payment_deadline = CURRENT_TIMESTAMP + INTERVAL '3 days' WHERE id = {order_id}"
+                    )
+                elif status == 'processing' and delivery_price_set and delivery_type_val == 'delivery':
+                    title = 'Цена доставки установлена'
+                    message = f'Стоимость доставки составит {delivery_price}₽. Перейдите в заказ для оплаты'
                     cur.execute(
                         f"UPDATE orders SET payment_deadline = CURRENT_TIMESTAMP + INTERVAL '3 days' WHERE id = {order_id}"
                     )

@@ -32,6 +32,7 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
   const [rejectionReason, setRejectionReason] = useState('');
   const [itemAvailability, setItemAvailability] = useState<Record<number, { quantity: number; price: string }>>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [customDeliveryPrice, setCustomDeliveryPrice] = useState<string>('');
 
   const filteredOrders = orders.filter(order =>
     order.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,17 +45,21 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
     setEditingOrder(order);
     setNewStatus(order.status);
     setRejectionReason(order.rejection_reason || '');
+    setCustomDeliveryPrice(order.custom_delivery_price?.toString() || '');
   };
 
   const handleSaveStatus = () => {
     if (editingOrder) {
+      const deliveryPrice = customDeliveryPrice.trim() ? parseFloat(customDeliveryPrice) : null;
       onUpdateStatus(
         editingOrder.id, 
         newStatus, 
-        newStatus === 'rejected' ? rejectionReason : undefined
+        newStatus === 'rejected' ? rejectionReason : undefined,
+        deliveryPrice
       );
       setEditingOrder(null);
       setRejectionReason('');
+      setCustomDeliveryPrice('');
     }
   };
 
@@ -146,6 +151,11 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                       {order.delivery_zone_id && (
                         <span className="ml-1 text-xs text-primary">
                           (Зона #{order.delivery_zone_id})
+                        </span>
+                      )}
+                      {order.custom_delivery_price && (
+                        <span className="ml-1 text-xs font-bold text-primary">
+                          {order.custom_delivery_price}₽
                         </span>
                       )}
                     </div>
@@ -244,6 +254,23 @@ const OrdersTab = ({ orders, onUpdateStatus, onDeleteOrder, onUpdateItemStock, o
                 </SelectContent>
               </Select>
             </div>
+
+            {editingOrder?.delivery_type === 'delivery' && editingOrder?.delivery_address && !editingOrder?.delivery_address?.toLowerCase().includes('барнаул') && (
+              <div>
+                <Label>Цена доставки (₽)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={customDeliveryPrice}
+                  onChange={(e) => setCustomDeliveryPrice(e.target.value)}
+                  placeholder="Укажите стоимость доставки"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Доставка в другой город: {editingOrder?.delivery_address}
+                </p>
+              </div>
+            )}
 
             {(newStatus === 'rejected' || newStatus === 'cancelled') && (
               <div>

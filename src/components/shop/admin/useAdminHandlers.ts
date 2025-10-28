@@ -336,7 +336,7 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
     }
   };
 
-  const handleUpdateOrderStatus = async (orderId: number, status: string, rejectionReason?: string) => {
+  const handleUpdateOrderStatus = async (orderId: number, status: string, rejectionReason?: string, customDeliveryPrice?: number | null) => {
     try {
       const response = await fetch(props.API_ORDERS, {
         method: 'PUT',
@@ -344,7 +344,8 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
         body: JSON.stringify({ 
           order_id: orderId, 
           status,
-          rejection_reason: rejectionReason 
+          rejection_reason: rejectionReason,
+          custom_delivery_price: customDeliveryPrice
         })
       });
 
@@ -354,15 +355,15 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
         await logAdminAction(
           props.user.id,
           'order_update',
-          `Обновление статуса заказа #${orderId}: ${status}${rejectionReason ? `. Причина: ${rejectionReason}` : ''}`,
+          `Обновление статуса заказа #${orderId}: ${status}${rejectionReason ? `. Причина: ${rejectionReason}` : ''}${customDeliveryPrice !== null && customDeliveryPrice !== undefined ? `. Цена доставки: ${customDeliveryPrice}₽` : ''}`,
           undefined,
           'order',
           orderId,
-          { status, rejection_reason: rejectionReason }
+          { status, rejection_reason: rejectionReason, custom_delivery_price: customDeliveryPrice }
         );
         toast({
           title: 'Статус обновлён',
-          description: `Заказ #${orderId} теперь: ${status}`
+          description: `Заказ #${orderId} теперь: ${status}${customDeliveryPrice !== null && customDeliveryPrice !== undefined ? `. Доставка: ${customDeliveryPrice}₽` : ''}`
         });
         props.loadOrders();
       }
