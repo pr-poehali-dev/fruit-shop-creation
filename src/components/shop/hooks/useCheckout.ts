@@ -235,13 +235,13 @@ export const useCheckout = ({
           }
         );
         
-        const orderMessage = paymentMethod === 'balance'
-          ? isPreorder
+        const orderMessage = isPreorder
+          ? paymentMethod === 'balance'
             ? `Заказ #${data.order_id}. Оплачено 50% (${totalAmount.toFixed(2)}₽). Остальное при получении. Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
-            : `Заказ #${data.order_id}. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
-          : isPreorder
-            ? `Заказ #${data.order_id}. Предзаказ оформлен! Оплачено 50% предоплаты`
-            : `Номер заказа: ${data.order_id}`;
+            : `Заказ #${data.order_id}. Предзаказ оформлен! Оплачено 50% предоплаты (${totalAmount.toFixed(2)}₽)`
+          : paymentMethod === 'balance'
+            ? `Заказ #${data.order_id}. Оплачено полностью ${totalAmount.toFixed(2)}₽. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
+            : `Заказ #${data.order_id}. Оплачено полностью ${totalAmount.toFixed(2)}₽`;
         
         toast({
           title: 'Заказ оформлен!',

@@ -38,23 +38,36 @@ export const OrderCard = ({
           </div>
         </div>
         <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:text-right">
-          <div className="font-bold text-base sm:text-lg">
-            {order.items ? 
-              order.items
-                .filter((i: any) => i.product_name)
-                .reduce((sum: number, i: any) => {
-                  if (i.is_out_of_stock) {
-                    if (i.available_quantity > 0) {
-                      const price = parseFloat(i.available_price) || parseFloat(i.price);
-                      const qty = parseInt(i.available_quantity);
-                      return sum + (price * qty);
+          <div className="space-y-1">
+            <div className={`font-bold text-base sm:text-lg ${order.is_preorder ? 'line-through text-muted-foreground text-sm' : ''}`}>
+              {order.items ? 
+                order.items
+                  .filter((i: any) => i.product_name)
+                  .reduce((sum: number, i: any) => {
+                    if (i.is_out_of_stock) {
+                      if (i.available_quantity > 0) {
+                        const price = parseFloat(i.available_price) || parseFloat(i.price);
+                        const qty = parseInt(i.available_quantity);
+                        return sum + (price * qty);
+                      }
+                      return sum;
                     }
-                    return sum;
-                  }
-                  return sum + (parseFloat(i.price) * parseInt(i.quantity));
-                }, 0).toFixed(2)
-              : parseFloat(order.total_amount).toFixed(2)
-            }₽
+                    return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                  }, 0).toFixed(2)
+                : parseFloat(order.total_amount).toFixed(2)
+              }₽
+            </div>
+            {order.is_preorder && order.amount_paid && (
+              <div className="text-blue-700 dark:text-blue-300 font-bold text-sm">
+                Оплачено: {parseFloat(order.amount_paid).toFixed(2)}₽
+              </div>
+            )}
+            {!order.is_preorder && (
+              <div className="text-green-700 dark:text-green-300 font-semibold text-xs flex items-center gap-1">
+                <Icon name="CheckCircle" size={12} />
+                Полностью
+              </div>
+            )}
           </div>
           <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
             {statusLabels[order.status] || order.status}
