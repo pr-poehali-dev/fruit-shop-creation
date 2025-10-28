@@ -229,23 +229,21 @@ export const OrderDetailsDialog = ({
                 }₽
               </span>
             </div>
-            {order.is_preorder && order.amount_paid && (
-              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-blue-900 dark:text-blue-100 font-bold text-base">Клиент оплатил (предоплата 50%):</span>
-                  <span className="text-blue-900 dark:text-blue-100 font-bold text-lg">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
-                </div>
-                <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Остальное клиент оплатит при получении</p>
-              </div>
-            )}
-            {!order.is_preorder && (
+            {order.is_fully_paid ? (
               <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-3">
                 <div className="flex items-center justify-center gap-2">
                   <Icon name="CheckCircle" size={16} className="text-green-700 dark:text-green-300" />
                   <span className="text-green-900 dark:text-green-100 font-semibold text-sm">Заказ оплачен полностью</span>
                 </div>
               </div>
-            )}
+            ) : order.is_preorder && order.amount_paid ? (
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-900 dark:text-blue-100 font-bold text-base">Клиент оплатил (предоплата 50%):</span>
+                  <span className="text-blue-900 dark:text-blue-100 font-bold text-lg">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </DialogContent>

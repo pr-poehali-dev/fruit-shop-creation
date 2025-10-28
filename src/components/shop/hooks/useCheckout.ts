@@ -237,8 +237,8 @@ export const useCheckout = ({
         
         const orderMessage = isPreorder
           ? paymentMethod === 'balance'
-            ? `Заказ #${data.order_id}. Оплачено 50% (${totalAmount.toFixed(2)}₽). Остальное при получении. Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
-            : `Заказ #${data.order_id}. Предзаказ оформлен! Оплачено 50% предоплаты (${totalAmount.toFixed(2)}₽)`
+            ? `Заказ #${data.order_id}. Оплачена предоплата 50% (${totalAmount.toFixed(2)}₽). Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
+            : `Заказ #${data.order_id}. Предзаказ оформлен! Оплачена предоплата 50% (${totalAmount.toFixed(2)}₽)`
           : paymentMethod === 'balance'
             ? `Заказ #${data.order_id}. Оплачено полностью ${totalAmount.toFixed(2)}₽. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
             : `Заказ #${data.order_id}. Оплачено полностью ${totalAmount.toFixed(2)}₽`;

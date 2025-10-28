@@ -57,17 +57,16 @@ export const OrderCard = ({
                 : parseFloat(order.total_amount).toFixed(2)
               }₽
             </div>
-            {order.is_preorder && order.amount_paid && (
-              <div className="text-blue-700 dark:text-blue-300 font-bold text-sm">
-                Оплачено: {parseFloat(order.amount_paid).toFixed(2)}₽
-              </div>
-            )}
-            {!order.is_preorder && (
+            {order.is_fully_paid ? (
               <div className="text-green-700 dark:text-green-300 font-semibold text-xs flex items-center gap-1">
                 <Icon name="CheckCircle" size={12} />
                 Полностью
               </div>
-            )}
+            ) : order.is_preorder && order.amount_paid ? (
+              <div className="text-blue-700 dark:text-blue-300 font-bold text-sm">
+                Оплачено: {parseFloat(order.amount_paid).toFixed(2)}₽
+              </div>
+            ) : null}
           </div>
           <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
             {statusLabels[order.status] || order.status}

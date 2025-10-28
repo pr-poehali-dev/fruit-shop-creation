@@ -107,10 +107,10 @@ export const PaymentMethods = ({
         >
           <Icon name="Banknote" size={18} className="mr-2 flex-shrink-0" />
           <div className="text-left flex-1">
-            <div className="font-semibold text-sm">Наличными при получении</div>
+            <div className="font-semibold text-sm">Наличными</div>
             <div className="text-xs text-muted-foreground mt-0.5">
               {preorderEnabled
-                ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽ картой онлайн, остальное наличными`
+                ? `Предоплата ${(finalPrice * 0.5).toFixed(2)} ₽ картой, вторая часть после обработки`
                 : 'Оплата курьеру или в пункте выдачи'}
             </div>
           </div>

@@ -174,22 +174,21 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCan
                     }₽
                   </span>
                 </div>
-                {order.is_preorder && order.amount_paid ? (
-                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Вы оплатили (предоплата 50%):</span>
-                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
-                    </div>
-                    <p className="text-[10px] text-blue-700 dark:text-blue-300 mt-1">Остальное оплатите при получении</p>
-                  </div>
-                ) : (
+                {order.is_fully_paid ? (
                   <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-2">
                     <div className="flex items-center justify-center gap-2">
                       <Icon name="CheckCircle" size={14} className="text-green-700 dark:text-green-300" />
                       <span className="text-green-900 dark:text-green-100 font-semibold text-xs sm:text-sm">Вы оплатили заказ полностью</span>
                     </div>
                   </div>
-                )}
+                ) : order.is_preorder && order.amount_paid ? (
+                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Вы оплатили (предоплата 50%):</span>
+                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           )}

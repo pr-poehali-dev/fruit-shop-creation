@@ -34,6 +34,7 @@ export interface Order {
   rejection_reason?: string;
   is_preorder?: boolean;
   amount_paid?: string;
+  is_fully_paid?: boolean;
   payment_deadline?: string;
   custom_delivery_price?: number;
   delivery_price_set_by_admin?: boolean;
