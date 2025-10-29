@@ -120,10 +120,6 @@ const SideMenu = ({ siteSettings, user, onSectionChange }: SideMenuProps) => {
 
           <Separator />
 
-          <ReferralProgramCard show={!!user} userId={user?.id} />
-
-          {user && <Separator />}
-
           {!isInstalled && (
             <>
               <InstallAppSection 
@@ -147,6 +143,13 @@ const SideMenu = ({ siteSettings, user, onSectionChange }: SideMenuProps) => {
           )}
 
           <ContactInfoSection siteSettings={siteSettings} />
+
+          {user && (
+            <>
+              <Separator />
+              <ReferralProgramCard show={!!user} userId={user?.id} />
+            </>
+          )}
 
           <div className="pt-4 pb-8">
             <p className="text-xs text-center text-muted-foreground">
