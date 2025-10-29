@@ -13,17 +13,32 @@ interface AdminPinDialogProps {
 
 const ADMIN_PIN_KEY = 'admin_pin_verified';
 const PIN_EXPIRY_KEY = 'admin_pin_expiry';
+const LOCKOUT_KEY = 'admin_pin_lockout';
 const SESSION_DURATION = 30 * 60 * 1000;
+const LOCKOUT_DURATION = 10 * 60 * 1000;
+const MAX_ATTEMPTS = 3;
 
 const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
   const [pin, setPin] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [lockoutTime, setLockoutTime] = useState<number | null>(null);
+  const [remainingTime, setRemainingTime] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
     const verified = localStorage.getItem(ADMIN_PIN_KEY);
     const expiry = localStorage.getItem(PIN_EXPIRY_KEY);
+    const lockout = localStorage.getItem(LOCKOUT_KEY);
+    
+    if (lockout) {
+      const lockoutEnd = parseInt(lockout, 10);
+      if (Date.now() < lockoutEnd) {
+        setLockoutTime(lockoutEnd);
+      } else {
+        localStorage.removeItem(LOCKOUT_KEY);
+      }
+    }
     
     if (verified === 'true' && expiry) {
       const expiryTime = parseInt(expiry, 10);
@@ -36,6 +51,24 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!lockoutTime) return;
+
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, lockoutTime - Date.now());
+      setRemainingTime(remaining);
+
+      if (remaining === 0) {
+        setLockoutTime(null);
+        setAttempts(0);
+        localStorage.removeItem(LOCKOUT_KEY);
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lockoutTime]);
+
   const handleVerify = async () => {
     if (!pin.trim()) {
       toast({
@@ -46,10 +79,11 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
       return;
     }
 
-    if (attempts >= 3) {
+    if (lockoutTime && Date.now() < lockoutTime) {
+      const minutes = Math.ceil((lockoutTime - Date.now()) / 60000);
       toast({
-        title: 'Слишком много попыток',
-        description: 'Подождите 5 минут перед следующей попыткой',
+        title: 'Доступ заблокирован',
+        description: `Слишком много неудачных попыток. Попробуйте через ${minutes} мин.`,
         variant: 'destructive'
       });
       return;
@@ -68,6 +102,7 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
         const expiryTime = Date.now() + SESSION_DURATION;
         localStorage.setItem(ADMIN_PIN_KEY, 'true');
         localStorage.setItem(PIN_EXPIRY_KEY, expiryTime.toString());
+        localStorage.removeItem(LOCKOUT_KEY);
         
         toast({
           title: 'Доступ разрешён',
@@ -76,16 +111,29 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
         
         setPin('');
         setAttempts(0);
+        setLockoutTime(null);
         onSuccess();
       } else {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
         
-        toast({
-          title: 'Неверный PIN-код',
-          description: `Осталось попыток: ${3 - newAttempts}`,
-          variant: 'destructive'
-        });
+        if (newAttempts >= MAX_ATTEMPTS) {
+          const lockoutEnd = Date.now() + LOCKOUT_DURATION;
+          localStorage.setItem(LOCKOUT_KEY, lockoutEnd.toString());
+          setLockoutTime(lockoutEnd);
+          
+          toast({
+            title: 'Доступ заблокирован',
+            description: 'Слишком много неудачных попыток. Вход заблокирован на 10 минут.',
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: 'Неверный PIN-код',
+            description: `Осталось попыток: ${MAX_ATTEMPTS - newAttempts}`,
+            variant: 'destructive'
+          });
+        }
         
         setPin('');
       }
@@ -131,7 +179,7 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
               onKeyPress={handleKeyPress}
               maxLength={10}
               className="text-center text-2xl tracking-widest"
-              disabled={isVerifying || attempts >= 3}
+              disabled={isVerifying || (lockoutTime !== null && Date.now() < lockoutTime)}
               autoFocus
             />
             <p className="text-xs text-muted-foreground text-center">
@@ -139,10 +187,22 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
             </p>
           </div>
 
-          {attempts > 0 && (
+          {lockoutTime && Date.now() < lockoutTime ? (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Icon name="Lock" size={18} className="text-destructive" />
+                <p className="text-sm font-semibold text-destructive">
+                  Доступ заблокирован
+                </p>
+              </div>
+              <p className="text-xs text-center text-muted-foreground">
+                Попробуйте снова через {Math.floor(remainingTime / 60000)}:{String(Math.floor((remainingTime % 60000) / 1000)).padStart(2, '0')}
+              </p>
+            </div>
+          ) : attempts > 0 && (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
               <p className="text-sm text-destructive text-center">
-                Неверный PIN-код. Осталось попыток: {3 - attempts}
+                Неверный PIN-код. Осталось попыток: {MAX_ATTEMPTS - attempts}
               </p>
             </div>
           )}
@@ -159,7 +219,7 @@ const AdminPinDialog = ({ open, onSuccess, onCancel }: AdminPinDialogProps) => {
             <Button
               onClick={handleVerify}
               className="flex-1"
-              disabled={isVerifying || attempts >= 3}
+              disabled={isVerifying || (lockoutTime !== null && Date.now() < lockoutTime)}
             >
               {isVerifying ? (
                 <>Проверка...</>
