@@ -5,6 +5,15 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import { useState, useEffect } from 'react';
 
+interface User {
+  id: number;
+  phone: string;
+  full_name: string;
+  is_admin: boolean;
+  balance?: number;
+  cashback?: number;
+}
+
 interface SideMenuProps {
   siteSettings?: {
     site_name?: string;
@@ -18,6 +27,7 @@ interface SideMenuProps {
     price_list_url?: string;
     logo_url?: string;
   };
+  user?: User | null;
   onSectionChange: (section: string) => void;
 }
 
@@ -26,10 +36,13 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
+const SideMenu = ({ siteSettings, user, onSectionChange }: SideMenuProps) => {
   const [open, setOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [referralStats, setReferralStats] = useState<{total_referrals: number; total_earned: number} | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -48,6 +61,40 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      if (!user?.id) return;
+
+      try {
+        const codeResponse = await fetch(
+          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=referral_code&user_id=${user.id}`
+        );
+        
+        if (codeResponse.ok) {
+          const codeData = await codeResponse.json();
+          if (codeData.referral_code) {
+            setReferralCode(codeData.referral_code);
+          }
+        }
+
+        const statsResponse = await fetch(
+          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=referral_stats&user_id=${user.id}`
+        );
+        
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setReferralStats(statsData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch referral data:', error);
+      }
+    };
+
+    if (open && user) {
+      fetchReferralData();
+    }
+  }, [open, user]);
+
   const handleNavigate = (section: string) => {
     onSectionChange(section);
     setOpen(false);
@@ -63,6 +110,13 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
       setDeferredPrompt(null);
       setIsInstalled(true);
     }
+  };
+
+  const copyReferralLink = () => {
+    const link = `${window.location.origin}?ref=${referralCode}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -168,6 +222,52 @@ const SideMenu = ({ siteSettings, onSectionChange }: SideMenuProps) => {
           </div>
 
           <Separator />
+
+          {user && referralCode && (
+            <>
+              <div>
+                <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/20 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Icon name="Users" size={20} className="text-amber-600 dark:text-amber-400" />
+                      Реферальная программа
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white/50 dark:bg-black/20 rounded-lg p-2 text-center">
+                        <div className="text-xl font-bold text-amber-600 dark:text-amber-400">
+                          {referralStats?.total_referrals || 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Приглашено</div>
+                      </div>
+                      <div className="bg-white/50 dark:bg-black/20 rounded-lg p-2 text-center">
+                        <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                          {referralStats?.total_earned || 0} ₽
+                        </div>
+                        <div className="text-xs text-muted-foreground">Заработано</div>
+                      </div>
+                    </div>
+                    
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full bg-amber-600 hover:bg-amber-700"
+                      onClick={copyReferralLink}
+                    >
+                      <Icon name={copied ? 'Check' : 'Copy'} size={16} className="mr-2" />
+                      {copied ? 'Скопировано!' : 'Скопировать ссылку'}
+                    </Button>
+                    
+                    <p className="text-xs text-center text-muted-foreground">
+                      Приглашайте друзей и получайте 500 ₽ за каждого!
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+              <Separator />
+            </>
+          )}
 
           {!isInstalled && (
             <>

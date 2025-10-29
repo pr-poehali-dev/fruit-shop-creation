@@ -122,7 +122,7 @@ const Header = ({
       
       <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink min-w-0">
-          <SideMenu siteSettings={siteSettings} onSectionChange={onSectionChange} />
+          <SideMenu siteSettings={siteSettings} user={user} onSectionChange={onSectionChange} />
           <button 
             onClick={() => onSectionChange('home')} 
             className="flex items-center gap-2 hover:opacity-90 transition min-w-0 flex-shrink"
