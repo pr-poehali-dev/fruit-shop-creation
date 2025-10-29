@@ -97,6 +97,26 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNotificat
     }
   };
 
+  const deleteNotification = async (notificationId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await fetch(API_NOTIFICATIONS, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': userId.toString(),
+        },
+        body: JSON.stringify({ notification_id: notificationId }),
+      });
+
+      toast.success('Уведомление удалено');
+      loadNotifications();
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+      toast.error('Ошибка при удалении уведомления');
+    }
+  };
+
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.is_read) {
       markAsRead(notification.id);
@@ -187,9 +207,19 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId, onNotificat
                         <h4 className={`font-semibold text-sm ${notification.is_read ? 'text-muted-foreground' : 'text-foreground'}`}>
                           {notification.title}
                         </h4>
-                        {!notification.is_read && (
-                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
-                        )}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {!notification.is_read && (
+                            <div className="w-2 h-2 bg-primary rounded-full" />
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => deleteNotification(notification.id, e)}
+                            className="h-6 w-6 hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Icon name="X" size={14} />
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
                         {notification.message}
