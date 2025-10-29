@@ -102,7 +102,7 @@ export const useCheckout = ({
 
     const isPreorder = siteSettings?.preorder_enabled === true;
     const fullTotalAmount = basePrice + deliveryPrice;
-    const totalAmount = isPreorder ? fullTotalAmount * 0.5 : fullTotalAmount;
+    const totalAmount = isPreorder ? basePrice * 0.5 + deliveryPrice : fullTotalAmount;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {

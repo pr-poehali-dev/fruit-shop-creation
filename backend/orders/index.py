@@ -330,13 +330,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             is_preorder = body_data.get('is_preorder', False)
             
             full_order_amount = body_data.get('full_order_amount')
+            items_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
+            
             if full_order_amount is None:
-                full_order_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
+                full_order_amount = items_amount
             else:
                 full_order_amount = float(full_order_amount)
             
+            delivery_amount = full_order_amount - items_amount
+            
             if is_preorder:
-                total_amount = full_order_amount * 0.5
+                total_amount = items_amount * 0.5 + delivery_amount
             else:
                 total_amount = full_order_amount
             
