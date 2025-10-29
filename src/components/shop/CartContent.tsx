@@ -137,7 +137,7 @@ const CartContent = ({
       const zone = deliveryZones.find(z => z.id === selectedZoneId);
       return zone ? parseFloat(zone.delivery_price) : deliveryPrice + courierDeliveryPrice;
     }
-    return deliveryPrice + courierDeliveryPrice;
+    return deliveryPrice;
   };
   
   const getFinalPrice = () => {
