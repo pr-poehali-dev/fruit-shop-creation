@@ -125,6 +125,11 @@ const FavoritesSection = ({ favorites, onAddToCart, favoriteIds, onToggleFavorit
         isAuthenticated={isAuthenticated}
         onShowAuth={onShowAuth}
       />
+
+      <div className="mt-12 pt-6 border-t text-center space-y-1">
+        <p className="text-xs text-muted-foreground font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
+        <p className="text-xs text-muted-foreground">ИНН: 222261894107</p>
+      </div>
     </div>
   );
 };

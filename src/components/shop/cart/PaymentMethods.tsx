@@ -116,6 +116,11 @@ export const PaymentMethods = ({
           </div>
         </Button>
       )}
+
+      <div className="pt-3 mt-3 border-t text-center space-y-1">
+        <p className="text-xs text-muted-foreground font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
+        <p className="text-xs text-muted-foreground">ИНН: 222261894107</p>
+      </div>
     </div>
   );
 };
