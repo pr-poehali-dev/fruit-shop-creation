@@ -49,40 +49,65 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
-            if action == 'referral_stats' and user_id:
-                cur.execute(f"""
-                    SELECT 
-                        COUNT(*) as total_referrals,
-                        COUNT(CASE WHEN first_order_made = true THEN 1 END) as completed_referrals,
-                        SUM(CASE WHEN reward_given = true THEN reward_amount ELSE 0 END) as total_earned
-                    FROM t_p77282076_fruit_shop_creation.referrals
-                    WHERE referrer_id = {user_id}
-                """)
-                stats = cur.fetchone()
+            if action == 'get_referral_data' and user_id:
+                import random
+                import string
+                
+                cur.execute(f"SELECT referral_code FROM t_p77282076_fruit_shop_creation.referral_codes WHERE user_id = {user_id}")
+                code_result = cur.fetchone()
+                
+                if code_result:
+                    referral_code = code_result['referral_code']
+                else:
+                    referral_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+                    cur.execute(f"INSERT INTO t_p77282076_fruit_shop_creation.referral_codes (user_id, referral_code) VALUES ({user_id}, '{referral_code}')")
+                    conn.commit()
                 
                 cur.execute(f"""
                     SELECT 
-                        u.full_name,
-                        u.phone,
-                        r.created_at,
-                        r.first_order_made,
+                        r.id,
+                        r.referred_id,
                         r.reward_given,
-                        r.reward_amount
+                        r.first_order_total,
+                        r.created_at,
+                        u.full_name,
+                        u.phone
                     FROM t_p77282076_fruit_shop_creation.referrals r
-                    JOIN users u ON r.referred_id = u.id
+                    JOIN users u ON u.id = r.referred_id
                     WHERE r.referrer_id = {user_id}
                     ORDER BY r.created_at DESC
                 """)
-                referrals = cur.fetchall()
+                referrals_data = cur.fetchall()
+                
+                referrals = []
+                for row in referrals_data:
+                    referrals.append({
+                        'id': row['id'],
+                        'referred_user': {
+                            'id': row['referred_id'],
+                            'full_name': row['full_name'],
+                            'phone': row['phone']
+                        },
+                        'reward_given': row['reward_given'],
+                        'first_order_total': float(row['first_order_total']) if row['first_order_total'] else None,
+                        'created_at': row['created_at'].isoformat() if row['created_at'] else None
+                    })
+                
+                cur.execute(f"""
+                    SELECT COALESCE(SUM(reward_amount), 0) 
+                    FROM t_p77282076_fruit_shop_creation.referrals 
+                    WHERE referrer_id = {user_id} AND reward_given = true
+                """)
+                total_earned = float(cur.fetchone()[0])
                 
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'body': json.dumps({
-                        'total_referrals': int(stats['total_referrals'] or 0),
-                        'completed_referrals': int(stats['completed_referrals'] or 0),
-                        'total_earned': float(stats['total_earned'] or 0),
-                        'referrals': [dict(r) for r in referrals]
+                        'success': True,
+                        'referral_code': referral_code,
+                        'referrals': referrals,
+                        'total_earned': total_earned
                     }, default=str),
                     'isBase64Encoded': False
                 }

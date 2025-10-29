@@ -398,6 +398,38 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ({order_id}, {product_id}, {quantity}, {price})"
                 )
             
+            cur.execute(f"SELECT referred_by_code FROM users WHERE id = {user_id}")
+            user_referral = cur.fetchone()
+            if user_referral and user_referral['referred_by_code']:
+                referral_code = user_referral['referred_by_code']
+                cur.execute(
+                    f"SELECT rc.user_id, r.id as referral_id, r.first_order_total FROM referral_codes rc LEFT JOIN referrals r ON r.referred_id = {user_id} WHERE rc.referral_code = '{referral_code}'"
+                )
+                referrer_data = cur.fetchone()
+                if referrer_data and referrer_data['user_id']:
+                    referrer_id = referrer_data['user_id']
+                    existing_referral_id = referrer_data.get('referral_id')
+                    previous_order_total = referrer_data.get('first_order_total')
+                    
+                    if not existing_referral_id:
+                        cur.execute(
+                            f"INSERT INTO referrals (referrer_id, referred_id, referral_code, first_order_total) VALUES ({referrer_id}, {user_id}, '{referral_code}', {full_order_amount})"
+                        )
+                    elif previous_order_total is None or float(previous_order_total) < 1500:
+                        cur.execute(
+                            f"UPDATE referrals SET first_order_total = {full_order_amount} WHERE id = {existing_referral_id}"
+                        )
+                        if full_order_amount >= 1500:
+                            cur.execute(
+                                f"UPDATE referrals SET reward_given = TRUE WHERE id = {existing_referral_id}"
+                            )
+                            cur.execute(
+                                f"UPDATE users SET balance = balance + 500 WHERE id = {referrer_id}"
+                            )
+                            cur.execute(
+                                f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({referrer_id}, 'referral_bonus', 500, 'Бонус за приглашение друга (заказ от 1500₽)')"
+                            )
+            
             conn.commit()
             
             return {
