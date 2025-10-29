@@ -137,12 +137,12 @@ const CartContent = ({
       const zone = deliveryZones.find(z => z.id === selectedZoneId);
       return zone ? parseFloat(zone.delivery_price) : deliveryPrice + courierDeliveryPrice;
     }
-    return deliveryPrice;
+    return 0;
   };
   
   const getFinalPrice = () => {
     const basePrice = getTotalPrice();
-    if (deliveryType === 'delivery') {
+    if (deliveryType === 'delivery' && selectedCity === 'Барнаул') {
       const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
       const totalDeliveryFee = isFreeDelivery ? 0 : getZoneDeliveryPrice();
       return basePrice + totalDeliveryFee;
@@ -151,6 +151,7 @@ const CartContent = ({
   };
   
   const getDeliveryFee = () => {
+    if (selectedCity !== 'Барнаул') return 0;
     const basePrice = getTotalPrice();
     const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
     return isFreeDelivery ? 0 : getZoneDeliveryPrice();
