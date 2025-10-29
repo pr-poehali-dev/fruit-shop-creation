@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 
 interface ContactsSectionProps {
@@ -43,6 +43,18 @@ const ContactsSection = ({ settings }: ContactsSectionProps) => {
               <h4 className="font-semibold">Режим работы</h4>
               <p className="text-muted-foreground">{settings?.work_hours || 'Пн-Вс: 9:00 - 19:00'}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 bg-muted/50">
+        <CardHeader>
+          <CardTitle className="text-xl">Реквизиты</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1">
+            <p className="font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
+            <p className="text-muted-foreground">ИНН: 222261894107</p>
           </div>
         </CardContent>
       </Card>
