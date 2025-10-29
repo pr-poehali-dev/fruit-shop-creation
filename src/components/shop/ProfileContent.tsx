@@ -11,7 +11,6 @@ import OrdersTab from './profile/OrdersTab';
 import PreorderPaymentDialog from './PreorderPaymentDialog';
 import TransactionsTab from './profile/TransactionsTab';
 import SettingsTab from './profile/SettingsTab';
-import ReferralTab from './profile/ReferralTab';
 
 
 interface ProfileContentProps {
@@ -87,13 +86,12 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
       <ProfileHeader user={user} siteSettings={siteSettings} onShowAdminPanel={onShowAdminPanel} onUserUpdate={onUserUpdate} />
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className={`grid w-full ${hasLoyaltyCard ? 'grid-cols-6' : 'grid-cols-5'} gap-0.5 sm:gap-1 h-9 sm:h-10`}>
+        <TabsList className={`grid w-full ${hasLoyaltyCard ? 'grid-cols-5' : 'grid-cols-4'} gap-0.5 sm:gap-1 h-9 sm:h-10`}>
           <TabsTrigger value="orders" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Заказы</TabsTrigger>
           {hasLoyaltyCard && (
             <TabsTrigger value="cashback" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Обмен</TabsTrigger>
           )}
           <TabsTrigger value="loyalty" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Карта</TabsTrigger>
-          <TabsTrigger value="referral" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Рефералы</TabsTrigger>
           <TabsTrigger value="transactions" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">Баланс</TabsTrigger>
           <TabsTrigger value="settings" className="text-[11px] sm:text-sm px-1 sm:px-2 data-[state=active]:text-xs sm:data-[state=active]:text-sm">
             <Icon name="Settings" size={14} className="sm:w-4 sm:h-4" />
@@ -147,10 +145,6 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
               }}
             />
           )}
-        </TabsContent>
-
-        <TabsContent value="referral">
-          {user && <ReferralTab userId={user.id} />}
         </TabsContent>
 
         <TabsContent value="transactions">

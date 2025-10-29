@@ -120,7 +120,7 @@ const SideMenu = ({ siteSettings, user, onSectionChange }: SideMenuProps) => {
 
           <Separator />
 
-          <ReferralProgramCard show={!!user} />
+          <ReferralProgramCard show={!!user} userId={user?.id} />
 
           {user && <Separator />}
 
