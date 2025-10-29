@@ -340,6 +340,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             else:
                 total_amount = full_order_amount
             
+            print(f"ORDER CREATE: is_preorder={is_preorder}, full={full_order_amount}, to_charge={total_amount}, payment={payment_method}")
+            
             cashback_percent = float(cashback_percent_input) / 100
             
             if payment_method == 'balance':
@@ -353,6 +355,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
+                print(f"CHARGING USER: user_id={user_id}, amount={total_amount}")
                 cur.execute(
                     f"UPDATE users SET balance = balance - {total_amount} WHERE id = {user_id}"
                 )
