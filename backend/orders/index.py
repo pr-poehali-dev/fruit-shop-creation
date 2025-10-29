@@ -329,13 +329,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cashback_percent_input = body_data.get('cashback_percent', 5)
             is_preorder = body_data.get('is_preorder', False)
             
-            total_amount_full = body_data.get('total_amount')
-            if total_amount_full is None:
-                total_amount_full = sum(float(item['price']) * int(item['quantity']) for item in items)
+            full_order_amount = body_data.get('full_order_amount')
+            if full_order_amount is None:
+                full_order_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             else:
-                total_amount_full = float(total_amount_full)
+                full_order_amount = float(full_order_amount)
             
-            total_amount = total_amount_full if not is_preorder else total_amount_full * 0.5
+            total_amount = body_data.get('total_amount', full_order_amount)
+            if total_amount:
+                total_amount = float(total_amount)
+            else:
+                total_amount = full_order_amount if not is_preorder else full_order_amount * 0.5
             
             cashback_percent = float(cashback_percent_input) / 100
             
@@ -354,7 +358,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE users SET balance = balance - {total_amount} WHERE id = {user_id}"
                 )
                 
-                cashback_amount = total_amount_full * cashback_percent
+                cashback_amount = full_order_amount * cashback_percent
                 cur.execute(
                     f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {user_id}"
                 )
@@ -370,13 +374,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             amount_paid = 0
             
             if payment_method == 'balance':
-                cashback_earned = total_amount * cashback_percent
+                cashback_earned = full_order_amount * cashback_percent
                 amount_paid = total_amount
             
             zone_id_sql = f", {delivery_zone_id}" if delivery_zone_id else ", NULL"
             
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder) VALUES ({user_id}, {total_amount_full}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}) RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder) VALUES ({user_id}, {full_order_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             
