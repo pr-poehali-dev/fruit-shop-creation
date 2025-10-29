@@ -1,8 +1,8 @@
 {
+  "admin-get-logs": "https://functions.poehali.dev/14c40ab2-8b60-4ccc-b428-bb824cb6871c",
   "support-chat": "https://functions.poehali.dev/98c69bc9-5dec-4d0e-b5d8-8abc20d4db4d",
   "content-manager": "https://functions.poehali.dev/56deea36-35f7-4c07-becc-dedeaa3de78d",
   "user-tickets": "https://functions.poehali.dev/c2c15ef8-454e-4315-bff3-7109e95d5f3d",
-  "upload-pdf": "https://functions.poehali.dev/1dd9da2d-583e-4678-9e8a-b647fdb30eea",
   "plants-inventory": "https://functions.poehali.dev/ff57c64d-2ef3-40a0-b0ef-d3ecc109a1fa",
   "alfabank-webhook": "https://functions.poehali.dev/563d9333-4b51-4637-82a8-c2a66058792a",
   "alfabank-payment": "https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb",

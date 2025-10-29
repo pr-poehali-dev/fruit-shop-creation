@@ -6,6 +6,7 @@ import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import funcUrls from '../../../../backend/func2url.json';
 
 interface AdminLog {
   id: number;
@@ -68,7 +69,8 @@ const LogsTab = () => {
     }
     
     try {
-      const response = await fetch(`https://functions.poehali.dev/e5bdda57-9d9d-4506-b4a8-6a4d2bbcd778?${params.toString()}`);
+      const logsUrl = funcUrls['admin-get-logs'];
+      const response = await fetch(`${logsUrl}?${params.toString()}`);
       const data = await response.json();
       
       if (logType === 'admin') {

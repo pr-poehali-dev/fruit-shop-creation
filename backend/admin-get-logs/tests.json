@@ -1,0 +1,36 @@
+{
+  "tests": [
+    {
+      "name": "Get admin logs",
+      "method": "GET",
+      "path": "/?type=admin&page=1&limit=10",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "logs": "array",
+        "pagination": {
+          "page": 1,
+          "limit": 10,
+          "total": "number",
+          "pages": "number"
+        }
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get user logs",
+      "method": "GET",
+      "path": "/?type=user&page=1&limit=10",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "logs": "array",
+        "pagination": {
+          "page": 1,
+          "limit": 10,
+          "total": "number",
+          "pages": "number"
+        }
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
