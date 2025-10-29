@@ -440,6 +440,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 delivery_price = order_user['custom_delivery_price']
                 delivery_type_val = order_user['delivery_type']
                 
+                if status == 'delivered':
+                    cur.execute(f"SELECT referred_id FROM t_p77282076_fruit_shop_creation.referrals WHERE referred_id = {user_id_for_notif} AND first_order_made = FALSE")
+                    referral = cur.fetchone()
+                    if referral:
+                        cur.execute(f"UPDATE t_p77282076_fruit_shop_creation.referrals SET first_order_made = TRUE, reward_given = TRUE WHERE referred_id = {user_id_for_notif}")
+                        cur.execute(f"SELECT referrer_id, reward_amount FROM t_p77282076_fruit_shop_creation.referrals WHERE referred_id = {user_id_for_notif}")
+                        ref_data = cur.fetchone()
+                        if ref_data:
+                            referrer_id = ref_data['referrer_id']
+                            reward = float(ref_data['reward_amount'])
+                            cur.execute(f"UPDATE users SET balance = balance + {reward} WHERE id = {referrer_id}")
+                            cur.execute(f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({referrer_id}, 'referral_bonus', {reward}, 'Бонус за приглашенного друга')")
+                
                 status_messages = {
                     'delivered': 'Ваш заказ доставлен! Оцените качество обслуживания',
                     'cancelled': 'Ваш заказ отменён',

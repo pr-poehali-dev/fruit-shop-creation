@@ -93,6 +93,8 @@ export const useAuth = () => {
       
       console.log('Auth attempt:', { action, phone, hasPassword: !!password });
       
+      const referralCode = action === 'register' ? localStorage.getItem('referralCode') : null;
+      
       const response = await fetch(API_AUTH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,9 +102,14 @@ export const useAuth = () => {
           action,
           phone,
           password,
-          full_name: formData.get('full_name') || ''
+          full_name: formData.get('full_name') || '',
+          referral_code: referralCode
         })
       });
+      
+      if (action === 'register' && referralCode) {
+        localStorage.removeItem('referralCode');
+      }
       
       const data = await response.json();
       console.log('Auth response:', { status: response.status, data });

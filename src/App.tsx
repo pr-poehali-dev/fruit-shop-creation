@@ -30,6 +30,12 @@ const App = () => {
       document.documentElement.classList.remove('dark');
     }
 
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      localStorage.setItem('referralCode', refCode);
+    }
+
     const checkExpiredPreorders = async () => {
       try {
         await fetch('https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35', {

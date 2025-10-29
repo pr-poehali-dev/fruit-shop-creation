@@ -625,9 +625,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         if action == 'register':
             full_name = body_data.get('full_name', '')
+            referral_code = body_data.get('referral_code', '')
             
             phone_escaped = phone.replace("'", "''")
             full_name_escaped = full_name.replace("'", "''")
+            referral_code_escaped = referral_code.replace("'", "") if referral_code else ''
             
             cur.execute(f"SELECT id FROM users WHERE phone = '{phone_escaped}'")
             if cur.fetchone():
@@ -641,11 +643,29 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
             password_hash_escaped = password_hash.replace("'", "''")
             
-            cur.execute(
-                f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar) VALUES ('{phone_escaped}', '{password_hash_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
-            )
+            if referral_code_escaped:
+                cur.execute(
+                    f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar, referred_by_code) VALUES ('{phone_escaped}', '{password_hash_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤', '{referral_code_escaped}') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
+                )
+            else:
+                cur.execute(
+                    f"INSERT INTO users (phone, password, full_name, balance, cashback, avatar) VALUES ('{phone_escaped}', '{password_hash_escaped}', '{full_name_escaped}', 0.00, 0.00, '👤') RETURNING id, phone, full_name, is_admin, balance, cashback, avatar"
+                )
             conn.commit()
             user = cur.fetchone()
+            user_id = user[0]
+            
+            if referral_code_escaped:
+                cur.execute(
+                    f"SELECT user_id FROM t_p77282076_fruit_shop_creation.referral_codes WHERE referral_code = '{referral_code_escaped}'"
+                )
+                referrer_row = cur.fetchone()
+                if referrer_row and referrer_row[0] != user_id:
+                    referrer_id = referrer_row[0]
+                    cur.execute(
+                        f"INSERT INTO t_p77282076_fruit_shop_creation.referrals (referrer_id, referred_id, referral_code, reward_amount) VALUES ({referrer_id}, {user_id}, '{referral_code_escaped}', 500.00)"
+                    )
+                    conn.commit()
             
             return {
                 'statusCode': 200,
@@ -653,7 +673,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({
                     'success': True,
                     'user': {
-                        'id': user[0],
+                        'id': user_id,
                         'phone': user[1],
                         'full_name': user[2],
                         'is_admin': user[3],
