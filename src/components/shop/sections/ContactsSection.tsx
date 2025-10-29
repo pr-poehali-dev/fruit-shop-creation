@@ -12,7 +12,7 @@ interface ContactsSectionProps {
 
 const ContactsSection = ({ settings }: ContactsSectionProps) => {
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto pb-24">
       <h2 className="text-4xl font-display font-bold mb-6">Контакты</h2>
       <Card>
         <CardContent className="pt-6 space-y-4">
