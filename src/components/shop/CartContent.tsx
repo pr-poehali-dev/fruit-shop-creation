@@ -137,7 +137,7 @@ const CartContent = ({
       const zone = deliveryZones.find(z => z.id === selectedZoneId);
       return zone ? parseFloat(zone.delivery_price) : deliveryPrice + courierDeliveryPrice;
     }
-    return 0;
+    return deliveryPrice + courierDeliveryPrice;
   };
   
   const getFinalPrice = () => {
@@ -151,8 +151,6 @@ const CartContent = ({
   };
   
   const getDeliveryFee = () => {
-    if (selectedCity !== 'Барнаул') return 0;
-    
     const basePrice = getTotalPrice();
     const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
     return isFreeDelivery ? 0 : getZoneDeliveryPrice();

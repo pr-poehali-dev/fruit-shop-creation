@@ -79,15 +79,9 @@ export const DeliveryOptions = ({
                 <div className="flex-1">
                   <p className="font-semibold">Доставка</p>
                   <p className="text-xs text-muted-foreground mt-1">Доставим по указанному адресу</p>
-                  {selectedCity === 'Барнаул' ? (
-                    <p className="text-sm font-medium text-primary mt-1">
-                      {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                      Стоимость рассчитает администратор
-                    </p>
-                  )}
+                  <p className="text-sm font-medium text-primary mt-1">
+                    {getDeliveryFee() > 0 ? `${getDeliveryFee()} ₽` : 'Бесплатно'}
+                  </p>
                 </div>
               </div>
             </Label>
