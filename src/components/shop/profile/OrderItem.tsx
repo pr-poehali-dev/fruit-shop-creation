@@ -174,21 +174,45 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCan
                     }₽
                   </span>
                 </div>
-                {order.is_fully_paid ? (
-                  <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <Icon name="CheckCircle" size={14} className="text-green-700 dark:text-green-300" />
-                      <span className="text-green-900 dark:text-green-100 font-semibold text-xs sm:text-sm">Вы оплатили заказ полностью</span>
-                    </div>
-                  </div>
-                ) : order.is_preorder && order.amount_paid ? (
-                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Вы оплатили (предоплата 50%):</span>
-                      <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{parseFloat(order.amount_paid).toFixed(2)}₽</span>
-                    </div>
-                  </div>
-                ) : null}
+                {(() => {
+                  const totalAmount = order.items
+                    .filter((i: any) => i.product_name)
+                    .reduce((sum: number, i: any) => {
+                      if (i.is_out_of_stock) {
+                        if (i.available_quantity > 0) {
+                          const price = parseFloat(i.available_price) || parseFloat(i.price);
+                          const qty = parseInt(i.available_quantity);
+                          return sum + (price * qty);
+                        }
+                        return sum;
+                      }
+                      return sum + (parseFloat(i.price) * parseInt(i.quantity));
+                    }, 0);
+                  
+                  const amountPaid = parseFloat(order.amount_paid || '0');
+                  const isFullyPaid = amountPaid >= totalAmount;
+
+                  if (isFullyPaid) {
+                    return (
+                      <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-2">
+                        <div className="flex items-center justify-center gap-2">
+                          <Icon name="CheckCircle" size={14} className="text-green-700 dark:text-green-300" />
+                          <span className="text-green-900 dark:text-green-100 font-semibold text-xs sm:text-sm">Вы оплатили заказ полностью</span>
+                        </div>
+                      </div>
+                    );
+                  } else if (order.is_preorder && amountPaid > 0) {
+                    return (
+                      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Вы оплатили (предоплата 50%):</span>
+                          <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{amountPaid.toFixed(2)}₽</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             </div>
           )}
