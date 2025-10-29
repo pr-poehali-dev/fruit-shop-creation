@@ -340,7 +340,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             delivery_amount = full_order_amount - items_amount
             
             if is_preorder:
-                total_amount = items_amount * 0.5 + delivery_amount
+                total_amount = items_amount * 0.5
             else:
                 total_amount = full_order_amount
             
@@ -364,7 +364,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE users SET balance = balance - {total_amount} WHERE id = {user_id}"
                 )
                 
-                cashback_amount = full_order_amount * cashback_percent
+                cashback_amount = items_amount * cashback_percent
                 cur.execute(
                     f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {user_id}"
                 )

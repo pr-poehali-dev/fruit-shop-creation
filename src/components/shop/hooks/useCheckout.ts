@@ -102,7 +102,7 @@ export const useCheckout = ({
 
     const isPreorder = siteSettings?.preorder_enabled === true;
     const fullTotalAmount = basePrice + deliveryPrice;
-    const totalAmount = isPreorder ? basePrice * 0.5 + deliveryPrice : fullTotalAmount;
+    const totalAmount = isPreorder ? basePrice * 0.5 : fullTotalAmount;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {
@@ -237,8 +237,8 @@ export const useCheckout = ({
         
         const orderMessage = isPreorder
           ? paymentMethod === 'balance'
-            ? `Заказ #${data.order_id}. Оплачена предоплата 50% (${totalAmount.toFixed(2)}₽). Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
-            : `Заказ #${data.order_id}. Предзаказ оформлен! Оплачена предоплата 50% (${totalAmount.toFixed(2)}₽)`
+            ? `Заказ #${data.order_id}. Оплачена предоплата 50% товаров (${totalAmount.toFixed(2)}₽). Доставка оплачивается отдельно. Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
+            : `Заказ #${data.order_id}. Предзаказ оформлен! Оплачена предоплата 50% товаров (${totalAmount.toFixed(2)}₽). Доставка оплачивается отдельно.`
           : paymentMethod === 'balance'
             ? `Заказ #${data.order_id}. Оплачено полностью ${totalAmount.toFixed(2)}₽. Начислен кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
             : `Заказ #${data.order_id}. Оплачено полностью ${totalAmount.toFixed(2)}₽`;
