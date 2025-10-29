@@ -354,7 +354,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     f"UPDATE users SET balance = balance - {total_amount} WHERE id = {user_id}"
                 )
                 
-                cashback_amount = total_amount * cashback_percent
+                cashback_amount = total_amount_full * cashback_percent
                 cur.execute(
                     f"UPDATE users SET cashback = cashback + {cashback_amount} WHERE id = {user_id}"
                 )
