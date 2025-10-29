@@ -44,17 +44,17 @@ const DeliverySettingsSection = ({ siteSettings }: DeliverySettingsSectionProps)
           </div>
         </div>
         <div>
-          <Label htmlFor="delivery-price">Стоимость доставки (₽)</Label>
+          <Label htmlFor="delivery-price">Стоимость доставки в Барнаул (₽)</Label>
           <Input 
             id="delivery-price" 
             name="delivery_price" 
             type="number"
             step="0.01"
             min="0"
-            defaultValue={siteSettings.delivery_price || 0} 
+            defaultValue={siteSettings.delivery_price || 600} 
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Укажите 0 для бесплатной доставки
+            Фиксированная стоимость доставки в Барнаул. Для других городов цена устанавливается в карточке заказа.
           </p>
         </div>
         <div>
@@ -71,20 +71,7 @@ const DeliverySettingsSection = ({ siteSettings }: DeliverySettingsSectionProps)
             При заказе от этой суммы доставка становится бесплатной. Укажите 0, чтобы отключить
           </p>
         </div>
-        <div>
-          <Label htmlFor="courier-delivery-price">Стоимость курьерской доставки (₽)</Label>
-          <Input 
-            id="courier-delivery-price" 
-            name="courier_delivery_price" 
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={siteSettings.courier_delivery_price || 300} 
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Стоимость доставки курьером
-          </p>
-        </div>
+
         <div className="border-t pt-4">
           <h4 className="text-md font-semibold mb-3 flex items-center gap-2">
             <Icon name="Calendar" size={18} />

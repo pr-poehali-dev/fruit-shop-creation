@@ -89,14 +89,12 @@ export const useCheckout = ({
     const basePrice = getTotalPrice();
     let deliveryPrice = 0;
 
-    if (deliveryType === 'delivery') {
+    if (deliveryType === 'delivery' && deliveryCity === 'Барнаул') {
       const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
       const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
 
       if (!isFreeDelivery) {
-        const baseDeliveryPrice = parseFloat(siteSettings?.delivery_price || 0);
-        const courierDeliveryPrice = parseFloat(siteSettings?.courier_delivery_price || 0);
-        deliveryPrice = baseDeliveryPrice + courierDeliveryPrice;
+        deliveryPrice = 600;
       }
     }
 
