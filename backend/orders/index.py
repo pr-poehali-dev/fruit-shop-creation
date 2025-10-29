@@ -335,16 +335,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             else:
                 full_order_amount = float(full_order_amount)
             
-            total_amount_from_request = body_data.get('total_amount')
-            
-            print(f"DEBUG: is_preorder={is_preorder}, full_order_amount={full_order_amount}, total_amount_from_request={total_amount_from_request}")
-            
-            if total_amount_from_request is not None:
-                total_amount = float(total_amount_from_request)
+            if is_preorder:
+                total_amount = full_order_amount * 0.5
             else:
-                total_amount = full_order_amount if not is_preorder else full_order_amount * 0.5
-            
-            print(f"DEBUG: Final total_amount to charge={total_amount}")
+                total_amount = full_order_amount
             
             cashback_percent = float(cashback_percent_input) / 100
             
