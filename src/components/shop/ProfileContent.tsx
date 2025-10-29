@@ -150,7 +150,7 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
         </TabsContent>
 
         <TabsContent value="referral" className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
-          <ReferralCard />
+          <ReferralCard user={user} />
         </TabsContent>
 
         <TabsContent value="transactions">

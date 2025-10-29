@@ -1,14 +1,91 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import { useReferralSystem } from '@/hooks/useReferralSystem';
-import { useAuth } from '@/contexts/AuthContext';
+import { User } from '@/types/shop';
 
-export const ReferralCard = () => {
-  const { user } = useAuth();
-  const { referralCode, stats, loading } = useReferralSystem(user?.id || null);
+interface ReferralStats {
+  total_referrals: number;
+  completed_referrals: number;
+  total_earned: number;
+  referrals: Array<{
+    full_name: string;
+    phone: string;
+    created_at: string;
+    first_order_made: boolean;
+    reward_given: boolean;
+    reward_amount: number;
+  }>;
+}
+
+interface ReferralCardProps {
+  user: User | null;
+}
+
+export const ReferralCard = ({ user }: ReferralCardProps) => {
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [stats, setStats] = useState<ReferralStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  const generateReferralCode = (length: number = 8): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  };
+
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const codeResponse = await fetch(
+          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=referral_code&user_id=${user.id}`
+        );
+        
+        if (codeResponse.ok) {
+          const codeData = await codeResponse.json();
+          if (codeData.referral_code) {
+            setReferralCode(codeData.referral_code);
+          } else {
+            const newCode = generateReferralCode();
+            const createResponse = await fetch(
+              'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: 'create_referral_code',
+                  user_id: user.id,
+                  referral_code: newCode
+                })
+              }
+            );
+            if (createResponse.ok) {
+              setReferralCode(newCode);
+            }
+          }
+        }
+
+        const statsResponse = await fetch(
+          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=referral_stats&user_id=${user.id}`
+        );
+        
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch referral data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReferralData();
+  }, [user?.id]);
 
   const referralLink = referralCode
     ? `${window.location.origin}?ref=${referralCode}`
@@ -30,6 +107,10 @@ export const ReferralCard = () => {
         </CardContent>
       </Card>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -118,7 +199,7 @@ export const ReferralCard = () => {
           </div>
         </div>
 
-        {stats && stats.referrals.length > 0 && (
+        {stats && stats.referrals && stats.referrals.length > 0 && (
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Icon name="UserCheck" size={18} />

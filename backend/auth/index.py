@@ -37,6 +37,56 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             action = params.get('action', 'users')
             user_id = params.get('user_id')
             
+            if action == 'referral_code' and user_id:
+                cur.execute(f"SELECT referral_code FROM t_p77282076_fruit_shop_creation.referral_codes WHERE user_id = {user_id}")
+                code_result = cur.fetchone()
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'referral_code': code_result['referral_code'] if code_result else None
+                    }),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'referral_stats' and user_id:
+                cur.execute(f"""
+                    SELECT 
+                        COUNT(*) as total_referrals,
+                        COUNT(CASE WHEN first_order_made = true THEN 1 END) as completed_referrals,
+                        SUM(CASE WHEN reward_given = true THEN reward_amount ELSE 0 END) as total_earned
+                    FROM t_p77282076_fruit_shop_creation.referrals
+                    WHERE referrer_id = {user_id}
+                """)
+                stats = cur.fetchone()
+                
+                cur.execute(f"""
+                    SELECT 
+                        u.full_name,
+                        u.phone,
+                        r.created_at,
+                        r.first_order_made,
+                        r.reward_given,
+                        r.reward_amount
+                    FROM t_p77282076_fruit_shop_creation.referrals r
+                    JOIN users u ON r.referred_id = u.id
+                    WHERE r.referrer_id = {user_id}
+                    ORDER BY r.created_at DESC
+                """)
+                referrals = cur.fetchall()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'total_referrals': int(stats['total_referrals'] or 0),
+                        'completed_referrals': int(stats['completed_referrals'] or 0),
+                        'total_earned': float(stats['total_earned'] or 0),
+                        'referrals': [dict(r) for r in referrals]
+                    }, default=str),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'ban_status' and user_id:
                 from datetime import datetime
                 
@@ -253,13 +303,42 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     print(f"Phone normalization: raw='{phone_raw}' -> cleaned='{cleaned_phone}' -> formatted='{phone}'")
     
-    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar', 'update_permissions']:
+    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar', 'update_permissions', 'create_referral_code']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(db_url)
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         try:
+            if action == 'create_referral_code':
+                user_id = body_data.get('user_id')
+                referral_code = body_data.get('referral_code')
+                
+                if not user_id or not referral_code:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id and referral_code required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                code_escaped = referral_code.replace("'", "''")
+                cur.execute(
+                    f"INSERT INTO t_p77282076_fruit_shop_creation.referral_codes (user_id, referral_code) VALUES ({user_id}, '{code_escaped}') ON CONFLICT (referral_code) DO NOTHING RETURNING referral_code"
+                )
+                conn.commit()
+                result = cur.fetchone()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({
+                        'success': True,
+                        'referral_code': result['referral_code'] if result else None
+                    }),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'toggle_admin':
                 user_id = body_data.get('user_id')
                 is_admin = body_data.get('is_admin')
