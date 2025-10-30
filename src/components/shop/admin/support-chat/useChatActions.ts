@@ -110,17 +110,6 @@ export const useChatActions = ({
   const closeChat = async (chatId: number) => {
     try {
       await fetch(SUPPORT_CHAT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'admin_message',
-          chat_id: chatId,
-          admin_id: userId,
-          message: `Администратор ${userName} закрыл чат`,
-        }),
-      });
-
-      await fetch(SUPPORT_CHAT_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
