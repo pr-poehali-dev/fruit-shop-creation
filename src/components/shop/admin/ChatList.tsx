@@ -18,11 +18,10 @@ interface ChatItem {
 
 interface ChatListProps {
   chats: ChatItem[];
-  selectedChat: ChatItem | null;
-  userId: number;
+  selectedChatId?: number;
+  waitingCount: number;
+  activeCount: number;
   onSelectChat: (chatId: number) => void;
-  onTakeChat: (chatId: number) => void;
-  onCloseChat: (chatId: number) => void;
 }
 
 const getStatusBadge = (status: string) => {
@@ -42,32 +41,29 @@ const getStatusBadge = (status: string) => {
 
 export default function ChatList({
   chats,
-  selectedChat,
-  userId,
+  selectedChatId,
   onSelectChat,
-  onTakeChat,
-  onCloseChat,
 }: ChatListProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Список чатов</CardTitle>
+        <CardTitle className="text-base sm:text-lg">Список чатов</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2 max-h-[600px] md:max-h-[70vh] overflow-y-auto">
           {chats.map((chat) => (
             <div
               key={chat.id}
-              className={`p-3 border rounded cursor-pointer hover:bg-accent ${
-                selectedChat?.id === chat.id ? 'bg-accent' : ''
+              className={`p-3 border rounded cursor-pointer hover:bg-accent transition-colors ${
+                selectedChatId === chat.id ? 'bg-accent border-primary' : ''
               }`}
               onClick={() => onSelectChat(chat.id)}
             >
               <div className="flex justify-between items-start mb-2 gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{chat.user_name || 'Пользователь'}</div>
+                  <div className="font-semibold truncate text-sm sm:text-base">{chat.user_name || 'Пользователь'}</div>
                   {chat.user_phone && (
-                    <div className="text-sm text-muted-foreground truncate">{chat.user_phone}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground truncate">{chat.user_phone}</div>
                   )}
                 </div>
                 <div className="flex-shrink-0">
@@ -86,28 +82,6 @@ export default function ChatList({
                   Администратор: {chat.admin_name}
                 </div>
               )}
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {chat.status === 'waiting' && (
-                  <Button size="sm" onClick={(e) => { e.stopPropagation(); onTakeChat(chat.id); }} className="flex-1 sm:flex-none">
-                    <Icon name="UserPlus" size={14} className="mr-1" />
-                    <span className="hidden sm:inline">Взять в работу</span>
-                    <span className="sm:hidden">Взять</span>
-                  </Button>
-                )}
-                {chat.status === 'active' && chat.admin_id === userId && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={(e) => { e.stopPropagation(); onCloseChat(chat.id); }}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Icon name="X" size={14} className="mr-1" />
-                    <span className="hidden sm:inline">Закрыть чат</span>
-                    <span className="sm:hidden">Закрыть</span>
-                  </Button>
-                )}
-              </div>
             </div>
           ))}
         </div>
