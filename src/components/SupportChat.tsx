@@ -337,26 +337,25 @@ export default function SupportChat() {
                 </div>
               </div>
             ))}
-            
-            {showFaqs && chat?.status === 'bot' && faqs.length > 0 && (
-              <div className="space-y-2 mt-4">
-                <div className="text-sm font-semibold text-muted-foreground">Популярные вопросы:</div>
-                {faqs.map((faq) => (
-                  <button
-                    key={faq.id}
-                    onClick={() => {
-                      setInputMessage(faq.question);
-                    }}
-                    className="w-full text-left text-sm p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-                  >
-                    {faq.question}
-                  </button>
-                ))}
-              </div>
-            )}
-            
             <div ref={messagesEndRef} />
           </div>
+
+          {showFaqs && chat?.status === 'bot' && faqs.length > 0 && (
+            <div className="px-4 pb-3 space-y-2 border-b">
+              <div className="text-sm font-semibold text-muted-foreground">Популярные вопросы:</div>
+              {faqs.map((faq) => (
+                <button
+                  key={faq.id}
+                  onClick={() => {
+                    setInputMessage(faq.question);
+                  }}
+                  className="w-full text-left text-sm p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                >
+                  {faq.question}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="p-4 border-t space-y-3">
             <div className="flex gap-2">
