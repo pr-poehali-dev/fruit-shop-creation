@@ -43,6 +43,11 @@ const Index = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductGalleryOpen, setIsProductGalleryOpen] = useState(false);
 
+  const handleSectionChange = (section: string) => {
+    setCurrentSection(section);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const { handleCheckout } = useCheckout({
     user,
     cart,
@@ -217,7 +222,7 @@ const Index = () => {
             currentSection={currentSection}
             siteSettings={siteSettings}
             favoritesCount={favorites.length}
-            onSectionChange={setCurrentSection}
+            onSectionChange={handleSectionChange}
             onShowAuth={() => setShowAuthDialog(true)}
             renderCartContent={renderCartContent}
             renderProfileContent={renderProfileContent}
@@ -245,7 +250,7 @@ const Index = () => {
               siteSettings={siteSettings}
               isAuthenticated={!!user}
               userId={user?.id}
-              onSectionChange={setCurrentSection}
+              onSectionChange={handleSectionChange}
               onAddToCart={handleAddToCart}
               onViewDetails={handleViewDetails}
               onToggleFavorite={toggleFavorite}
