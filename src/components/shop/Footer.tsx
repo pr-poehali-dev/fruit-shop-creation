@@ -3,7 +3,7 @@ import Icon from '@/components/ui/icon';
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground mt-16 py-6 pb-24 md:pb-8">
+    <footer className="bg-primary text-primary-foreground mt-auto py-6 pb-24 md:pb-8">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-4">
           {/* Ссылки на юридические документы */}

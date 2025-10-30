@@ -201,7 +201,7 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen ${getBackgroundStyle(siteSettings?.holiday_theme)} relative`}>
+    <div className={`min-h-screen ${getBackgroundStyle(siteSettings?.holiday_theme)} relative flex flex-col`}>
       <HolidayThemeRenderer theme={siteSettings?.holiday_theme} />
 
       {showAdminPanel && user?.is_admin ? (
@@ -239,7 +239,7 @@ const Index = () => {
             }}
           />
 
-          <main className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-8 flex-grow">
             <MainContent
               isLoading={isLoading}
               currentSection={currentSection}
