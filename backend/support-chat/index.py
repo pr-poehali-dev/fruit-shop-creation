@@ -9,9 +9,26 @@ import os
 import psycopg2
 from typing import Dict, Any, List, Optional
 
+_faq_cache = None
+_faq_cache_time = 0
+
 def get_db_connection():
     dsn = os.environ.get('DATABASE_URL')
     return psycopg2.connect(dsn)
+
+def get_faqs_cached(cur) -> List:
+    global _faq_cache, _faq_cache_time
+    import time
+    
+    current_time = time.time()
+    if _faq_cache is None or (current_time - _faq_cache_time) > 300:
+        cur.execute(
+            "SELECT id, question, answer, keywords FROM t_p77282076_fruit_shop_creation.faq WHERE is_active = true"
+        )
+        _faq_cache = cur.fetchall()
+        _faq_cache_time = current_time
+    
+    return _faq_cache
 
 def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
     question_lower = question.lower().strip()
@@ -20,10 +37,7 @@ def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
     if any(keyword in question_lower for keyword in operator_keywords):
         return None
     
-    cur.execute(
-        "SELECT id, question, answer, keywords FROM t_p77282076_fruit_shop_creation.faq WHERE is_active = true"
-    )
-    faqs = cur.fetchall()
+    faqs = get_faqs_cached(cur)
     
     best_match = None
     best_score = 0
