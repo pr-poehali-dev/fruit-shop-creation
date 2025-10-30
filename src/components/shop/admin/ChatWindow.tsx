@@ -29,9 +29,11 @@ interface ChatWindowProps {
   selectedChat: ChatItem | null;
   messages: ChatMessage[];
   messageInput: string;
-  userId: number;
+  currentUserId: number;
   onMessageInputChange: (value: string) => void;
   onSendMessage: () => void;
+  onTakeChat: (chatId: number) => void;
+  onCloseChat: () => void;
   isMobile?: boolean;
 }
 
@@ -39,9 +41,11 @@ export default function ChatWindow({
   selectedChat,
   messages,
   messageInput,
-  userId,
+  currentUserId,
   onMessageInputChange,
   onSendMessage,
+  onTakeChat,
+  onCloseChat,
   isMobile = false,
 }: ChatWindowProps) {
   return (
@@ -78,23 +82,43 @@ export default function ChatWindow({
                 </div>
               ))}
             </div>
-            {(selectedChat.status === 'active' && selectedChat.admin_id === userId) && (
-              <div className="flex gap-2 flex-shrink-0">
-                <Input
-                  value={messageInput}
-                  onChange={(e) => onMessageInputChange(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && onSendMessage()}
-                  placeholder="Сообщение..."
-                  className="text-sm sm:text-base"
-                />
-                <Button onClick={onSendMessage} disabled={!messageInput.trim()} size="icon" className="flex-shrink-0">
-                  <Icon name="Send" size={18} />
+            {(selectedChat.status === 'active' && selectedChat.admin_id === currentUserId) && (
+              <div className="space-y-2 flex-shrink-0">
+                <div className="flex gap-2">
+                  <Input
+                    value={messageInput}
+                    onChange={(e) => onMessageInputChange(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && onSendMessage()}
+                    placeholder="Сообщение..."
+                    className="text-sm sm:text-base"
+                  />
+                  <Button onClick={onSendMessage} disabled={!messageInput.trim()} size="icon" className="flex-shrink-0">
+                    <Icon name="Send" size={18} />
+                  </Button>
+                </div>
+                <Button 
+                  onClick={onCloseChat} 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full"
+                >
+                  <Icon name="X" size={16} className="mr-2" />
+                  Закрыть чат
                 </Button>
               </div>
             )}
             {selectedChat.status === 'waiting' && (
-              <div className="text-center text-muted-foreground py-4 text-sm sm:text-base">
-                Нажмите "Взять в работу" чтобы начать общение
+              <div className="space-y-3 flex-shrink-0">
+                <div className="text-center text-muted-foreground py-2 text-sm sm:text-base">
+                  Нажмите "Взять в работу" чтобы начать общение
+                </div>
+                <Button 
+                  onClick={() => onTakeChat(selectedChat.id)} 
+                  className="w-full"
+                >
+                  <Icon name="UserCheck" size={18} className="mr-2" />
+                  Взять в работу
+                </Button>
               </div>
             )}
           </>
