@@ -7,6 +7,7 @@ Returns: HTTP response с данными чата и сообщениями
 import json
 import os
 import psycopg2
+import time
 from typing import Dict, Any, List, Optional
 
 _faq_cache = None
@@ -14,7 +15,22 @@ _faq_cache_time = 0
 
 def get_db_connection():
     dsn = os.environ.get('DATABASE_URL')
-    return psycopg2.connect(dsn)
+    conn = psycopg2.connect(dsn)
+    return conn
+
+def execute_with_retry(cur, query, params=None, max_retries=2):
+    for attempt in range(max_retries):
+        try:
+            if params:
+                cur.execute(query, params)
+            else:
+                cur.execute(query)
+            return
+        except psycopg2.OperationalError as e:
+            if 'rate limit' in str(e) and attempt < max_retries - 1:
+                time.sleep(0.5 * (attempt + 1))
+                continue
+            raise
 
 def get_faqs_cached(cur) -> List:
     global _faq_cache, _faq_cache_time
@@ -463,29 +479,41 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 chat_id = body_data.get('chat_id')
                 admin_id = body_data.get('admin_id')
                 
-                cur.execute(
-                    "SELECT full_name FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
-                    (int(admin_id),)
-                )
-                admin_name = cur.fetchone()[0]
-                
-                cur.execute(
-                    "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'active', admin_id = %s, admin_name = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s",
-                    (int(admin_id), admin_name, int(chat_id))
-                )
-                
-                cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, true, 1)",
-                    (int(chat_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?')
-                )
-                conn.commit()
-                
-                return {
-                    'statusCode': 200,
-                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'message': 'Чат взят в работу'}, ensure_ascii=False),
-                    'isBase64Encoded': False
-                }
+                try:
+                    execute_with_retry(
+                        cur,
+                        "SELECT full_name FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                        (int(admin_id),)
+                    )
+                    admin_name = cur.fetchone()[0]
+                    
+                    execute_with_retry(
+                        cur,
+                        "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'active', admin_id = %s, admin_name = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s",
+                        (int(admin_id), admin_name, int(chat_id))
+                    )
+                    
+                    execute_with_retry(
+                        cur,
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, true, 1)",
+                        (int(chat_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?')
+                    )
+                    conn.commit()
+                    
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'message': 'Чат взят в работу'}, ensure_ascii=False),
+                        'isBase64Encoded': False
+                    }
+                except Exception as e:
+                    conn.rollback()
+                    return {
+                        'statusCode': 500,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': f'Не удалось взять чат: {str(e)}'}, ensure_ascii=False),
+                        'isBase64Encoded': False
+                    }
             
             elif action == 'mark_read':
                 chat_id = body_data.get('chat_id')
