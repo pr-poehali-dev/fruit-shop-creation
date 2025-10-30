@@ -574,6 +574,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     chat_info = cur.fetchone()
                     user_id, admin_id, admin_name, old_status, guest_id = chat_info
                     
+                    # Добавляем системное сообщение о закрытии чата
+                    if admin_name:
+                        close_message = f'Чат закрыт администратором {admin_name}'
+                    else:
+                        close_message = 'Чат закрыт'
+                    
+                    cur.execute(
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, true, 1)",
+                        (int(chat_id), admin_name or 'Система', close_message)
+                    )
+                    
                     # Получаем имя и телефон пользователя
                     is_guest = guest_id is not None
                     if is_guest or not user_id:
