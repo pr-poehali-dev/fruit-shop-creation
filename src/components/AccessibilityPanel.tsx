@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import Icon from '@/components/ui/icon';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface AccessibilitySettings {
   enabled: boolean;
@@ -70,31 +76,18 @@ export default function AccessibilityPanel() {
   };
 
   return (
-    <>
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        variant="outline"
-        size="icon"
-        className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full shadow-lg bg-background border-2"
-        aria-label="Настройки доступности"
-      >
-        <Icon name={settings.enabled ? 'EyeOff' : 'Eye'} size={20} />
-      </Button>
-
-      {isOpen && (
-        <Card className="fixed top-20 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-base">Настройки доступности</CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8"
-            >
-              <Icon name="X" size={16} />
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" className="w-full justify-start gap-2">
+          <Icon name={settings.enabled ? 'EyeOff' : 'Eye'} size={20} />
+          <span>Настройки доступности</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Настройки доступности</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Режим для слабовидящих</Label>
               <Button
@@ -188,9 +181,8 @@ export default function AccessibilityPanel() {
                 </Button>
               </>
             )}
-          </CardContent>
-        </Card>
-      )}
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

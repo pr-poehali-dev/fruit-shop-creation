@@ -7,6 +7,7 @@ import { NavigationMenu } from './sidemenu/NavigationMenu';
 import { ReferralProgramCard } from './sidemenu/ReferralProgramCard';
 import { InstallAppSection } from './sidemenu/InstallAppSection';
 import { ContactInfoSection } from './sidemenu/ContactInfoSection';
+import AccessibilityPanel from '@/components/AccessibilityPanel';
 
 interface User {
   id: number;
@@ -117,6 +118,10 @@ const SideMenu = ({ siteSettings, user, onSectionChange }: SideMenuProps) => {
 
         <div className="space-y-6">
           <NavigationMenu onNavigate={handleNavigate} />
+
+          <Separator />
+
+          <AccessibilityPanel />
 
           <Separator />
 
