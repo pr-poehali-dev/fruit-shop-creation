@@ -107,4 +107,53 @@
     overscroll-behavior-x: none;
     overflow-x: hidden;
   }
+
+  .accessibility-mode {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 20%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+  }
+
+  .accessibility-mode * {
+    font-size: 120% !important;
+    line-height: 1.8 !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .accessibility-mode h1 {
+    font-size: 250% !important;
+  }
+
+  .accessibility-mode h2 {
+    font-size: 200% !important;
+  }
+
+  .accessibility-mode h3 {
+    font-size: 170% !important;
+  }
+
+  .accessibility-mode button,
+  .accessibility-mode a,
+  .accessibility-mode input,
+  .accessibility-mode textarea {
+    padding: 1rem 1.5rem !important;
+    min-height: 48px !important;
+  }
+
+  .accessibility-mode img {
+    border: 2px solid #000 !important;
+  }
 }

@@ -9,6 +9,7 @@ import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
 import DecorativeBranch from "./components/DecorativeBranch";
 import SupportChat from "./components/SupportChat";
+import AccessibilityToggle from "./components/AccessibilityToggle";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -66,6 +67,7 @@ const App = () => {
         <InstallPrompt />
         <DecorativeBranch />
         <SupportChat />
+        <AccessibilityToggle />
         <BrowserRouter>
           <Suspense fallback={<LoadingScreen onComplete={() => {}} />}>
             <Routes>
