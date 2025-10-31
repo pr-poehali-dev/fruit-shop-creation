@@ -108,7 +108,15 @@
     overflow-x: hidden;
   }
 
-  .accessibility-mode {
+  .contrast-normal {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+    --border: 0 0% 80%;
+  }
+
+  .contrast-high {
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
     --card: 0 0% 100%;
@@ -119,30 +127,55 @@
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 20%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 20%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 10%;
     --accent: 0 0% 10%;
     --accent-foreground: 0 0% 100%;
     --border: 0 0% 0%;
     --input: 0 0% 0%;
   }
 
+  .contrast-extra-high {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 80%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 90%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
+    --border: 0 0% 100%;
+    --input: 0 0% 100%;
+  }
+
+  .accessibility-mode {
+    --accessibility-font-size: 100%;
+    --accessibility-line-spacing: 1.5;
+    --accessibility-letter-spacing: 0em;
+  }
+
   .accessibility-mode * {
-    font-size: 120% !important;
-    line-height: 1.8 !important;
-    letter-spacing: 0.05em !important;
+    font-size: calc(1em * var(--accessibility-font-size) / 100) !important;
+    line-height: var(--accessibility-line-spacing) !important;
+    letter-spacing: var(--accessibility-letter-spacing) !important;
   }
 
   .accessibility-mode h1 {
-    font-size: 250% !important;
+    font-size: calc(2.5em * var(--accessibility-font-size) / 100) !important;
   }
 
   .accessibility-mode h2 {
-    font-size: 200% !important;
+    font-size: calc(2em * var(--accessibility-font-size) / 100) !important;
   }
 
   .accessibility-mode h3 {
-    font-size: 170% !important;
+    font-size: calc(1.7em * var(--accessibility-font-size) / 100) !important;
   }
 
   .accessibility-mode button,
@@ -153,7 +186,8 @@
     min-height: 48px !important;
   }
 
-  .accessibility-mode img {
-    border: 2px solid #000 !important;
+  .contrast-high img,
+  .contrast-extra-high img {
+    border: 2px solid currentColor !important;
   }
 }
