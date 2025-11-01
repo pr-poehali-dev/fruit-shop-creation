@@ -288,9 +288,6 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
                       <div className="text-xs sm:text-sm font-medium">
                         Стоимость доставки: <span className="text-lg font-bold text-primary">{deliveryAmount.toFixed(2)}₽</span>
                       </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground">
-                        Оплатите доставку отдельно
-                      </div>
                       <Button 
                         size="sm" 
                         className="w-full text-xs sm:text-sm h-9 sm:h-10"
