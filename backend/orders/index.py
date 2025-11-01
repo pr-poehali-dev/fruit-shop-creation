@@ -235,7 +235,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'delivery_payment', {delivery_amount}, 'Оплата доставки для заказа #{order_id}')"
                     )
                     cur.execute(
-                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, payment_deadline = NULL, amount_paid = amount_paid + {delivery_amount} WHERE id = {order_id}"
+                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, delivery_price_paid = TRUE, payment_deadline = NULL, amount_paid = amount_paid + {delivery_amount} WHERE id = {order_id}"
                     )
                     
                     conn.commit()
