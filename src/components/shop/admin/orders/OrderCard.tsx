@@ -74,6 +74,44 @@ export const OrderCard = ({
         </div>
       </div>
 
+      {order.is_preorder && order.delivery_zone_id === 1 && (
+        <div className="p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-2 border-orange-300 dark:border-orange-700 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <Icon name="MapPin" size={18} className="text-orange-600 dark:text-orange-400" />
+            <div className="font-bold text-orange-900 dark:text-orange-100">Заказ из Барнаула (предзаказ)</div>
+          </div>
+          <div className="space-y-1.5 text-xs sm:text-sm">
+            <div className="flex justify-between">
+              <span className="text-orange-700 dark:text-orange-300">Предоплата (50%):</span>
+              <span className="font-bold text-orange-900 dark:text-orange-100">{parseFloat(order.amount_paid || '0').toFixed(2)}₽</span>
+            </div>
+            {order.delivery_price_paid ? (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-orange-700 dark:text-orange-300">Доставка:</span>
+                  <span className="font-bold text-green-700 dark:text-green-300">{order.custom_delivery_price}₽ ✓</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-orange-700 dark:text-orange-300">Осталось доплатить:</span>
+                  <span className="font-bold text-orange-900 dark:text-orange-100">
+                    {(parseFloat(order.total_amount) - parseFloat(order.amount_paid || '0')).toFixed(2)}₽
+                  </span>
+                </div>
+              </>
+            ) : order.custom_delivery_price ? (
+              <div className="flex justify-between">
+                <span className="text-orange-700 dark:text-orange-300">Ожидает оплаты доставки:</span>
+                <span className="font-bold text-red-600 dark:text-red-400">{order.custom_delivery_price}₽</span>
+              </div>
+            ) : (
+              <div className="text-orange-700 dark:text-orange-300 italic">
+                Ожидает установки цены доставки
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
         <div>
           <div className="font-medium">Способ оплаты:</div>
