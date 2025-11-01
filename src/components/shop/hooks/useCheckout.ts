@@ -100,12 +100,11 @@ export const useCheckout = ({
 
     const isPreorder = siteSettings?.preorder_enabled === true;
     
-    // Для Барнаула при предзаказе доставка оплачивается отдельно
-    const isBarnaul = deliveryType === 'delivery' && deliveryCity === 'Барнаул';
-    const deliveryPaidSeparately = isPreorder && isBarnaul;
+    // Полная сумма ВСЕГДА включает доставку для расчёта
+    const fullTotalAmount = basePrice + deliveryPrice;
     
-    const fullTotalAmount = deliveryPaidSeparately ? basePrice : basePrice + deliveryPrice;
-    const totalAmount = isPreorder ? basePrice * 0.5 : fullTotalAmount;
+    // Для предзаказа берём 50% от ПОЛНОЙ суммы (товары + доставка)
+    const totalAmount = isPreorder ? fullTotalAmount * 0.5 : fullTotalAmount;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {
