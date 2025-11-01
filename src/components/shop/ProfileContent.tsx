@@ -43,7 +43,8 @@ const ProfileContent = ({ user, orders, siteSettings, onShowAdminPanel, onLogout
         order => order.is_preorder && 
                  order.status === 'processing' && 
                  order.payment_deadline &&
-                 parseFloat(order.amount_paid || '0') < parseFloat(order.total_amount)
+                 parseFloat(order.amount_paid || '0') < parseFloat(order.total_amount) &&
+                 !order.delivery_price_set_by_admin
       );
       
       if (preorderNeedingPayment) {

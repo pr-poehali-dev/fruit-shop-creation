@@ -206,6 +206,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
+                if order['status'] != 'processing':
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Delivery can only be paid when order is in processing status'}),
+                        'isBase64Encoded': False
+                    }
+                
                 delivery_amount = float(order['custom_delivery_price'])
                 
                 if payment_method == 'balance':
@@ -502,15 +510,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'confirmed': 'Ваш заказ подтвержден и готовится к отправке'
                 }
                 
-                if status == 'processing' and is_preorder:
-                    title = 'Необходима доплата за заказ'
-                    message = 'Ваш предзаказ обрабатывается! Пожалуйста, оплатите оставшиеся 50% стоимости заказа в течение 3 дней'
+                if status == 'processing' and delivery_price_set and delivery_type_val == 'delivery':
+                    title = 'Цена доставки установлена'
+                    message = f'Стоимость доставки составит {delivery_price}₽. Пожалуйста, оплатите доставку в течение 3 дней'
                     cur.execute(
                         f"UPDATE orders SET payment_deadline = CURRENT_TIMESTAMP + INTERVAL '3 days' WHERE id = {order_id}"
                     )
-                elif status == 'processing' and delivery_price_set and delivery_type_val == 'delivery':
-                    title = 'Цена доставки установлена'
-                    message = f'Стоимость доставки составит {delivery_price}₽. Перейдите в заказ для оплаты'
+                elif status == 'processing' and is_preorder:
+                    title = 'Необходима доплата за заказ'
+                    message = 'Ваш предзаказ обрабатывается! Пожалуйста, оплатите оставшиеся 50% стоимости заказа в течение 3 дней'
                     cur.execute(
                         f"UPDATE orders SET payment_deadline = CURRENT_TIMESTAMP + INTERVAL '3 days' WHERE id = {order_id}"
                     )

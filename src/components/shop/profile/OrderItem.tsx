@@ -11,10 +11,11 @@ interface OrderItemProps {
   onToggle: () => void;
   onCancel: (orderId: number) => void;
   onPayDelivery: (order: Order) => void;
+  onPayRemaining: (order: Order) => void;
   isCancelling: boolean;
 }
 
-const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCancelling }: OrderItemProps) => {
+const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPayRemaining, isCancelling }: OrderItemProps) => {
   return (
     <Card className="border">
       <CardHeader 
@@ -249,6 +250,39 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, isCan
                 Оплатить доставку
               </Button>
             </div>
+          )}
+          
+          {order.status === 'processing' && order.is_preorder && !order.delivery_price_set_by_admin && (
+            (() => {
+              const totalAmount = parseFloat(order.total_amount);
+              const amountPaid = parseFloat(order.amount_paid || '0');
+              const remaining = totalAmount - amountPaid;
+              
+              if (remaining > 0) {
+                return (
+                  <div className="p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-300 dark:border-orange-700 rounded space-y-2">
+                    <div className="text-xs sm:text-sm font-medium text-orange-900 dark:text-orange-100">
+                      Необходимо доплатить: <span className="text-lg font-bold">{remaining.toFixed(2)}₽</span>
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-orange-700 dark:text-orange-300">
+                      Оплатите оставшиеся 50% стоимости заказа
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="w-full text-xs sm:text-sm h-9 sm:h-10 bg-orange-600 hover:bg-orange-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPayRemaining(order);
+                      }}
+                    >
+                      <Icon name="CreditCard" size={14} className="mr-1.5" />
+                      Доплатить за заказ
+                    </Button>
+                  </div>
+                );
+              }
+              return null;
+            })()
           )}
           
           {order.status === 'pending' && (
