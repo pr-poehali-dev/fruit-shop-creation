@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Order } from '@/types/shop';
 import OrderItem from './OrderItem';
 import DeliveryPaymentDialog from './DeliveryPaymentDialog';
-import PreorderPaymentDialog from '../PreorderPaymentDialog';
+import SecondPaymentDialog from './SecondPaymentDialog';
 
 interface OrdersTabProps {
   orders: Order[];
@@ -16,11 +16,7 @@ const OrdersTab = ({ orders, userId, userBalance, userEmail, onOrderUpdate }: Or
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
   const [payingDeliveryOrder, setPayingDeliveryOrder] = useState<Order | null>(null);
-  const [preorderPaymentDialog, setPreorderPaymentDialog] = useState<{
-    open: boolean;
-    orderId: number;
-    remainingAmount: number;
-  } | null>(null);
+  const [payingSecondPaymentOrder, setPayingSecondPaymentOrder] = useState<Order | null>(null);
 
   const handleCancelOrder = async (orderId: number) => {
     if (!confirm('Вы уверены, что хотите отменить этот заказ?')) return;
@@ -67,14 +63,7 @@ const OrdersTab = ({ orders, userId, userBalance, userEmail, onOrderUpdate }: Or
               onToggle={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
               onCancel={handleCancelOrder}
               onPayDelivery={(ord) => setPayingDeliveryOrder(ord)}
-              onPayRemaining={(ord) => {
-                const remaining = parseFloat(ord.total_amount) - parseFloat(ord.amount_paid || '0');
-                setPreorderPaymentDialog({
-                  open: true,
-                  orderId: ord.id,
-                  remainingAmount: remaining
-                });
-              }}
+              onPayRemaining={(ord) => setPayingSecondPaymentOrder(ord)}
               isCancelling={cancellingOrderId === order.id}
             />
           ))}
@@ -90,19 +79,14 @@ const OrdersTab = ({ orders, userId, userBalance, userEmail, onOrderUpdate }: Or
         onSuccess={onOrderUpdate}
       />
       
-      {preorderPaymentDialog && (
-        <PreorderPaymentDialog
-          userId={userId}
-          orderId={preorderPaymentDialog.orderId}
-          remainingAmount={preorderPaymentDialog.remainingAmount}
-          userBalance={userBalance}
-          onClose={() => setPreorderPaymentDialog(null)}
-          onSuccess={() => {
-            setPreorderPaymentDialog(null);
-            onOrderUpdate();
-          }}
-        />
-      )}
+      <SecondPaymentDialog
+        order={payingSecondPaymentOrder}
+        userId={userId}
+        userBalance={userBalance}
+        userEmail={userEmail}
+        onClose={() => setPayingSecondPaymentOrder(null)}
+        onSuccess={onOrderUpdate}
+      />
     </div>
   );
 };
