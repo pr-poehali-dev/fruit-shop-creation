@@ -152,7 +152,7 @@ const PreorderPaymentDialog: React.FC<PreorderPaymentDialogProps> = ({
               <Label htmlFor="alfabank" className="flex-1 cursor-pointer">
                 <div className="flex items-center gap-2">
                   <Icon name="CreditCard" size={20} className="text-primary" />
-                  <span>Оплатить через Альфа-Банк (СБП)</span>
+                  <span>Банковская карта</span>
                 </div>
               </Label>
             </div>

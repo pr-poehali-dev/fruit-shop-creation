@@ -8,7 +8,6 @@ interface DeliverySectionProps {
 const DeliverySection = ({ siteSettings }: DeliverySectionProps) => {
   let paymentMethods = [
     'Банковская карта онлайн',
-    'СБП (Система быстрых платежей)',
     'Оплата при получении наличными',
     'Оплата при получении картой',
     'Банковский перевод для юр. лиц'

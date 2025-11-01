@@ -24,7 +24,7 @@ const PaymentSettingsSection = ({ siteSettings }: PaymentSettingsSectionProps) =
           <div className="flex-1">
             <p className="text-sm font-medium text-green-900">Касса подключена</p>
             <p className="text-xs text-green-700 mt-1">
-              Клиенты могут оплачивать заказы через Альфа-Банк
+              Клиенты могут оплачивать заказы банковскими картами
             </p>
           </div>
         </div>

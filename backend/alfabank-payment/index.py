@@ -52,7 +52,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'error': 'Alfabank token not configured',
-                    'message': 'Необходимо добавить токен API Альфа-Банка в настройках проекта'
+                    'message': 'Онлайн-оплата временно недоступна. Обратитесь к администратору для настройки.'
                 }),
                 'isBase64Encoded': False
             }

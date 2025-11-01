@@ -144,9 +144,9 @@ const DeliveryPaymentDialog = ({ order, userId, userBalance, userEmail, onClose,
                 </Label>
               </div>
 
-              <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-colors ${paymentMethod === 'card' ? 'border-primary bg-primary/5' : 'hover:bg-accent'}`}>
-                <RadioGroupItem value="card" id="card" />
-                <Label htmlFor="card" className="flex-1 cursor-pointer">
+              <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-colors ${paymentMethod === 'alfabank' ? 'border-primary bg-primary/5' : 'hover:bg-accent'}`}>
+                <RadioGroupItem value="alfabank" id="alfabank" />
+                <Label htmlFor="alfabank" className="flex-1 cursor-pointer">
                   <div className="flex items-center gap-2">
                     <Icon name="CreditCard" size={20} className="text-primary" />
                     <span className="font-medium">Банковская карта</span>
