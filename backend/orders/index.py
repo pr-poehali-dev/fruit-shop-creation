@@ -348,7 +348,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             delivery_amount = full_order_amount - items_amount
             
             if is_preorder:
-                total_amount = items_amount * 0.5
+                # Для Барнаула: берём 50% от ПОЛНОЙ суммы (товары + доставка)
+                total_amount = full_order_amount * 0.5
             else:
                 total_amount = full_order_amount
             
