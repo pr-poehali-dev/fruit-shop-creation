@@ -23,6 +23,23 @@ const App = () => {
   const [showLoading, setShowLoading] = useState(true);
 
   useEffect(() => {
+    const clearCacheIfNeeded = () => {
+      const CACHE_VERSION = '1.0.0';
+      const currentVersion = localStorage.getItem('cacheVersion');
+      
+      if (currentVersion !== CACHE_VERSION) {
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+          });
+        }
+        localStorage.setItem('cacheVersion', CACHE_VERSION);
+        console.log('Cache cleared, version updated to', CACHE_VERSION);
+      }
+    };
+
+    clearCacheIfNeeded();
+
     const theme = localStorage.getItem('theme');
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
