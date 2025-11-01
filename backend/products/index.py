@@ -56,22 +56,50 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             products = cur.fetchall()
             products_list = [dict(p) for p in products]
             
+            if not products_list:
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'products': []}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            product_ids = [p['id'] for p in products_list]
+            ids_str = ','.join(map(str, product_ids))
+            
+            cur.execute(
+                f"""SELECT id, product_id, image_url, is_primary, sort_order 
+                   FROM product_images 
+                   WHERE product_id IN ({ids_str}) AND image_url != '' AND image_url IS NOT NULL
+                   ORDER BY product_id, sort_order"""
+            )
+            all_images = cur.fetchall()
+            
+            cur.execute(
+                f"""SELECT id, product_id, size, price, stock, sort_order 
+                   FROM product_variants 
+                   WHERE product_id IN ({ids_str}) 
+                   ORDER BY product_id, sort_order"""
+            )
+            all_variants = cur.fetchall()
+            
+            images_by_product = {}
+            for img in all_images:
+                pid = img['product_id']
+                if pid not in images_by_product:
+                    images_by_product[pid] = []
+                images_by_product[pid].append(dict(img))
+            
+            variants_by_product = {}
+            for var in all_variants:
+                pid = var['product_id']
+                if pid not in variants_by_product:
+                    variants_by_product[pid] = []
+                variants_by_product[pid].append(dict(var))
+            
             for product in products_list:
-                cur.execute(
-                    f"""SELECT id, image_url, is_primary, sort_order 
-                       FROM product_images 
-                       WHERE product_id = {product['id']} AND image_url != '' AND image_url IS NOT NULL
-                       ORDER BY sort_order"""
-                )
-                product['images'] = [dict(img) for img in cur.fetchall()]
-                
-                cur.execute(
-                    f"""SELECT id, size, price, stock, sort_order 
-                       FROM product_variants 
-                       WHERE product_id = {product['id']} 
-                       ORDER BY sort_order"""
-                )
-                product['variants'] = [dict(v) for v in cur.fetchall()]
+                product['images'] = images_by_product.get(product['id'], [])
+                product['variants'] = variants_by_product.get(product['id'], [])
             
             return {
                 'statusCode': 200,

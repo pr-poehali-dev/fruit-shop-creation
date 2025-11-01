@@ -9,6 +9,7 @@ import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
 import DecorativeBranch from "./components/DecorativeBranch";
 import SupportChat from "./components/SupportChat";
+import NetworkStatus from "./components/NetworkStatus";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -55,11 +56,17 @@ const App = () => {
 
     const checkExpiredPreorders = async () => {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
         await fetch('https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-User-Id': '0' },
-          body: JSON.stringify({ action: 'check_expired_preorders' })
+          body: JSON.stringify({ action: 'check_expired_preorders' }),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
       } catch (error) {
         console.error('Failed to check expired preorders:', error);
       }
@@ -80,6 +87,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <NetworkStatus />
         <InstallPrompt />
         <DecorativeBranch />
         <SupportChat />
