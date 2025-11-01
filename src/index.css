@@ -155,27 +155,13 @@
   }
 
   .accessibility-mode {
-    --accessibility-font-size: 100%;
-    --accessibility-line-spacing: 1.5;
-    --accessibility-letter-spacing: 0em;
+    font-size: var(--accessibility-font-size, 100%) !important;
   }
 
+  .accessibility-mode,
   .accessibility-mode * {
-    font-size: calc(1em * var(--accessibility-font-size) / 100) !important;
-    line-height: var(--accessibility-line-spacing) !important;
-    letter-spacing: var(--accessibility-letter-spacing) !important;
-  }
-
-  .accessibility-mode h1 {
-    font-size: calc(2.5em * var(--accessibility-font-size) / 100) !important;
-  }
-
-  .accessibility-mode h2 {
-    font-size: calc(2em * var(--accessibility-font-size) / 100) !important;
-  }
-
-  .accessibility-mode h3 {
-    font-size: calc(1.7em * var(--accessibility-font-size) / 100) !important;
+    line-height: var(--accessibility-line-spacing, 1.5) !important;
+    letter-spacing: var(--accessibility-letter-spacing, 0em) !important;
   }
 
   .accessibility-mode button,

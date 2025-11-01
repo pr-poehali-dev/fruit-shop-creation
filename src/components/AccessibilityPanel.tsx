@@ -49,11 +49,14 @@ export default function AccessibilityPanel() {
       
       root.classList.remove('contrast-normal', 'contrast-high', 'contrast-extra-high');
       root.classList.add(`contrast-${newSettings.contrast}`);
+      
+      document.body.style.fontSize = `${newSettings.fontSize}%`;
     } else {
       root.classList.remove('accessibility-mode', 'contrast-normal', 'contrast-high', 'contrast-extra-high');
       root.style.removeProperty('--accessibility-font-size');
       root.style.removeProperty('--accessibility-line-spacing');
       root.style.removeProperty('--accessibility-letter-spacing');
+      document.body.style.fontSize = '';
     }
   };
 

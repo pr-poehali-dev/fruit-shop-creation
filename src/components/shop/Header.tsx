@@ -127,11 +127,14 @@ const Header = ({
             onClick={() => onSectionChange('home')} 
             className="flex items-center gap-2 hover:opacity-90 transition min-w-0 flex-shrink"
           >
-            {siteSettings?.logo_url && (
+            {siteSettings?.logo_url && siteSettings.logo_url.startsWith('http') && (
               <img 
                 src={siteSettings.logo_url} 
                 alt={`Логотип ${siteSettings?.site_name || 'Питомник растений'}`}
                 className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full object-cover border-2 border-white/20 shadow-lg flex-shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
             )}
             <LeafyTitle 
