@@ -450,7 +450,9 @@ export const useAdminHandlers = (props: UseAdminHandlersProps) => {
       payment_title: getFormValue('payment_title') || '',
       payment_methods: formData.has('payment_methods') 
         ? (formData.get('payment_methods') as string).split('\n').filter(m => m.trim()) 
-        : (props.siteSettings?.payment_methods || [])
+        : (props.siteSettings?.payment_methods || []),
+      alfabank_login: getFormValue('alfabank_login') || '',
+      alfabank_password: getFormValue('alfabank_password') || ''
     };
     
     console.log('Saving settings:', {
