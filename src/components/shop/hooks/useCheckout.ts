@@ -94,7 +94,7 @@ export const useCheckout = ({
       const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
 
       if (!isFreeDelivery) {
-        deliveryPrice = 600;
+        deliveryPrice = parseFloat(siteSettings?.delivery_price || 500);
       }
     }
 

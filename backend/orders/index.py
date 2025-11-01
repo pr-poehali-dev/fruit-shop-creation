@@ -227,7 +227,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'delivery_payment', {delivery_amount}, 'Оплата доставки для заказа #{order_id}')"
                     )
                     cur.execute(
-                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, payment_deadline = NULL WHERE id = {order_id}"
+                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, payment_deadline = NULL, amount_paid = amount_paid + {delivery_amount} WHERE id = {order_id}"
                     )
                     
                     conn.commit()
@@ -342,7 +342,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if is_preorder:
                 total_amount = items_amount * 0.5
             else:
-                total_amount = full_order_amount
+                total_amount = items_amount
             
             print(f"ORDER CREATE: is_preorder={is_preorder}, full={full_order_amount}, to_charge={total_amount}, payment={payment_method}")
             
@@ -386,7 +386,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             zone_id_sql = f", {delivery_zone_id}" if delivery_zone_id else ", NULL"
             
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder) VALUES ({user_id}, {full_order_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}) RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder, custom_delivery_price) VALUES ({user_id}, {items_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}, {delivery_amount}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             
