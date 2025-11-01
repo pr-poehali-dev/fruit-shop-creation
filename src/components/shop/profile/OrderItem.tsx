@@ -283,24 +283,7 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
                     </div>
                   )}
                   
-                  {!deliveryPaid && deliveryAmount > 0 && (
-                    <div className="p-3 bg-primary/10 border border-primary/30 rounded space-y-2">
-                      <div className="text-xs sm:text-sm font-medium">
-                        Стоимость доставки: <span className="text-lg font-bold text-primary">{deliveryAmount.toFixed(2)}₽</span>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        className="w-full text-xs sm:text-sm h-9 sm:h-10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onPayDelivery(order);
-                        }}
-                      >
-                        <Icon name="Truck" size={14} className="mr-1.5" />
-                        Оплатить доставку ({deliveryAmount.toFixed(2)}₽)
-                      </Button>
-                    </div>
-                  )}
+
                 </div>
               );
             })()
