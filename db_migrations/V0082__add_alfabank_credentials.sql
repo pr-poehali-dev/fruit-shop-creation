@@ -1,0 +1,1 @@
+UPDATE site_settings SET alfabank_login = 'r-siberian_florarium-ap', alfabank_password = '7pui6mfp6eanpr0ucrmsj6lpsq' WHERE id = 1;
