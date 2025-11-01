@@ -99,7 +99,12 @@ export const useCheckout = ({
     }
 
     const isPreorder = siteSettings?.preorder_enabled === true;
-    const fullTotalAmount = basePrice + deliveryPrice;
+    
+    // Для Барнаула при предзаказе доставка оплачивается отдельно
+    const isBarnaul = deliveryType === 'delivery' && deliveryCity === 'Барнаул';
+    const deliveryPaidSeparately = isPreorder && isBarnaul;
+    
+    const fullTotalAmount = deliveryPaidSeparately ? basePrice : basePrice + deliveryPrice;
     const totalAmount = isPreorder ? basePrice * 0.5 : fullTotalAmount;
 
     if (paymentMethod === 'balance') {

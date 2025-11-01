@@ -342,7 +342,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if is_preorder:
                 total_amount = items_amount * 0.5
             else:
-                total_amount = items_amount
+                total_amount = full_order_amount
             
             print(f"ORDER CREATE: is_preorder={is_preorder}, full={full_order_amount}, to_charge={total_amount}, payment={payment_method}")
             
@@ -380,13 +380,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             amount_paid = 0
             
             if payment_method == 'balance':
-                cashback_earned = full_order_amount * cashback_percent
+                cashback_earned = items_amount * cashback_percent
                 amount_paid = total_amount
             
             zone_id_sql = f", {delivery_zone_id}" if delivery_zone_id else ", NULL"
+            delivery_price_sql = f", {delivery_amount}" if delivery_amount > 0 else ", NULL"
             
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder, custom_delivery_price) VALUES ({user_id}, {items_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}, {delivery_amount}) RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder, custom_delivery_price) VALUES ({user_id}, {items_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}{delivery_price_sql}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             
