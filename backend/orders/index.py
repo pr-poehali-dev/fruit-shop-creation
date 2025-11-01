@@ -258,6 +258,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 order_id = body_data.get('order_id')
                 user_id = body_data.get('user_id')
                 payment_method = body_data.get('payment_method', 'balance')
+                payment_type = body_data.get('payment_type', 'second_payment')  # 'second_payment' или 'delivery'
                 
                 if not order_id or not user_id:
                     return {
@@ -268,7 +269,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cur.execute(
-                    f"SELECT total_amount, amount_paid, is_preorder, user_id FROM orders WHERE id = {order_id}"
+                    f"SELECT total_amount, amount_paid, is_preorder, user_id, second_payment_amount, second_payment_paid, custom_delivery_price, delivery_paid FROM orders WHERE id = {order_id}"
                 )
                 order = cur.fetchone()
                 
@@ -288,13 +289,42 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
-                remaining_amount = float(order['total_amount']) - float(order['amount_paid'] or 0)
+                # Определяем сумму платежа
+                if payment_type == 'second_payment':
+                    if order['second_payment_paid']:
+                        return {
+                            'statusCode': 400,
+                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                            'body': json.dumps({'error': 'Второй платёж уже оплачен'}),
+                            'isBase64Encoded': False
+                        }
+                    payment_amount = float(order['second_payment_amount'])
+                    update_field = 'second_payment_paid = TRUE'
+                    description = f'Оплата второй части заказа #{order_id} (50%)'
+                elif payment_type == 'delivery':
+                    if order['delivery_paid']:
+                        return {
+                            'statusCode': 400,
+                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                            'body': json.dumps({'error': 'Доставка уже оплачена'}),
+                            'isBase64Encoded': False
+                        }
+                    payment_amount = float(order['custom_delivery_price'] or 500)
+                    update_field = 'delivery_paid = TRUE'
+                    description = f'Оплата доставки для заказа #{order_id}'
+                else:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Invalid payment_type'}),
+                        'isBase64Encoded': False
+                    }
                 
                 if payment_method == 'balance':
                     cur.execute(f"SELECT balance FROM users WHERE id = {user_id}")
                     user = cur.fetchone()
                     
-                    if not user or float(user['balance']) < remaining_amount:
+                    if not user or float(user['balance']) < payment_amount:
                         return {
                             'statusCode': 400,
                             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -303,13 +333,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         }
                     
                     cur.execute(
-                        f"UPDATE users SET balance = balance - {remaining_amount} WHERE id = {user_id}"
+                        f"UPDATE users SET balance = balance - {payment_amount} WHERE id = {user_id}"
                     )
                     cur.execute(
-                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {remaining_amount}, 'Доплата за предзаказ #{order_id}')"
+                        f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'purchase', {payment_amount}, '{description}')"
                     )
                     cur.execute(
-                        f"UPDATE orders SET amount_paid = total_amount, payment_deadline = NULL WHERE id = {order_id}"
+                        f"UPDATE orders SET {update_field}, amount_paid = amount_paid + {payment_amount} WHERE id = {order_id}"
                     )
                     
                     conn.commit()
@@ -317,7 +347,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     return {
                         'statusCode': 200,
                         'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                        'body': json.dumps({'success': True}),
+                        'body': json.dumps({'success': True, 'amount': payment_amount}),
                         'isBase64Encoded': False
                     }
                 
@@ -337,23 +367,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cashback_percent_input = body_data.get('cashback_percent', 5)
             is_preorder = body_data.get('is_preorder', False)
             
-            full_order_amount = body_data.get('full_order_amount')
             items_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             
-            if full_order_amount is None:
-                full_order_amount = items_amount
-            else:
-                full_order_amount = float(full_order_amount)
-            
-            delivery_amount = full_order_amount - items_amount
-            
+            # Для Барнаула при предзаказе:
+            # - Списываем 50% от товаров сейчас
+            # - Доставка 500₽ оплачивается отдельно
             if is_preorder:
-                # Для Барнаула: берём 50% от ПОЛНОЙ суммы (товары + доставка)
-                total_amount = full_order_amount * 0.5
+                total_amount = items_amount * 0.5
+                delivery_amount = 500  # Фиксированная доставка для Барнаула
             else:
+                full_order_amount = body_data.get('full_order_amount', items_amount)
+                if full_order_amount is not None:
+                    full_order_amount = float(full_order_amount)
+                else:
+                    full_order_amount = items_amount
+                delivery_amount = full_order_amount - items_amount
                 total_amount = full_order_amount
             
-            print(f"ORDER CREATE: is_preorder={is_preorder}, full={full_order_amount}, to_charge={total_amount}, payment={payment_method}")
+            print(f"ORDER CREATE: is_preorder={is_preorder}, items={items_amount}, delivery={delivery_amount}, to_charge={total_amount}, payment={payment_method}")
             
             cashback_percent = float(cashback_percent_input) / 100
             
@@ -395,8 +426,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             zone_id_sql = f", {delivery_zone_id}" if delivery_zone_id else ", NULL"
             delivery_price_sql = f", {delivery_amount}" if delivery_amount > 0 else ", NULL"
             
+            # Для предзаказа: сохраняем сумму второго платежа (50% от товаров)
+            second_payment_amount = items_amount * 0.5 if is_preorder else 0
+            delivery_paid = False if is_preorder else (delivery_amount == 0)
+            
             cur.execute(
-                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder, custom_delivery_price) VALUES ({user_id}, {items_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}{delivery_price_sql}) RETURNING id"
+                f"INSERT INTO orders (user_id, total_amount, payment_method, delivery_address, delivery_type, delivery_zone_id, cashback_earned, amount_paid, is_preorder, custom_delivery_price, second_payment_amount, second_payment_paid, delivery_paid) VALUES ({user_id}, {items_amount}, '{payment_method}', '{delivery_address}', '{delivery_type}'{zone_id_sql}, {cashback_earned}, {amount_paid}, {is_preorder}{delivery_price_sql}, {second_payment_amount}, FALSE, {delivery_paid}) RETURNING id"
             )
             order_id = cur.fetchone()['id']
             

@@ -87,24 +87,24 @@ export const useCheckout = ({
     }
 
     const basePrice = getTotalPrice();
+    const isBarnaul = deliveryType === 'delivery' && deliveryCity === 'Барнаул';
+    const isPreorder = siteSettings?.preorder_enabled === true;
+    
+    // Для Барнаула:
+    // - Товары: 50% сейчас, 50% после обработки
+    // - Доставка: 500₽ отдельным платежом
     let deliveryPrice = 0;
-
-    if (deliveryType === 'delivery' && deliveryCity === 'Барнаул') {
+    if (isBarnaul && !isPreorder) {
       const freeDeliveryMin = parseFloat(siteSettings?.free_delivery_min || 0);
       const isFreeDelivery = freeDeliveryMin > 0 && basePrice >= freeDeliveryMin;
-
       if (!isFreeDelivery) {
         deliveryPrice = parseFloat(siteSettings?.delivery_price || 500);
       }
     }
-
-    const isPreorder = siteSettings?.preorder_enabled === true;
     
-    // Полная сумма ВСЕГДА включает доставку для расчёта
-    const fullTotalAmount = basePrice + deliveryPrice;
-    
-    // Для предзаказа берём 50% от ПОЛНОЙ суммы (товары + доставка)
-    const totalAmount = isPreorder ? fullTotalAmount * 0.5 : fullTotalAmount;
+    // Для Барнаула при предзаказе: доставка оплачивается отдельно (всегда 500₽)
+    const fullTotalAmount = isPreorder && isBarnaul ? basePrice : basePrice + deliveryPrice;
+    const totalAmount = isPreorder ? basePrice * 0.5 : fullTotalAmount;
 
     if (paymentMethod === 'balance') {
       if (!user.balance || user.balance < totalAmount) {

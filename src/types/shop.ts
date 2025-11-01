@@ -40,6 +40,11 @@ export interface Order {
   delivery_price_set_by_admin?: boolean;
   delivery_type?: string;
   delivery_address?: string;
+  second_payment_amount?: string;
+  second_payment_paid?: boolean;
+  delivery_paid?: boolean;
+  cancellation_reason?: string;
+  cancelled_by?: string;
   items: Array<{
     product_name: string;
     quantity: number;

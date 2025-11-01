@@ -59,6 +59,7 @@ const PreorderPaymentDialog: React.FC<PreorderPaymentDialogProps> = ({
             order_id: orderId,
             user_id: userId,
             payment_method: 'balance',
+            payment_type: 'second_payment',
           }),
         });
 

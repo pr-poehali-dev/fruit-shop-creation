@@ -44,10 +44,11 @@ const DeliveryPaymentDialog = ({ order, userId, userBalance, userEmail, onClose,
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action: 'pay_delivery',
+            action: 'complete_preorder_payment',
             order_id: order.id,
             user_id: userId,
-            payment_method: 'balance'
+            payment_method: 'balance',
+            payment_type: 'delivery'
           })
         });
 
