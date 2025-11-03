@@ -208,11 +208,24 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
                     );
                   } else if (order.is_preorder && amountPaid > 0) {
                     return (
-                      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Вы оплатили (предоплата 50%):</span>
-                          <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{amountPaid.toFixed(2)}₽</span>
+                      <div className="space-y-2">
+                        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-700 rounded p-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">Вы оплатили (предоплата 50%):</span>
+                            <span className="text-blue-900 dark:text-blue-100 font-bold text-xs sm:text-sm">{amountPaid.toFixed(2)}₽</span>
+                          </div>
                         </div>
+                        {order.delivery_price_paid && (
+                          <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <Icon name="Truck" size={14} className="text-green-700 dark:text-green-300" />
+                                <span className="text-green-900 dark:text-green-100 font-semibold text-xs sm:text-sm">Доставка оплачена:</span>
+                              </div>
+                              <span className="text-green-900 dark:text-green-100 font-bold text-xs sm:text-sm">{parseFloat(order.custom_delivery_price || '0').toFixed(2)}₽</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   }
