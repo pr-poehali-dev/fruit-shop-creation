@@ -6,6 +6,8 @@ import AdminPanelTabs from './AdminPanelTabs';
 import ProductDialog from './ProductDialog';
 import CategoryDialog from './CategoryDialog';
 import AdminPinDialog from './AdminPinDialog';
+import AdminOnlineStatus from '@/components/AdminOnlineStatus';
+import AdminTeamChat from '@/components/AdminTeamChat';
 import { Product, Category } from './types';
 
 interface AdminPanelProps {
@@ -121,6 +123,10 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         <AdminPanelHeader onClose={onClose} />
 
+        <div className="mb-6">
+          <AdminOnlineStatus />
+        </div>
+
         <AdminPanelTabs
           products={products}
           categories={categories}
@@ -170,6 +176,8 @@ const AdminPanel = ({ user, onClose, onSettingsUpdate }: AdminPanelProps) => {
           setEditingCategory(null);
         }}
       />
+
+      <AdminTeamChat />
     </div>
   );
 };

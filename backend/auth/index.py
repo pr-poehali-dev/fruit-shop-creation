@@ -282,6 +282,80 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'admin_online':
+                cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or not user['is_admin']:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Admin access required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                from datetime import datetime, timedelta
+                offline_threshold = (datetime.now() - timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S')
+                
+                cur.execute(f"""
+                    SELECT u.id, u.full_name, u.avatar, aos.last_seen, aos.is_online
+                    FROM users u
+                    LEFT JOIN admin_online_status aos ON u.id = aos.user_id
+                    WHERE u.is_admin = TRUE
+                    ORDER BY aos.last_seen DESC NULLS LAST
+                """)
+                
+                admins = cur.fetchall()
+                online_admins = []
+                for admin in admins:
+                    admin_dict = dict(admin)
+                    last_seen = admin_dict.get('last_seen')
+                    
+                    if last_seen and last_seen > datetime.strptime(offline_threshold, '%Y-%m-%d %H:%M:%S'):
+                        admin_dict['is_online'] = True
+                    else:
+                        admin_dict['is_online'] = False
+                    
+                    online_admins.append(admin_dict)
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'admins': online_admins}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'admin_chat':
+                cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or not user['is_admin']:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Admin access required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                limit = int(params.get('limit', 50))
+                
+                cur.execute(f"""
+                    SELECT acm.id, acm.user_id, acm.message, acm.created_at, acm.is_read,
+                           u.full_name, u.avatar
+                    FROM admin_chat_messages acm
+                    JOIN users u ON acm.user_id = u.id
+                    ORDER BY acm.created_at DESC
+                    LIMIT {limit}
+                """)
+                
+                messages = cur.fetchall()
+                messages_list = [dict(msg) for msg in reversed(messages)]
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'messages': messages_list}, default=str),
+                    'isBase64Encoded': False
+                }
+            
             cur.execute(
                 """SELECT id, phone, full_name, is_admin, is_super_admin, admin_permissions, balance, cashback, avatar, created_at 
                    FROM users 
@@ -328,7 +402,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     print(f"Phone normalization: raw='{phone_raw}' -> cleaned='{cleaned_phone}' -> formatted='{phone}'")
     
-    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar', 'update_permissions', 'create_referral_code']:
+    if action in ['update_balance', 'update_cashback', 'toggle_admin', 'ban_user', 'unban_user', 'update_avatar', 'update_permissions', 'create_referral_code', 'update_admin_status', 'send_admin_message', 'mark_chat_read']:
         from psycopg2.extras import RealDictCursor
         db_url = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(db_url)
@@ -507,6 +581,105 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'success': True,
                         'user': dict(user)
                     }, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'update_admin_status':
+                user_id = body_data.get('user_id')
+                
+                cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or not user['is_admin']:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Admin access required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"""
+                    INSERT INTO admin_online_status (user_id, last_seen, is_online, updated_at)
+                    VALUES ({user_id}, CURRENT_TIMESTAMP, TRUE, CURRENT_TIMESTAMP)
+                    ON CONFLICT (user_id) 
+                    DO UPDATE SET last_seen = CURRENT_TIMESTAMP, is_online = TRUE, updated_at = CURRENT_TIMESTAMP
+                """)
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'send_admin_message':
+                user_id = body_data.get('user_id')
+                message = body_data.get('message', '').strip()
+                
+                cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or not user['is_admin']:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Admin access required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                if not message:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Message cannot be empty'}),
+                        'isBase64Encoded': False
+                    }
+                
+                message_escaped = message.replace("'", "''")
+                
+                cur.execute(f"""
+                    INSERT INTO admin_chat_messages (user_id, message, created_at, is_read)
+                    VALUES ({user_id}, '{message_escaped}', CURRENT_TIMESTAMP, FALSE)
+                    RETURNING id, user_id, message, created_at, is_read
+                """)
+                
+                new_message = cur.fetchone()
+                
+                cur.execute(f"SELECT full_name, avatar FROM users WHERE id = {user_id}")
+                user_info = cur.fetchone()
+                
+                conn.commit()
+                
+                result = dict(new_message)
+                result['full_name'] = user_info['full_name']
+                result['avatar'] = user_info['avatar']
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'message': result}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            if action == 'mark_chat_read':
+                user_id = body_data.get('user_id')
+                
+                cur.execute(f"SELECT is_admin FROM users WHERE id = {user_id}")
+                user = cur.fetchone()
+                if not user or not user['is_admin']:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Admin access required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute("UPDATE admin_chat_messages SET is_read = TRUE WHERE is_read = FALSE")
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
                     'isBase64Encoded': False
                 }
 
