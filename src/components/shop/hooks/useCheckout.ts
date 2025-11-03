@@ -269,7 +269,7 @@ export const useCheckout = ({
           description: orderMessage
         });
         clearCart();
-        loadOrders(user);
+        loadOrders(user, true);
 
         if (paymentMethod === 'balance') {
           setTimeout(() => refreshUserBalance(user, isRefreshingBalance, setIsRefreshingBalance, setUser), 500);

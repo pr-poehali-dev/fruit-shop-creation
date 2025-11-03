@@ -86,7 +86,7 @@ export const useShopData = () => {
     }
   };
 
-  const loadOrders = async (user: User | null) => {
+  const loadOrders = async (user: User | null, silent: boolean = false) => {
     if (!user) {
       setOrders([]);
       return;
@@ -94,10 +94,14 @@ export const useShopData = () => {
     try {
       const response = await fetchWithRetry(`${API_ORDERS}?user_id=${user.id}`);
       const data = await response.json();
-      console.log('Orders loaded:', data.orders?.length || 0);
+      if (!silent) {
+        console.log('Orders loaded:', data.orders?.length || 0);
+      }
       setOrders(data.orders || []);
     } catch (error) {
-      console.error('Failed to load orders:', error);
+      if (!silent) {
+        console.error('Failed to load orders:', error);
+      }
       setOrders([]);
     }
   };

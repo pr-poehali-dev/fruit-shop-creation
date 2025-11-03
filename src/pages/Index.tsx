@@ -169,7 +169,7 @@ const Index = () => {
       onLogout={() => handleLogout(onLogout)}
       onBalanceUpdate={() => {
         refreshUserBalance(user, setUser, setIsRefreshingBalance);
-        loadOrders();
+        loadOrders(user, true);
       }}
       onUserUpdate={(updatedUser) => setUser(updatedUser)}
     />
