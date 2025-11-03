@@ -102,8 +102,8 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
             {order.custom_delivery_price !== null && order.custom_delivery_price !== undefined && (
               <div className="flex justify-between text-xs sm:text-sm gap-2">
                 <span className="text-muted-foreground">Доставка:</span>
-                <span className={`font-bold ${order.delivery_price_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
-                  {order.custom_delivery_price}₽ {order.delivery_price_paid && '✓'}
+                <span className={`font-bold ${order.delivery_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
+                  {order.custom_delivery_price}₽ {order.delivery_paid && '✓'}
                 </span>
               </div>
             )}
@@ -217,7 +217,7 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
                             </div>
                           </div>
                         )}
-                        {order.delivery_price_paid && (
+                        {order.delivery_paid && (
                           <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-2">
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">

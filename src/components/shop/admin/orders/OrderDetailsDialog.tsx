@@ -88,8 +88,8 @@ export const OrderDetailsDialog = ({
                   </span>
                 )}
                 {order.custom_delivery_price && (
-                  <span className={`ml-2 text-xs font-bold ${order.delivery_price_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
-                    {order.custom_delivery_price}₽ {order.delivery_price_paid && '✓ Оплачена'}
+                  <span className={`ml-2 text-xs font-bold ${order.delivery_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
+                    {order.custom_delivery_price}₽ {order.delivery_paid && '✓ Оплачена'}
                   </span>
                 )}
               </div>

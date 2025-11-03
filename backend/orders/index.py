@@ -60,10 +60,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 orders = cur.fetchall()
                 
+                orders_list = []
+                for order in orders:
+                    order_dict = dict(order)
+                    
+                    if order_dict.get('is_preorder'):
+                        order_dict['is_fully_paid'] = bool(order_dict.get('second_payment_paid'))
+                    else:
+                        amount_paid = float(order_dict.get('amount_paid') or 0)
+                        total_amount = float(order_dict.get('total_amount') or 0)
+                        order_dict['is_fully_paid'] = amount_paid >= total_amount
+                    
+                    orders_list.append(order_dict)
+                
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'orders': [dict(o) for o in orders]}, default=str),
+                    'body': json.dumps({'orders': orders_list}, default=str),
                     'isBase64Encoded': False
                 }
             
@@ -89,10 +102,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 orders = cur.fetchall()
                 
+                orders_list = []
+                for order in orders:
+                    order_dict = dict(order)
+                    
+                    if order_dict.get('is_preorder'):
+                        order_dict['is_fully_paid'] = bool(order_dict.get('second_payment_paid'))
+                    else:
+                        amount_paid = float(order_dict.get('amount_paid') or 0)
+                        total_amount = float(order_dict.get('total_amount') or 0)
+                        order_dict['is_fully_paid'] = amount_paid >= total_amount
+                    
+                    orders_list.append(order_dict)
+                
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                    'body': json.dumps({'orders': [dict(o) for o in orders]}, default=str),
+                    'body': json.dumps({'orders': orders_list}, default=str),
                     'isBase64Encoded': False
                 }
             else:

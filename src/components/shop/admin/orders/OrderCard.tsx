@@ -85,7 +85,7 @@ export const OrderCard = ({
               <span className="text-orange-700 dark:text-orange-300">Предоплата (50%):</span>
               <span className="font-bold text-orange-900 dark:text-orange-100">{parseFloat(order.amount_paid || '0').toFixed(2)}₽</span>
             </div>
-            {order.delivery_price_paid ? (
+            {order.delivery_paid ? (
               <>
                 <div className="flex justify-between">
                   <span className="text-orange-700 dark:text-orange-300">Доставка:</span>
@@ -132,8 +132,8 @@ export const OrderCard = ({
               </span>
             )}
             {order.custom_delivery_price && (
-              <span className={`ml-1 text-xs font-bold ${order.delivery_price_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
-                {order.custom_delivery_price}₽ {order.delivery_price_paid && '✓'}
+              <span className={`ml-1 text-xs font-bold ${order.delivery_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
+                {order.custom_delivery_price}₽ {order.delivery_paid && '✓'}
               </span>
             )}
           </div>
