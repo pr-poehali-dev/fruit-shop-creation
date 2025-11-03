@@ -28,6 +28,7 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
   const [copied, setCopied] = useState(false);
   const [totalEarned, setTotalEarned] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'waiting'>('all');
 
   useEffect(() => {
     if (show && userId) {
@@ -66,7 +67,8 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
     if (referral.reward_given) {
       return {
         text: '✅ Выполнено',
-        color: 'text-green-600',
+        color: 'text-green-600 dark:text-green-400',
+        bgColor: 'bg-green-50 dark:bg-green-950/30',
         description: `Заказ на ${referral.first_order_total}₽ • Бонус 500₽ получен`
       };
     }
@@ -75,22 +77,25 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
       if (referral.first_order_total >= 1500) {
         return {
           text: '⌛ Обрабатывается',
-          color: 'text-blue-600',
+          color: 'text-blue-600 dark:text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/30',
           description: `Заказ на ${referral.first_order_total}₽ • Бонус скоро будет начислен`
         };
       } else {
         return {
-          text: '📦 Первый заказ',
-          color: 'text-orange-600',
+          text: '📦 Малая сумма',
+          color: 'text-orange-600 dark:text-orange-400',
+          bgColor: 'bg-orange-50 dark:bg-orange-950/30',
           description: `Заказ на ${referral.first_order_total}₽ • Нужно от 1500₽`
         };
       }
     }
     
     return {
-      text: '⏰ Ожидание',
-      color: 'text-gray-500',
-      description: 'Ещё не сделал заказ'
+      text: '⏰ Не заказал',
+      color: 'text-gray-600 dark:text-gray-400',
+      bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+      description: 'Зарегистрировался, но ещё не сделал заказ'
     };
   };
 
@@ -152,6 +157,18 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
             </div>
           )}
 
+          {referrals.length > 0 && (
+            <div className="flex items-center justify-between text-xs pt-2 border-t">
+              <div className="flex gap-3 text-muted-foreground">
+                <span>✅ {referrals.filter(r => r.reward_given).length}</span>
+                <span>⌛ {referrals.filter(r => !r.reward_given && r.first_order_total && r.first_order_total >= 1500).length}</span>
+                <span>📦 {referrals.filter(r => !r.reward_given && r.first_order_total && r.first_order_total < 1500).length}</span>
+                <span>⏰ {referrals.filter(r => !r.first_order_total).length}</span>
+              </div>
+              <span className="text-muted-foreground">Всего: {referrals.length}</span>
+            </div>
+          )}
+
           <Button 
             variant="ghost" 
             size="sm" 
@@ -159,11 +176,48 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
             className="w-full text-xs"
           >
             <Icon name={isExpanded ? "ChevronUp" : "ChevronDown"} size={16} className="mr-1" />
-            {isExpanded ? 'Скрыть' : `Показать рефералов (${referrals.length})`}
+            {isExpanded ? 'Скрыть список' : 'Показать список рефералов'}
           </Button>
 
           {isExpanded && (
             <div className="space-y-2 pt-2">
+              {referrals.length > 0 && (
+                <div className="flex gap-1 flex-wrap">
+                  <Button
+                    variant={statusFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('all')}
+                    className="h-7 text-xs"
+                  >
+                    Все ({referrals.length})
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'completed' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('completed')}
+                    className="h-7 text-xs"
+                  >
+                    ✅ Выполнено ({referrals.filter(r => r.reward_given).length})
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'pending' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('pending')}
+                    className="h-7 text-xs"
+                  >
+                    ⌛ В процессе ({referrals.filter(r => !r.reward_given && r.first_order_total && r.first_order_total >= 1500).length})
+                  </Button>
+                  <Button
+                    variant={statusFilter === 'waiting' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('waiting')}
+                    className="h-7 text-xs"
+                  >
+                    ⏰ Ожидают ({referrals.filter(r => !r.first_order_total).length})
+                  </Button>
+                </div>
+              )}
+              
               {referrals.length === 0 ? (
                 <div className="text-center py-4">
                   <Icon name="UserPlus" size={24} className="mx-auto mb-2 text-muted-foreground" />
@@ -172,10 +226,18 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
                   </p>
                 </div>
               ) : (
-                referrals.map((referral) => {
+                referrals
+                  .filter(referral => {
+                    if (statusFilter === 'all') return true;
+                    if (statusFilter === 'completed') return referral.reward_given;
+                    if (statusFilter === 'pending') return !referral.reward_given && referral.first_order_total && referral.first_order_total >= 1500;
+                    if (statusFilter === 'waiting') return !referral.first_order_total;
+                    return true;
+                  })
+                  .map((referral) => {
                   const status = getReferralStatus(referral);
                   return (
-                    <Card key={referral.id} className="p-2.5">
+                    <Card key={referral.id} className={`p-2.5 ${status.bgColor}`}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-1">
@@ -188,10 +250,14 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
                             {status.description}
                           </p>
                           <p className="text-[10px] text-muted-foreground">
-                            {new Date(referral.created_at).toLocaleDateString('ru-RU')}
+                            Приглашён: {new Date(referral.created_at).toLocaleDateString('ru-RU', { 
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
                           </p>
                         </div>
-                        <div className={`text-[10px] font-medium whitespace-nowrap ${status.color}`}>
+                        <div className={`text-[10px] font-medium whitespace-nowrap px-2 py-1 rounded ${status.color} ${status.bgColor}`}>
                           {status.text}
                         </div>
                       </div>
