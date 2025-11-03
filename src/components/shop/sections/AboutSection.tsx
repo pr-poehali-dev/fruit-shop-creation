@@ -51,7 +51,7 @@ const AboutSection = ({ siteSettings }: AboutSectionProps) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-1 text-sm sm:text-base">
-            <p className="font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
+            <p className="font-medium">ИП Бояринцев Вадим Вячеславович</p>
             <p className="text-muted-foreground">ИНН: 222261894107</p>
           </div>
         </CardContent>

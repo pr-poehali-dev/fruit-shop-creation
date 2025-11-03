@@ -81,22 +81,7 @@ export const PaymentMethods = ({
         </div>
       </Button>
 
-      <Button
-        onClick={() => onCheckout('sber_qr', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
-        variant="outline"
-        className="w-full justify-start h-auto py-3"
-        disabled={isDisabled}
-      >
-        <Icon name="Smartphone" size={18} className="mr-2 flex-shrink-0" />
-        <div className="text-left flex-1">
-          <div className="font-semibold text-sm">СберБанк QR</div>
-          <div className="text-xs text-muted-foreground mt-0.5">
-            {preorderEnabled
-              ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽`
-              : 'Оплата по QR-коду'}
-          </div>
-        </div>
-      </Button>
+
 
       {isCashPaymentAvailable && (
         <Button
@@ -118,7 +103,7 @@ export const PaymentMethods = ({
       )}
 
       <div className="pt-3 mt-3 border-t text-center space-y-1">
-        <p className="text-xs text-muted-foreground font-medium">Самозанятый Бояринцев Вадим Вячеславович</p>
+        <p className="text-xs text-muted-foreground font-medium">ИП Бояринцев Вадим Вячеславович</p>
         <p className="text-xs text-muted-foreground">ИНН: 222261894107</p>
       </div>
     </div>

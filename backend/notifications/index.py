@@ -7,7 +7,70 @@ Returns: HTTP response с уведомлениями пользователя
 import json
 import os
 import psycopg2
+import urllib.request
+import urllib.parse
 from typing import Dict, Any
+
+def send_vk_notification(order_data: Dict[str, Any]) -> bool:
+    '''Send order notification to VK admin'''
+    vk_token = os.environ.get('VK_BOT_TOKEN')
+    vk_admin_id = os.environ.get('VK_ADMIN_USER_ID')
+    
+    if not vk_token or not vk_admin_id:
+        return False
+    
+    order_id = order_data.get('orderId', 'N/A')
+    user_name = order_data.get('userName', 'Не указано')
+    user_phone = order_data.get('userPhone', 'Не указано')
+    total_price = order_data.get('totalPrice', 0)
+    payment_method = order_data.get('paymentMethod', 'Не указано')
+    delivery_type = order_data.get('deliveryType', 'Не указано')
+    items = order_data.get('items', [])
+    
+    payment_method_names = {
+        'balance': 'Балансом сайта',
+        'card': 'Банковская карта',
+        'cash': 'Наличными'
+    }
+    
+    delivery_type_names = {
+        'pickup': 'Самовывоз',
+        'delivery': 'Доставка'
+    }
+    
+    items_text = '\n'.join([f"• {item.get('name', 'Товар')}" for item in items])
+    
+    message = f"""🌱 Новый заказ #{order_id}
+
+👤 Клиент: {user_name}
+📱 Телефон: {user_phone}
+
+💰 Сумма: {total_price} ₽
+💳 Оплата: {payment_method_names.get(payment_method, payment_method)}
+🚚 Тип: {delivery_type_names.get(delivery_type, delivery_type)}
+
+🛒 Товары:
+{items_text}"""
+    
+    try:
+        params = {
+            'user_id': vk_admin_id,
+            'message': message,
+            'access_token': vk_token,
+            'v': '5.131',
+            'random_id': 0
+        }
+        
+        url = 'https://api.vk.com/method/messages.send'
+        data = urllib.parse.urlencode(params).encode('utf-8')
+        
+        req = urllib.request.Request(url, data=data)
+        response = urllib.request.urlopen(req)
+        result = json.loads(response.read().decode('utf-8'))
+        
+        return 'error' not in result
+    except:
+        return False
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method: str = event.get('httpMethod', 'GET')
@@ -129,6 +192,19 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                     'isBase64Encoded': False,
                     'body': json.dumps({'success': True})
+                }
+            
+            elif action == 'send_vk_order_notification':
+                vk_sent = send_vk_notification(body_data)
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'isBase64Encoded': False,
+                    'body': json.dumps({
+                        'success': True,
+                        'vk_sent': vk_sent
+                    })
                 }
             
             elif action == 'check_expired_preorders':

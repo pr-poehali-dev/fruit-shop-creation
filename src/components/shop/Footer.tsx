@@ -30,9 +30,9 @@ const Footer = () => {
             </Link>
           </div>
           
-          {/* Информация о самозанятом и копирайт */}
+          {/* Информация об ИП и копирайт */}
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs md:text-sm opacity-75 text-center">
-            <span className="font-medium whitespace-nowrap">Самозанятый Бояринцев Вадим Вячеславович</span>
+            <span className="font-medium whitespace-nowrap">ИП Бояринцев Вадим Вячеславович</span>
             <span className="opacity-50">•</span>
             <span className="whitespace-nowrap">ИНН: 222261894107</span>
             <span className="opacity-50">•</span>
