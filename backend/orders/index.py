@@ -235,7 +235,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({user_id}, 'delivery_payment', {delivery_amount}, 'Оплата доставки для заказа #{order_id}')"
                     )
                     cur.execute(
-                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, delivery_price_paid = TRUE, payment_deadline = NULL, amount_paid = amount_paid + {delivery_amount} WHERE id = {order_id}"
+                        f"UPDATE orders SET delivery_price_set_by_admin = FALSE, delivery_paid = TRUE, payment_deadline = NULL, amount_paid = amount_paid + {delivery_amount} WHERE id = {order_id}"
                     )
                     
                     conn.commit()
@@ -448,7 +448,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if user_referral and user_referral['referred_by_code']:
                 referral_code = user_referral['referred_by_code']
                 cur.execute(
-                    f"SELECT rc.user_id, r.id as referral_id, r.first_order_total FROM referral_codes rc LEFT JOIN referrals r ON r.referred_id = {user_id} WHERE rc.referral_code = '{referral_code}'"
+                    f"SELECT rc.user_id, r.id as referral_id, r.first_order_total FROM t_p77282076_fruit_shop_creation.referral_codes rc LEFT JOIN t_p77282076_fruit_shop_creation.referrals r ON r.referred_id = {user_id} WHERE rc.referral_code = '{referral_code}'"
                 )
                 referrer_data = cur.fetchone()
                 if referrer_data and referrer_data['user_id']:
@@ -458,15 +458,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     
                     if not existing_referral_id:
                         cur.execute(
-                            f"INSERT INTO referrals (referrer_id, referred_id, referral_code, first_order_total) VALUES ({referrer_id}, {user_id}, '{referral_code}', {full_order_amount})"
+                            f"INSERT INTO t_p77282076_fruit_shop_creation.referrals (referrer_id, referred_id, referral_code, first_order_total) VALUES ({referrer_id}, {user_id}, '{referral_code}', {full_order_amount})"
                         )
                     elif previous_order_total is None or float(previous_order_total) < 1500:
                         cur.execute(
-                            f"UPDATE referrals SET first_order_total = {full_order_amount} WHERE id = {existing_referral_id}"
+                            f"UPDATE t_p77282076_fruit_shop_creation.referrals SET first_order_total = {full_order_amount} WHERE id = {existing_referral_id}"
                         )
                         if full_order_amount >= 1500:
                             cur.execute(
-                                f"UPDATE referrals SET reward_given = TRUE WHERE id = {existing_referral_id}"
+                                f"UPDATE t_p77282076_fruit_shop_creation.referrals SET reward_given = TRUE WHERE id = {existing_referral_id}"
                             )
                             cur.execute(
                                 f"UPDATE users SET balance = balance + 500 WHERE id = {referrer_id}"
