@@ -30,6 +30,7 @@ interface Product {
   stock: number;
   show_stock?: boolean;
   hide_main_price?: boolean;
+  is_popular?: boolean;
   images?: ProductImage[];
   variants?: ProductVariant[];
   expected_date?: string;
@@ -144,8 +145,14 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           );
         }
       }}>
+        {product.is_popular && (
+          <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-bold flex items-center gap-1">
+            <Icon name="Star" size={14} className="fill-white" />
+            Популярный
+          </div>
+        )}
         {product.stock !== null && product.stock <= 0 && (
-          <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-semibold">
+          <div className={`absolute ${product.is_popular ? 'top-12' : 'top-2'} left-2 z-10 bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-semibold`}>
             <div className="flex flex-col gap-0.5">
               <span>Нет в наличии</span>
               {product.expected_date && (

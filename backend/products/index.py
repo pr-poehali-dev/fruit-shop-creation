@@ -153,9 +153,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             variants = body_data.get('variants', [])
             
             cur.execute(
-                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock, show_stock, hide_main_price, expected_date) 
-                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}, {show_stock}, {hide_main_price}, {expected_date_sql}) 
-                   RETURNING id, name, slug, description, price, image_url, stock, show_stock, hide_main_price, expected_date"""
+                f"""INSERT INTO products (name, slug, description, price, image_url, category_id, stock, show_stock, hide_main_price, is_popular, expected_date) 
+                   VALUES ('{name}', '{slug}', '{desc}', {price}, '{img}', {cat_id}, {stock}, {show_stock}, {hide_main_price}, {is_popular}, {expected_date_sql}) 
+                   RETURNING id, name, slug, description, price, image_url, stock, show_stock, hide_main_price, is_popular, expected_date"""
             )
             product = cur.fetchone()
             product_id = product['id']
@@ -202,6 +202,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             stock = stock_val if stock_val not in [None, ''] else 'NULL'
             show_stock = 'TRUE' if body_data.get('show_stock', True) else 'FALSE'
             hide_main_price = 'TRUE' if body_data.get('hide_main_price', False) else 'FALSE'
+            is_popular = 'TRUE' if body_data.get('is_popular', False) else 'FALSE'
             expected_date = body_data.get('expected_date')
             expected_date_sql = f"'{expected_date}'" if expected_date else 'NULL'
             images = body_data.get('images', [])
@@ -211,9 +212,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 f"""UPDATE products 
                    SET name = '{name}', description = '{desc}', price = {price}, image_url = '{img}', 
                        category_id = {cat_id}, stock = {stock}, show_stock = {show_stock}, hide_main_price = {hide_main_price}, 
-                       expected_date = {expected_date_sql}, updated_at = CURRENT_TIMESTAMP
+                       is_popular = {is_popular}, expected_date = {expected_date_sql}, updated_at = CURRENT_TIMESTAMP
                    WHERE id = {product_id}
-                   RETURNING id, name, slug, description, price, image_url, stock, show_stock, hide_main_price, expected_date"""
+                   RETURNING id, name, slug, description, price, image_url, stock, show_stock, hide_main_price, is_popular, expected_date"""
             )
             product = cur.fetchone()
             

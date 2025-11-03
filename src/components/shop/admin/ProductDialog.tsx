@@ -34,6 +34,7 @@ interface Product {
   is_active: boolean;
   show_stock?: boolean;
   hide_main_price?: boolean;
+  is_popular?: boolean;
   images?: ProductImage[];
   variants?: ProductVariant[];
 }
@@ -50,7 +51,7 @@ interface ProductDialogProps {
   onOpenChange: (open: boolean) => void;
   editingProduct: Product | null;
   categories: Category[];
-  onSubmit: (e: React.FormEvent<HTMLFormElement>, images: ProductImage[], variants: ProductVariant[], showStock: boolean, hideMainPrice: boolean) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>, images: ProductImage[], variants: ProductVariant[], showStock: boolean, hideMainPrice: boolean, isPopular: boolean) => void;
 }
 
 const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmit }: ProductDialogProps) => {
@@ -62,6 +63,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
   const [newVariantStock, setNewVariantStock] = useState('');
   const [showStock, setShowStock] = useState(true);
   const [hideMainPrice, setHideMainPrice] = useState(false);
+  const [isPopular, setIsPopular] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     
     setShowStock(editingProduct?.show_stock ?? true);
     setHideMainPrice(editingProduct?.hide_main_price ?? false);
+    setIsPopular(editingProduct?.is_popular ?? false);
     setNewImageUrl('');
     setNewVariantSize('');
     setNewVariantPrice('');
@@ -269,7 +272,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       alert('Добавьте хотя бы одно изображение товара');
       return;
     }
-    onSubmit(e, images, variants, showStock, hideMainPrice);
+    onSubmit(e, images, variants, showStock, hideMainPrice, isPopular);
   };
 
   return (
@@ -288,6 +291,8 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
             variantsCount={variants.length}
             hideMainPrice={hideMainPrice}
             onHideMainPriceChange={setHideMainPrice}
+            isPopular={isPopular}
+            onIsPopularChange={setIsPopular}
           />
 
           <ProductImageGallery

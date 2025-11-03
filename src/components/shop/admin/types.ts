@@ -26,6 +26,7 @@ export interface Product {
   is_active: boolean;
   show_stock?: boolean;
   hide_main_price?: boolean;
+  is_popular?: boolean;
   images?: ProductImage[];
   variants?: ProductVariant[];
 }

@@ -33,9 +33,11 @@ interface ProductBasicFieldsProps {
   variantsCount: number;
   hideMainPrice: boolean;
   onHideMainPriceChange: (checked: boolean) => void;
+  isPopular: boolean;
+  onIsPopularChange: (checked: boolean) => void;
 }
 
-const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStockChange, variantsCount, hideMainPrice, onHideMainPriceChange }: ProductBasicFieldsProps) => {
+const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStockChange, variantsCount, hideMainPrice, onHideMainPriceChange, isPopular, onIsPopularChange }: ProductBasicFieldsProps) => {
   return (
     <>
       <div>
@@ -126,6 +128,19 @@ const ProductBasicFields = ({ editingProduct, categories, showStock, onShowStock
           />
           <Label htmlFor="show-stock" className="text-sm cursor-pointer">
             Показывать количество на складе покупателям
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="is-popular"
+            checked={isPopular}
+            onChange={(e) => onIsPopularChange(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300"
+          />
+          <Label htmlFor="is-popular" className="text-sm cursor-pointer">
+            Популярный товар (отображается с меткой)
           </Label>
         </div>
         
