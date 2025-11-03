@@ -12,6 +12,7 @@ interface Product {
   image_url: string;
   category_name: string;
   stock: number;
+  is_popular?: boolean;
 }
 
 interface HomeSectionProps {
@@ -31,6 +32,12 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
   console.log('HomeSection render - products count:', products?.length, 'products:', products);
   const showNewYearBanner = siteSettings?.holiday_theme === 'new_year';
   const holidayTheme = siteSettings?.holiday_theme || 'none';
+  
+  const sortedProducts = [...products].sort((a, b) => {
+    if (a.is_popular && !b.is_popular) return -1;
+    if (!a.is_popular && b.is_popular) return 1;
+    return 0;
+  });
   
   const isPreorderActive = () => {
     if (!siteSettings?.preorder_enabled) return false;
@@ -178,7 +185,7 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
           <p className="text-muted-foreground">Выбор наших покупателей</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.slice(0, 6).map(product => (
+          {sortedProducts.slice(0, 6).map(product => (
             <ProductCard 
               key={product.id} 
               product={product} 
