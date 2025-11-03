@@ -8,8 +8,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     Args: event with httpMethod, body, queryStringParameters
     Returns: HTTP response with products data
     '''
-    import psycopg2
-    from psycopg2.extras import RealDictCursor
+    try:
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
+    except ImportError as e:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': f'Import error: {str(e)}'}),
+            'isBase64Encoded': False
+        }
     
     method: str = event.get('httpMethod', 'GET')
     
@@ -27,8 +35,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     db_url = os.environ.get('DATABASE_URL')
-    conn = psycopg2.connect(db_url)
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    if not db_url:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'DATABASE_URL not configured'}),
+            'isBase64Encoded': False
+        }
+    
+    try:
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': f'Database connection error: {str(e)}'}),
+            'isBase64Encoded': False
+        }
     
     try:
         if method == 'GET':
