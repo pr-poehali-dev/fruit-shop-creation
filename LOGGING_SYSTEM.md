@@ -129,6 +129,50 @@ logger.logLoyaltyCardPurchase('Gold', 500);
 logger.logButtonClick('checkout', 'cart_page');
 ```
 
+## Где интегрировано
+
+Логирование автоматически работает в следующих компонентах:
+
+✅ **src/pages/Index.tsx**
+- Переход между разделами
+- Просмотр деталей товара
+- Добавление в корзину
+- Удаление из корзины (через useCart)
+- Добавление/удаление избранного
+
+✅ **src/hooks/useAuth.ts**
+- Вход в систему
+- Регистрация
+- Выход из системы
+
+✅ **src/hooks/useCart.ts**
+- Удаление товаров из корзины (при quantity = 0)
+
+✅ **src/components/shop/hooks/useCheckout.ts**
+- Создание заказа
+
+✅ **src/components/shop/LoyaltyCard.tsx**
+- Покупка карты лояльности
+- Разблокировка карты за покупки
+
+✅ **src/components/shop/CashbackExchange.tsx**
+- Обмен кэшбэка на баланс
+
+✅ **src/components/shop/profile/OrdersTab.tsx**
+- Отмена заказа
+
+✅ **src/components/shop/profile/DeliveryPaymentDialog.tsx**
+- Оплата доставки
+
+✅ **src/components/shop/profile/SecondPaymentDialog.tsx**
+- Оплата второй части предзаказа
+
+✅ **src/components/shop/profile/ProfileHeader.tsx**
+- Обновление аватара профиля
+
+✅ **src/components/shop/profile/SettingsTab.tsx**
+- Смена темы
+
 ## Просмотр логов
 
 Логи доступны в админ-панели:

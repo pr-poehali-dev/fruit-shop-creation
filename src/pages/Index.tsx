@@ -23,7 +23,13 @@ import { Product } from '@/types/shop';
 const Index = () => {
   const { toast } = useToast();
   const { user, setUser, isRefreshingBalance, setIsRefreshingBalance, handleAuth, handleDirectLogin, handleLogout, banInfo, clearBanInfo } = useAuth();
-  const { cart, addToCart, updateCartQuantity, getTotalPrice, clearCart } = useCart();
+  const logger = useUserActivityLogger({ userId: user?.id, isAuthenticated: !!user });
+  
+  const { cart, addToCart, updateCartQuantity, getTotalPrice, clearCart } = useCart({
+    onRemoveFromCart: (productId, productName) => {
+      logger.logRemoveFromCart(productId, productName);
+    }
+  });
   const {
     products,
     categories,
@@ -37,8 +43,13 @@ const Index = () => {
     refreshUserBalance,
     API_ORDERS
   } = useShopData();
-  const { favorites, favoriteIds, toggleFavorite } = useFavorites(user?.id || null);
-  const logger = useUserActivityLogger({ userId: user?.id, isAuthenticated: !!user });
+  const { favorites, favoriteIds, toggleFavorite: originalToggleFavorite } = useFavorites(user?.id || null);
+  
+  const toggleFavorite = (productId: number, productName: string) => {
+    const isCurrentlyFavorite = favoriteIds.has(productId);
+    originalToggleFavorite(productId, productName);
+    logger.logToggleFavorite(productId, productName, !isCurrentlyFavorite);
+  };
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);

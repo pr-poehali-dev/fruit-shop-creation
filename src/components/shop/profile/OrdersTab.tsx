@@ -3,6 +3,7 @@ import { Order } from '@/types/shop';
 import OrderItem from './OrderItem';
 import DeliveryPaymentDialog from './DeliveryPaymentDialog';
 import SecondPaymentDialog from './SecondPaymentDialog';
+import { logUserAction } from '@/utils/userLogger';
 
 interface OrdersTabProps {
   orders: Order[];
@@ -35,6 +36,13 @@ const OrdersTab = ({ orders, userId, userBalance, userEmail, onOrderUpdate }: Or
       const data = await response.json();
       
       if (data.success) {
+        await logUserAction(
+          userId,
+          'order_cancel',
+          `Отмена заказа #${orderId}`,
+          'order',
+          orderId
+        );
         onOrderUpdate();
         alert('Заказ успешно отменён. Средства и кэшбэк обновлены.');
       } else {

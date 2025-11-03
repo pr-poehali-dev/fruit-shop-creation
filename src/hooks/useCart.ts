@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { CartItem, Product } from '@/types/shop';
 
-export const useCart = () => {
+interface UseCartProps {
+  onRemoveFromCart?: (productId: number, productName: string) => void;
+}
+
+export const useCart = (props?: UseCartProps) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const onRemoveFromCart = props?.onRemoveFromCart;
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -48,6 +53,17 @@ export const useCart = () => {
 
   const updateCartQuantity = (productId: number, quantity: number, selectedSize?: string) => {
     if (quantity <= 0) {
+      const itemToRemove = cart.find(item => {
+        if (selectedSize) {
+          return item.product.id === productId && (item.product as any).selectedSize === selectedSize;
+        }
+        return item.product.id === productId;
+      });
+      
+      if (itemToRemove && onRemoveFromCart) {
+        onRemoveFromCart(itemToRemove.product.id, itemToRemove.product.name);
+      }
+      
       setCart(cart.filter(item => {
         if (selectedSize) {
           return !(item.product.id === productId && (item.product as any).selectedSize === selectedSize);

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
 import SBPTopUpDialog from '../SBPTopUpDialog';
+import { logUserAction } from '@/utils/userLogger';
 
 interface ProfileHeaderProps {
   user: User | null;
@@ -39,6 +40,14 @@ const ProfileHeader = ({ user, siteSettings, onShowAdminPanel, onUserUpdate }: P
       const data = await response.json();
 
       if (data.success) {
+        await logUserAction(
+          user.id,
+          'profile_update',
+          'Обновление аватара профиля',
+          'user',
+          user.id,
+          { avatar }
+        );
         const updatedUser = { ...user, avatar: data.avatar };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         onUserUpdate(updatedUser);
