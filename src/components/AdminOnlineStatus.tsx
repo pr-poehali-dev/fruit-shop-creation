@@ -112,7 +112,7 @@ export default function AdminOnlineStatus() {
       <div className="space-y-3">
         {onlineAdmins.length > 0 && (
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Онлайн</p>
+
             <div className="space-y-2">
               {onlineAdmins.map(admin => (
                 <div key={admin.id} className="flex items-center gap-3 p-2 rounded-lg bg-green-500/10">
@@ -122,7 +122,6 @@ export default function AdminOnlineStatus() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{admin.full_name}</p>
-                    <p className="text-xs text-green-600">В сети</p>
                   </div>
                 </div>
               ))}
@@ -132,7 +131,7 @@ export default function AdminOnlineStatus() {
 
         {offlineAdmins.length > 0 && (
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Не в сети</p>
+
             <div className="space-y-2">
               {offlineAdmins.map(admin => (
                 <div key={admin.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
