@@ -474,23 +474,36 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if user_referral and user_referral['referred_by_code']:
                 referral_code = user_referral['referred_by_code']
                 cur.execute(
-                    f"SELECT rc.user_id, r.id as referral_id, r.first_order_total FROM t_p77282076_fruit_shop_creation.referral_codes rc LEFT JOIN t_p77282076_fruit_shop_creation.referrals r ON r.referred_id = {user_id} WHERE rc.referral_code = '{referral_code}'"
+                    f"SELECT rc.user_id, r.id as referral_id, r.first_order_total, r.reward_given FROM t_p77282076_fruit_shop_creation.referral_codes rc LEFT JOIN t_p77282076_fruit_shop_creation.referrals r ON r.referred_id = {user_id} WHERE rc.referral_code = '{referral_code}'"
                 )
                 referrer_data = cur.fetchone()
                 if referrer_data and referrer_data['user_id']:
                     referrer_id = referrer_data['user_id']
                     existing_referral_id = referrer_data.get('referral_id')
                     previous_order_total = referrer_data.get('first_order_total')
+                    reward_already_given = referrer_data.get('reward_given')
                     
                     if not existing_referral_id:
                         cur.execute(
-                            f"INSERT INTO t_p77282076_fruit_shop_creation.referrals (referrer_id, referred_id, referral_code, first_order_total) VALUES ({referrer_id}, {user_id}, '{referral_code}', {full_order_amount})"
-                        )
-                    elif previous_order_total is None or float(previous_order_total) < 1500:
-                        cur.execute(
-                            f"UPDATE t_p77282076_fruit_shop_creation.referrals SET first_order_total = {full_order_amount} WHERE id = {existing_referral_id}"
+                            f"INSERT INTO t_p77282076_fruit_shop_creation.referrals (referrer_id, referred_id, referral_code, first_order_total, reward_given) VALUES ({referrer_id}, {user_id}, '{referral_code}', {full_order_amount}, {str(full_order_amount >= 1500).lower()})"
                         )
                         if full_order_amount >= 1500:
+                            cur.execute(
+                                f"UPDATE users SET balance = balance + 500 WHERE id = {referrer_id}"
+                            )
+                            cur.execute(
+                                f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({referrer_id}, 'referral_bonus', 500, 'Бонус за приглашение друга (заказ от 1500₽)')"
+                            )
+                            print(f"Referral bonus 500₽ auto-credited to user {referrer_id} for referred user {user_id} (order #{order_id}, amount {full_order_amount}₽)")
+                    elif not reward_already_given:
+                        current_total = float(previous_order_total or 0)
+                        new_total = current_total + full_order_amount
+                        
+                        cur.execute(
+                            f"UPDATE t_p77282076_fruit_shop_creation.referrals SET first_order_total = {new_total} WHERE id = {existing_referral_id}"
+                        )
+                        
+                        if new_total >= 1500:
                             cur.execute(
                                 f"UPDATE t_p77282076_fruit_shop_creation.referrals SET reward_given = TRUE WHERE id = {existing_referral_id}"
                             )
@@ -498,8 +511,11 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                                 f"UPDATE users SET balance = balance + 500 WHERE id = {referrer_id}"
                             )
                             cur.execute(
-                                f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({referrer_id}, 'referral_bonus', 500, 'Бонус за приглашение друга (заказ от 1500₽)')"
+                                f"INSERT INTO transactions (user_id, type, amount, description) VALUES ({referrer_id}, 'referral_bonus', 500, 'Бонус за приглашение друга (накоплено {new_total}₽)')"
                             )
+                            print(f"Referral bonus 500₽ auto-credited to user {referrer_id} for referred user {user_id} (accumulated {new_total}₽ from multiple orders)")
+                        else:
+                            print(f"Referral progress updated: user {user_id} accumulated {new_total}₽ out of required 1500₽")
             
             conn.commit()
             
