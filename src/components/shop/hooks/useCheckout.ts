@@ -237,6 +237,25 @@ export const useCheckout = ({
           }
         );
         
+        try {
+          await fetch('https://functions.poehali.dev/fc281a64-4d76-4cbd-9ae6-6cf970c14f35', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'send_vk_order_notification',
+              orderId: data.order_id,
+              userName: user.name || 'Не указано',
+              userPhone: user.phone || 'Не указано',
+              totalPrice: totalAmount,
+              paymentMethod: paymentMethod,
+              deliveryType: deliveryType,
+              items: cart.map(item => ({ name: item.product.name }))
+            })
+          });
+        } catch (e) {
+          console.error('VK notification failed:', e);
+        }
+        
         const orderMessage = isPreorder
           ? paymentMethod === 'balance'
             ? `Заказ #${data.order_id}. Оплачена предоплата 50% товаров (${totalAmount.toFixed(2)}₽). Доставка оплачивается отдельно. Кэшбэк ${siteSettings?.balance_payment_cashback_percent || 5}%!`
