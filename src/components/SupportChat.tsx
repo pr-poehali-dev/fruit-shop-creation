@@ -319,7 +319,7 @@ export default function SupportChat() {
       {!isOpen && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-50"
+          className="fixed bottom-24 right-6 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-50"
           aria-label="Открыть чат поддержки"
         >
           <MessageCircle size={28} />
