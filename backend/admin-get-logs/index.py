@@ -18,11 +18,83 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, Accept, Cache-Control, X-User-Id, X-Auth-Token, X-Session-Id',
                 'Access-Control-Max-Age': '86400'
             },
             'body': ''
+        }
+    
+    dsn = os.environ.get('DATABASE_URL')
+    if not dsn:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({'error': 'Database not configured'})
+        }
+    
+    if method == 'POST':
+        body_data = json.loads(event.get('body', '{}'))
+        log_type = body_data.get('type', 'user')
+        action = body_data.get('action', 'create')
+        
+        if action != 'create':
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'error': 'Invalid action'})
+            }
+        
+        user_id = body_data.get('user_id')
+        action_type = body_data.get('action_type')
+        action_description = body_data.get('action_description')
+        target_entity_type = body_data.get('target_entity_type')
+        target_entity_id = body_data.get('target_entity_id')
+        metadata = body_data.get('metadata', {})
+        
+        if not user_id or not action_type or not action_description:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({'error': 'Missing required fields'})
+            }
+        
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        headers = event.get('headers', {})
+        ip_address = headers.get('X-Forwarded-For', headers.get('X-Real-IP'))
+        user_agent = headers.get('User-Agent')
+        
+        cur.execute("""
+            INSERT INTO user_logs 
+            (user_id, action_type, action_description, target_entity_type, target_entity_id, metadata, ip_address, user_agent)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (user_id, action_type, action_description, target_entity_type, target_entity_id, json.dumps(metadata), ip_address, user_agent))
+        
+        result = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'isBase64Encoded': False,
+            'body': json.dumps({'success': True, 'log_id': result['id']})
         }
     
     if method != 'GET':
@@ -42,17 +114,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     action_type = params.get('action_type', '')
     
     offset = (page - 1) * limit
-    
-    dsn = os.environ.get('DATABASE_URL')
-    if not dsn:
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            'body': json.dumps({'error': 'Database not configured'})
-        }
     
     conn = psycopg2.connect(dsn)
     cur = conn.cursor(cursor_factory=RealDictCursor)

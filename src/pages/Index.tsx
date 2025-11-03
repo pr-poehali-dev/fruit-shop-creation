@@ -6,6 +6,7 @@ import { useShopData } from '@/hooks/useShopData';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCheckout } from '@/components/shop/hooks/useCheckout';
 import { useAdminAuth } from '@/components/shop/hooks/useAdminAuth';
+import { useUserActivityLogger } from '@/hooks/useUserActivityLogger';
 import { getBackgroundStyle } from '@/components/shop/utils/themeHelpers';
 import Header from '@/components/shop/Header';
 import AuthDialog from '@/components/shop/AuthDialog';
@@ -37,6 +38,7 @@ const Index = () => {
     API_ORDERS
   } = useShopData();
   const { favorites, favoriteIds, toggleFavorite } = useFavorites(user?.id || null);
+  const logger = useUserActivityLogger({ userId: user?.id, isAuthenticated: !!user });
 
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -47,6 +49,8 @@ const Index = () => {
   const handleSectionChange = (section: string) => {
     setCurrentSection(section);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    logger.logPageView(section);
   };
 
   const { handleCheckout } = useCheckout({
@@ -112,11 +116,20 @@ const Index = () => {
       title: 'Добавлено в корзину',
       description: product.name
     });
+    
+    logger.logAddToCart(
+      product.id,
+      product.name,
+      product.selected_variant_id,
+      product.selected_variant_price || product.base_price
+    );
   };
 
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
     setIsProductGalleryOpen(true);
+    
+    logger.logProductView(product.id, product.name);
   };
 
   const onLogout = () => {

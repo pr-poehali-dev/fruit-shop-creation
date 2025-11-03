@@ -97,9 +97,14 @@ const LogsTab = () => {
       'user_update': 'UserCog',
       'balance_add': 'Plus',
       'balance_subtract': 'Minus',
+      'balance_deduct': 'Minus',
       'loyalty_add': 'Award',
       'loyalty_subtract': 'TrendingDown',
       'order_update': 'ShoppingCart',
+      'order_create': 'ShoppingBag',
+      'order_cancel': 'XCircle',
+      'order_preorder_payment': 'CreditCard',
+      'order_delivery_payment': 'Truck',
       'product_update': 'Package',
       'settings_update': 'Settings',
       'admin_grant': 'Shield',
@@ -108,38 +113,69 @@ const LogsTab = () => {
       'cashback_exchange': 'ArrowLeftRight',
       'loyalty_card_purchase': 'CreditCard',
       'order_payment': 'Wallet',
+      'balance_top_up': 'ArrowUp',
       'theme_change': 'Palette',
+      'page_view': 'Eye',
+      'button_click': 'MousePointerClick',
+      'product_view': 'Eye',
       'view_product': 'Eye',
       'add_to_cart': 'ShoppingCart',
+      'product_add_to_cart': 'ShoppingCart',
+      'product_remove_from_cart': 'Trash2',
       'add_to_favorites': 'Heart',
-      'remove_from_favorites': 'HeartOff'
+      'product_add_to_favorites': 'Heart',
+      'remove_from_favorites': 'HeartOff',
+      'product_remove_from_favorites': 'HeartOff',
+      'auth_login': 'LogIn',
+      'auth_logout': 'LogOut',
+      'support_message': 'MessageCircle',
+      'rating_submit': 'Star',
+      'profile_update': 'User'
     };
     return icons[actionType] || 'Activity';
   };
 
   const getActionColor = (actionType: string) => {
     const colors: Record<string, string> = {
-      'user_update': 'text-blue-600',
-      'balance_add': 'text-green-600',
-      'balance_subtract': 'text-red-600',
-      'loyalty_add': 'text-purple-600',
-      'loyalty_subtract': 'text-orange-600',
-      'order_update': 'text-indigo-600',
-      'product_update': 'text-teal-600',
-      'settings_update': 'text-gray-600',
-      'admin_grant': 'text-emerald-600',
-      'admin_revoke': 'text-rose-600',
-      'permissions_update': 'text-amber-600',
-      'cashback_exchange': 'text-green-600',
-      'loyalty_card_purchase': 'text-purple-600',
-      'order_payment': 'text-blue-600',
-      'theme_change': 'text-slate-600',
-      'view_product': 'text-cyan-600',
-      'add_to_cart': 'text-indigo-600',
-      'add_to_favorites': 'text-pink-600',
-      'remove_from_favorites': 'text-gray-600'
+      'user_update': 'text-blue-600 dark:text-blue-400',
+      'balance_add': 'text-green-600 dark:text-green-400',
+      'balance_subtract': 'text-red-600 dark:text-red-400',
+      'balance_deduct': 'text-red-600 dark:text-red-400',
+      'balance_top_up': 'text-green-600 dark:text-green-400',
+      'loyalty_add': 'text-purple-600 dark:text-purple-400',
+      'loyalty_subtract': 'text-orange-600 dark:text-orange-400',
+      'order_update': 'text-indigo-600 dark:text-indigo-400',
+      'order_create': 'text-blue-600 dark:text-blue-400',
+      'order_cancel': 'text-red-600 dark:text-red-400',
+      'order_preorder_payment': 'text-green-600 dark:text-green-400',
+      'order_delivery_payment': 'text-green-600 dark:text-green-400',
+      'product_update': 'text-teal-600 dark:text-teal-400',
+      'settings_update': 'text-gray-600 dark:text-gray-400',
+      'admin_grant': 'text-emerald-600 dark:text-emerald-400',
+      'admin_revoke': 'text-rose-600 dark:text-rose-400',
+      'permissions_update': 'text-amber-600 dark:text-amber-400',
+      'cashback_exchange': 'text-green-600 dark:text-green-400',
+      'loyalty_card_purchase': 'text-purple-600 dark:text-purple-400',
+      'order_payment': 'text-blue-600 dark:text-blue-400',
+      'theme_change': 'text-slate-600 dark:text-slate-400',
+      'page_view': 'text-cyan-600 dark:text-cyan-400',
+      'button_click': 'text-slate-600 dark:text-slate-400',
+      'product_view': 'text-cyan-600 dark:text-cyan-400',
+      'view_product': 'text-cyan-600 dark:text-cyan-400',
+      'add_to_cart': 'text-indigo-600 dark:text-indigo-400',
+      'product_add_to_cart': 'text-indigo-600 dark:text-indigo-400',
+      'product_remove_from_cart': 'text-red-600 dark:text-red-400',
+      'add_to_favorites': 'text-pink-600 dark:text-pink-400',
+      'product_add_to_favorites': 'text-pink-600 dark:text-pink-400',
+      'remove_from_favorites': 'text-gray-600 dark:text-gray-400',
+      'product_remove_from_favorites': 'text-gray-600 dark:text-gray-400',
+      'auth_login': 'text-green-600 dark:text-green-400',
+      'auth_logout': 'text-gray-600 dark:text-gray-400',
+      'support_message': 'text-blue-600 dark:text-blue-400',
+      'rating_submit': 'text-yellow-600 dark:text-yellow-400',
+      'profile_update': 'text-blue-600 dark:text-blue-400'
     };
-    return colors[actionType] || 'text-gray-600';
+    return colors[actionType] || 'text-gray-600 dark:text-gray-400';
   };
 
   const filteredAdminLogs = adminLogs.filter(log => {
@@ -166,13 +202,12 @@ const LogsTab = () => {
 
   const actionTypes = [
     { value: 'all', label: 'Все действия' },
-    { value: 'user_update', label: 'Изменения пользователей' },
-    { value: 'balance_add', label: 'Пополнение баланса' },
-    { value: 'balance_subtract', label: 'Списание баланса' },
-    { value: 'loyalty_add', label: 'Начисление баллов' },
-    { value: 'loyalty_subtract', label: 'Списание баллов' },
-    { value: 'order_update', label: 'Изменения заказов' },
-    { value: 'permissions_update', label: 'Изменения прав' }
+    { value: 'balance_add', label: 'Пополнение' },
+    { value: 'balance_deduct', label: 'Списание' },
+    { value: 'order_create', label: 'Заказы' },
+    { value: 'product_view', label: 'Просмотры' },
+    { value: 'product_add_to_cart', label: 'В корзину' },
+    { value: 'auth_login', label: 'Входы' }
   ];
 
   return (
