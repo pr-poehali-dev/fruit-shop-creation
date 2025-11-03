@@ -102,7 +102,9 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
             {order.custom_delivery_price !== null && order.custom_delivery_price !== undefined && (
               <div className="flex justify-between text-xs sm:text-sm gap-2">
                 <span className="text-muted-foreground">Доставка:</span>
-                <span className="font-bold text-primary">{order.custom_delivery_price}₽</span>
+                <span className={`font-bold ${order.delivery_price_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
+                  {order.custom_delivery_price}₽ {order.delivery_price_paid && '✓'}
+                </span>
               </div>
             )}
           </div>

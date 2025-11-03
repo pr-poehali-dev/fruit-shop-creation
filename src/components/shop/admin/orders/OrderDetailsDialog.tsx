@@ -87,6 +87,11 @@ export const OrderDetailsDialog = ({
                     (Зона #{order.delivery_zone_id})
                   </span>
                 )}
+                {order.custom_delivery_price && (
+                  <span className={`ml-2 text-xs font-bold ${order.delivery_price_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
+                    {order.custom_delivery_price}₽ {order.delivery_price_paid && '✓ Оплачена'}
+                  </span>
+                )}
               </div>
             </div>
             <div className="col-span-2">

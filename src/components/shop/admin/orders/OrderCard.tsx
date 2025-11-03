@@ -132,8 +132,8 @@ export const OrderCard = ({
               </span>
             )}
             {order.custom_delivery_price && (
-              <span className="ml-1 text-xs font-bold text-primary">
-                {order.custom_delivery_price}₽
+              <span className={`ml-1 text-xs font-bold ${order.delivery_price_paid ? 'text-green-600 dark:text-green-400' : 'text-primary'}`}>
+                {order.custom_delivery_price}₽ {order.delivery_price_paid && '✓'}
               </span>
             )}
           </div>
