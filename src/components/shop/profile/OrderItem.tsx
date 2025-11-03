@@ -193,9 +193,11 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
                     }, 0);
                   
                   const amountPaid = parseFloat(order.amount_paid || '0');
-                  const isFullyPaid = amountPaid >= totalAmount;
+                  const secondPaymentPaid = order.second_payment_paid || false;
+                  const isFullyPaid = !order.is_preorder && amountPaid >= totalAmount;
+                  const isPreorderFullyPaid = order.is_preorder && secondPaymentPaid;
 
-                  if (isFullyPaid) {
+                  if (isFullyPaid || isPreorderFullyPaid) {
                     return (
                       <div className="bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-700 rounded p-2">
                         <div className="flex items-center justify-center gap-2">
