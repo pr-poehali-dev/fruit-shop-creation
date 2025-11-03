@@ -199,6 +199,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         conn.close()
 
 
+
 def send_telegram_notification(user_name: str, phone: str, reset_code: str):
     '''Отправка уведомления администратору в Telegram'''
     bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')

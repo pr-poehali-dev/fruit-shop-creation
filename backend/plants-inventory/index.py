@@ -79,6 +79,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
 
 
+
 def handle_get(conn, headers: Dict[str, str]) -> Dict[str, Any]:
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute('''
