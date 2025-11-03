@@ -11,12 +11,12 @@ import urllib.request
 import urllib.parse
 from typing import Dict, Any
 
-def send_vk_notification(order_data: Dict[str, Any]) -> bool:
-    '''Send order notification to VK admin'''
-    vk_token = os.environ.get('VK_BOT_TOKEN')
-    vk_admin_id = os.environ.get('VK_ADMIN_USER_ID')
+def send_telegram_notification(order_data: Dict[str, Any]) -> bool:
+    '''Send order notification to Telegram admin'''
+    telegram_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+    telegram_chat_id = os.environ.get('ADMIN_TELEGRAM_CHAT_ID')
     
-    if not vk_token or not vk_admin_id:
+    if not telegram_token or not telegram_chat_id:
         return False
     
     order_id = order_data.get('orderId', 'N/A')
@@ -54,21 +54,18 @@ def send_vk_notification(order_data: Dict[str, Any]) -> bool:
     
     try:
         params = {
-            'user_id': vk_admin_id,
-            'message': message,
-            'access_token': vk_token,
-            'v': '5.131',
-            'random_id': 0
+            'chat_id': telegram_chat_id,
+            'text': message
         }
         
-        url = 'https://api.vk.com/method/messages.send'
+        url = f'https://api.telegram.org/bot{telegram_token}/sendMessage'
         data = urllib.parse.urlencode(params).encode('utf-8')
         
         req = urllib.request.Request(url, data=data)
         response = urllib.request.urlopen(req)
         result = json.loads(response.read().decode('utf-8'))
         
-        return 'error' not in result
+        return result.get('ok', False)
     except:
         return False
 
@@ -194,8 +191,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'body': json.dumps({'success': True})
                 }
             
-            elif action == 'send_vk_order_notification':
-                vk_sent = send_vk_notification(body_data)
+            elif action == 'send_telegram_order_notification':
+                telegram_sent = send_telegram_notification(body_data)
                 
                 return {
                     'statusCode': 200,
@@ -203,7 +200,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False,
                     'body': json.dumps({
                         'success': True,
-                        'vk_sent': vk_sent
+                        'telegram_sent': telegram_sent
                     })
                 }
             

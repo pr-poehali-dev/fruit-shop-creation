@@ -242,7 +242,7 @@ export const useCheckout = ({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              action: 'send_vk_order_notification',
+              action: 'send_telegram_order_notification',
               orderId: data.order_id,
               userName: user.name || 'Не указано',
               userPhone: user.phone || 'Не указано',
@@ -253,7 +253,7 @@ export const useCheckout = ({
             })
           });
         } catch (e) {
-          console.error('VK notification failed:', e);
+          console.error('Telegram notification failed:', e);
         }
         
         const orderMessage = isPreorder
