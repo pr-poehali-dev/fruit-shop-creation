@@ -193,7 +193,9 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
                     }, 0);
                   
                   const amountPaid = parseFloat(order.amount_paid || '0');
-                  const isFullyPaid = amountPaid >= totalAmount;
+                  const deliveryPaid = order.delivery_price_paid ? parseFloat(order.custom_delivery_price || '0') : 0;
+                  const totalPaid = amountPaid + deliveryPaid;
+                  const isFullyPaid = totalPaid >= totalAmount;
 
                   if (isFullyPaid) {
                     return (
