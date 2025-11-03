@@ -4,37 +4,6 @@ import { Button } from '@/components/ui/button';
 
 const SUPPORT_CHAT_URL = 'https://functions.poehali.dev/98c69bc9-5dec-4d0e-b5d8-8abc20d4db4d';
 
-const fetchWithRetry = async (url: string, options?: RequestInit, retries = 5, delay = 800) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          ...(options?.headers || {}),
-        },
-        mode: 'cors',
-        signal: controller.signal,
-      });
-      
-      clearTimeout(timeoutId);
-      if (response.ok) return response;
-      
-      if (i < retries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-      }
-    } catch (error) {
-      if (i === retries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-    }
-  }
-  throw new Error('Max retries reached');
-};
-
 interface Message {
   id: number;
   sender_type: 'user' | 'bot' | 'admin';
@@ -127,7 +96,7 @@ export default function SupportChat() {
 
   const loadFaqs = async () => {
     try {
-      const response = await fetchWithRetry(`${SUPPORT_CHAT_URL}?faq=true`);
+      const response = await fetch(`${SUPPORT_CHAT_URL}?faq=true`);
       const data = await response.json();
       const activeFaqs = Array.isArray(data) ? data.filter((f: any) => f.is_active) : [];
       setFaqs(activeFaqs);
@@ -141,12 +110,13 @@ export default function SupportChat() {
     if (!chatUserId) return;
 
     try {
-      const isGuest = !userId;
-      const response = await fetchWithRetry(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
+      const isGuest = !userId;  // Если нет userId - значит гость
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
       const data = await response.json();
       setChat(data.chat);
       setMessages(data.messages || []);
       
+      // Показываем FAQ только если статус 'bot' и нет пользовательских сообщений
       if (data.chat?.status === 'bot') {
         const hasUserMessages = (data.messages || []).some((m: Message) => m.sender_type === 'user');
         setShowFaqs(!hasUserMessages);
@@ -158,13 +128,14 @@ export default function SupportChat() {
     }
   };
 
+  // Тихое обновление без перезагрузки UI
   const loadChatSilent = async () => {
     const chatUserId = userId || guestId;
     if (!chatUserId) return;
 
     try {
-      const isGuest = !userId;
-      const response = await fetchWithRetry(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
+      const isGuest = !userId;  // Если нет userId - значит гость
+      const response = await fetch(`${SUPPORT_CHAT_URL}?user_id=${chatUserId}&is_guest=${isGuest}`);
       const data = await response.json();
       
       // Обновляем статус чата
@@ -216,7 +187,7 @@ export default function SupportChat() {
     setMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      const response = await fetchWithRetry(SUPPORT_CHAT_URL, {
+      const response = await fetch(SUPPORT_CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -224,7 +195,7 @@ export default function SupportChat() {
           user_id: chatUserId,
           chat_id: chat.id,
           message: messageText,
-          is_guest: !userId,
+          is_guest: !userId,  // Просто проверяем есть ли userId
         }),
       });
 

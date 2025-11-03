@@ -97,14 +97,6 @@ const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, o
     <div>
       <h2 className="text-4xl font-display font-bold mb-8">Каталог растений</h2>
       
-      {/* Debug info */}
-      <div className="mb-4 p-4 bg-muted rounded-lg">
-        <p className="text-sm">Всего товаров: {products.length}</p>
-        <p className="text-sm">Отфильтровано: {filteredProducts.length}</p>
-        <p className="text-sm">Активная категория: {activeCategory}</p>
-        <p className="text-sm">Поиск: {searchQuery || 'нет'}</p>
-      </div>
-      
       <div className="mb-6 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">

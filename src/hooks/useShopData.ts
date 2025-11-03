@@ -7,47 +7,21 @@ const API_ORDERS = 'https://functions.poehali.dev/b35bef37-8423-4939-b43b-0fb565
 const API_SETTINGS = 'https://functions.poehali.dev/9b1ac59e-93b6-41de-8974-a7f58d4ffaf9';
 const API_CATEGORIES = 'https://functions.poehali.dev/0a62d37c-9fd0-4ff3-9b5b-2c881073d3ac';
 
-const fetchWithRetry = async (url: string, retries = 5, delay = 800) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        mode: 'cors',
-        signal: controller.signal,
-      });
-      
-      clearTimeout(timeoutId);
-      if (response.ok) return response;
-      
-      if (i < retries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-      }
-    } catch (error) {
-      if (i === retries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-    }
-  }
-  throw new Error('Max retries reached');
-};
-
 export const useShopData = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [siteSettings, setSiteSettings] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadProducts = async () => {
     try {
-      const response = await fetchWithRetry(API_PRODUCTS);
+      const response = await fetch(API_PRODUCTS);
+      if (!response.ok) {
+        console.error('Products API error:', response.status);
+        setProducts([]);
+        return;
+      }
       const data = await response.json();
       console.log('Products loaded:', data.products?.length || 0);
       setProducts(data.products || []);
@@ -59,7 +33,12 @@ export const useShopData = () => {
 
   const loadCategories = async () => {
     try {
-      const response = await fetchWithRetry(API_CATEGORIES);
+      const response = await fetch(API_CATEGORIES);
+      if (!response.ok) {
+        console.error('Categories API error:', response.status);
+        setCategories([]);
+        return;
+      }
       const data = await response.json();
       console.log('Categories loaded:', data.categories?.length || 0);
       setCategories(data.categories || []);
@@ -71,7 +50,17 @@ export const useShopData = () => {
 
   const loadSettings = async () => {
     try {
-      const response = await fetchWithRetry(`${API_SETTINGS}?t=${Date.now()}`);
+      const response = await fetch(`${API_SETTINGS}?t=${Date.now()}`);
+      if (!response.ok) {
+        console.error('Settings API error:', response.status);
+        setSiteSettings({
+          site_name: 'Питомник растений',
+          site_description: 'Плодовые и декоративные культуры',
+          phone: '+7 (495) 123-45-67',
+          email: 'info@plantsnursery.ru'
+        });
+        return;
+      }
       const data = await response.json();
       console.log('Settings loaded:', data.settings);
       setSiteSettings(data.settings || {});
@@ -92,7 +81,12 @@ export const useShopData = () => {
       return;
     }
     try {
-      const response = await fetchWithRetry(`${API_ORDERS}?user_id=${user.id}`);
+      const response = await fetch(`${API_ORDERS}?user_id=${user.id}`);
+      if (!response.ok) {
+        console.error('Orders API error:', response.status);
+        setOrders([]);
+        return;
+      }
       const data = await response.json();
       console.log('Orders loaded:', data.orders?.length || 0);
       setOrders(data.orders || []);
@@ -112,7 +106,7 @@ export const useShopData = () => {
 
     setIsRefreshingBalance(true);
     try {
-      const response = await fetchWithRetry(`${API_AUTH}?action=balance&user_id=${user.id}`);
+      const response = await fetch(`${API_AUTH}?action=balance&user_id=${user.id}`);
       const data = await response.json();
 
       const updatedUser = {
@@ -132,15 +126,8 @@ export const useShopData = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      try {
-        setLoadError(null);
-        await Promise.all([loadProducts(), loadCategories(), loadSettings()]);
-      } catch (error) {
-        console.error('Critical load error:', error);
-        setLoadError('Не удалось загрузить данные. Проверьте подключение к интернету.');
-      } finally {
-        setIsLoading(false);
-      }
+      await Promise.all([loadProducts(), loadCategories(), loadSettings()]);
+      setIsLoading(false);
     };
     loadData();
   }, []);
@@ -151,7 +138,6 @@ export const useShopData = () => {
     orders,
     siteSettings,
     isLoading,
-    loadError,
     loadProducts,
     loadSettings,
     loadOrders,
