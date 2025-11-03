@@ -29,6 +29,7 @@ const Index = () => {
     orders,
     siteSettings,
     isLoading,
+    loadError,
     loadProducts,
     loadSettings,
     loadOrders,
@@ -79,6 +80,17 @@ const Index = () => {
       setShowAuthDialog(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (loadError) {
+      toast({
+        title: 'Ошибка загрузки',
+        description: loadError,
+        variant: 'destructive',
+        duration: 5000,
+      });
+    }
+  }, [loadError]);
 
   useEffect(() => {
     const isMaintenanceActive = checkScheduledMaintenance();
