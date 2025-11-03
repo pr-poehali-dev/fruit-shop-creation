@@ -25,7 +25,7 @@ const App = () => {
 
   useEffect(() => {
     const clearCacheIfNeeded = () => {
-      const CACHE_VERSION = '1.0.0';
+      const CACHE_VERSION = '1.0.1';
       const currentVersion = localStorage.getItem('cacheVersion');
       
       if (currentVersion !== CACHE_VERSION) {
