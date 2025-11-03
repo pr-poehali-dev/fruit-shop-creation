@@ -117,7 +117,7 @@ export default function AdminOnlineStatus() {
               {onlineAdmins.map(admin => (
                 <div key={admin.id} className="flex items-center gap-3 p-2 rounded-lg bg-green-500/10">
                   <div className="relative">
-                    <div className="text-2xl">{admin.avatar}</div>
+                    <div className="text-2xl">{admin.avatar && !admin.avatar.startsWith('http') ? admin.avatar : '👤'}</div>
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card"></div>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -136,7 +136,7 @@ export default function AdminOnlineStatus() {
               {offlineAdmins.map(admin => (
                 <div key={admin.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
                   <div className="relative">
-                    <div className="text-2xl opacity-60">{admin.avatar}</div>
+                    <div className="text-2xl opacity-60">{admin.avatar && !admin.avatar.startsWith('http') ? admin.avatar : '👤'}</div>
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-muted-foreground rounded-full border-2 border-card"></div>
                   </div>
                   <div className="flex-1 min-w-0">

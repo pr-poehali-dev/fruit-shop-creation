@@ -151,11 +151,10 @@ export default function AdminTeamChat() {
             const isOwn = msg.user_id === user.id;
             return (
               <div key={msg.id} className={`flex gap-2 ${isOwn ? 'flex-row-reverse' : ''}`}>
-                <div className="text-xl flex-shrink-0">{msg.avatar}</div>
+                <div className="text-xl flex-shrink-0">
+                  {msg.avatar && !msg.avatar.startsWith('http') ? msg.avatar : '👤'}
+                </div>
                 <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[70%]`}>
-                  {!isOwn && (
-                    <p className="text-xs text-muted-foreground mb-1">{msg.full_name}</p>
-                  )}
                   <div className={`rounded-lg px-3 py-2 ${isOwn ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                     <p className="text-sm break-words">{msg.message}</p>
                   </div>
