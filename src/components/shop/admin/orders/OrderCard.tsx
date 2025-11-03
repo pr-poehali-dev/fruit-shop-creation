@@ -91,12 +91,19 @@ export const OrderCard = ({
                   <span className="text-orange-700 dark:text-orange-300">Доставка:</span>
                   <span className="font-bold text-green-700 dark:text-green-300">{order.custom_delivery_price}₽ ✓</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-orange-700 dark:text-orange-300">Осталось доплатить:</span>
-                  <span className="font-bold text-orange-900 dark:text-orange-100">
-                    {(parseFloat(order.total_amount) - parseFloat(order.amount_paid || '0')).toFixed(2)}₽
-                  </span>
-                </div>
+                {!order.second_payment_paid ? (
+                  <div className="flex justify-between">
+                    <span className="text-orange-700 dark:text-orange-300">Осталось доплатить:</span>
+                    <span className="font-bold text-orange-900 dark:text-orange-100">
+                      {(parseFloat(order.total_amount) - parseFloat(order.amount_paid || '0')).toFixed(2)}₽
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 justify-center py-1 px-2 bg-green-100 dark:bg-green-950/40 rounded">
+                    <Icon name="CheckCircle2" size={14} className="text-green-700 dark:text-green-300" />
+                    <span className="text-green-700 dark:text-green-300 font-semibold text-xs">Заказ оплачен полностью</span>
+                  </div>
+                )}
               </>
             ) : order.custom_delivery_price ? (
               <div className="flex justify-between">
