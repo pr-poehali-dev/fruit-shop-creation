@@ -41,6 +41,8 @@ const MainContent = ({
   onToggleFavorite,
   onShowAuth
 }: MainContentProps) => {
+  console.log('MainContent render - isLoading:', isLoading, 'products count:', products?.length, 'currentSection:', currentSection);
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">

@@ -139,6 +139,7 @@ export const useShopData = () => {
         console.error('Critical load error:', error);
         setLoadError('Не удалось загрузить данные. Проверьте подключение к интернету.');
       } finally {
+        console.log('Setting isLoading to false');
         setIsLoading(false);
       }
     };
