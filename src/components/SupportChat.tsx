@@ -195,6 +195,13 @@ export default function SupportChat() {
     }
   };
 
+  const isWorkingHours = () => {
+    const now = new Date();
+    const moscowTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+    const hours = moscowTime.getHours();
+    return hours >= 6 && hours < 19;
+  };
+
   const sendMessage = async () => {
     const chatUserId = userId || guestId;
     if (!inputMessage.trim() || !chat || !chatUserId) return;
@@ -267,6 +274,21 @@ export default function SupportChat() {
       }
 
       if (data.status_changed === 'waiting') {
+        // Проверка рабочего времени
+        if (!isWorkingHours()) {
+          const offHoursMessage: Message = {
+            id: Date.now() + 1,
+            sender_type: 'bot',
+            sender_name: 'Анфиса',
+            message: 'Наши специалисты сейчас отдыхают (работаем с 6:00 до 19:00 МСК). Вы можете написать нам ВКонтакте или позвонить по контактному номеру.',
+            created_at: new Date().toISOString(),
+            is_read: true,
+          };
+          setMessages((prev) => [...prev, offHoursMessage]);
+          setIsLoading(false);
+          return;
+        }
+        
         setChat((prev) => (prev ? { ...prev, status: 'waiting' } : null));
         setShowFaqs(false);
       }
