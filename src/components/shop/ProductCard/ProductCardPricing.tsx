@@ -25,7 +25,7 @@ const ProductCardPricing = ({
           <div className="flex flex-col gap-2">
             {product.variants!.map((variant, idx) => (
               <div key={idx} className="flex items-center justify-between p-2 border rounded-lg hover:border-primary transition-colors">
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
                     {variant.size}
                   </Badge>
@@ -45,7 +45,7 @@ const ProductCardPricing = ({
           </div>
         </div>
       ) : (
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-2">
           <span className="text-2xl font-bold text-primary">{product.price} ₽</span>
           {showStock && product.stock !== null && product.stock > 0 && (
             <span className="text-sm text-muted-foreground">
