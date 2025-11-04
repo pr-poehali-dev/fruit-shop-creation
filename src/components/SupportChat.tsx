@@ -247,35 +247,10 @@ export default function SupportChat() {
         prev.map(msg => msg.id === tempId ? { ...msg, id: data.message_id } : msg)
       );
 
-      if (data.bot_response) {
-        const botMessageId = data.bot_message_id || Date.now();
-        const botMessage: Message = {
-          id: botMessageId,
-          sender_type: 'bot',
-          sender_name: 'Анфиса',
-          message: data.bot_response,
-          created_at: new Date().toISOString(),
-          is_read: true,
-        };
-        setMessages((prev) => {
-          // Проверяем, нет ли уже этого сообщения
-          if (prev.some(m => m.id === botMessageId)) {
-            return prev;
-          }
-          return [...prev, botMessage];
-        });
-        
-        // Если бот ответил (не перевел на оператора) - показываем FAQ через 2 секунды
-        if (!data.status_changed) {
-          setTimeout(() => {
-            setShowFaqs(true);
-          }, 2000);
-        }
-      }
-
+      // Если статус меняется на ожидание оператора - проверяем рабочее время СРАЗУ
       if (data.status_changed === 'waiting') {
-        // Проверка рабочего времени
         if (!isWorkingHours()) {
+          // Вне рабочего времени - НЕ показываем сообщение о переводе, только о нерабочем времени
           const offHoursMessage: Message = {
             id: Date.now() + 1,
             sender_type: 'bot',
@@ -287,10 +262,50 @@ export default function SupportChat() {
           setMessages((prev) => [...prev, offHoursMessage]);
           setIsLoading(false);
           return;
+        } else {
+          // В рабочее время - показываем сообщение о переводе
+          if (data.bot_response) {
+            const botMessageId = data.bot_message_id || Date.now();
+            const botMessage: Message = {
+              id: botMessageId,
+              sender_type: 'bot',
+              sender_name: 'Анфиса',
+              message: data.bot_response,
+              created_at: new Date().toISOString(),
+              is_read: true,
+            };
+            setMessages((prev) => {
+              if (prev.some(m => m.id === botMessageId)) {
+                return prev;
+              }
+              return [...prev, botMessage];
+            });
+          }
+          setChat((prev) => (prev ? { ...prev, status: 'waiting' } : null));
+          setShowFaqs(false);
         }
+      } else if (data.bot_response) {
+        // Обычный ответ бота (без перевода на оператора)
+        const botMessageId = data.bot_message_id || Date.now();
+        const botMessage: Message = {
+          id: botMessageId,
+          sender_type: 'bot',
+          sender_name: 'Анфиса',
+          message: data.bot_response,
+          created_at: new Date().toISOString(),
+          is_read: true,
+        };
+        setMessages((prev) => {
+          if (prev.some(m => m.id === botMessageId)) {
+            return prev;
+          }
+          return [...prev, botMessage];
+        });
         
-        setChat((prev) => (prev ? { ...prev, status: 'waiting' } : null));
-        setShowFaqs(false);
+        // Показываем FAQ через 2 секунды
+        setTimeout(() => {
+          setShowFaqs(true);
+        }, 2000);
       }
     } catch (error) {
       console.error('Ошибка отправки сообщения:', error);
