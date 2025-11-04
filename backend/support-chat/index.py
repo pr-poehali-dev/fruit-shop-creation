@@ -46,10 +46,10 @@ def get_faqs_cached(cur) -> List:
     
     return _faq_cache
 
-def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
+def search_faq(question: str, cur, conversation_history: List[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
     question_lower = question.lower().strip()
     
-    operator_keywords = ['оператор', 'администратор', 'человек', 'живой', 'сотрудник', 'менеджер', 'помощь', 'помогите']
+    operator_keywords = ['оператор', 'администратор', 'человек', 'живой', 'сотрудник', 'менеджер', 'помощь', 'помогите', 'нужен человек', 'хочу с человеком']
     if any(keyword in question_lower for keyword in operator_keywords):
         return None
     
@@ -57,45 +57,69 @@ def search_faq(question: str, cur) -> Optional[Dict[str, Any]]:
     
     best_match = None
     best_score = 0
+    all_matches = []
     
     for faq in faqs:
         faq_id, faq_question, faq_answer, keywords = faq
         score = 0
         
-        # Ключевые слова дают больше очков
         if keywords:
             for keyword in keywords:
                 keyword_lower = keyword.lower().strip()
                 if keyword_lower in question_lower:
                     score += 5
         
-        # Слова из вопроса FAQ ищем в сообщении пользователя
         question_words = faq_question.lower().split()
         for word in question_words:
-            # Убираем знаки препинания
             word_clean = word.strip('?!.,;:')
-            # Ищем слова длиннее 3 символов
             if len(word_clean) > 3 and word_clean in question_lower:
                 score += 2
         
-        # Слова из сообщения пользователя ищем в вопросе FAQ
         user_words = question_lower.split()
         for word in user_words:
             word_clean = word.strip('?!.,;:')
             if len(word_clean) > 3 and word_clean in faq_question.lower():
                 score += 2
         
+        if score > 0:
+            all_matches.append({
+                'id': faq_id,
+                'question': faq_question,
+                'answer': faq_answer,
+                'score': score
+            })
+        
         if score > best_score:
             best_score = score
             best_match = {
                 'id': faq_id,
                 'question': faq_question,
-                'answer': faq_answer
+                'answer': faq_answer,
+                'score': score
             }
     
-    # Порог понижен до 3 (раньше 1, но теперь очки больше)
-    if best_score >= 3:
+    if best_score >= 8:
         return best_match
+    
+    if best_score >= 3 and len(all_matches) == 1:
+        return best_match
+    
+    if 3 <= best_score < 8 and len(all_matches) > 1:
+        all_matches.sort(key=lambda x: x['score'], reverse=True)
+        top_matches = [m for m in all_matches if m['score'] >= 3][:3]
+        
+        clarification = "Я нашла несколько похожих вопросов. Уточните, пожалуйста, что именно вас интересует:\n\n"
+        for i, match in enumerate(top_matches, 1):
+            clarification += f"{i}. {match['question']}\n"
+        
+        return {
+            'id': 0,
+            'question': '',
+            'answer': clarification,
+            'is_clarification': True,
+            'options': top_matches
+        }
+    
     return None
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -377,7 +401,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 message_id = cur.fetchone()[0]
                 
                 if chat_status == 'bot':
-                    faq_answer = search_faq(message, cur)
+                    cur.execute("""
+                        SELECT sender_type, message 
+                        FROM t_p77282076_fruit_shop_creation.support_messages 
+                        WHERE chat_id = %s 
+                        ORDER BY created_at DESC 
+                        LIMIT 5
+                    """, (int(chat_id),))
+                    history_rows = cur.fetchall()
+                    conversation_history = [{'sender': row[0], 'message': row[1]} for row in history_rows]
+                    
+                    faq_answer = search_faq(message, cur, conversation_history)
                     
                     if faq_answer:
                         cur.execute(
@@ -388,31 +422,59 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         conn.commit()
                         bot_response = faq_answer['answer']
                     else:
-                        bot_response = 'Извините, я не нашла ответа на ваш вопрос. Сейчас переведу вас на администратора...'
+                        cur.execute("""
+                            SELECT COUNT(*) 
+                            FROM t_p77282076_fruit_shop_creation.support_messages 
+                            WHERE chat_id = %s AND sender_type = 'user'
+                        """, (int(chat_id),))
+                        user_message_count = cur.fetchone()[0]
                         
-                        cur.execute(
-                            "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
-                            (int(chat_id), bot_response)
-                        )
-                        bot_message_id = cur.fetchone()[0]
-                        
-                        cur.execute(
-                            "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'waiting', updated_at = CURRENT_TIMESTAMP WHERE id = %s",
-                            (int(chat_id),)
-                        )
-                        conn.commit()
-                        
-                        return {
-                            'statusCode': 200,
-                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                            'body': json.dumps({
-                                'message_id': message_id,
-                                'bot_message_id': bot_message_id,
-                                'bot_response': bot_response,
-                                'status_changed': 'waiting'
-                            }, ensure_ascii=False),
-                            'isBase64Encoded': False
-                        }
+                        if user_message_count <= 2:
+                            bot_response = 'Не совсем поняла ваш вопрос 🤔 Попробуйте переформулировать или задать более конкретный вопрос. Например:\n• Как оформить заказ?\n• Какие способы оплаты?\n• Условия доставки?\n\nЕсли хотите поговорить с администратором, просто напишите "нужен администратор".'
+                            
+                            cur.execute(
+                                "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
+                                (int(chat_id), bot_response)
+                            )
+                            bot_message_id = cur.fetchone()[0]
+                            conn.commit()
+                            
+                            return {
+                                'statusCode': 200,
+                                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                                'body': json.dumps({
+                                    'message_id': message_id,
+                                    'bot_message_id': bot_message_id,
+                                    'bot_response': bot_response
+                                }, ensure_ascii=False),
+                                'isBase64Encoded': False
+                            }
+                        else:
+                            bot_response = 'Извините, я не смогла найти точный ответ на ваш вопрос. Сейчас переведу вас на администратора, который поможет детальнее! ⏳'
+                            
+                            cur.execute(
+                                "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
+                                (int(chat_id), bot_response)
+                            )
+                            bot_message_id = cur.fetchone()[0]
+                            
+                            cur.execute(
+                                "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'waiting', updated_at = CURRENT_TIMESTAMP WHERE id = %s",
+                                (int(chat_id),)
+                            )
+                            conn.commit()
+                            
+                            return {
+                                'statusCode': 200,
+                                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                                'body': json.dumps({
+                                    'message_id': message_id,
+                                    'bot_message_id': bot_message_id,
+                                    'bot_response': bot_response,
+                                    'status_changed': 'waiting'
+                                }, ensure_ascii=False),
+                                'isBase64Encoded': False
+                            }
                     
                     return {
                         'statusCode': 200,
