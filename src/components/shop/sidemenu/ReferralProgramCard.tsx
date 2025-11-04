@@ -117,14 +117,28 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
 
   return (
     <div>
-      <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+      <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/20 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Icon name="Gift" size={20} className="text-primary" />
+            <Icon name="Gift" size={20} className="text-amber-600" />
             Реферальная программа
+            <span className="ml-auto text-xs font-normal bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded-full">
+              В разработке
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="text-center py-6">
+            <Icon name="Construction" size={48} className="mx-auto mb-3 text-amber-600 opacity-50" />
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
+              Система промокодов в разработке
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              Скоро вы сможете создавать промокоды и приглашать друзей!
+            </p>
+          </div>
+          
+          <div className="hidden">
           <p className="text-sm text-muted-foreground">
             Приглашайте друзей и получайте <span className="font-bold text-primary">500₽</span> за каждого, 
             кто сделает заказ от <span className="font-bold">1500₽</span>
@@ -267,6 +281,7 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
               )}
             </div>
           )}
+          </div>
         </CardContent>
       </Card>
     </div>

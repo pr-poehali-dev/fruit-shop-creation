@@ -89,6 +89,16 @@ const App = () => {
           <Suspense fallback={<LoadingScreen onComplete={() => {}} />}>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/katalog" element={<Index />} />
+              <Route path="/izbrannoye" element={<Index />} />
+              <Route path="/o-nas" element={<Index />} />
+              <Route path="/dostavka" element={<Index />} />
+              <Route path="/ukhod" element={<Index />} />
+              <Route path="/kontakty" element={<Index />} />
+              <Route path="/galereya" element={<Index />} />
+              <Route path="/admin" element={<Index />} />
+              <Route path="/korzina" element={<Index />} />
+              <Route path="/profil" element={<Index />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/delivery-and-return" element={<DeliveryAndReturn />} />
