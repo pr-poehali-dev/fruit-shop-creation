@@ -67,13 +67,15 @@ export const PaymentMethods = ({
       <Button
         onClick={() => onCheckout('card', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
         variant="outline"
-        className="w-full justify-start h-auto py-3"
+        className="w-full justify-start h-auto py-4 border-2 hover:border-primary hover:bg-primary/5 transition-all"
         disabled={isDisabled}
       >
-        <Icon name="CreditCard" size={18} className="mr-2 flex-shrink-0" />
+        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
+          <Icon name="CreditCard" size={20} className="text-green-600" />
+        </div>
         <div className="text-left flex-1">
-          <div className="font-semibold text-sm">Банковская карта</div>
-          <div className="text-xs text-muted-foreground mt-0.5">
+          <div className="font-semibold">Банковская карта</div>
+          <div className="text-xs text-muted-foreground mt-1">
             {preorderEnabled
               ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽`
               : 'Оплата через Альфабанк'}
@@ -87,13 +89,15 @@ export const PaymentMethods = ({
         <Button
           onClick={() => onCheckout('cash', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
           variant="outline"
-          className="w-full justify-start h-auto py-3"
+          className="w-full justify-start h-auto py-4 border-2 hover:border-primary hover:bg-primary/5 transition-all"
           disabled={isDisabled}
         >
-          <Icon name="Banknote" size={18} className="mr-2 flex-shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 flex-shrink-0">
+            <Icon name="Banknote" size={20} className="text-amber-600" />
+          </div>
           <div className="text-left flex-1">
-            <div className="font-semibold text-sm">Наличными</div>
-            <div className="text-xs text-muted-foreground mt-0.5">
+            <div className="font-semibold">Наличными</div>
+            <div className="text-xs text-muted-foreground mt-1">
               {preorderEnabled
                 ? `Предоплата ${(finalPrice * 0.5).toFixed(2)} ₽ картой, вторая часть после обработки`
                 : 'Оплата курьеру или в пункте выдачи'}
@@ -102,9 +106,11 @@ export const PaymentMethods = ({
         </Button>
       )}
 
-      <div className="pt-3 mt-3 border-t text-center space-y-1">
-        <p className="text-xs text-muted-foreground font-medium">ИП Бояринцев Вадим Вячеславович</p>
-        <p className="text-xs text-muted-foreground">ИНН: 222261894107</p>
+      <div className="pt-4 mt-4 border-t">
+        <div className="bg-muted/30 rounded-lg p-3 text-center space-y-1">
+          <p className="text-xs font-semibold text-foreground">ИП Бояринцев Вадим Вячеславович</p>
+          <p className="text-xs text-muted-foreground">ИНН: 222261894107</p>
+        </div>
       </div>
     </div>
   );

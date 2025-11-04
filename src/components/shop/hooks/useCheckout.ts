@@ -119,7 +119,7 @@ export const useCheckout = ({
       }
     }
 
-    if (paymentMethod === 'alfabank') {
+    if (paymentMethod === 'card' || paymentMethod === 'alfabank') {
       try {
         const response = await fetch('https://functions.poehali.dev/60d635ae-584e-4966-b483-528742647efb', {
           method: 'POST',
