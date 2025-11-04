@@ -243,9 +243,9 @@ export default function SupportChatTab({ userId, userName, isSuperAdmin = false 
       {activeTab === 'faq' && (
         <FaqManager
           faqs={faqs}
-          onSave={faqActions.saveFaq}
-          onUpdate={faqActions.updateFaq}
-          onDelete={faqActions.deleteFaq}
+          onSaveFaq={faqActions.saveFaq}
+          onUpdateFaq={faqActions.updateFaq}
+          onDeleteFaq={faqActions.deleteFaq}
         />
       )}
 
