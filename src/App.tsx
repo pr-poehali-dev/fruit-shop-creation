@@ -21,8 +21,6 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showLoading, setShowLoading] = useState(true);
-
   useEffect(() => {
     const clearCacheIfNeeded = () => {
       const CACHE_VERSION = '1.0.1';
@@ -77,10 +75,6 @@ const App = () => {
 
     return () => clearInterval(interval);
   }, []);
-
-  if (showLoading) {
-    return <LoadingScreen onComplete={() => setShowLoading(false)} />;
-  }
 
   return (
     <QueryClientProvider client={queryClient}>
