@@ -49,13 +49,13 @@ export const PaymentMethods = ({
         <Button
           onClick={() => onCheckout('balance', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
           variant="outline"
-          className="w-full justify-start h-auto py-3 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20 transition-all"
+          className="w-full justify-start h-auto py-3 group hover:bg-gradient-to-r hover:from-green-600 hover:to-green-500 hover:border-green-600 hover:text-white transition-all duration-300"
           disabled={isDisabled}
         >
-          <Icon name="Wallet" size={18} className="mr-2 flex-shrink-0" />
+          <Icon name="Wallet" size={18} className="mr-2 flex-shrink-0 group-hover:text-white" />
           <div className="text-left flex-1">
-            <div className="font-semibold text-sm">Балансом сайта</div>
-            <div className="text-xs text-foreground/70 mt-0.5">
+            <div className="font-semibold text-sm group-hover:text-white">Балансом сайта</div>
+            <div className="text-xs text-foreground/70 group-hover:text-white/90 mt-0.5">
               {preorderEnabled
                 ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽ (баланс: ${user.balance} ₽)`
                 : `Ваш баланс: ${user.balance} ₽`}
@@ -66,16 +66,16 @@ export const PaymentMethods = ({
       
       <Button
         onClick={() => onCheckout('card', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
-        variant="default"
-        className="w-full justify-start h-auto py-5 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all"
+        variant="outline"
+        className="w-full justify-start h-auto py-5 group hover:bg-gradient-to-r hover:from-green-600 hover:to-green-500 hover:border-green-600 hover:text-white transition-all duration-300 border-2"
         disabled={isDisabled}
       >
-        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-3 flex-shrink-0">
-          <Icon name="CreditCard" size={24} className="text-white" />
+        <div className="w-12 h-12 rounded-full bg-green-100 group-hover:bg-white/20 flex items-center justify-center mr-3 flex-shrink-0 transition-colors duration-300">
+          <Icon name="CreditCard" size={24} className="text-green-600 group-hover:text-white" />
         </div>
         <div className="text-left flex-1">
-          <div className="font-bold text-base">Банковская карта</div>
-          <div className="text-sm text-white/90 mt-1 font-medium">
+          <div className="font-bold text-base group-hover:text-white">Банковская карта</div>
+          <div className="text-sm text-foreground/70 group-hover:text-white/90 mt-1 font-medium">
             {preorderEnabled
               ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽`
               : 'Оплата через Альфабанк'}
@@ -89,15 +89,15 @@ export const PaymentMethods = ({
         <Button
           onClick={() => onCheckout('cash', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
           variant="outline"
-          className="w-full justify-start h-auto py-4 border-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20 transition-all"
+          className="w-full justify-start h-auto py-4 border-2 group hover:bg-gradient-to-r hover:from-green-600 hover:to-green-500 hover:border-green-600 hover:text-white transition-all duration-300"
           disabled={isDisabled}
         >
-          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 flex-shrink-0">
-            <Icon name="Banknote" size={20} className="text-amber-600" />
+          <div className="w-10 h-10 rounded-full bg-amber-100 group-hover:bg-white/20 flex items-center justify-center mr-3 flex-shrink-0 transition-colors duration-300">
+            <Icon name="Banknote" size={20} className="text-amber-600 group-hover:text-white" />
           </div>
           <div className="text-left flex-1">
-            <div className="font-semibold">Наличными</div>
-            <div className="text-xs text-foreground/70 mt-1">
+            <div className="font-semibold group-hover:text-white">Наличными</div>
+            <div className="text-xs text-foreground/70 group-hover:text-white/90 mt-1">
               {preorderEnabled
                 ? `Предоплата ${(finalPrice * 0.5).toFixed(2)} ₽ картой, вторая часть после обработки`
                 : 'Оплата курьеру или в пункте выдачи'}
