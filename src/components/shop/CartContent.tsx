@@ -251,6 +251,7 @@ const CartContent = ({
               isCashPaymentAvailable={isCashPaymentAvailable}
               preorderEnabled={preorderEnabled}
               finalPrice={getFinalPrice()}
+              totalPrice={getTotalPrice()}
               deliveryType={deliveryType}
               deliveryEnabled={deliveryEnabled}
               pickupEnabled={pickupEnabled}

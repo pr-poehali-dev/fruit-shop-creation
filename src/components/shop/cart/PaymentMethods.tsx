@@ -8,6 +8,7 @@ interface PaymentMethodsProps {
   isCashPaymentAvailable: boolean;
   preorderEnabled: boolean;
   finalPrice: number;
+  totalPrice: number;
   deliveryType: string;
   deliveryEnabled: boolean;
   pickupEnabled: boolean;
@@ -23,6 +24,7 @@ export const PaymentMethods = ({
   isCashPaymentAvailable,
   preorderEnabled,
   finalPrice,
+  totalPrice,
   deliveryType,
   deliveryEnabled,
   pickupEnabled,
@@ -59,7 +61,7 @@ export const PaymentMethods = ({
             <div className="font-semibold group-hover:text-white">Балансом сайта</div>
             <div className="text-xs text-foreground/70 group-hover:text-white/90 mt-1">
               {preorderEnabled
-                ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽ (баланс: ${user.balance} ₽)`
+                ? `Предоплата: ${(totalPrice * 0.5).toFixed(2)} ₽ (баланс: ${user.balance} ₽)`
                 : `Ваш баланс: ${user.balance} ₽`}
             </div>
           </div>
@@ -79,7 +81,7 @@ export const PaymentMethods = ({
           <div className="font-semibold group-hover:text-white">Банковская карта</div>
           <div className="text-xs text-foreground/70 group-hover:text-white/90 mt-1">
             {preorderEnabled
-              ? `Предоплата: ${(finalPrice * 0.5).toFixed(2)} ₽`
+              ? `Предоплата: ${(totalPrice * 0.5).toFixed(2)} ₽`
               : 'Оплата через Альфабанк'}
           </div>
         </div>
@@ -101,7 +103,7 @@ export const PaymentMethods = ({
             <div className="font-semibold group-hover:text-white">Наличными</div>
             <div className="text-xs text-foreground/70 group-hover:text-white/90 mt-1">
               {preorderEnabled
-                ? `Предоплата ${(finalPrice * 0.5).toFixed(2)} ₽ картой, вторая часть после обработки`
+                ? `Предоплата ${(totalPrice * 0.5).toFixed(2)} ₽ картой, вторая часть после обработки`
                 : 'Оплата курьеру или в пункте выдачи'}
             </div>
           </div>
