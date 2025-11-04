@@ -114,7 +114,10 @@ export const ReferralCard = ({ user }: ReferralCardProps) => {
   }
 
   return (
-    <Card className="border-primary/20">
+    <Card className="border-primary/20 relative">
+      <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-medium">
+        В разработке
+      </div>
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
