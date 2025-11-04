@@ -24,11 +24,15 @@ def handle_faq(method: str, event: Dict[str, Any], cur, conn):
     
     if method == 'POST':
         body_data = json.loads(event.get('body', '{}'))
+        print(f"FAQ POST body: {body_data}")
         question = body_data.get('question', '').strip().replace("'", "''")
         answer = body_data.get('answer', '').strip().replace("'", "''")
         sort_order = body_data.get('sort_order', 0)
         
+        print(f"FAQ POST - question: '{question}', answer: '{answer}', sort_order: {sort_order}")
+        
         if not question or not answer:
+            print("FAQ POST validation failed - empty question or answer")
             return {
                 'statusCode': 400,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
