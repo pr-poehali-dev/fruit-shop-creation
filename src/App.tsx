@@ -46,12 +46,6 @@ const App = () => {
       document.documentElement.classList.remove('dark');
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const refCode = params.get('ref');
-    if (refCode) {
-      localStorage.setItem('referralCode', refCode);
-    }
-
     const checkExpiredPreorders = async () => {
       try {
         const controller = new AbortController();

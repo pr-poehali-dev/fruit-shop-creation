@@ -91,6 +91,20 @@ const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsP
             <Input id="register-password" name="password" type="password" autoComplete="new-password" required />
           </div>
           
+          <div>
+            <Label htmlFor="register-promo">Промокод (необязательно)</Label>
+            <Input 
+              id="register-promo" 
+              name="promo_code" 
+              placeholder="Введите промокод друга" 
+              className="uppercase"
+              maxLength={8}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Если у вас есть промокод от друга, введите его здесь
+            </p>
+          </div>
+          
           <div className="space-y-3 pt-2">
             <div className="flex items-start space-x-2">
               <Checkbox 

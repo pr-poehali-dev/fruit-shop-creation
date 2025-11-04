@@ -90,10 +90,9 @@ export const useAuth = () => {
     try {
       const phone = formData.get('phone');
       const password = formData.get('password');
+      const promoCode = action === 'register' ? formData.get('promo_code') : null;
       
-      console.log('Auth attempt:', { action, phone, hasPassword: !!password });
-      
-      const referralCode = action === 'register' ? localStorage.getItem('referralCode') : null;
+      console.log('Auth attempt:', { action, phone, hasPassword: !!password, hasPromo: !!promoCode });
       
       const response = await fetch(API_AUTH, {
         method: 'POST',
@@ -103,13 +102,9 @@ export const useAuth = () => {
           phone,
           password,
           full_name: formData.get('full_name') || '',
-          referral_code: referralCode
+          promo_code: promoCode || null
         })
       });
-      
-      if (action === 'register' && referralCode) {
-        localStorage.removeItem('referralCode');
-      }
       
       const data = await response.json();
       console.log('Auth response:', { status: response.status, data });
@@ -148,6 +143,30 @@ export const useAuth = () => {
           undefined,
           { phone: data.user.phone }
         );
+        
+        // Активация промокода при регистрации
+        if (action === 'register' && promoCode) {
+          try {
+            const promoResponse = await fetch(API_AUTH, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'activate_promo',
+                promo_code: promoCode.toString().toUpperCase().trim(),
+                user_id: data.user.id
+              })
+            });
+            
+            const promoData = await promoResponse.json();
+            if (promoData.success) {
+              console.log('Promo code activated successfully');
+            } else {
+              console.warn('Promo code activation failed:', promoData.error);
+            }
+          } catch (promoError) {
+            console.error('Failed to activate promo code:', promoError);
+          }
+        }
         
         const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
         onSuccess(data.user, message, false);

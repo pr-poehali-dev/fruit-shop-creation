@@ -3,287 +3,197 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReferralProgramCardProps {
   show: boolean;
   userId?: number;
 }
 
-interface Referral {
+interface InvitedUser {
   id: number;
-  referred_user: {
-    id: number;
-    full_name: string;
-    phone: string;
-  };
-  first_order_total: number | null;
+  full_name: string;
+  phone: string;
   reward_given: boolean;
-  created_at: string;
+  first_order_made: boolean;
+  first_order_total: number | null;
+  invited_at: string;
 }
 
 export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) => {
-  const [referralCode, setReferralCode] = useState<string>('');
-  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [promoCode, setPromoCode] = useState<string>('');
+  const [invitedUsers, setInvitedUsers] = useState<InvitedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [totalEarned, setTotalEarned] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'waiting'>('all');
+  const { toast } = useToast();
 
   useEffect(() => {
     if (show && userId) {
-      loadReferralData();
+      loadPromoData();
     }
   }, [show, userId]);
 
-  const loadReferralData = async () => {
+  const loadPromoData = async () => {
     if (!userId) return;
     
     try {
       setIsLoading(true);
-      const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_referral_data&user_id=${userId}`);
+      const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_code&user_id=${userId}`);
       const data = await response.json();
       
       if (data.success) {
-        setReferralCode(data.referral_code);
-        setReferrals(data.referrals || []);
+        setPromoCode(data.promo_code);
+        setInvitedUsers(data.invited || []);
         setTotalEarned(data.total_earned || 0);
       }
     } catch (error) {
-      console.error('Failed to load referral data:', error);
+      console.error('Failed to load promo data:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить данные промокода',
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const copyReferralLink = () => {
-    const link = `${window.location.origin}?ref=${referralCode}`;
-    navigator.clipboard.writeText(link);
+  const copyPromoCode = () => {
+    navigator.clipboard.writeText(promoCode);
     setCopied(true);
+    toast({
+      title: 'Скопировано!',
+      description: 'Промокод скопирован в буфер обмена'
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getReferralStatus = (referral: Referral) => {
-    if (referral.reward_given) {
-      return {
-        text: '✅ Выполнено',
-        color: 'text-green-600 dark:text-green-400',
-        bgColor: 'bg-green-50 dark:bg-green-950/30',
-        description: `Заказ на ${referral.first_order_total}₽ • Бонус 500₽ получен`
-      };
+  const getStatusBadge = (user: InvitedUser) => {
+    if (user.reward_given) {
+      return <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">✅ Бонус получен</span>;
     }
-    
-    if (referral.first_order_total) {
-      if (referral.first_order_total >= 1500) {
-        return {
-          text: '⌛ Обрабатывается',
-          color: 'text-blue-600 dark:text-blue-400',
-          bgColor: 'bg-blue-50 dark:bg-blue-950/30',
-          description: `Заказ на ${referral.first_order_total}₽ • Бонус скоро будет начислен`
-        };
-      } else {
-        return {
-          text: '📦 Малая сумма',
-          color: 'text-orange-600 dark:text-orange-400',
-          bgColor: 'bg-orange-50 dark:bg-orange-950/30',
-          description: `Заказ на ${referral.first_order_total}₽ • Нужно от 1500₽`
-        };
-      }
+    if (user.first_order_made && user.first_order_total && user.first_order_total >= 1500) {
+      return <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">⏳ Обрабатывается</span>;
     }
-    
-    return {
-      text: '⏰ Не заказал',
-      color: 'text-gray-600 dark:text-gray-400',
-      bgColor: 'bg-gray-50 dark:bg-gray-900/30',
-      description: 'Зарегистрировался, но ещё не сделал заказ'
-    };
+    if (user.first_order_made && user.first_order_total && user.first_order_total < 1500) {
+      return <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full">📦 Заказ &lt; 1500₽</span>;
+    }
+    return <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">⏰ Ждём заказ</span>;
   };
 
   if (!show) return null;
 
   if (isLoading) {
     return (
-      <div>
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/20 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
-          <CardContent className="py-8">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-600"></div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20 border-purple-200 dark:border-purple-800">
+        <CardContent className="py-8">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div>
-      <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/20 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Icon name="Gift" size={20} className="text-amber-600" />
-            Реферальная программа
-            <span className="ml-auto text-xs font-normal bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded-full">
-              В разработке
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="text-center py-6">
-            <Icon name="Construction" size={48} className="mx-auto mb-3 text-amber-600 opacity-50" />
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
-              Система промокодов в разработке
-            </p>
-            <p className="text-xs text-amber-700 dark:text-amber-300">
-              Скоро вы сможете создавать промокоды и приглашать друзей!
-            </p>
-          </div>
-          
-          <div className="hidden">
-          <p className="text-sm text-muted-foreground">
-            Приглашайте друзей и получайте <span className="font-bold text-primary">500₽</span> за каждого, 
-            кто сделает заказ от <span className="font-bold">1500₽</span>
+    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20 border-purple-200 dark:border-purple-800">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Icon name="Gift" size={20} className="text-purple-600" />
+          Программа промокодов
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <p className="text-sm text-purple-900 dark:text-purple-100 font-medium">
+            Ваш промокод:
           </p>
+          <div className="flex gap-2">
+            <Input 
+              value={promoCode}
+              readOnly
+              className="font-bold text-lg text-center bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700"
+            />
+            <Button 
+              onClick={copyPromoCode}
+              size="sm"
+              className="shrink-0 bg-purple-600 hover:bg-purple-700"
+            >
+              <Icon name={copied ? "Check" : "Copy"} size={16} />
+            </Button>
+          </div>
+          <p className="text-xs text-purple-700 dark:text-purple-300">
+            Друзья вводят этот код при регистрации и вы получаете <strong>500₽</strong> после их первого заказа от <strong>1500₽</strong>
+          </p>
+        </div>
 
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Ваша реферальная ссылка:</p>
-            <div className="flex gap-2">
-              <Input 
-                value={`${window.location.origin}?ref=${referralCode}`}
-                readOnly
-                className="font-mono text-xs bg-background"
-              />
-              <Button 
-                onClick={copyReferralLink}
-                size="sm"
-                className="shrink-0"
-              >
-                <Icon name={copied ? "Check" : "Copy"} size={16} />
-              </Button>
+        {totalEarned > 0 && (
+          <div className="pt-3 border-t border-purple-200 dark:border-purple-700">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-purple-700 dark:text-purple-300">Всего заработано:</span>
+              <span className="text-xl font-bold text-purple-600">{totalEarned}₽</span>
             </div>
           </div>
+        )}
 
-          {totalEarned > 0 && (
-            <div className="pt-2 border-t">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Всего заработано:</span>
-                <span className="text-lg font-bold text-primary">{totalEarned}₽</span>
+        {invitedUsers.length > 0 && (
+          <div className="flex items-center justify-between text-sm pt-3 border-t border-purple-200 dark:border-purple-700">
+            <span className="text-purple-700 dark:text-purple-300">Приглашено друзей:</span>
+            <span className="font-bold text-purple-600">{invitedUsers.length}</span>
+          </div>
+        )}
+
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full text-xs text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900"
+        >
+          <Icon name={isExpanded ? "ChevronUp" : "ChevronDown"} size={16} className="mr-1" />
+          {isExpanded ? 'Скрыть список' : `Показать приглашённых (${invitedUsers.length})`}
+        </Button>
+
+        {isExpanded && (
+          <div className="space-y-2 pt-2">
+            {invitedUsers.length === 0 ? (
+              <div className="text-center py-4">
+                <Icon name="UserPlus" size={32} className="mx-auto mb-2 text-purple-400" />
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  Вы ещё никого не пригласили
+                </p>
               </div>
-            </div>
-          )}
-
-          {referrals.length > 0 && (
-            <div className="flex items-center justify-between text-xs pt-2 border-t">
-              <div className="flex gap-3 text-muted-foreground">
-                <span>✅ {referrals.filter(r => r.reward_given).length}</span>
-                <span>⌛ {referrals.filter(r => !r.reward_given && r.first_order_total && r.first_order_total >= 1500).length}</span>
-                <span>📦 {referrals.filter(r => !r.reward_given && r.first_order_total && r.first_order_total < 1500).length}</span>
-                <span>⏰ {referrals.filter(r => !r.first_order_total).length}</span>
-              </div>
-              <span className="text-muted-foreground">Всего: {referrals.length}</span>
-            </div>
-          )}
-
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full text-xs"
-          >
-            <Icon name={isExpanded ? "ChevronUp" : "ChevronDown"} size={16} className="mr-1" />
-            {isExpanded ? 'Скрыть список' : 'Показать список рефералов'}
-          </Button>
-
-          {isExpanded && (
-            <div className="space-y-2 pt-2">
-              {referrals.length > 0 && (
-                <div className="flex gap-1 flex-wrap">
-                  <Button
-                    variant={statusFilter === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setStatusFilter('all')}
-                    className="h-7 text-xs"
-                  >
-                    Все ({referrals.length})
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'completed' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setStatusFilter('completed')}
-                    className="h-7 text-xs"
-                  >
-                    ✅ Выполнено ({referrals.filter(r => r.reward_given).length})
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'pending' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setStatusFilter('pending')}
-                    className="h-7 text-xs"
-                  >
-                    ⌛ В процессе ({referrals.filter(r => !r.reward_given && r.first_order_total && r.first_order_total >= 1500).length})
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'waiting' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setStatusFilter('waiting')}
-                    className="h-7 text-xs"
-                  >
-                    ⏰ Ожидают ({referrals.filter(r => !r.first_order_total).length})
-                  </Button>
-                </div>
-              )}
-              
-              {referrals.length === 0 ? (
-                <div className="text-center py-4">
-                  <Icon name="UserPlus" size={24} className="mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">
-                    У вас пока нет рефералов
-                  </p>
-                </div>
-              ) : (
-                referrals
-                  .filter(referral => {
-                    if (statusFilter === 'all') return true;
-                    if (statusFilter === 'completed') return referral.reward_given;
-                    if (statusFilter === 'pending') return !referral.reward_given && referral.first_order_total && referral.first_order_total >= 1500;
-                    if (statusFilter === 'waiting') return !referral.first_order_total;
-                    return true;
-                  })
-                  .map((referral) => {
-                  const status = getReferralStatus(referral);
-                  return (
-                    <Card key={referral.id} className={`p-2.5 ${status.bgColor}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Icon name="User" size={12} className="shrink-0 text-muted-foreground" />
-                            <p className="font-medium text-xs truncate">
-                              {referral.referred_user.full_name || referral.referred_user.phone}
-                            </p>
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mb-1">
-                            {status.description}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">
-                            Приглашён: {new Date(referral.created_at).toLocaleDateString('ru-RU', { 
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                        <div className={`text-[10px] font-medium whitespace-nowrap px-2 py-1 rounded ${status.color} ${status.bgColor}`}>
-                          {status.text}
-                        </div>
+            ) : (
+              invitedUsers.map((user) => (
+                <Card key={user.id} className="bg-white/50 dark:bg-gray-900/50 border-purple-200 dark:border-purple-800">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Icon name="User" size={16} className="text-purple-600" />
+                        <span className="text-sm font-medium">{user.full_name || user.phone}</span>
                       </div>
-                    </Card>
-                  );
-                })
-              )}
-            </div>
-          )}
+                      {getStatusBadge(user)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Зарегистрировался: {new Date(user.invited_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    {user.first_order_total && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Первый заказ: {user.first_order_total}₽
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
