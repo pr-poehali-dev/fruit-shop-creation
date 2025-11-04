@@ -49,7 +49,7 @@ export const PaymentMethods = ({
         <Button
           onClick={() => onCheckout('balance', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
           variant="outline"
-          className="w-full justify-start h-auto py-3"
+          className="w-full justify-start h-auto py-3 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20 transition-all"
           disabled={isDisabled}
         >
           <Icon name="Wallet" size={18} className="mr-2 flex-shrink-0" />
@@ -89,7 +89,7 @@ export const PaymentMethods = ({
         <Button
           onClick={() => onCheckout('cash', deliveryType, selectedZoneId || undefined, deliveryCity, deliveryAddress)}
           variant="outline"
-          className="w-full justify-start h-auto py-4 border-2 hover:border-primary hover:bg-primary/5 transition-all"
+          className="w-full justify-start h-auto py-4 border-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20 transition-all"
           disabled={isDisabled}
         >
           <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 flex-shrink-0">
