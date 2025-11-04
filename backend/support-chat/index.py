@@ -8,6 +8,7 @@ import json
 import os
 import psycopg2
 import time
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 _faq_cache = None
@@ -17,6 +18,11 @@ def clear_faq_cache():
     global _faq_cache, _faq_cache_time
     _faq_cache = None
     _faq_cache_time = 0
+
+def is_working_hours() -> bool:
+    now = datetime.utcnow()
+    moscow_hour = (now.hour + 3) % 24
+    return 6 <= moscow_hour < 19
 
 def get_db_connection():
     dsn = os.environ.get('DATABASE_URL')
@@ -457,6 +463,27 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                                 'isBase64Encoded': False
                             }
                         else:
+                            if not is_working_hours():
+                                bot_response = 'К сожалению, я не смогла найти точный ответ на ваш вопрос, а наши специалисты сейчас отдыхают (работаем с 6:00 до 19:00 МСК). Вы можете:\n\n• Написать нам ВКонтакте\n• Позвонить по контактному номеру\n• Оставить ваш вопрос здесь, и мы ответим в рабочее время\n\nПопробую помочь сама — переформулируйте вопрос, и я поищу ответ! 😊'
+                                
+                                cur.execute(
+                                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
+                                    (int(chat_id), bot_response)
+                                )
+                                bot_message_id = cur.fetchone()[0]
+                                conn.commit()
+                                
+                                return {
+                                    'statusCode': 200,
+                                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                                    'body': json.dumps({
+                                        'message_id': message_id,
+                                        'bot_message_id': bot_message_id,
+                                        'bot_response': bot_response
+                                    }, ensure_ascii=False),
+                                    'isBase64Encoded': False
+                                }
+                            
                             bot_response = 'Извините, я не смогла найти точный ответ на ваш вопрос. Сейчас переведу вас на администратора, который поможет детальнее! ⏳'
                             
                             cur.execute(
