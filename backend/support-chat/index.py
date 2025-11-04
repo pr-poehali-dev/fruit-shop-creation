@@ -13,6 +13,11 @@ from typing import Dict, Any, List, Optional
 _faq_cache = None
 _faq_cache_time = 0
 
+def clear_faq_cache():
+    global _faq_cache, _faq_cache_time
+    _faq_cache = None
+    _faq_cache_time = 0
+
 def get_db_connection():
     dsn = os.environ.get('DATABASE_URL')
     conn = psycopg2.connect(dsn)
@@ -355,6 +360,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 conn.commit()
                 new_id = cur.fetchone()[0]
                 
+                clear_faq_cache()
+                
                 return {
                     'statusCode': 201,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -609,6 +616,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 )
                 conn.commit()
                 
+                clear_faq_cache()
+                
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -717,6 +726,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 (int(faq_id),)
             )
             conn.commit()
+            
+            clear_faq_cache()
             
             return {
                 'statusCode': 200,
