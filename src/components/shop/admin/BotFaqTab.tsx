@@ -118,7 +118,7 @@ const BotFaqTab = () => {
           <h3 className="text-lg font-semibold">Вопросы и ответы бота</h3>
           <p className="text-sm text-muted-foreground">Управление базой знаний чат-бота</p>
         </div>
-        <Button onClick={startAdd}>
+        <Button type="button" onClick={startAdd}>
           <Icon name="Plus" size={16} className="mr-2" />
           Добавить вопрос
         </Button>
@@ -138,8 +138,8 @@ const BotFaqTab = () => {
             rows={3}
           />
           <div className="flex gap-2">
-            <Button onClick={() => handleSave()}>Сохранить</Button>
-            <Button variant="outline" onClick={() => { setIsAdding(false); setEditQuestion(''); setEditAnswer(''); }}>
+            <Button type="button" onClick={() => handleSave()}>Сохранить</Button>
+            <Button type="button" variant="outline" onClick={() => { setIsAdding(false); setEditQuestion(''); setEditAnswer(''); }}>
               Отмена
             </Button>
           </div>
@@ -163,8 +163,8 @@ const BotFaqTab = () => {
                   rows={3}
                 />
                 <div className="flex gap-2">
-                  <Button onClick={() => handleSave(faq)}>Сохранить</Button>
-                  <Button variant="outline" onClick={() => setEditingId(null)}>Отмена</Button>
+                  <Button type="button" onClick={() => handleSave(faq)}>Сохранить</Button>
+                  <Button type="button" variant="outline" onClick={() => setEditingId(null)}>Отмена</Button>
                 </div>
               </div>
             ) : (
