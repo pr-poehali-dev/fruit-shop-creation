@@ -69,9 +69,7 @@ export default function CourierPage() {
         description: 'Войдите в систему для доступа',
         variant: 'destructive'
       });
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
+      setIsLoading(false);
       return;
     }
     
@@ -97,14 +95,7 @@ export default function CourierPage() {
         
         if (!data.user.is_courier) {
           console.log('CourierPage: ACCESS DENIED');
-          toast({
-            title: 'Доступ запрещён',
-            description: 'У вас нет прав курьера. Обратитесь к администратору.',
-            variant: 'destructive'
-          });
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1500);
+          setIsLoading(false);
         } else {
           console.log('CourierPage: ACCESS GRANTED');
           loadData(data.user.id);
@@ -114,14 +105,7 @@ export default function CourierPage() {
         setUser(parsedUser);
         if (!parsedUser.is_courier) {
           console.log('CourierPage: ACCESS DENIED (cache)');
-          toast({
-            title: 'Доступ запрещён',
-            description: 'У вас нет прав курьера',
-            variant: 'destructive'
-          });
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1500);
+          setIsLoading(false);
         } else {
           loadData(parsedUser.id);
         }
@@ -130,14 +114,7 @@ export default function CourierPage() {
       console.error('Failed to fetch user data:', error);
       setUser(parsedUser);
       if (!parsedUser.is_courier) {
-        toast({
-          title: 'Доступ запрещён',
-          description: 'У вас нет прав курьера',
-          variant: 'destructive'
-        });
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
+        setIsLoading(false);
       } else {
         loadData(parsedUser.id);
       }
