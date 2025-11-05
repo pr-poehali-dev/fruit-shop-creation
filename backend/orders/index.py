@@ -302,6 +302,90 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            elif action == 'admin_get_couriers':
+                cur.execute("""
+                    SELECT 
+                        u.id,
+                        u.full_name,
+                        u.phone,
+                        u.is_courier,
+                        u.created_at,
+                        COUNT(DISTINCT o.id) as total_deliveries,
+                        COALESCE(SUM(ce.amount), 0) as total_earned,
+                        COALESCE(SUM(CASE WHEN ce.paid_out THEN ce.amount ELSE 0 END), 0) as paid_out,
+                        COALESCE(SUM(CASE WHEN NOT ce.paid_out THEN ce.amount ELSE 0 END), 0) as pending
+                    FROM users u
+                    LEFT JOIN orders o ON o.courier_id = u.id
+                    LEFT JOIN courier_earnings ce ON ce.courier_id = u.id
+                    WHERE u.is_courier = TRUE
+                    GROUP BY u.id, u.full_name, u.phone, u.is_courier, u.created_at
+                    ORDER BY u.created_at DESC
+                """)
+                couriers = cur.fetchall()
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'couriers': [dict(row) for row in couriers]}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'admin_toggle_courier':
+                user_id = body_data.get('user_id')
+                is_courier = body_data.get('is_courier')
+                
+                if not user_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'user_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"UPDATE users SET is_courier = {is_courier} WHERE id = {user_id}")
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Courier status updated'}),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'admin_payout_courier':
+                courier_id = body_data.get('courier_id')
+                
+                if not courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'courier_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"""
+                    UPDATE courier_earnings
+                    SET paid_out = TRUE,
+                        paid_out_at = CURRENT_TIMESTAMP
+                    WHERE courier_id = {courier_id} AND paid_out = FALSE
+                """)
+                
+                cur.execute(f"""
+                    SELECT COALESCE(SUM(amount), 0) as paid_amount
+                    FROM courier_earnings
+                    WHERE courier_id = {courier_id} AND paid_out_at >= CURRENT_TIMESTAMP - INTERVAL '1 second'
+                """)
+                result = cur.fetchone()
+                paid_amount = result['paid_amount'] if result else 0
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': f'Paid out {paid_amount}₽', 'amount': float(paid_amount)}),
+                    'isBase64Encoded': False
+                }
+            
             elif action == 'courier_complete_delivery':
                 order_id = body_data.get('order_id')
                 courier_id = body_data.get('courier_id')

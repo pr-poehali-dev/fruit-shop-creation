@@ -53,19 +53,32 @@ export default function CourierPage() {
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      
-      if (!parsedUser.is_courier) {
-        toast({
-          title: 'Доступ запрещён',
-          description: 'У вас нет прав курьера',
-          variant: 'destructive'
-        });
-      } else {
-        loadData(parsedUser.id);
-      }
+    if (!userData) {
+      toast({
+        title: 'Требуется авторизация',
+        description: 'Войдите в систему для доступа',
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+      return;
+    }
+    
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
+    
+    if (!parsedUser.is_courier) {
+      toast({
+        title: 'Доступ запрещён',
+        description: 'У вас нет прав курьера',
+        variant: 'destructive'
+      });
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    } else {
+      loadData(parsedUser.id);
     }
   }, []);
 
