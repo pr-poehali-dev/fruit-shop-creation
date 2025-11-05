@@ -46,6 +46,18 @@ const MainContent = ({
 }: MainContentProps) => {
   console.log('MainContent render - isLoading:', isLoading, 'products count:', products?.length, 'currentSection:', currentSection);
   
+  if (currentSection === 'courier') {
+    return (
+      <Suspense fallback={
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      }>
+        <CourierPage />
+      </Suspense>
+    );
+  }
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -111,16 +123,6 @@ const MainContent = ({
       {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
 
       {currentSection === 'gallery' && <GallerySection />}
-      
-      {currentSection === 'courier' && (
-        <Suspense fallback={
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        }>
-          <CourierPage />
-        </Suspense>
-      )}
     </>
   );
 };
