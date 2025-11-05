@@ -60,7 +60,10 @@ export default function CourierPage() {
 
   const checkAccess = async () => {
     const userData = localStorage.getItem('user');
+    console.log('CourierPage: checking access, userData:', userData);
+    
     if (!userData) {
+      console.log('CourierPage: no user data');
       toast({
         title: 'Требуется авторизация',
         description: 'Войдите в систему для доступа',
@@ -73,6 +76,8 @@ export default function CourierPage() {
     }
     
     const parsedUser = JSON.parse(userData);
+    console.log('CourierPage: parsed user:', parsedUser);
+    console.log('CourierPage: is_courier from localStorage:', parsedUser.is_courier);
     
     try {
       const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc', {
@@ -82,11 +87,16 @@ export default function CourierPage() {
       });
       
       const data = await response.json();
+      console.log('CourierPage: server response:', data);
+      
       if (data.user) {
+        console.log('CourierPage: fresh user data:', data.user);
+        console.log('CourierPage: is_courier from server:', data.user.is_courier);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
         
         if (!data.user.is_courier) {
+          console.log('CourierPage: ACCESS DENIED');
           toast({
             title: 'Доступ запрещён',
             description: 'У вас нет прав курьера. Обратитесь к администратору.',
@@ -96,11 +106,14 @@ export default function CourierPage() {
             window.location.href = '/';
           }, 1500);
         } else {
+          console.log('CourierPage: ACCESS GRANTED');
           loadData(data.user.id);
         }
       } else {
+        console.log('CourierPage: no user in response, using cache');
         setUser(parsedUser);
         if (!parsedUser.is_courier) {
+          console.log('CourierPage: ACCESS DENIED (cache)');
           toast({
             title: 'Доступ запрещён',
             description: 'У вас нет прав курьера',
