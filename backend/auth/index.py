@@ -141,6 +141,35 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'get_all_users':
+                cur.execute("""
+                    SELECT id, phone, full_name, is_admin, is_courier, balance, cashback, avatar, created_at 
+                    FROM users 
+                    ORDER BY created_at DESC
+                """)
+                users = cur.fetchall()
+                
+                users_list = []
+                for user in users:
+                    users_list.append({
+                        'id': user['id'],
+                        'phone': user['phone'],
+                        'full_name': user['full_name'],
+                        'is_admin': user['is_admin'],
+                        'is_courier': user['is_courier'],
+                        'balance': float(user['balance']) if user['balance'] else 0.00,
+                        'cashback': float(user['cashback']) if user['cashback'] else 0.00,
+                        'avatar': user['avatar'] if user['avatar'] else '👤',
+                        'created_at': user['created_at'].isoformat() if user['created_at'] else None
+                    })
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'users': users_list}, default=str),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'user' and user_id:
                 cur.execute(f"SELECT id, phone, full_name, is_admin, balance, cashback, avatar FROM users WHERE id = {user_id}")
                 user = cur.fetchone()

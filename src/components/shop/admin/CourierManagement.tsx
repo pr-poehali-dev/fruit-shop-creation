@@ -73,13 +73,19 @@ export default function CourierManagement() {
 
   const loadAllUsers = async () => {
     try {
-      const res = await fetch('https://functions.poehali.dev/00695b6a-a8ce-41ee-b2c6-3e05d1bb0e7a?all=true');
+      const res = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_all_users');
       const data = await res.json();
+      console.log('Users response:', data);
       if (data.users) {
         setAllUsers(data.users);
       }
     } catch (error) {
       console.error('Failed to load users:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить пользователей',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -149,10 +155,15 @@ export default function CourierManagement() {
     loadAllUsers();
   };
 
-  const filteredUsers = allUsers.filter(user => 
-    !user.is_courier && 
-    (user.phone.includes(searchPhone) || user.full_name?.toLowerCase().includes(searchPhone.toLowerCase()))
-  );
+  const filteredUsers = allUsers.filter(user => {
+    if (!user || user.is_courier) return false;
+    
+    const searchLower = searchPhone.toLowerCase();
+    const phoneMatch = user.phone?.toLowerCase().includes(searchLower);
+    const nameMatch = user.full_name?.toLowerCase().includes(searchLower);
+    
+    return phoneMatch || nameMatch;
+  });
 
   if (isLoading) {
     return (
@@ -254,16 +265,26 @@ export default function CourierManagement() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <Input
-              placeholder="Поиск по телефону или имени..."
-              value={searchPhone}
-              onChange={(e) => setSearchPhone(e.target.value)}
-            />
+            <div>
+              <Input
+                placeholder="Поиск по телефону или имени..."
+                value={searchPhone}
+                onChange={(e) => setSearchPhone(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Найдено: {filteredUsers.length} пользователей
+              </p>
+            </div>
 
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {filteredUsers.length === 0 ? (
+              {allUsers.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-muted-foreground">Загрузка...</p>
+                </div>
+              ) : filteredUsers.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
-                  Пользователи не найдены
+                  {searchPhone ? 'Пользователи не найдены' : 'Начните вводить для поиска'}
                 </p>
               ) : (
                 filteredUsers.map((user) => (
