@@ -108,8 +108,10 @@ const Index = () => {
       setCurrentSection('korzina');
     } else if (path === '/profil') {
       setCurrentSection('profil');
+    } else if (path === '/') {
+      setCurrentSection('home');
     }
-  }, [user]);
+  }, [user?.is_admin]);
 
   useEffect(() => {
     if (loadError) {
