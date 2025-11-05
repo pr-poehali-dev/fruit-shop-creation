@@ -78,26 +78,31 @@ export default function CourierPage() {
     console.log('CourierPage: is_courier from localStorage:', parsedUser.is_courier);
     
     try {
+      console.log('CourierPage: fetching fresh user data from server...');
       const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'user', user_id: parsedUser.id })
       });
       
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+      
       const data = await response.json();
-      console.log('CourierPage: server response:', data);
+      console.log('CourierPage: server response:', JSON.stringify(data, null, 2));
       
       if (data.user) {
-        console.log('CourierPage: fresh user data:', data.user);
+        console.log('CourierPage: fresh user data received');
         console.log('CourierPage: is_courier from server:', data.user.is_courier);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
         
         if (!data.user.is_courier) {
-          console.log('CourierPage: ACCESS DENIED');
+          console.log('CourierPage: ACCESS DENIED - is_courier is false');
           setIsLoading(false);
         } else {
-          console.log('CourierPage: ACCESS GRANTED');
+          console.log('CourierPage: ACCESS GRANTED - is_courier is true');
           loadData(data.user.id);
         }
       } else {
@@ -111,7 +116,7 @@ export default function CourierPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
+      console.error('CourierPage: Failed to fetch user data:', error);
       setUser(parsedUser);
       if (!parsedUser.is_courier) {
         setIsLoading(false);
