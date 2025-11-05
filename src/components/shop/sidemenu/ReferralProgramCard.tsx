@@ -102,7 +102,7 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Icon name="Gift" size={20} className="text-purple-600" />
-          Программа промокодов
+          Разработка
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
