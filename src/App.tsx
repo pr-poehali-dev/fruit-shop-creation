@@ -91,6 +91,7 @@ const App = () => {
               <Route path="/kontakty" element={<Index />} />
               <Route path="/galereya" element={<Index />} />
               <Route path="/admin" element={<Index />} />
+              <Route path="/courier" element={<Index />} />
               <Route path="/korzina" element={<Index />} />
               <Route path="/profil" element={<Index />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />

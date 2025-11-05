@@ -97,6 +97,21 @@ const Index = () => {
   }, [user]);
 
   useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/courier') {
+      setCurrentSection('courier');
+    } else if (path === '/admin') {
+      if (user?.is_admin) {
+        setShowAdminPanel(true);
+      }
+    } else if (path === '/korzina') {
+      setCurrentSection('korzina');
+    } else if (path === '/profil') {
+      setCurrentSection('profil');
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (loadError) {
       toast({
         title: 'Ошибка загрузки',

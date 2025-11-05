@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import HomeSection from '@/components/shop/sections/HomeSection';
 import CatalogSection from '@/components/shop/sections/CatalogSection';
 import FavoritesSection from '@/components/shop/sections/FavoritesSection';
@@ -7,6 +8,8 @@ import CareSection from '@/components/shop/sections/CareSection';
 import ContactsSection from '@/components/shop/sections/ContactsSection';
 import GallerySection from '@/components/shop/sections/GallerySection';
 import { Product } from '@/types/shop';
+
+const CourierPage = lazy(() => import('@/pages/CourierPage'));
 
 interface MainContentProps {
   isLoading: boolean;
@@ -108,6 +111,16 @@ const MainContent = ({
       {currentSection === 'contacts' && <ContactsSection settings={siteSettings} />}
 
       {currentSection === 'gallery' && <GallerySection />}
+      
+      {currentSection === 'courier' && (
+        <Suspense fallback={
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        }>
+          <CourierPage />
+        </Suspense>
+      )}
     </>
   );
 };

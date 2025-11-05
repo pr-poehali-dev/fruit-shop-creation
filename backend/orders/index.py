@@ -133,6 +133,230 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body_data = json.loads(event.get('body', '{}'))
             action = body_data.get('action')
             
+            # Courier actions
+            if action == 'courier_available_orders':
+                cur.execute("""
+                    SELECT 
+                        o.id,
+                        o.user_id,
+                        u.full_name as customer_name,
+                        u.phone as customer_phone,
+                        o.delivery_address,
+                        o.total_amount,
+                        o.payment_method,
+                        o.created_at,
+                        o.status,
+                        o.delivery_type
+                    FROM orders o
+                    JOIN users u ON o.user_id = u.id
+                    WHERE o.status = 'готов к выдаче'
+                    AND o.delivery_type = 'courier'
+                    AND o.courier_id IS NULL
+                    ORDER BY o.created_at ASC
+                """)
+                orders = cur.fetchall()
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'orders': [dict(row) for row in orders]}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'courier_my_orders':
+                courier_id = body_data.get('courier_id')
+                if not courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'courier_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"""
+                    SELECT 
+                        o.id,
+                        o.user_id,
+                        u.full_name as customer_name,
+                        u.phone as customer_phone,
+                        o.delivery_address,
+                        o.total_amount,
+                        o.payment_method,
+                        o.created_at,
+                        o.status,
+                        o.courier_assigned_at,
+                        o.courier_delivered_at
+                    FROM orders o
+                    JOIN users u ON o.user_id = u.id
+                    WHERE o.courier_id = {courier_id}
+                    ORDER BY o.created_at DESC
+                """)
+                orders = cur.fetchall()
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'orders': [dict(row) for row in orders]}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'courier_earnings':
+                courier_id = body_data.get('courier_id')
+                if not courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'courier_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"""
+                    SELECT 
+                        COUNT(*) as total_deliveries,
+                        COALESCE(SUM(amount), 0) as total_earned,
+                        COALESCE(SUM(CASE WHEN paid_out THEN amount ELSE 0 END), 0) as paid_out,
+                        COALESCE(SUM(CASE WHEN NOT paid_out THEN amount ELSE 0 END), 0) as pending
+                    FROM courier_earnings
+                    WHERE courier_id = {courier_id}
+                """)
+                stats = dict(cur.fetchone())
+                
+                cur.execute(f"""
+                    SELECT 
+                        ce.id,
+                        ce.order_id,
+                        ce.amount,
+                        ce.earned_at,
+                        ce.paid_out,
+                        ce.paid_out_at,
+                        o.delivery_address
+                    FROM courier_earnings ce
+                    JOIN orders o ON ce.order_id = o.id
+                    WHERE ce.courier_id = {courier_id}
+                    ORDER BY ce.earned_at DESC
+                    LIMIT 50
+                """)
+                earnings = cur.fetchall()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'stats': stats, 'earnings': [dict(row) for row in earnings]}, default=str),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'courier_take_order':
+                order_id = body_data.get('order_id')
+                courier_id = body_data.get('courier_id')
+                
+                if not order_id or not courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'order_id and courier_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"SELECT id, is_courier, full_name FROM users WHERE id = {courier_id} AND is_courier = TRUE")
+                courier = cur.fetchone()
+                
+                if not courier:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Not a courier'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"SELECT id, status, courier_id FROM orders WHERE id = {order_id}")
+                order = cur.fetchone()
+                
+                if not order:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Order not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                if order['courier_id']:
+                    return {
+                        'statusCode': 409,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Order already taken'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"""
+                    UPDATE orders
+                    SET courier_id = {courier_id},
+                        courier_assigned_at = CURRENT_TIMESTAMP,
+                        status = 'в пути'
+                    WHERE id = {order_id}
+                """)
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Order assigned successfully', 'order_id': order_id}),
+                    'isBase64Encoded': False
+                }
+            
+            elif action == 'courier_complete_delivery':
+                order_id = body_data.get('order_id')
+                courier_id = body_data.get('courier_id')
+                
+                if not order_id or not courier_id:
+                    return {
+                        'statusCode': 400,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'order_id and courier_id required'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"SELECT id, status, courier_id FROM orders WHERE id = {order_id}")
+                order = cur.fetchone()
+                
+                if not order:
+                    return {
+                        'statusCode': 404,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Order not found'}),
+                        'isBase64Encoded': False
+                    }
+                
+                if order['courier_id'] != courier_id:
+                    return {
+                        'statusCode': 403,
+                        'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                        'body': json.dumps({'error': 'Not your order'}),
+                        'isBase64Encoded': False
+                    }
+                
+                cur.execute(f"""
+                    UPDATE orders
+                    SET status = 'выполнен',
+                        courier_delivered_at = CURRENT_TIMESTAMP,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = {order_id}
+                """)
+                
+                cur.execute(f"""
+                    INSERT INTO courier_earnings 
+                    (courier_id, order_id, amount, earned_at)
+                    VALUES ({courier_id}, {order_id}, 250.00, CURRENT_TIMESTAMP)
+                    ON CONFLICT (order_id) DO NOTHING
+                """)
+                
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Delivery completed, 250₽ earned', 'earned': 250}),
+                    'isBase64Encoded': False
+                }
+            
             if action == 'cancel_order':
                 order_id = body_data.get('order_id')
                 cancelled_by = body_data.get('cancelled_by', 'user')
