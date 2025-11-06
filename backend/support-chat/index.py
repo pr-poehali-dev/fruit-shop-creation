@@ -8,6 +8,8 @@ import json
 import os
 import psycopg2
 import time
+import urllib.request
+import urllib.parse
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
@@ -18,6 +20,26 @@ def clear_faq_cache():
     global _faq_cache, _faq_cache_time
     _faq_cache = None
     _faq_cache_time = 0
+
+def send_telegram_notification(message: str):
+    try:
+        bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+        chat_id = os.environ.get('TELEGRAM_ADMIN_CHAT_ID')
+        
+        if not bot_token or not chat_id:
+            return
+        
+        url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+        data = urllib.parse.urlencode({
+            'chat_id': chat_id,
+            'text': message,
+            'parse_mode': 'HTML'
+        }).encode()
+        
+        req = urllib.request.Request(url, data=data)
+        urllib.request.urlopen(req, timeout=5)
+    except Exception:
+        pass
 
 def is_working_hours() -> bool:
     now = datetime.utcnow()
@@ -498,6 +520,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             )
                             conn.commit()
                             
+                            telegram_msg = f"🔔 <b>Новое обращение в поддержку!</b>\n\n👤 От: {user_name}\n💬 Сообщение: {message[:100]}{'...' if len(message) > 100 else ''}\n\n📱 Чат ID: {chat_id}"
+                            send_telegram_notification(telegram_msg)
+                            
                             return {
                                 'statusCode': 200,
                                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -526,6 +551,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         (int(chat_id),)
                     )
                     conn.commit()
+                    
+                    if chat_status in ['waiting', 'active']:
+                        telegram_msg = f"💬 <b>Новое сообщение в чате #{chat_id}</b>\n\n👤 От: {user_name}\n✉️ {message[:150]}{'...' if len(message) > 150 else ''}"
+                        send_telegram_notification(telegram_msg)
                     
                     return {
                         'statusCode': 200,
