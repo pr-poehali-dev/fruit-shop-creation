@@ -24,7 +24,7 @@ def clear_faq_cache():
 def send_telegram_notification(message: str):
     try:
         bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
-        chat_id = os.environ.get('TELEGRAM_ADMIN_CHAT_ID')
+        chat_id = os.environ.get('ADMIN_TELEGRAM_CHAT_ID')
         
         if not bot_token or not chat_id:
             return
