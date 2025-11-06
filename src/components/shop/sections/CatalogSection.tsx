@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 interface ProductImage {
   id?: number;
@@ -46,6 +48,7 @@ interface CatalogSectionProps {
 
 const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, onToggleFavorite, siteSettings, isAuthenticated = false, userId, onShowAuth }: CatalogSectionProps) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const { user } = useAuth();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [showPumpkin, setShowPumpkin] = useState(true);
@@ -97,13 +100,15 @@ const CatalogSection = ({ products, categories = [], onAddToCart, favoriteIds, o
     <div>
       <h2 className="text-4xl font-display font-bold mb-8">Каталог растений</h2>
       
-      {/* Debug info */}
-      <div className="mb-4 p-4 bg-muted rounded-lg">
-        <p className="text-sm">Всего товаров: {products.length}</p>
-        <p className="text-sm">Отфильтровано: {filteredProducts.length}</p>
-        <p className="text-sm">Активная категория: {activeCategory}</p>
-        <p className="text-sm">Поиск: {searchQuery || 'нет'}</p>
-      </div>
+      {/* Debug info - только для админов */}
+      {user?.is_admin && (
+        <div className="mb-4 p-4 bg-muted rounded-lg">
+          <p className="text-sm">Всего товаров: {products.length}</p>
+          <p className="text-sm">Отфильтровано: {filteredProducts.length}</p>
+          <p className="text-sm">Активная категория: {activeCategory}</p>
+          <p className="text-sm">Поиск: {searchQuery || 'нет'}</p>
+        </div>
+      )}
       
       <div className="mb-6 space-y-4">
         <div className="flex flex-col md:flex-row gap-4">
