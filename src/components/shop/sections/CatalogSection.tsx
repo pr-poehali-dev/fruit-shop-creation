@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProductImage {
   id?: number;
