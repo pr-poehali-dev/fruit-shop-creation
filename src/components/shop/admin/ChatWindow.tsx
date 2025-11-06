@@ -76,7 +76,7 @@ export default function ChatWindow({
                     <div className="text-xs font-semibold mb-1">{msg.sender_name}</div>
                     <div className="text-sm whitespace-pre-wrap">{msg.message}</div>
                     <div className="text-xs opacity-70 mt-1">
-                      {new Date(msg.created_at).toLocaleString('ru-RU')}
+                      {new Date(msg.created_at).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}
                     </div>
                   </div>
                 </div>
