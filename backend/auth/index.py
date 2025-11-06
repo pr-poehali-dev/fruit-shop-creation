@@ -414,6 +414,55 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     body_data = json.loads(event.get('body', '{}'))
     action = body_data.get('action')
+    
+    if action == 'user':
+        user_id = body_data.get('user_id')
+        if not user_id:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'user_id required'}),
+                'isBase64Encoded': False
+            }
+        
+        from psycopg2.extras import RealDictCursor
+        db_url = os.environ.get('DATABASE_URL')
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        try:
+            cur.execute(f"SELECT id, phone, full_name, is_admin, is_courier, balance, cashback, avatar FROM users WHERE id = {user_id}")
+            user = cur.fetchone()
+            
+            if not user:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'User not found'}),
+                    'isBase64Encoded': False
+                }
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'user': {
+                        'id': user['id'],
+                        'phone': user['phone'],
+                        'full_name': user['full_name'],
+                        'is_admin': user['is_admin'],
+                        'is_courier': user['is_courier'],
+                        'balance': float(user['balance']) if user['balance'] else 0.00,
+                        'cashback': float(user['cashback']) if user['cashback'] else 0.00,
+                        'avatar': user['avatar'] if user['avatar'] else '👤'
+                    }
+                }, default=str),
+                'isBase64Encoded': False
+            }
+        finally:
+            cur.close()
+            conn.close()
+    
     phone_raw = body_data.get('phone', '').strip()
     password = body_data.get('password', '')
     login_code = body_data.get('login_code', '')
