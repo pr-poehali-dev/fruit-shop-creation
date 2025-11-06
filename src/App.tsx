@@ -23,7 +23,7 @@ const queryClient = new QueryClient();
 const App = () => {
   useEffect(() => {
     const clearCacheIfNeeded = () => {
-      const CACHE_VERSION = '1.0.1';
+      const CACHE_VERSION = '1.0.2';
       const currentVersion = localStorage.getItem('cacheVersion');
       
       if (currentVersion !== CACHE_VERSION) {
@@ -38,6 +38,30 @@ const App = () => {
     };
 
     clearCacheIfNeeded();
+    
+    const refreshUserData = async () => {
+      const userData = localStorage.getItem('user');
+      if (!userData) return;
+      
+      try {
+        const user = JSON.parse(userData);
+        const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'user', user_id: user.id })
+        });
+        
+        const data = await response.json();
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          console.log('User data refreshed with is_courier:', data.user.is_courier);
+        }
+      } catch (error) {
+        console.error('Failed to refresh user data:', error);
+      }
+    };
+    
+    refreshUserData();
 
     const theme = localStorage.getItem('theme');
     if (theme === 'dark') {

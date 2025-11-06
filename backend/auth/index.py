@@ -171,7 +171,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             if action == 'user' and user_id:
-                cur.execute(f"SELECT id, phone, full_name, is_admin, balance, cashback, avatar FROM users WHERE id = {user_id}")
+                cur.execute(f"SELECT id, phone, full_name, is_admin, is_courier, balance, cashback, avatar FROM users WHERE id = {user_id}")
                 user = cur.fetchone()
                 
                 if not user:
@@ -182,10 +182,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'isBase64Encoded': False
                     }
                 
-                cur.execute(f"SELECT is_active FROM couriers WHERE user_id = {user_id}")
-                courier = cur.fetchone()
-                is_courier = courier['is_active'] if courier else False
-                
                 return {
                     'statusCode': 200,
                     'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
@@ -195,7 +191,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             'phone': user['phone'],
                             'full_name': user['full_name'],
                             'is_admin': user['is_admin'],
-                            'is_courier': is_courier,
+                            'is_courier': user['is_courier'],
                             'balance': float(user['balance']) if user['balance'] else 0.00,
                             'cashback': float(user['cashback']) if user['cashback'] else 0.00,
                             'avatar': user['avatar'] if user['avatar'] else '👤'
