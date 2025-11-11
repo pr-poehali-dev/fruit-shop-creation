@@ -9,6 +9,7 @@ import DeliverySettingsSection from './settings/DeliverySettingsSection';
 import LoyaltySettingsSection from './settings/LoyaltySettingsSection';
 import PagesContentSection from './settings/PagesContentSection';
 import AdminSettingsSection from './settings/AdminSettingsSection';
+import OnlineCounterSection from './settings/OnlineCounterSection';
 
 interface SettingsTabProps {
   siteSettings: any;
@@ -58,6 +59,8 @@ const SettingsTab = ({ siteSettings, onSaveSettings }: SettingsTabProps) => {
           <PagesContentSection siteSettings={siteSettings} />
           
           <AdminSettingsSection siteSettings={siteSettings} />
+          
+          <OnlineCounterSection siteSettings={siteSettings} />
 
           <Button type="submit" className="w-full">
             Сохранить изменения

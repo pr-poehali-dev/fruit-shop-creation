@@ -6,6 +6,7 @@ import SideMenu from './SideMenu';
 import SnowEffect from './SnowEffect';
 import LeafyTitle from './LeafyTitle';
 import NotificationBell from './NotificationBell';
+import OnlineCounter from './OnlineCounter';
 
 import { useState, useEffect } from 'react';
 
@@ -145,6 +146,7 @@ const Header = ({
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
+          <OnlineCounter />
           <button onClick={() => onSectionChange('home')} className="hover:opacity-80 transition">Главная</button>
           <button onClick={() => onSectionChange('catalog')} className="hover:opacity-80 transition">Каталог</button>
           <button onClick={() => onSectionChange('about')} className="hover:opacity-80 transition">О нас</button>

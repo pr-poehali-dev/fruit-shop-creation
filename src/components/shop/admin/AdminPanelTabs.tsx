@@ -16,6 +16,7 @@ import LogsTab from './LogsTab';
 import SupportChatTab from './SupportChatTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import CourierManagement from './CourierManagement';
+import StatisticsTab from './StatisticsTab';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -96,6 +97,7 @@ const AdminPanelTabs = ({
     hasPermission('settings'),
     hasPermission('support'),
     hasPermission('couriers'),
+    isSuperAdmin,
     isSuperAdmin,
     isSuperAdmin
   ].filter(Boolean).length;
@@ -191,6 +193,12 @@ const AdminPanelTabs = ({
           <TabsTrigger value="couriers" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="Truck" size={16} className="sm:mr-1" />
             <span className="hidden sm:inline">Курьеры</span>
+          </TabsTrigger>
+        )}
+        {isSuperAdmin && (
+          <TabsTrigger value="statistics" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="BarChart3" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Статистика</span>
           </TabsTrigger>
         )}
       </TabsList>
@@ -300,6 +308,12 @@ const AdminPanelTabs = ({
       {hasPermission('couriers') && (
         <TabsContent value="couriers">
           <CourierManagement />
+        </TabsContent>
+      )}
+
+      {isSuperAdmin && (
+        <TabsContent value="statistics">
+          <StatisticsTab />
         </TabsContent>
       )}
     </Tabs>

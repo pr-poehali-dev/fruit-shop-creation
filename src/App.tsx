@@ -10,6 +10,7 @@ import LoadingScreen from "./components/LoadingScreen";
 import DecorativeBranch from "./components/DecorativeBranch";
 import SupportChat from "./components/SupportChat";
 import NetworkStatus from "./components/NetworkStatus";
+import { useVisitorTracking } from "./hooks/useVisitorTracking";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -21,6 +22,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const queryClient = new QueryClient();
 
 const App = () => {
+  useVisitorTracking();
+  
   useEffect(() => {
     const clearCacheIfNeeded = () => {
       const CACHE_VERSION = '1.0.2';
