@@ -153,8 +153,6 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
   };
 
   const uploadImageFile = async (file: File): Promise<string | null> => {
-    console.log('uploadImageFile called with file:', file.name, file.type, file.size);
-    
     if (!file.type.startsWith('image/')) {
       alert('Пожалуйста, выберите изображение');
       return null;
@@ -166,58 +164,28 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       return null;
     }
     
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const base64Image = event.target?.result as string;
-        console.log('File read complete, base64 length:', base64Image?.length);
-        
-        try {
-          console.log('Sending upload request...');
-          const response = await fetch('https://functions.poehali.dev/44df414c-694f-4079-aa96-764afeaf23e3', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              image: base64Image,
-              filename: file.name
-            })
-          });
-          
-          console.log('Response status:', response.status);
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          console.log('Upload response data:', data);
-          
-          if (data.success && data.url) {
-            console.log('Upload successful, URL:', data.url);
-            resolve(data.url);
-          } else {
-            console.error('Upload error:', data);
-            alert(`Ошибка загрузки: ${data.error || 'Неизвестная ошибка'}`);
-            resolve(null);
-          }
-        } catch (fetchError) {
-          console.error('Fetch error:', fetchError);
-          alert(`Ошибка запроса: ${fetchError instanceof Error ? fetchError.message : 'Неизвестная ошибка'}`);
-          resolve(null);
-        }
-      };
+    const formData = new FormData();
+    formData.append('key', '47fefc6b8e5e4a3fc4e4c7d7b4883f86');
+    formData.append('image', file);
+    
+    try {
+      const response = await fetch('https://api.imgbb.com/1/upload', {
+        method: 'POST',
+        body: formData
+      });
       
-      reader.onerror = () => {
-        console.error('File reader error');
-        alert('Ошибка чтения файла');
-        resolve(null);
-      };
+      const data = await response.json();
       
-      console.log('Starting file read...');
-      reader.readAsDataURL(file);
-    });
+      if (data.success && data.data?.url) {
+        return data.data.url;
+      } else {
+        alert(`Ошибка загрузки: ${data.error?.message || 'Неизвестная ошибка'}`);
+        return null;
+      }
+    } catch (error) {
+      alert(`Ошибка запроса: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
+      return null;
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
