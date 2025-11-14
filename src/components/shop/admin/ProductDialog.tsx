@@ -152,29 +152,19 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     setImages(newImages);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
+  const uploadImageFile = async (file: File): Promise<string | null> => {
     if (!file.type.startsWith('image/')) {
       alert('Пожалуйста, выберите изображение');
-      return;
+      return null;
     }
     
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       alert('Размер файла не должен превышать 10 МБ');
-      return;
+      return null;
     }
     
-    if (images.length >= 10) {
-      alert('Можно добавить максимум 10 изображений');
-      return;
-    }
-    
-    setIsUploading(true);
-    
-    try {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64Image = event.target?.result as string;
@@ -198,39 +188,83 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
           const data = await response.json();
           
           if (data.success && data.url) {
-            setImages(prevImages => {
-              const newImage: ProductImage = {
-                image_url: data.url,
-                is_primary: prevImages.length === 0,
-                sort_order: prevImages.length
-              };
-              return [...prevImages, newImage];
-            });
+            resolve(data.url);
           } else {
             console.error('Upload error:', data);
             alert(`Ошибка загрузки: ${data.error || 'Неизвестная ошибка'}`);
+            resolve(null);
           }
         } catch (fetchError) {
           console.error('Fetch error:', fetchError);
           alert(`Ошибка запроса: ${fetchError instanceof Error ? fetchError.message : 'Неизвестная ошибка'}`);
+          resolve(null);
         }
-        
-        setIsUploading(false);
       };
       
       reader.onerror = () => {
         alert('Ошибка чтения файла');
-        setIsUploading(false);
+        resolve(null);
       };
       
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (images.length >= 10) {
+      alert('Можно добавить максимум 10 изображений');
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      const url = await uploadImageFile(file);
+      
+      if (url) {
+        setImages(prevImages => {
+          const newImage: ProductImage = {
+            image_url: url,
+            is_primary: prevImages.length === 0,
+            sort_order: prevImages.length
+          };
+          return [...prevImages, newImage];
+        });
+      }
     } catch (error) {
       console.error('Reader error:', error);
       alert('Ошибка обработки файла');
-      setIsUploading(false);
     }
     
+    setIsUploading(false);
     e.target.value = '';
+  };
+
+  const handleReplaceImage = async (index: number, file: File) => {
+    setIsUploading(true);
+    
+    try {
+      const url = await uploadImageFile(file);
+      
+      if (url) {
+        setImages(prevImages => {
+          const newImages = [...prevImages];
+          newImages[index] = {
+            ...newImages[index],
+            image_url: url
+          };
+          return newImages;
+        });
+      }
+    } catch (error) {
+      console.error('Replace error:', error);
+      alert('Ошибка замены изображения');
+    }
+    
+    setIsUploading(false);
   };
 
   const handleAddVariant = () => {
@@ -305,6 +339,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
             onMoveImage={handleMoveImage}
             onFileUpload={handleFileUpload}
             onNewImageUrlChange={setNewImageUrl}
+            onReplaceImage={handleReplaceImage}
           />
 
           <ProductVariants

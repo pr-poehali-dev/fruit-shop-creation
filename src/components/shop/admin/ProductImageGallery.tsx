@@ -22,6 +22,7 @@ interface ProductImageGalleryProps {
   onMoveImage: (index: number, direction: 'up' | 'down') => void;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onNewImageUrlChange: (value: string) => void;
+  onReplaceImage: (index: number, file: File) => void;
 }
 
 const ProductImageGallery = ({
@@ -33,8 +34,21 @@ const ProductImageGallery = ({
   onSetPrimary,
   onMoveImage,
   onFileUpload,
-  onNewImageUrlChange
+  onNewImageUrlChange,
+  onReplaceImage
 }: ProductImageGalleryProps) => {
+  const handleReplaceClick = (index: number) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        onReplaceImage(index, file);
+      }
+    };
+    input.click();
+  };
   return (
     <div>
       <Label className="text-sm">Галерея изображений (до 10 фото) *</Label>
@@ -137,6 +151,17 @@ const ProductImageGallery = ({
                           <Icon name="Star" size={14} />
                         </Button>
                       )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleReplaceClick(index)}
+                        title="Заменить изображение"
+                        disabled={isUploading}
+                        className="h-8 w-8 sm:h-10 sm:w-10"
+                      >
+                        <Icon name="RefreshCw" size={14} />
+                      </Button>
                       <Button
                         type="button"
                         variant="destructive"
