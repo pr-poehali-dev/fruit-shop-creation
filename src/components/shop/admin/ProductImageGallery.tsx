@@ -106,9 +106,17 @@ const ProductImageGallery = ({
             {images.map((img, index) => (
               <Card key={index} className="p-2 sm:p-3">
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
-                  <img src={img.image_url} alt="" className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0" />
+                  <img 
+                    src={img.image_url} 
+                    alt="" 
+                    className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <p className="text-xs sm:text-sm truncate break-all">{img.image_url}</p>
+                    <p className="text-xs sm:text-sm break-all line-clamp-2">{img.image_url}</p>
                     {img.is_primary && (
                       <Badge variant="default" className="mt-1 text-xs">Главное</Badge>
                     )}

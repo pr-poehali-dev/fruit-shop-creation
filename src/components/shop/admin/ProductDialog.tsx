@@ -153,6 +153,8 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
   };
 
   const uploadImageFile = async (file: File): Promise<string | null> => {
+    console.log('uploadImageFile called with file:', file.name, file.type, file.size);
+    
     if (!file.type.startsWith('image/')) {
       alert('Пожалуйста, выберите изображение');
       return null;
@@ -168,8 +170,10 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64Image = event.target?.result as string;
+        console.log('File read complete, base64 length:', base64Image?.length);
         
         try {
+          console.log('Sending upload request...');
           const response = await fetch('https://functions.poehali.dev/44df414c-694f-4079-aa96-764afeaf23e3', {
             method: 'POST',
             headers: {
@@ -181,13 +185,17 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
             })
           });
           
+          console.log('Response status:', response.status);
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           
           const data = await response.json();
+          console.log('Upload response data:', data);
           
           if (data.success && data.url) {
+            console.log('Upload successful, URL:', data.url);
             resolve(data.url);
           } else {
             console.error('Upload error:', data);
@@ -202,10 +210,12 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       };
       
       reader.onerror = () => {
+        console.error('File reader error');
         alert('Ошибка чтения файла');
         resolve(null);
       };
       
+      console.log('Starting file read...');
       reader.readAsDataURL(file);
     });
   };
