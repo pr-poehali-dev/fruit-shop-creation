@@ -32,7 +32,7 @@ const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsP
         <TabsTrigger value="register">Регистрация</TabsTrigger>
       </TabsList>
       <TabsContent value="login">
-        <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-4" autoComplete="on">
+        <form onSubmit={(e) => onSubmit(e, 'login')} className="space-y-3" autoComplete="on">
           <div>
             <Label htmlFor="login-phone">Телефон</Label>
             <Input 
@@ -65,7 +65,7 @@ const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsP
         </form>
       </TabsContent>
       <TabsContent value="register">
-        <form onSubmit={handleRegisterSubmit} className="space-y-4" autoComplete="on">
+        <form onSubmit={handleRegisterSubmit} className="space-y-3" autoComplete="on">
           <div>
             <Label htmlFor="register-phone">Телефон</Label>
             <Input 
