@@ -40,12 +40,23 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
     
     try {
       setIsLoading(true);
-      const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_code&user_id=${userId}`);
+      const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_referral_data&user_id=${userId}`);
       const data = await response.json();
       
       if (data.success) {
-        setPromoCode(data.promo_code);
-        setInvitedUsers(data.invited || []);
+        setPromoCode(data.referral_code);
+        
+        const formattedInvited = (data.referrals || []).map((ref: any) => ({
+          id: ref.referred_user.id,
+          full_name: ref.referred_user.full_name,
+          phone: ref.referred_user.phone,
+          reward_given: ref.reward_given,
+          first_order_made: ref.first_order_total !== null,
+          first_order_total: ref.first_order_total,
+          invited_at: ref.created_at
+        }));
+        
+        setInvitedUsers(formattedInvited);
         setTotalEarned(data.total_earned || 0);
       }
     } catch (error) {
@@ -108,24 +119,25 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <p className="text-sm text-purple-900 dark:text-purple-100 font-medium">
-            Ваш промокод:
+            Ваш промокод для приглашений:
           </p>
           <div className="flex gap-2">
             <Input 
-              value={promoCode}
+              value={promoCode || 'Загрузка...'}
               readOnly
-              className="font-bold text-lg text-center bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700"
+              className="font-bold text-lg text-center bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 uppercase"
             />
             <Button 
               onClick={copyPromoCode}
               size="sm"
               className="shrink-0 bg-purple-600 hover:bg-purple-700"
+              disabled={!promoCode}
             >
               <Icon name={copied ? "Check" : "Copy"} size={16} />
             </Button>
           </div>
           <p className="text-xs text-purple-700 dark:text-purple-300">
-            Друзья вводят этот код при регистрации и вы получаете <strong>500₽</strong> после их первого заказа от <strong>1500₽</strong>
+            Друзья вводят этот код при регистрации, и вы получаете <strong>500₽</strong> после их первого заказа от <strong>1500₽</strong>
           </p>
         </div>
 
