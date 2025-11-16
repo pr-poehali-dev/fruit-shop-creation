@@ -73,7 +73,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         u.full_name,
                         u.phone
                     FROM t_p77282076_fruit_shop_creation.referrals r
-                    JOIN users u ON u.id = r.referred_id
+                    JOIN t_p77282076_fruit_shop_creation.users u ON u.id = r.referred_id
                     WHERE r.referrer_id = {user_id}
                     ORDER BY r.created_at DESC
                 """)
