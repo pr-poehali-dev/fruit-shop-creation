@@ -11,6 +11,9 @@ interface ProductImage {
   image_url: string;
   is_primary: boolean;
   sort_order: number;
+  width?: number;
+  height?: number;
+  object_fit?: string;
 }
 
 interface ProductVariant {
@@ -245,6 +248,19 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     setIsUploading(false);
   };
 
+  const handleUpdateImageDimensions = (index: number, width: number | undefined, height: number | undefined, objectFit: string) => {
+    setImages(prevImages => {
+      const newImages = [...prevImages];
+      newImages[index] = {
+        ...newImages[index],
+        width,
+        height,
+        object_fit: objectFit
+      };
+      return newImages;
+    });
+  };
+
   const handleAddVariant = () => {
     if (!newVariantSize.trim() || !newVariantPrice.trim()) return;
     
@@ -318,6 +334,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
             onFileUpload={handleFileUpload}
             onNewImageUrlChange={setNewImageUrl}
             onReplaceImage={handleReplaceImage}
+            onUpdateImageDimensions={handleUpdateImageDimensions}
           />
 
           <ProductVariants

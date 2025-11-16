@@ -4,12 +4,17 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Card } from '@/components/ui/card';
+import React from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ProductImage {
   id?: number;
   image_url: string;
   is_primary: boolean;
   sort_order: number;
+  width?: number;
+  height?: number;
+  object_fit?: string;
 }
 
 interface ProductImageGalleryProps {
@@ -23,6 +28,7 @@ interface ProductImageGalleryProps {
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onNewImageUrlChange: (value: string) => void;
   onReplaceImage: (index: number, file: File) => void;
+  onUpdateImageDimensions: (index: number, width: number | undefined, height: number | undefined, objectFit: string) => void;
 }
 
 const ProductImageGallery = ({
@@ -35,7 +41,8 @@ const ProductImageGallery = ({
   onMoveImage,
   onFileUpload,
   onNewImageUrlChange,
-  onReplaceImage
+  onReplaceImage,
+  onUpdateImageDimensions
 }: ProductImageGalleryProps) => {
   const handleReplaceClick = (index: number) => {
     const input = document.createElement('input');
@@ -48,6 +55,12 @@ const ProductImageGallery = ({
       }
     };
     input.click();
+  };
+
+  const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
+
+  const toggleExpanded = (index: number) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
   };
   return (
     <div>
@@ -102,13 +115,18 @@ const ProductImageGallery = ({
         </p>
         
         {images.length > 0 && (
-          <div className="grid gap-2 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+          <div className="grid gap-2 max-h-[400px] overflow-y-auto">
             {images.map((img, index) => (
               <Card key={index} className="p-2 sm:p-3">
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
                   <img 
                     src={img.image_url} 
                     alt="" 
+                    style={{
+                      width: img.width ? `${img.width}px` : undefined,
+                      height: img.height ? `${img.height}px` : undefined,
+                      objectFit: (img.object_fit as any) || 'cover'
+                    }}
                     className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -147,6 +165,16 @@ const ProductImageGallery = ({
                       </Button>
                     </div>
                     <div className="flex gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => toggleExpanded(index)}
+                        title="Настройки размера"
+                        className="h-8 w-8 sm:h-10 sm:w-10"
+                      >
+                        <Icon name="Settings2" size={14} />
+                      </Button>
                       {!img.is_primary && (
                         <Button
                           type="button"
@@ -183,6 +211,61 @@ const ProductImageGallery = ({
                     </div>
                   </div>
                 </div>
+                
+                {expandedIndex === index && (
+                  <div className="mt-3 pt-3 border-t space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Ширина (px)</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Авто"
+                          value={img.width || ''}
+                          onChange={(e) => {
+                            const val = e.target.value ? parseInt(e.target.value) : undefined;
+                            onUpdateImageDimensions(index, val, img.height, img.object_fit || 'cover');
+                          }}
+                          className="text-sm h-9"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Высота (px)</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Авто"
+                          value={img.height || ''}
+                          onChange={(e) => {
+                            const val = e.target.value ? parseInt(e.target.value) : undefined;
+                            onUpdateImageDimensions(index, img.width, val, img.object_fit || 'cover');
+                          }}
+                          className="text-sm h-9"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Подгонка изображения</Label>
+                      <Select
+                        value={img.object_fit || 'cover'}
+                        onValueChange={(val) => onUpdateImageDimensions(index, img.width, img.height, val)}
+                      >
+                        <SelectTrigger className="text-sm h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cover">Cover (обрезка)</SelectItem>
+                          <SelectItem value="contain">Contain (уместить)</SelectItem>
+                          <SelectItem value="fill">Fill (растянуть)</SelectItem>
+                          <SelectItem value="none">None (оригинал)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Оставьте поля пустыми для автоматического размера
+                    </p>
+                  </div>
+                )}
               </Card>
             ))}
           </div>

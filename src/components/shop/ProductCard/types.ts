@@ -3,6 +3,9 @@ export interface ProductImage {
   image_url: string;
   is_primary: boolean;
   sort_order: number;
+  width?: number;
+  height?: number;
+  object_fit?: string;
 }
 
 export interface ProductVariant {

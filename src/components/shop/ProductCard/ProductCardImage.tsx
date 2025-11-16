@@ -20,6 +20,13 @@ const ProductCardImage = ({
   isAuthenticated,
   onLogAction 
 }: ProductCardImageProps) => {
+  const primaryImageObj = product.images?.find(img => img.is_primary);
+  const imageStyle: React.CSSProperties = {
+    width: primaryImageObj?.width ? `${primaryImageObj.width}px` : '100%',
+    height: primaryImageObj?.height ? `${primaryImageObj.height}px` : '12rem',
+    objectFit: (primaryImageObj?.object_fit as any) || 'cover'
+  };
+
   return (
     <div className="relative group cursor-pointer" onClick={async () => {
       onViewDetails(product);
@@ -36,7 +43,12 @@ const ProductCardImage = ({
     }}>
       {primaryImage && primaryImage.trim() !== '' ? (
         <>
-          <img src={primaryImage} alt={product.name} className="w-full h-48 object-cover" />
+          <img 
+            src={primaryImage} 
+            alt={product.name} 
+            style={imageStyle}
+            className="w-full h-48"
+          />
           {hasMultipleImages && (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <div className="text-white text-center">

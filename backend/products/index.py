@@ -92,7 +92,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             ids_str = ','.join(map(str, product_ids))
             
             cur.execute(
-                f"""SELECT id, product_id, image_url, is_primary, sort_order 
+                f"""SELECT id, product_id, image_url, is_primary, sort_order, width, height, object_fit 
                    FROM product_images 
                    WHERE product_id IN ({ids_str}) AND image_url != '' AND image_url IS NOT NULL
                    ORDER BY product_id, sort_order"""
@@ -164,9 +164,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 img_url = image['image_url'].replace("'", "''")
                 is_primary = 'TRUE' if image.get('is_primary', False) else 'FALSE'
                 sort_order = image.get('sort_order', 0)
+                width = image.get('width')
+                height = image.get('height')
+                object_fit = image.get('object_fit', 'cover').replace("'", "''")
+                width_sql = str(width) if width else 'NULL'
+                height_sql = str(height) if height else 'NULL'
                 cur.execute(
-                    f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order) 
-                       VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order})"""
+                    f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order, width, height, object_fit) 
+                       VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order}, {width_sql}, {height_sql}, '{object_fit}')"""
                 )
             
             for variant in variants:
@@ -225,18 +230,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 img_url = image['image_url'].replace("'", "''")
                 is_primary = 'TRUE' if image.get('is_primary', False) else 'FALSE'
                 sort_order = image.get('sort_order', 0)
+                width = image.get('width')
+                height = image.get('height')
+                object_fit = image.get('object_fit', 'cover').replace("'", "''")
+                width_sql = str(width) if width else 'NULL'
+                height_sql = str(height) if height else 'NULL'
                 
                 if image.get('id') and image['id'] in existing_ids:
                     cur.execute(
                         f"""UPDATE product_images 
-                           SET image_url = '{img_url}', is_primary = {is_primary}, sort_order = {sort_order}
+                           SET image_url = '{img_url}', is_primary = {is_primary}, sort_order = {sort_order}, 
+                               width = {width_sql}, height = {height_sql}, object_fit = '{object_fit}'
                            WHERE id = {image['id']}"""
                     )
                     existing_ids.remove(image['id'])
                 else:
                     cur.execute(
-                        f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order) 
-                           VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order})"""
+                        f"""INSERT INTO product_images (product_id, image_url, is_primary, sort_order, width, height, object_fit) 
+                           VALUES ({product_id}, '{img_url}', {is_primary}, {sort_order}, {width_sql}, {height_sql}, '{object_fit}')"""
                     )
             
             for old_id in existing_ids:
