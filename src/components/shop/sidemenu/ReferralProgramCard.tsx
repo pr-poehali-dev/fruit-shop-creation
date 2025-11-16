@@ -43,6 +43,8 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
       const response = await fetch(`https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_referral_data&user_id=${userId}`);
       const data = await response.json();
       
+      console.log('Referral data response:', data);
+      
       if (data.success) {
         setPromoCode(data.referral_code);
         
@@ -58,6 +60,8 @@ export const ReferralProgramCard = ({ show, userId }: ReferralProgramCardProps) 
         
         setInvitedUsers(formattedInvited);
         setTotalEarned(data.total_earned || 0);
+      } else {
+        console.error('API returned success: false', data);
       }
     } catch (error) {
       console.error('Failed to load promo data:', error);
