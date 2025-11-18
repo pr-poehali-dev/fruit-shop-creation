@@ -213,8 +213,7 @@ const ProductImageGallery = ({
                 {expandedIndex === index && (
                   <div className="mt-3 pt-3 border-t space-y-3">
                     <div>
-                      <Label className="text-xs mb-2 block">Превью</Label>
-                      <div className="bg-muted/30 rounded-lg p-4 flex items-center justify-center min-h-[120px]">
+                      <div className="bg-muted/30 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] relative">
                         <img 
                           src={img.image_url} 
                           alt="Preview" 
@@ -226,36 +225,32 @@ const ProductImageGallery = ({
                           }}
                           className="rounded border-2 border-dashed border-primary/30"
                         />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Ширина (px)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="Авто"
-                          value={img.width || ''}
-                          onChange={(e) => {
-                            const val = e.target.value ? parseInt(e.target.value) : undefined;
-                            onUpdateImageDimensions(index, val, img.height, img.object_fit || 'cover');
-                          }}
-                          className="text-sm h-9"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Высота (px)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="Авто"
-                          value={img.height || ''}
-                          onChange={(e) => {
-                            const val = e.target.value ? parseInt(e.target.value) : undefined;
-                            onUpdateImageDimensions(index, img.width, val, img.object_fit || 'cover');
-                          }}
-                          className="text-sm h-9"
-                        />
+                        <div className="absolute top-2 left-2 bg-background/90 backdrop-blur-sm rounded px-2 py-1 text-xs flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="Ширина"
+                            value={img.width || ''}
+                            onChange={(e) => {
+                              const val = e.target.value ? parseInt(e.target.value) : undefined;
+                              onUpdateImageDimensions(index, val, img.height, img.object_fit || 'cover');
+                            }}
+                            className="h-7 w-20 text-xs"
+                          />
+                          <span className="text-muted-foreground">×</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="Высота"
+                            value={img.height || ''}
+                            onChange={(e) => {
+                              const val = e.target.value ? parseInt(e.target.value) : undefined;
+                              onUpdateImageDimensions(index, img.width, val, img.object_fit || 'cover');
+                            }}
+                            className="h-7 w-20 text-xs"
+                          />
+                          <span className="text-muted-foreground text-[10px]">px</span>
+                        </div>
                       </div>
                     </div>
                     <div>
@@ -275,9 +270,6 @@ const ProductImageGallery = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Оставьте поля пустыми для автоматического размера
-                    </p>
                   </div>
                 )}
               </Card>
