@@ -87,7 +87,7 @@ const NewYearBackground = () => {
         />
       </div>
 
-      <div className="fixed bottom-0 right-0 z-[99] pointer-events-none santa-peek">
+      <div className="fixed bottom-0 right-0 z-[99] pointer-events-none santa-peek" style={{ display: 'none' }}>
         <div className="relative">
           <div className="santa-speech-bubble">
             <p className="text-sm font-bold text-gray-800">
