@@ -153,6 +153,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             auto_maintenance_enabled = bool(body_data.get('auto_maintenance_enabled', False))
             maintenance_start_time = body_data.get('maintenance_start_time')
             maintenance_end_time = body_data.get('maintenance_end_time')
+            show_online_counter = bool(body_data.get('show_online_counter', False))
+            online_boost = body_data.get('online_boost', 0) if body_data.get('online_boost') is not None else 0
             
             if maintenance_start_time:
                 maintenance_start_time = f"'{maintenance_start_time}'"
@@ -175,7 +177,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     care_pruning_title, care_pruning_text, delivery_title, delivery_courier_title, delivery_courier_text,
                     delivery_transport_title, delivery_transport_text, delivery_pickup_title, delivery_pickup_text,
                     payment_title, payment_methods,
-                    is_maintenance_mode, maintenance_reason, auto_maintenance_enabled, maintenance_start_time, maintenance_end_time
+                    is_maintenance_mode, maintenance_reason, auto_maintenance_enabled, maintenance_start_time, maintenance_end_time,
+                    show_online_counter, online_boost
                    )
                    VALUES (1, '{site_name}', '{logo_url}', '{site_desc}', '{phone}', '{email}', '{address}', '{work_hours}', '{promotions}', '{additional_info}', '{price_list_url}', 
                     '{holiday_theme}', {loyalty_card_price}, {loyalty_unlock_amount}, {loyalty_cashback_percent}, {balance_payment_cashback_percent}, '{admin_pin}',
@@ -186,7 +189,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     '{care_pruning_title}', '{care_pruning_text}', '{delivery_title}', '{delivery_courier_title}', '{delivery_courier_text}',
                     '{delivery_transport_title}', '{delivery_transport_text}', '{delivery_pickup_title}', '{delivery_pickup_text}',
                     '{payment_title}', '{payment_methods_json}'::jsonb,
-                    {is_maintenance_mode}, '{maintenance_reason}', {auto_maintenance_enabled}, {maintenance_start_time}, {maintenance_end_time}
+                    {is_maintenance_mode}, '{maintenance_reason}', {auto_maintenance_enabled}, {maintenance_start_time}, {maintenance_end_time},
+                    {show_online_counter}, {online_boost}
                    )
                    ON CONFLICT (id) DO UPDATE SET
                    site_name = EXCLUDED.site_name,
@@ -239,6 +243,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                    auto_maintenance_enabled = EXCLUDED.auto_maintenance_enabled,
                    maintenance_start_time = EXCLUDED.maintenance_start_time,
                    maintenance_end_time = EXCLUDED.maintenance_end_time,
+                   show_online_counter = EXCLUDED.show_online_counter,
+                   online_boost = EXCLUDED.online_boost,
                    updated_at = CURRENT_TIMESTAMP
                    RETURNING *"""
             )

@@ -342,6 +342,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             cur.execute("""
+                UPDATE t_p77282076_fruit_shop_creation.support_messages
+                SET is_read = true
+                WHERE chat_id = %s AND sender_type = 'user' AND is_read = false
+            """, (chat_data['id'],))
+            conn.commit()
+            
+            cur.execute("""
                 SELECT id, sender_type, sender_name, message, created_at, is_read
                 FROM t_p77282076_fruit_shop_creation.support_messages
                 WHERE chat_id = %s
