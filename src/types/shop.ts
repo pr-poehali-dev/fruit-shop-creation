@@ -7,6 +7,7 @@ export interface User {
   balance?: number;
   cashback?: number;
   avatar?: string;
+  snow_effect_enabled?: boolean;
 }
 
 export interface Product {

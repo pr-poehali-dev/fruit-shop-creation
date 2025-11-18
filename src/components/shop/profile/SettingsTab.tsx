@@ -17,11 +17,7 @@ interface SettingsTabProps {
 const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
   const { toast } = useToast();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [qrCode, setQrCode] = useState('');
-  const [secret, setSecret] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [showQR, setShowQR] = useState(false);
+  const [snowEnabled, setSnowEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -31,8 +27,8 @@ const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
       document.documentElement.classList.add('dark');
     }
 
-    if (user?.two_factor_enabled) {
-      setTwoFactorEnabled(true);
+    if (user?.snow_effect_enabled !== undefined) {
+      setSnowEnabled(user.snow_effect_enabled);
     }
   }, [user]);
 
@@ -68,124 +64,55 @@ const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
     }
   };
 
-  const enableTwoFactor = async () => {
+  const toggleSnowEffect = async (enabled: boolean) => {
     if (!user) return;
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://functions.poehali.dev/YOUR_2FA_FUNCTION_URL', {
-        method: 'POST',
+      const response = await fetch('https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'setup',
-          user_id: user.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setQrCode(data.qr_code);
-        setSecret(data.secret);
-        setShowQR(true);
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось настроить 2FA',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось подключить двухфакторную аутентификацию',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const verifyTwoFactor = async () => {
-    if (!user || !verificationCode) return;
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('https://functions.poehali.dev/YOUR_2FA_FUNCTION_URL', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'verify',
           user_id: user.id,
-          code: verificationCode
+          snow_effect_enabled: enabled
         })
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setTwoFactorEnabled(true);
-        setShowQR(false);
-        setVerificationCode('');
-        onUserUpdate({ ...user, two_factor_enabled: true });
+        setSnowEnabled(enabled);
+        onUserUpdate({ ...user, snow_effect_enabled: enabled });
         toast({
-          title: 'Двухфакторная аутентификация включена',
-          description: 'Теперь при входе потребуется код из приложения'
+          title: enabled ? 'Снег включён' : 'Снег отключён',
+          description: enabled ? 'Новогодние снежинки теперь падают на экране' : 'Снежинки больше не отображаются'
         });
+        
+        if (user) {
+          await logUserAction(
+            user.id,
+            'snow_effect_toggle',
+            `Эффект снега ${enabled ? 'включён' : 'отключён'}`,
+            'settings',
+            undefined,
+            { snow_enabled: enabled }
+          );
+        }
       } else {
         toast({
           title: 'Ошибка',
-          description: data.error || 'Неверный код подтверждения',
+          description: data.error || 'Не удалось изменить настройку',
           variant: 'destructive'
         });
+        setSnowEnabled(!enabled);
       }
     } catch (error) {
       toast({
         title: 'Ошибка',
-        description: 'Не удалось подтвердить двухфакторную аутентификацию',
+        description: 'Не удалось сохранить настройку',
         variant: 'destructive'
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const disableTwoFactor = async () => {
-    if (!user) return;
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('https://functions.poehali.dev/YOUR_2FA_FUNCTION_URL', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'disable',
-          user_id: user.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setTwoFactorEnabled(false);
-        onUserUpdate({ ...user, two_factor_enabled: false });
-        toast({
-          title: 'Двухфакторная аутентификация отключена',
-          description: 'Вход теперь доступен только по паролю'
-        });
-      } else {
-        toast({
-          title: 'Ошибка',
-          description: data.error || 'Не удалось отключить 2FA',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось отключить двухфакторную аутентификацию',
-        variant: 'destructive'
-      });
+      setSnowEnabled(!enabled);
     } finally {
       setIsLoading(false);
     }
@@ -221,82 +148,26 @@ const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Icon name="Shield" size={20} />
-            Безопасность
+            <Icon name="Snowflake" size={20} />
+            Эффекты
           </CardTitle>
-          <CardDescription>Двухфакторная аутентификация (Google Authenticator)</CardDescription>
+          <CardDescription>Новогодние снежинки и анимация</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Label htmlFor="two-factor">Двухфакторная аутентификация</Label>
+              <Label htmlFor="snow-effect">Падающий снег</Label>
               <p className="text-sm text-muted-foreground">
-                Дополнительная защита аккаунта с помощью кодов
+                Отображать новогодние снежинки на экране
               </p>
             </div>
             <Switch
-              id="two-factor"
-              checked={twoFactorEnabled}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  enableTwoFactor();
-                } else {
-                  disableTwoFactor();
-                }
-              }}
+              id="snow-effect"
+              checked={snowEnabled}
+              onCheckedChange={toggleSnowEffect}
               disabled={isLoading}
             />
           </div>
-
-          {showQR && (
-            <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
-              <div className="text-center">
-                <h4 className="font-semibold mb-2">Отсканируйте QR-код</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Используйте Google Authenticator или аналогичное приложение
-                </p>
-                {qrCode && (
-                  <div className="flex justify-center mb-4">
-                    <img src={qrCode} alt="QR Code" className="w-48 h-48" />
-                  </div>
-                )}
-                {secret && (
-                  <div className="mb-4">
-                    <p className="text-xs text-muted-foreground mb-1">Или введите код вручную:</p>
-                    <code className="bg-background px-3 py-1 rounded text-sm font-mono">{secret}</code>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="verification-code">Код подтверждения</Label>
-                <Input
-                  id="verification-code"
-                  type="text"
-                  placeholder="000000"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  maxLength={6}
-                />
-              </div>
-
-              <Button 
-                onClick={verifyTwoFactor} 
-                disabled={isLoading || verificationCode.length !== 6}
-                className="w-full"
-              >
-                {isLoading ? 'Проверка...' : 'Подтвердить'}
-              </Button>
-
-              <Button 
-                variant="outline" 
-                onClick={() => setShowQR(false)}
-                className="w-full"
-              >
-                Отмена
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

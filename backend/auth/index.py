@@ -405,6 +405,33 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             conn.close()
     
 
+    if method == 'PUT':
+        body_data = json.loads(event.get('body', '{}'))
+        user_id = body_data.get('user_id')
+        
+        if 'snow_effect_enabled' in body_data:
+            snow_enabled = body_data.get('snow_effect_enabled')
+            
+            db_url = os.environ.get('DATABASE_URL')
+            conn = psycopg2.connect(db_url)
+            cur = conn.cursor()
+            
+            try:
+                cur.execute(
+                    f"UPDATE t_p77282076_fruit_shop_creation.users SET snow_effect_enabled = {snow_enabled} WHERE id = {user_id}"
+                )
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True}),
+                    'isBase64Encoded': False
+                }
+            finally:
+                cur.close()
+                conn.close()
+    
     if method != 'POST':
         return {
             'statusCode': 405,
@@ -1049,7 +1076,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             print(f"Login attempt: phone='{phone_escaped}', skip_admin_code={skip_admin_code}")
             
             cur.execute(
-                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar, password FROM users WHERE phone = '{phone_escaped}'"
+                f"SELECT id, phone, full_name, is_admin, balance, cashback, banned, ban_reason, ban_until, avatar, password, snow_effect_enabled FROM users WHERE phone = '{phone_escaped}'"
             )
             user_row = cur.fetchone()
             
@@ -1186,7 +1213,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'is_admin': user[3],
                         'balance': float(user[4]) if user[4] else 0.00,
                         'cashback': float(user[5]) if user[5] else 0.00,
-                        'avatar': user[9] if user[9] else '👤'
+                        'avatar': user[9] if user[9] else '👤',
+                        'snow_effect_enabled': user_row[11] if len(user_row) > 11 else True
                     }
                 }),
                 'isBase64Encoded': False

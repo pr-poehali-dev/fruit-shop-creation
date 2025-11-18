@@ -1,7 +1,15 @@
 import { useEffect, useRef } from 'react';
 
-const NewYearBackground = () => {
+interface NewYearBackgroundProps {
+  enabled?: boolean;
+}
+
+const NewYearBackground = ({ enabled = true }: NewYearBackgroundProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  if (!enabled) {
+    return null;
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
