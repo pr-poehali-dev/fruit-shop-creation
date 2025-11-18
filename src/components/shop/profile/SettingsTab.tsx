@@ -81,6 +81,7 @@ const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
       const data = await response.json();
 
       if (data.success) {
+        setSnowEnabled(enabled);
         onUserUpdate({ ...user, snow_effect_enabled: enabled });
         toast({
           title: enabled ? 'Снег включён' : 'Снег отключён',
@@ -97,8 +98,6 @@ const SettingsTab = ({ user, onUserUpdate }: SettingsTabProps) => {
             { snow_enabled: enabled }
           );
         }
-        
-        window.location.reload();
       } else {
         toast({
           title: 'Ошибка',
