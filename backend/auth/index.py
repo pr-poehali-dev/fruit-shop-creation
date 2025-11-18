@@ -94,11 +94,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     })
                 
                 cur.execute(f"""
-                    SELECT COALESCE(SUM(reward_amount), 0) 
+                    SELECT COALESCE(SUM(reward_amount), 0) as total
                     FROM t_p77282076_fruit_shop_creation.referrals 
                     WHERE referrer_id = {user_id} AND reward_given = true
                 """)
-                total_earned = float(cur.fetchone()[0])
+                result = cur.fetchone()
+                total_earned = float(result['total']) if result else 0
                 
                 return {
                     'statusCode': 200,
