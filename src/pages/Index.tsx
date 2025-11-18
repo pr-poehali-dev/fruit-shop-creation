@@ -255,7 +255,10 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${getBackgroundStyle(siteSettings?.holiday_theme)} relative flex flex-col`}>
-      <HolidayThemeRenderer theme={siteSettings?.holiday_theme} snowEnabled={user?.snow_effect_enabled !== false} />
+      <HolidayThemeRenderer 
+        theme={siteSettings?.holiday_theme} 
+        snowEnabled={user ? (user.snow_effect_enabled !== false) : true} 
+      />
 
       {showAdminPanel && user?.is_admin ? (
         <AdminPanel
