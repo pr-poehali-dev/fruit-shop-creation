@@ -119,20 +119,28 @@ const ProductImageGallery = ({
             {images.map((img, index) => (
               <Card key={index} className="p-2 sm:p-3">
                 <div className="flex items-start sm:items-center gap-2 sm:gap-3">
-                  <img 
-                    src={img.image_url} 
-                    alt="" 
-                    style={{
-                      width: img.width ? `${img.width}px` : undefined,
-                      height: img.height ? `${img.height}px` : undefined,
-                      objectFit: (img.object_fit as any) || 'cover'
-                    }}
-                    className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
+                  <div className="relative group flex-shrink-0">
+                    <img 
+                      src={img.image_url} 
+                      alt="" 
+                      style={{
+                        width: img.width ? `${img.width}px` : undefined,
+                        height: img.height ? `${img.height}px` : undefined,
+                        objectFit: (img.object_fit as any) || 'cover'
+                      }}
+                      className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                    <div 
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center cursor-pointer"
+                      onClick={() => toggleExpanded(index)}
+                    >
+                      <Icon name="Settings2" size={16} className="text-white" />
+                    </div>
+                  </div>
                   <div className="flex-1 min-w-0 overflow-hidden">
                     <p className="text-xs sm:text-sm break-all line-clamp-2">{img.image_url}</p>
                     {img.is_primary && (
@@ -165,16 +173,6 @@ const ProductImageGallery = ({
                       </Button>
                     </div>
                     <div className="flex gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => toggleExpanded(index)}
-                        title="Настройки размера"
-                        className="h-8 w-8 sm:h-10 sm:w-10"
-                      >
-                        <Icon name="Settings2" size={14} />
-                      </Button>
                       {!img.is_primary && (
                         <Button
                           type="button"
@@ -214,6 +212,22 @@ const ProductImageGallery = ({
                 
                 {expandedIndex === index && (
                   <div className="mt-3 pt-3 border-t space-y-3">
+                    <div>
+                      <Label className="text-xs mb-2 block">Превью</Label>
+                      <div className="bg-muted/30 rounded-lg p-4 flex items-center justify-center min-h-[120px]">
+                        <img 
+                          src={img.image_url} 
+                          alt="Preview" 
+                          style={{
+                            width: img.width ? `${img.width}px` : 'auto',
+                            height: img.height ? `${img.height}px` : 'auto',
+                            objectFit: (img.object_fit as any) || 'cover',
+                            maxWidth: '100%'
+                          }}
+                          className="rounded border-2 border-dashed border-primary/30"
+                        />
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label className="text-xs">Ширина (px)</Label>
