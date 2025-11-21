@@ -68,7 +68,11 @@ export const useFavorites = (userId: number | null) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: userId, product_id: productId })
         });
-        setFavoriteIds(prev => new Set(prev).add(productId));
+        setFavoriteIds(prev => {
+          const newSet = new Set(prev);
+          newSet.add(productId);
+          return newSet;
+        });
         loadFavorites();
       }
     } catch (error) {

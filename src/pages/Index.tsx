@@ -136,7 +136,7 @@ const Index = () => {
         });
       });
     }
-  }, [siteSettings?.is_maintenance_mode, siteSettings?.auto_maintenance_enabled, user]);
+  }, [siteSettings?.is_maintenance_mode, siteSettings?.auto_maintenance_enabled, siteSettings?.maintenance_start_time, siteSettings?.maintenance_end_time, user]);
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
@@ -235,8 +235,8 @@ const Index = () => {
     const endTime = siteSettings.maintenance_end_time ? new Date(siteSettings.maintenance_end_time) : null;
 
     if (startTime && endTime) {
-      const isInMaintenanceWindow = now >= startTime && now <= endTime;
-      return isInMaintenanceWindow;
+      const isInMaintenanceWindow = now >= startTime && now < endTime;
+      return isInMaintenanceWindow || siteSettings?.is_maintenance_mode;
     }
 
     return siteSettings?.is_maintenance_mode;

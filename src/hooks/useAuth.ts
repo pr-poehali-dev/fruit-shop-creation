@@ -32,10 +32,8 @@ export const useAuth = () => {
           }).catch(() => null)
         ]);
         
-        if (!balanceResponse || !banResponse) return;
-        
-        const balanceData = await balanceResponse.json().catch(() => ({}));
-        const banData = await banResponse.json().catch(() => ({}));
+        const balanceData = balanceResponse ? await balanceResponse.json().catch(() => ({})) : {};
+        const banData = banResponse ? await banResponse.json().catch(() => ({})) : {};
         
         if (banData.banned) {
           setBanInfo({
