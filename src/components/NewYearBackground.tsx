@@ -46,6 +46,8 @@ const NewYearBackground = ({ enabled = true }: NewYearBackgroundProps) => {
       });
     }
 
+    let animationFrameId: number;
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -72,13 +74,14 @@ const NewYearBackground = ({ enabled = true }: NewYearBackgroundProps) => {
         }
       });
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     animate();
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationFrameId);
     };
   }, [enabled]);
 
