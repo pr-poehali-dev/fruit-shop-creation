@@ -4,18 +4,14 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { User } from '@/types/shop';
 
-interface ReferralStats {
-  total_referrals: number;
-  completed_referrals: number;
-  total_earned: number;
-  referrals: Array<{
-    full_name: string;
-    phone: string;
-    created_at: string;
-    first_order_made: boolean;
-    reward_given: boolean;
-    reward_amount: number;
-  }>;
+interface InvitedUser {
+  id: number;
+  full_name: string;
+  phone: string;
+  reward_given: boolean;
+  first_order_made: boolean;
+  first_order_total: number | null;
+  invited_at: string;
 }
 
 interface ReferralCardProps {
@@ -24,14 +20,10 @@ interface ReferralCardProps {
 
 export const ReferralCard = ({ user }: ReferralCardProps) => {
   const [referralCode, setReferralCode] = useState<string>('');
-  const [stats, setStats] = useState<ReferralStats | null>(null);
+  const [invitedUsers, setInvitedUsers] = useState<InvitedUser[]>([]);
+  const [totalEarned, setTotalEarned] = useState(0);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-
-  const generateReferralCode = (length: number = 8): string => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  };
 
   useEffect(() => {
     const fetchReferralData = async () => {
@@ -41,41 +33,28 @@ export const ReferralCard = ({ user }: ReferralCardProps) => {
       }
 
       try {
-        const codeResponse = await fetch(
-          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=referral_code&user_id=${user.id}`
+        const response = await fetch(
+          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=get_referral_data&user_id=${user.id}`
         );
         
-        if (codeResponse.ok) {
-          const codeData = await codeResponse.json();
-          if (codeData.referral_code) {
-            setReferralCode(codeData.referral_code);
-          } else {
-            const newCode = generateReferralCode();
-            const createResponse = await fetch(
-              'https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc',
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  action: 'create_referral_code',
-                  user_id: user.id,
-                  referral_code: newCode
-                })
-              }
-            );
-            if (createResponse.ok) {
-              setReferralCode(newCode);
-            }
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setReferralCode(data.referral_code || '');
+            
+            const formattedInvited = (data.referrals || []).map((ref: any) => ({
+              id: ref.referred_user.id,
+              full_name: ref.referred_user.full_name,
+              phone: ref.referred_user.phone,
+              reward_given: ref.reward_given,
+              first_order_made: ref.first_order_total !== null,
+              first_order_total: ref.first_order_total,
+              invited_at: ref.created_at
+            }));
+            
+            setInvitedUsers(formattedInvited);
+            setTotalEarned(data.total_earned || 0);
           }
-        }
-
-        const statsResponse = await fetch(
-          `https://functions.poehali.dev/2cc7c24d-08b2-4c44-a9a7-8d09198dbefc?action=referral_stats&user_id=${user.id}`
-        );
-        
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          setStats(statsData);
         }
       } catch (error) {
         console.error('Failed to fetch referral data:', error);
@@ -90,6 +69,8 @@ export const ReferralCard = ({ user }: ReferralCardProps) => {
   const referralLink = referralCode
     ? `${window.location.origin}?ref=${referralCode}`
     : '';
+
+  const completedReferrals = invitedUsers.filter(u => u.reward_given).length;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(referralLink);
@@ -115,9 +96,6 @@ export const ReferralCard = ({ user }: ReferralCardProps) => {
 
   return (
     <Card className="border-primary/20 relative">
-      <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-medium">
-        В разработке
-      </div>
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
@@ -184,57 +162,67 @@ export const ReferralCard = ({ user }: ReferralCardProps) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-lg border border-border bg-card text-center">
             <div className="text-3xl font-bold text-primary mb-1">
-              {stats?.total_referrals || 0}
+              {invitedUsers.length}
             </div>
             <div className="text-sm text-muted-foreground">Приглашено друзей</div>
           </div>
           <div className="p-4 rounded-lg border border-border bg-card text-center">
             <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
-              {stats?.completed_referrals || 0}
+              {completedReferrals}
             </div>
-            <div className="text-sm text-muted-foreground">Сделали заказ</div>
+            <div className="text-sm text-muted-foreground">Бонусы получены</div>
           </div>
           <div className="p-4 rounded-lg border border-border bg-card text-center">
             <div className="text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">
-              {stats?.total_earned || 0} ₽
+              {totalEarned} ₽
             </div>
             <div className="text-sm text-muted-foreground">Заработано</div>
           </div>
         </div>
 
-        {stats && stats.referrals && stats.referrals.length > 0 && (
+        {invitedUsers.length > 0 && (
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Icon name="UserCheck" size={18} />
               Приглашенные друзья
             </h3>
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {stats.referrals.map((ref, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-lg border border-border bg-card flex items-center justify-between"
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">{ref.full_name || 'Имя не указано'}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(ref.created_at).toLocaleDateString('ru-RU')}
+              {invitedUsers.map((ref) => {
+                const getStatusBadge = () => {
+                  if (ref.reward_given) {
+                    return <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full flex items-center gap-1"><Icon name="Check" size={12} />Бонус получен</span>;
+                  }
+                  if (ref.first_order_made && ref.first_order_total && ref.first_order_total >= 1500) {
+                    return <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full flex items-center gap-1"><Icon name="Clock" size={12} />Обрабатывается</span>;
+                  }
+                  if (ref.first_order_made && ref.first_order_total && ref.first_order_total < 1500) {
+                    return <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full">Заказ &lt; 1500₽</span>;
+                  }
+                  return <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full flex items-center gap-1"><Icon name="Clock" size={12} />Ждём заказ</span>;
+                };
+
+                return (
+                  <div
+                    key={ref.id}
+                    className="p-3 rounded-lg border border-border bg-card flex items-center justify-between"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{ref.full_name || ref.phone}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(ref.invited_at).toLocaleDateString('ru-RU')}
+                      </div>
+                      {ref.first_order_total && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Первый заказ: {ref.first_order_total}₽
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      {getStatusBadge()}
                     </div>
                   </div>
-                  <div className="text-right">
-                    {ref.first_order_made ? (
-                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-sm font-medium">
-                        <Icon name="Check" size={14} />
-                        +{ref.reward_amount} ₽
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-sm">
-                        <Icon name="Clock" size={14} />
-                        Ожидание заказа
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

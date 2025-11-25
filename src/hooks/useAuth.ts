@@ -142,29 +142,7 @@ export const useAuth = () => {
           { phone: data.user.phone }
         );
         
-        // Активация промокода при регистрации
-        if (action === 'register' && promoCode) {
-          try {
-            const promoResponse = await fetch(API_AUTH, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                action: 'activate_promo',
-                promo_code: promoCode.toString().toUpperCase().trim(),
-                user_id: data.user.id
-              })
-            });
-            
-            const promoData = await promoResponse.json();
-            if (promoData.success) {
-              console.log('Promo code activated successfully');
-            } else {
-              console.warn('Promo code activation failed:', promoData.error);
-            }
-          } catch (promoError) {
-            console.error('Failed to activate promo code:', promoError);
-          }
-        }
+
         
         const message = action === 'login' ? 'Вы вошли в систему' : 'Регистрация успешна';
         onSuccess(data.user, message, false);

@@ -3,8 +3,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface AuthFormsProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>, action: 'login' | 'register') => void;
@@ -13,8 +13,18 @@ interface AuthFormsProps {
 }
 
 const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsProps) => {
+  const location = useLocation();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [promoCodeFromUrl, setPromoCodeFromUrl] = useState<string>('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      setPromoCodeFromUrl(refCode.toUpperCase().trim());
+    }
+  }, [location]);
 
   const handleRegisterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -99,9 +109,10 @@ const AuthForms = ({ onSubmit, handlePhoneChange, onForgotPassword }: AuthFormsP
               placeholder="Введите промокод друга" 
               className="uppercase"
               maxLength={8}
+              defaultValue={promoCodeFromUrl}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Если у вас есть промокод от друга, введите его здесь
+              {promoCodeFromUrl ? `Промокод ${promoCodeFromUrl} применён автоматически` : 'Если у вас есть промокод от друга, введите его здесь'}
             </p>
           </div>
           

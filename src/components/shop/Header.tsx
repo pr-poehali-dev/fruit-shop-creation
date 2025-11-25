@@ -91,7 +91,7 @@ const Header = ({
   };
   
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-800 text-primary-foreground shadow-md overflow-hidden">
+    <header className="header-height sticky top-0 z-50 bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-800 text-primary-foreground shadow-md overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
       {isNewYear && <SnowEffect />}
       
