@@ -17,6 +17,7 @@ import SupportChatTab from './SupportChatTab';
 import OrdersStatsCard from './OrdersStatsCard';
 import CourierManagement from './CourierManagement';
 import StatisticsTab from './StatisticsTab';
+import ReferralStatsTab from './ReferralStatsTab';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -97,6 +98,7 @@ const AdminPanelTabs = ({
     hasPermission('settings'),
     hasPermission('support'),
     hasPermission('couriers'),
+    isSuperAdmin,
     isSuperAdmin,
     isSuperAdmin,
     isSuperAdmin
@@ -199,6 +201,12 @@ const AdminPanelTabs = ({
           <TabsTrigger value="statistics" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="BarChart3" size={16} className="sm:mr-1" />
             <span className="hidden sm:inline">Статистика</span>
+          </TabsTrigger>
+        )}
+        {isSuperAdmin && (
+          <TabsTrigger value="referrals" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="Users" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Рефералы</span>
           </TabsTrigger>
         )}
       </TabsList>
@@ -314,6 +322,12 @@ const AdminPanelTabs = ({
       {isSuperAdmin && (
         <TabsContent value="statistics">
           <StatisticsTab />
+        </TabsContent>
+      )}
+
+      {isSuperAdmin && (
+        <TabsContent value="referrals">
+          <ReferralStatsTab />
         </TabsContent>
       )}
     </Tabs>

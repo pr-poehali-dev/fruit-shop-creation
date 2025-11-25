@@ -387,6 +387,84 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'isBase64Encoded': False
                 }
             
+            if action == 'all_referral_stats':
+                cur.execute("""
+                    SELECT 
+                        u.id as user_id,
+                        u.phone as user_phone,
+                        u.full_name as user_name,
+                        rc.referral_code as promo_code,
+                        COUNT(r.id) as total_referrals,
+                        COUNT(CASE WHEN r.reward_given = true THEN 1 END) as successful_referrals,
+                        COUNT(CASE WHEN r.reward_given = false THEN 1 END) as pending_referrals,
+                        COALESCE(SUM(CASE WHEN r.reward_given = true THEN r.reward_amount ELSE 0 END), 0) as total_earned
+                    FROM t_p77282076_fruit_shop_creation.users u
+                    LEFT JOIN t_p77282076_fruit_shop_creation.referral_codes rc ON rc.user_id = u.id
+                    LEFT JOIN t_p77282076_fruit_shop_creation.referrals r ON r.referrer_id = u.id
+                    WHERE rc.referral_code IS NOT NULL
+                    GROUP BY u.id, u.phone, u.full_name, rc.referral_code
+                    HAVING COUNT(r.id) > 0
+                    ORDER BY total_earned DESC, successful_referrals DESC
+                """)
+                
+                stats_data = cur.fetchall()
+                result = []
+                
+                for row in stats_data:
+                    user_id = row['user_id']
+                    
+                    cur.execute(f"""
+                        SELECT 
+                            r.referred_id,
+                            u.phone as referred_phone,
+                            u.full_name as referred_name,
+                            r.created_at as referred_at,
+                            COALESCE(r.first_order_total, 0) as order_total,
+                            CASE 
+                                WHEN r.reward_given = true THEN 'completed'
+                                WHEN r.first_order_total >= 1500 THEN 'processing'
+                                ELSE 'pending'
+                            END as order_status,
+                            COALESCE(r.reward_amount, 0) as bonus_earned,
+                            r.reward_given as bonus_awarded
+                        FROM t_p77282076_fruit_shop_creation.referrals r
+                        JOIN t_p77282076_fruit_shop_creation.users u ON u.id = r.referred_id
+                        WHERE r.referrer_id = {user_id}
+                        ORDER BY r.created_at DESC
+                    """)
+                    
+                    referrals = []
+                    for ref_row in cur.fetchall():
+                        referrals.append({
+                            'referred_user_id': ref_row['referred_id'],
+                            'referred_phone': ref_row['referred_phone'],
+                            'referred_name': ref_row['referred_name'],
+                            'referred_at': ref_row['referred_at'].isoformat() if ref_row['referred_at'] else None,
+                            'order_total': float(ref_row['order_total']),
+                            'order_status': ref_row['order_status'],
+                            'bonus_earned': float(ref_row['bonus_earned']),
+                            'bonus_awarded': ref_row['bonus_awarded']
+                        })
+                    
+                    result.append({
+                        'user_id': row['user_id'],
+                        'user_phone': row['user_phone'],
+                        'user_name': row['user_name'],
+                        'promo_code': row['promo_code'],
+                        'total_referrals': row['total_referrals'],
+                        'successful_referrals': row['successful_referrals'],
+                        'pending_referrals': row['pending_referrals'],
+                        'total_earned': float(row['total_earned']),
+                        'referrals': referrals
+                    })
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'data': result}, default=str),
+                    'isBase64Encoded': False
+                }
+            
             cur.execute(
                 """SELECT id, phone, full_name, is_admin, is_super_admin, admin_permissions, balance, cashback, avatar, created_at 
                    FROM users 
