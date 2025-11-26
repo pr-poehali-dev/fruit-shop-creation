@@ -106,107 +106,107 @@ const AdminPanelTabs = ({
 
   return (
     <Tabs defaultValue="products">
-      <TabsList className="flex w-full overflow-x-auto h-auto flex-nowrap gap-1 p-1">
+      <TabsList className="flex w-full overflow-x-auto h-auto flex-nowrap gap-0.5 sm:gap-1 p-1">
         {hasPermission('products') && (
-          <TabsTrigger value="products" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Package" size={18} />
-            <span>Товары</span>
+          <TabsTrigger value="products" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Package" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Товары</span>
           </TabsTrigger>
         )}
         {hasPermission('categories') && (
-          <TabsTrigger value="categories" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="FolderTree" size={18} />
-            <span>Категории</span>
+          <TabsTrigger value="categories" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="FolderTree" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Категории</span>
           </TabsTrigger>
         )}
         {hasPermission('plants') && (
-          <TabsTrigger value="plants" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Sprout" size={18} />
-            <span>Растения</span>
+          <TabsTrigger value="plants" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Sprout" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Растения</span>
           </TabsTrigger>
         )}
         {hasPermission('users') && (
-          <TabsTrigger value="users" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Users" size={18} />
-            <span>Пользователи</span>
+          <TabsTrigger value="users" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Users" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Пользователи</span>
           </TabsTrigger>
         )}
         {hasPermission('orders') && (
-          <TabsTrigger value="orders" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="ShoppingCart" size={18} />
-            <span>Заказы</span>
+          <TabsTrigger value="orders" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="ShoppingCart" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Заказы</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="referrals" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="UserPlus" size={18} />
-            <span>Рефералы</span>
+          <TabsTrigger value="referrals" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="UserPlus" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Рефералы</span>
           </TabsTrigger>
         )}
         {hasPermission('delivery-zones') && (
-          <TabsTrigger value="delivery-zones" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="MapPin" size={18} />
-            <span>Зоны</span>
+          <TabsTrigger value="delivery-zones" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="MapPin" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Зоны</span>
           </TabsTrigger>
         )}
         {hasPermission('loyalty') && (
-          <TabsTrigger value="loyalty" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="ScanLine" size={18} />
-            <span>QR-Сканер</span>
+          <TabsTrigger value="loyalty" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="ScanLine" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">QR-Сканер</span>
           </TabsTrigger>
         )}
         {hasPermission('gallery') && (
-          <TabsTrigger value="gallery" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Image" size={18} />
-            <span>Галерея</span>
+          <TabsTrigger value="gallery" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Image" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Галерея</span>
           </TabsTrigger>
         )}
         {hasPermission('pages') && (
-          <TabsTrigger value="pages" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="FileText" size={18} />
-            <span>Страницы</span>
+          <TabsTrigger value="pages" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="FileText" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Страницы</span>
           </TabsTrigger>
         )}
         {hasPermission('codes') && (
-          <TabsTrigger value="codes" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="KeyRound" size={18} />
-            <span>Коды</span>
+          <TabsTrigger value="codes" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="KeyRound" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Коды</span>
           </TabsTrigger>
         )}
         {hasPermission('settings') && (
-          <TabsTrigger value="settings" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Settings" size={18} />
-            <span>Настройки</span>
+          <TabsTrigger value="settings" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Settings" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Настройки</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="permissions" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Shield" size={18} />
-            <span>Права</span>
+          <TabsTrigger value="permissions" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Shield" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Права</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="logs" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="ScrollText" size={18} />
-            <span>Логи</span>
+          <TabsTrigger value="logs" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="ScrollText" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Логи</span>
           </TabsTrigger>
         )}
         {hasPermission('support') && (
-          <TabsTrigger value="support-chat" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="MessageCircle" size={18} />
-            <span>Поддержка</span>
+          <TabsTrigger value="support-chat" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="MessageCircle" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Поддержка</span>
           </TabsTrigger>
         )}
         {hasPermission('couriers') && (
-          <TabsTrigger value="couriers" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="Truck" size={18} />
-            <span>Курьеры</span>
+          <TabsTrigger value="couriers" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="Truck" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Курьеры</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="statistics" className="text-sm px-3 py-2.5 flex items-center gap-2 whitespace-nowrap">
-            <Icon name="BarChart3" size={18} />
-            <span>Статистика</span>
+          <TabsTrigger value="statistics" className="text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-fit">
+            <Icon name="BarChart3" size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
+            <span className="text-xs sm:text-sm">Статистика</span>
           </TabsTrigger>
         )}
       </TabsList>
