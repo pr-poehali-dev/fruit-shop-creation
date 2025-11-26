@@ -106,7 +106,7 @@ const AdminPanelTabs = ({
 
   return (
     <Tabs defaultValue="products">
-      <TabsList className={`grid w-full grid-cols-4 lg:grid-cols-${Math.min(visibleTabsCount, 12)} h-auto`}>
+      <TabsList className="flex w-full overflow-x-auto h-auto flex-nowrap">
         {hasPermission('products') && (
           <TabsTrigger value="products" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="Package" size={16} className="sm:mr-1" />
