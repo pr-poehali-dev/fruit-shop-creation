@@ -137,6 +137,12 @@ const AdminPanelTabs = ({
             <span className="hidden sm:inline">Заказы</span>
           </TabsTrigger>
         )}
+        {isSuperAdmin && (
+          <TabsTrigger value="referrals" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
+            <Icon name="UserPlus" size={16} className="sm:mr-1" />
+            <span className="hidden sm:inline">Рефералы</span>
+          </TabsTrigger>
+        )}
         {hasPermission('delivery-zones') && (
           <TabsTrigger value="delivery-zones" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="MapPin" size={16} className="sm:mr-1" />
@@ -201,12 +207,6 @@ const AdminPanelTabs = ({
           <TabsTrigger value="statistics" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
             <Icon name="BarChart3" size={16} className="sm:mr-1" />
             <span className="hidden sm:inline">Статистика</span>
-          </TabsTrigger>
-        )}
-        {isSuperAdmin && (
-          <TabsTrigger value="referrals" className="text-xs sm:text-sm px-1 sm:px-2 py-2">
-            <Icon name="Users" size={16} className="sm:mr-1" />
-            <span className="hidden sm:inline">Рефералы</span>
           </TabsTrigger>
         )}
       </TabsList>
