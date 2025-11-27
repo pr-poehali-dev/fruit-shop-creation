@@ -302,81 +302,100 @@ const AdminPanelTabs = ({
       </TabsList>
 
       <div className="flex-1 min-w-0 w-full lg:w-auto pb-20 lg:pb-0">
-      <TabsContent value="products" className="mt-0">
-        <ProductsTab 
-          products={products}
-          onAddProduct={onAddProduct}
-          onEditProduct={onEditProduct}
-          onDeleteProduct={onDeleteProduct}
-        />
-      </TabsContent>
+      {hasPermission('products') && (
+        <TabsContent value="products" className="mt-0">
+          <ProductsTab 
+            products={products}
+            onAddProduct={onAddProduct}
+            onEditProduct={onEditProduct}
+            onDeleteProduct={onDeleteProduct}
+          />
+        </TabsContent>
+      )}
 
-      <TabsContent value="categories" className="mt-0">
-        <CategoriesTab 
-          categories={categories}
-          onAddCategory={onAddCategory}
-          onEditCategory={onEditCategory}
-          onDeleteCategory={onDeleteCategory}
-        />
-      </TabsContent>
+      {hasPermission('categories') && (
+        <TabsContent value="categories" className="mt-0">
+          <CategoriesTab 
+            categories={categories}
+            onAddCategory={onAddCategory}
+            onEditCategory={onEditCategory}
+            onDeleteCategory={onDeleteCategory}
+          />
+        </TabsContent>
+      )}
 
-      <TabsContent value="users" className="mt-0">
-        <UsersTab 
-          users={users} 
-          onAddBalance={onAddBalance} 
-          onAddCashback={onAddCashback}
-          onToggleAdmin={onToggleAdmin}
-          onIssueLoyaltyCard={onIssueLoyaltyCard}
-          onRefreshUsers={onRefreshUsers}
-        />
-      </TabsContent>
+      {hasPermission('users') && (
+        <TabsContent value="users" className="mt-0">
+          <UsersTab 
+            users={users} 
+            onAddBalance={onAddBalance} 
+            onAddCashback={onAddCashback}
+            onToggleAdmin={onToggleAdmin}
+            onIssueLoyaltyCard={onIssueLoyaltyCard}
+            onRefreshUsers={onRefreshUsers}
+          />
+        </TabsContent>
+      )}
 
-      <TabsContent value="plants" className="mt-0">
-        <PlantsInventoryTab />
-      </TabsContent>
+      {hasPermission('plants') && (
+        <TabsContent value="plants" className="mt-0">
+          <PlantsInventoryTab />
+        </TabsContent>
+      )}
 
-      <TabsContent value="orders" className="mt-0">
-        <OrdersTab 
-          orders={orders} 
-          onUpdateStatus={onUpdateOrderStatus} 
-          onDeleteOrder={onDeleteOrder}
-          onUpdateItemStock={onUpdateItemStock}
-          onUpdateItemAvailability={onUpdateItemAvailability}
-        />
-      </TabsContent>
+      {hasPermission('orders') && (
+        <TabsContent value="orders" className="mt-0">
+          <OrdersTab 
+            orders={orders} 
+            onUpdateStatus={onUpdateOrderStatus} 
+            onDeleteOrder={onDeleteOrder}
+            onUpdateItemStock={onUpdateItemStock}
+            onUpdateItemAvailability={onUpdateItemAvailability}
+          />
+        </TabsContent>
+      )}
 
-      <TabsContent value="loyalty" className="mt-0">
-        <LoyaltyScannerTab />
-      </TabsContent>
+      {hasPermission('loyalty') && (
+        <TabsContent value="loyalty" className="mt-0">
+          <LoyaltyScannerTab />
+        </TabsContent>
+      )}
 
+      {hasPermission('gallery') && (
+        <TabsContent value="gallery" className="mt-0">
+          <GalleryTab />
+        </TabsContent>
+      )}
 
+      {hasPermission('pages') && (
+        <TabsContent value="pages" className="mt-0">
+          <PagesTab 
+            siteSettings={siteSettings}
+            onSaveSettings={onSaveSettings}
+          />
+        </TabsContent>
+      )}
 
-      <TabsContent value="gallery" className="mt-0">
-        <GalleryTab />
-      </TabsContent>
+      {hasPermission('delivery-zones') && (
+        <TabsContent value="delivery-zones" className="mt-0">
+          <DeliveryZonesTab />
+        </TabsContent>
+      )}
 
+      {hasPermission('codes') && (
+        <TabsContent value="codes" className="mt-0">
+          <CodesTab userId={userId} />
+        </TabsContent>
+      )}
 
-      <TabsContent value="pages" className="mt-0">
-        <PagesTab 
-          siteSettings={siteSettings}
-          onSaveSettings={onSaveSettings}
-        />
-      </TabsContent>
-
-      <TabsContent value="delivery-zones" className="mt-0">
-        <DeliveryZonesTab />
-      </TabsContent>
-
-      <TabsContent value="codes" className="mt-0">
-        <CodesTab userId={userId} />
-      </TabsContent>
-
-      <TabsContent value="settings" className="mt-0">
-        <SettingsTab 
-          siteSettings={siteSettings}
-          onSaveSettings={onSaveSettings}
-        />
-      </TabsContent>
+      {hasPermission('settings') && (
+        <TabsContent value="settings" className="mt-0">
+          <SettingsTab 
+            siteSettings={siteSettings}
+            onSaveSettings={onSaveSettings}
+          />
+        </TabsContent>
+      )}
 
       {isSuperAdmin && (
         <TabsContent value="permissions" className="mt-0">
