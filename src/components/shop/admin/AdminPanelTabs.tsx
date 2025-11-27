@@ -107,6 +107,15 @@ const AdminPanelTabs = ({
   ].filter(Boolean).length;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('admin_active_tab') || 'products';
+  });
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    localStorage.setItem('admin_active_tab', value);
+    setIsSidebarOpen(false);
+  };
 
   return (
     <>
@@ -119,7 +128,7 @@ const AdminPanelTabs = ({
         <Icon name={isSidebarOpen ? "X" : "Menu"} size={24} />
       </Button>
 
-      <Tabs defaultValue="products" className="flex gap-4 relative">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="flex gap-4 relative">
         {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div 
@@ -141,7 +150,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="products" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Package" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Товары</span>
@@ -151,7 +159,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="categories" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="FolderTree" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Категории</span>
@@ -161,7 +168,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="plants" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Sprout" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Растения</span>
@@ -171,7 +177,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="users" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Users" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Пользователи</span>
@@ -181,7 +186,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="orders" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="ShoppingCart" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Заказы</span>
@@ -191,7 +195,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="referrals" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="UserPlus" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Рефералы</span>
@@ -201,7 +204,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="delivery-zones" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="MapPin" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Зоны</span>
@@ -211,7 +213,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="loyalty" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="ScanLine" size={18} className="shrink-0" />
             <span className="text-sm font-medium">QR-Сканер</span>
@@ -221,7 +222,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="gallery" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Image" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Галерея</span>
@@ -231,7 +231,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="pages" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="FileText" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Страницы</span>
@@ -241,7 +240,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="codes" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="KeyRound" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Коды</span>
@@ -251,7 +249,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="settings" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Settings" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Настройки</span>
@@ -261,7 +258,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="permissions" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Shield" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Права</span>
@@ -271,7 +267,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="logs" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="ScrollText" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Логи</span>
@@ -281,7 +276,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="support-chat" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="MessageCircle" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Поддержка</span>
@@ -291,7 +285,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="couriers" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="Truck" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Курьеры</span>
@@ -301,7 +294,6 @@ const AdminPanelTabs = ({
           <TabsTrigger 
             value="statistics" 
             className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <Icon name="BarChart3" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Статистика</span>

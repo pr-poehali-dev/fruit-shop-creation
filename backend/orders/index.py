@@ -703,6 +703,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             items_amount = sum(float(item['price']) * int(item['quantity']) for item in items)
             
+            # Устанавливаем full_order_amount для всех типов заказов
+            full_order_amount = body_data.get('full_order_amount', items_amount)
+            if full_order_amount is not None:
+                full_order_amount = float(full_order_amount)
+            else:
+                full_order_amount = items_amount
+            
             # Для Барнаула при предзаказе:
             # - Списываем 50% от товаров сейчас
             # - Доставка 500₽ оплачивается отдельно
@@ -710,11 +717,6 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 total_amount = items_amount * 0.5
                 delivery_amount = 500  # Фиксированная доставка для Барнаула
             else:
-                full_order_amount = body_data.get('full_order_amount', items_amount)
-                if full_order_amount is not None:
-                    full_order_amount = float(full_order_amount)
-                else:
-                    full_order_amount = items_amount
                 delivery_amount = full_order_amount - items_amount
                 total_amount = full_order_amount
             
