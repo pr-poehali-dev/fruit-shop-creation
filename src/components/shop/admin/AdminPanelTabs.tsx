@@ -281,15 +281,13 @@ const AdminPanelTabs = ({
             <span className="text-sm font-medium">Поддержка</span>
           </TabsTrigger>
         )}
-        {hasPermission('couriers') && (
-          <TabsTrigger 
-            value="couriers" 
-            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-          >
-            <Icon name="Truck" size={18} className="shrink-0" />
-            <span className="text-sm font-medium">Курьеры</span>
-          </TabsTrigger>
-        )}
+        <TabsTrigger 
+          value="couriers" 
+          className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+        >
+          <Icon name="Truck" size={18} className="shrink-0" />
+          <span className="text-sm font-medium">Курьеры</span>
+        </TabsTrigger>
         {isSuperAdmin && (
           <TabsTrigger 
             value="statistics" 
