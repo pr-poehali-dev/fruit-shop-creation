@@ -255,6 +255,11 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${getBackgroundStyle(siteSettings?.holiday_theme)} relative flex flex-col`}>
+      <div className="decorative-leaf decorative-leaf-1">🌿</div>
+      <div className="decorative-leaf decorative-leaf-2">🍃</div>
+      <div className="decorative-leaf decorative-leaf-3">🌱</div>
+      <div className="decorative-leaf decorative-leaf-4">🌿</div>
+      
       <HolidayThemeRenderer 
         theme={siteSettings?.holiday_theme} 
         snowEnabled={user ? (user.snow_effect_enabled !== false) : true} 

@@ -121,7 +121,7 @@ const Header = ({
         </>
       )}
       
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10 backdrop-blur-sm bg-background/80 rounded-lg my-2 shadow-sm border border-border/50">
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink min-w-0">
           <SideMenu siteSettings={siteSettings} user={user} onSectionChange={onSectionChange} />
           <button 

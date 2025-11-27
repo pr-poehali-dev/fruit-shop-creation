@@ -81,7 +81,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
   };
 
   return (
-    <Card className={`overflow-hidden transition-all relative ${isHalloween ? 'halloween-card hover:shadow-[0_0_30px_rgba(255,120,0,0.5)] border-2 border-orange-500/30' : 'hover:shadow-lg'}`}>
+    <Card className={`overflow-hidden transition-all relative group ${isHalloween ? 'halloween-card hover:shadow-[0_0_30px_rgba(255,120,0,0.5)] border-2 border-orange-500/30' : 'hover:shadow-lg hover:scale-[1.02]'}`}>
       {isNewYear && <div className="snow-cap"></div>}
       {isHalloween && (
         <>
@@ -90,6 +90,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, isFavorite = false, 
           <div className="halloween-corner halloween-corner-tr">🦇</div>
         </>
       )}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-lg"></div>
       <div className="relative">
         <ProductCardBadges
           product={product}
