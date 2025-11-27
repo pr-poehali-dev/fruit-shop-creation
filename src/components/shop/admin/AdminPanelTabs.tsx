@@ -105,113 +105,114 @@ const AdminPanelTabs = ({
   ].filter(Boolean).length;
 
   return (
-    <Tabs defaultValue="products">
-      <TabsList className="flex w-full overflow-x-auto h-auto flex-nowrap gap-1 p-1.5">
+    <Tabs defaultValue="products" className="flex gap-4">
+      <TabsList className="flex flex-col w-64 h-fit gap-1 p-2 sticky top-4">
         {hasPermission('products') && (
-          <TabsTrigger value="products" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="products" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Package" size={18} className="shrink-0" />
-            <span className="text-sm">Товары</span>
+            <span className="text-sm font-medium">Товары</span>
           </TabsTrigger>
         )}
         {hasPermission('categories') && (
-          <TabsTrigger value="categories" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="categories" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="FolderTree" size={18} className="shrink-0" />
-            <span className="text-sm">Категории</span>
+            <span className="text-sm font-medium">Категории</span>
           </TabsTrigger>
         )}
         {hasPermission('plants') && (
-          <TabsTrigger value="plants" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="plants" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Sprout" size={18} className="shrink-0" />
-            <span className="text-sm">Растения</span>
+            <span className="text-sm font-medium">Растения</span>
           </TabsTrigger>
         )}
         {hasPermission('users') && (
-          <TabsTrigger value="users" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="users" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Users" size={18} className="shrink-0" />
-            <span className="text-sm">Пользователи</span>
+            <span className="text-sm font-medium">Пользователи</span>
           </TabsTrigger>
         )}
         {hasPermission('orders') && (
-          <TabsTrigger value="orders" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="orders" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="ShoppingCart" size={18} className="shrink-0" />
-            <span className="text-sm">Заказы</span>
+            <span className="text-sm font-medium">Заказы</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="referrals" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="referrals" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="UserPlus" size={18} className="shrink-0" />
-            <span className="text-sm">Рефералы</span>
+            <span className="text-sm font-medium">Рефералы</span>
           </TabsTrigger>
         )}
         {hasPermission('delivery-zones') && (
-          <TabsTrigger value="delivery-zones" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="delivery-zones" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="MapPin" size={18} className="shrink-0" />
-            <span className="text-sm">Зоны</span>
+            <span className="text-sm font-medium">Зоны</span>
           </TabsTrigger>
         )}
         {hasPermission('loyalty') && (
-          <TabsTrigger value="loyalty" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="loyalty" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="ScanLine" size={18} className="shrink-0" />
-            <span className="text-sm">QR-Сканер</span>
+            <span className="text-sm font-medium">QR-Сканер</span>
           </TabsTrigger>
         )}
         {hasPermission('gallery') && (
-          <TabsTrigger value="gallery" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="gallery" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Image" size={18} className="shrink-0" />
-            <span className="text-sm">Галерея</span>
+            <span className="text-sm font-medium">Галерея</span>
           </TabsTrigger>
         )}
         {hasPermission('pages') && (
-          <TabsTrigger value="pages" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="pages" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="FileText" size={18} className="shrink-0" />
-            <span className="text-sm">Страницы</span>
+            <span className="text-sm font-medium">Страницы</span>
           </TabsTrigger>
         )}
         {hasPermission('codes') && (
-          <TabsTrigger value="codes" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="codes" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="KeyRound" size={18} className="shrink-0" />
-            <span className="text-sm">Коды</span>
+            <span className="text-sm font-medium">Коды</span>
           </TabsTrigger>
         )}
         {hasPermission('settings') && (
-          <TabsTrigger value="settings" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="settings" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Settings" size={18} className="shrink-0" />
-            <span className="text-sm">Настройки</span>
+            <span className="text-sm font-medium">Настройки</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="permissions" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="permissions" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Shield" size={18} className="shrink-0" />
-            <span className="text-sm">Права</span>
+            <span className="text-sm font-medium">Права</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="logs" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="logs" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="ScrollText" size={18} className="shrink-0" />
-            <span className="text-sm">Логи</span>
+            <span className="text-sm font-medium">Логи</span>
           </TabsTrigger>
         )}
         {hasPermission('support') && (
-          <TabsTrigger value="support-chat" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="support-chat" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="MessageCircle" size={18} className="shrink-0" />
-            <span className="text-sm">Поддержка</span>
+            <span className="text-sm font-medium">Поддержка</span>
           </TabsTrigger>
         )}
         {hasPermission('couriers') && (
-          <TabsTrigger value="couriers" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="couriers" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="Truck" size={18} className="shrink-0" />
-            <span className="text-sm">Курьеры</span>
+            <span className="text-sm font-medium">Курьеры</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="statistics" className="flex items-center gap-2 px-3 py-2 whitespace-nowrap">
+          <TabsTrigger value="statistics" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
             <Icon name="BarChart3" size={18} className="shrink-0" />
-            <span className="text-sm">Статистика</span>
+            <span className="text-sm font-medium">Статистика</span>
           </TabsTrigger>
         )}
       </TabsList>
 
-      <TabsContent value="products">
+      <div className="flex-1 min-w-0">
+      <TabsContent value="products" className="mt-0">
         <ProductsTab 
           products={products}
           onAddProduct={onAddProduct}
@@ -220,7 +221,7 @@ const AdminPanelTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="categories">
+      <TabsContent value="categories" className="mt-0">
         <CategoriesTab 
           categories={categories}
           onAddCategory={onAddCategory}
@@ -229,7 +230,7 @@ const AdminPanelTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="users">
+      <TabsContent value="users" className="mt-0">
         <UsersTab 
           users={users} 
           onAddBalance={onAddBalance} 
@@ -240,11 +241,11 @@ const AdminPanelTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="plants">
+      <TabsContent value="plants" className="mt-0">
         <PlantsInventoryTab />
       </TabsContent>
 
-      <TabsContent value="orders">
+      <TabsContent value="orders" className="mt-0">
         <OrdersTab 
           orders={orders} 
           onUpdateStatus={onUpdateOrderStatus} 
@@ -254,33 +255,33 @@ const AdminPanelTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="loyalty">
+      <TabsContent value="loyalty" className="mt-0">
         <LoyaltyScannerTab />
       </TabsContent>
 
 
 
-      <TabsContent value="gallery">
+      <TabsContent value="gallery" className="mt-0">
         <GalleryTab />
       </TabsContent>
 
 
-      <TabsContent value="pages">
+      <TabsContent value="pages" className="mt-0">
         <PagesTab 
           siteSettings={siteSettings}
           onSaveSettings={onSaveSettings}
         />
       </TabsContent>
 
-      <TabsContent value="delivery-zones">
+      <TabsContent value="delivery-zones" className="mt-0">
         <DeliveryZonesTab />
       </TabsContent>
 
-      <TabsContent value="codes">
+      <TabsContent value="codes" className="mt-0">
         <CodesTab userId={userId} />
       </TabsContent>
 
-      <TabsContent value="settings">
+      <TabsContent value="settings" className="mt-0">
         <SettingsTab 
           siteSettings={siteSettings}
           onSaveSettings={onSaveSettings}
@@ -288,7 +289,7 @@ const AdminPanelTabs = ({
       </TabsContent>
 
       {isSuperAdmin && (
-        <TabsContent value="permissions">
+        <TabsContent value="permissions" className="mt-0">
           <PermissionsTab
             users={users}
             currentUserId={userId}
@@ -298,13 +299,13 @@ const AdminPanelTabs = ({
       )}
 
       {isSuperAdmin && (
-        <TabsContent value="logs">
+        <TabsContent value="logs" className="mt-0">
           <LogsTab />
         </TabsContent>
       )}
 
       {hasPermission('support') && (
-        <TabsContent value="support-chat">
+        <TabsContent value="support-chat" className="mt-0">
           <SupportChatTab 
             userId={userId}
             userName={currentUser?.full_name || 'Администратор'}
@@ -314,22 +315,23 @@ const AdminPanelTabs = ({
       )}
 
       {hasPermission('couriers') && (
-        <TabsContent value="couriers">
+        <TabsContent value="couriers" className="mt-0">
           <CourierManagement />
         </TabsContent>
       )}
 
       {isSuperAdmin && (
-        <TabsContent value="statistics">
+        <TabsContent value="statistics" className="mt-0">
           <StatisticsTab />
         </TabsContent>
       )}
 
       {isSuperAdmin && (
-        <TabsContent value="referrals">
+        <TabsContent value="referrals" className="mt-0">
           <ReferralStatsTab />
         </TabsContent>
       )}
+      </div>
     </Tabs>
   );
 };
