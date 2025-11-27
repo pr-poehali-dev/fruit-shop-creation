@@ -28,6 +28,7 @@ export const ImageUploader = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(currentImageUrl || '');
+  const [fileSize, setFileSize] = useState<string>('');
   const { toast } = useToast();
 
   const uploadImage = async (file: File) => {
@@ -40,6 +41,10 @@ export const ImageUploader = ({
       return;
     }
 
+    // Форматируем размер файла
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    setFileSize(`${sizeInMB} MB`);
+    
     setIsUploading(true);
 
     const reader = new FileReader();
@@ -151,9 +156,10 @@ export const ImageUploader = ({
               className="cursor-pointer"
             />
             {isUploading && (
-              <div className="mt-3 flex items-center justify-center gap-2">
+              <div className="mt-3 flex flex-col items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                 <p className="text-sm text-primary font-medium">Загрузка и оптимизация...</p>
+                {fileSize && <p className="text-xs text-muted-foreground">Размер: {fileSize}</p>}
               </div>
             )}
           </>

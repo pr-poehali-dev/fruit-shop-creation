@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import ProductBasicFields from './ProductBasicFields';
 import ProductImageGallery from './ProductImageGallery';
 import ProductVariants from './ProductVariants';
+import ImageUploader from '@/components/ImageUploader';
 
 interface ProductImage {
   id?: number;
@@ -161,34 +162,47 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
       return null;
     }
     
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      alert('Размер файла не должен превышать 10 МБ');
-      return null;
-    }
+    const API_UPLOAD = 'https://functions.poehali.dev/44df414c-694f-4079-aa96-764afeaf23e3';
     
-    const formData = new FormData();
-    formData.append('key', '47fefc6b8e5e4a3fc4e4c7d7b4883f86');
-    formData.append('image', file);
-    
-    try {
-      const response = await fetch('https://api.imgbb.com/1/upload', {
-        method: 'POST',
-        body: formData
-      });
+    return new Promise((resolve) => {
+      const reader = new FileReader();
       
-      const data = await response.json();
+      reader.onload = async (event) => {
+        try {
+          const base64Image = event.target?.result as string;
+          
+          const response = await fetch(API_UPLOAD, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: base64Image,
+              max_width: 1200,
+              max_height: 1200,
+              quality: 85
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.success && data.url) {
+            resolve(data.url);
+          } else {
+            alert(`Ошибка загрузки: ${data.error || 'Неизвестная ошибка'}`);
+            resolve(null);
+          }
+        } catch (error) {
+          alert(`Ошибка запроса: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
+          resolve(null);
+        }
+      };
       
-      if (data.success && data.data?.url) {
-        return data.data.url;
-      } else {
-        alert(`Ошибка загрузки: ${data.error?.message || 'Неизвестная ошибка'}`);
-        return null;
-      }
-    } catch (error) {
-      alert(`Ошибка запроса: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
-      return null;
-    }
+      reader.onerror = () => {
+        alert('Ошибка чтения файла');
+        resolve(null);
+      };
+      
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

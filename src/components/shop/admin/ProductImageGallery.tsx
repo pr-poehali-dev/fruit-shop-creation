@@ -4,8 +4,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Card } from '@/components/ui/card';
-import React from 'react';
+import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ImageUploader from '@/components/ImageUploader';
 
 interface ProductImage {
   id?: number;
@@ -58,60 +59,87 @@ const ProductImageGallery = ({
   };
 
   const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
+  const [showUploader, setShowUploader] = useState(false);
 
   const toggleExpanded = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
+
+  const handleImageUploaded = (url: string) => {
+    if (url && images.length < 10) {
+      onNewImageUrlChange(url);
+      onAddImage();
+      setShowUploader(false);
+    }
+  };
+
   return (
     <div>
       <Label className="text-sm">Галерея изображений (до 10 фото) *</Label>
       <div className="space-y-2 sm:space-y-3 mt-2">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Input 
-            type="url"
-            value={newImageUrl}
-            onChange={(e) => onNewImageUrlChange(e.target.value)}
-            placeholder="https://example.com/image.jpg"
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAddImage())}
-            className="text-sm flex-1"
-          />
-          <Button 
-            type="button" 
-            onClick={onAddImage} 
-            disabled={images.length >= 10}
-            className="w-full sm:w-auto whitespace-nowrap"
-            size="default"
-          >
-            <Icon name="Link" size={16} className="sm:mr-2" />
-            <span className="hidden sm:inline">URL</span>
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-px bg-border"></div>
-          <span className="text-xs text-muted-foreground">или</span>
-          <div className="flex-1 h-px bg-border"></div>
-        </div>
-        <div>
-          <input
-            type="file"
-            id="image-upload"
-            accept="image/*"
-            onChange={onFileUpload}
-            className="hidden"
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="w-full text-sm"
-            onClick={() => document.getElementById('image-upload')?.click()}
-            disabled={images.length >= 10 || isUploading}
-          >
-            <Icon name={isUploading ? "Loader2" : "Upload"} size={16} className={`mr-2 ${isUploading ? 'animate-spin' : ''}`} />
-            {isUploading ? 'Загрузка...' : 'Загрузить с компьютера'}
-          </Button>
-        </div>
+        {!showUploader ? (
+          <>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input 
+                type="url"
+                value={newImageUrl}
+                onChange={(e) => onNewImageUrlChange(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAddImage())}
+                className="text-sm flex-1"
+              />
+              <Button 
+                type="button" 
+                onClick={onAddImage} 
+                disabled={images.length >= 10}
+                className="w-full sm:w-auto whitespace-nowrap"
+                size="default"
+              >
+                <Icon name="Link" size={16} className="sm:mr-2" />
+                <span className="hidden sm:inline">Добавить URL</span>
+                <span className="sm:hidden">URL</span>
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-xs text-muted-foreground">или</span>
+              <div className="flex-1 h-px bg-border"></div>
+            </div>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full text-sm"
+              onClick={() => setShowUploader(true)}
+              disabled={images.length >= 10 || isUploading}
+            >
+              <Icon name="Upload" size={16} className="mr-2" />
+              Загрузить с компьютера
+            </Button>
+          </>
+        ) : (
+          <div className="space-y-2">
+            <ImageUploader
+              onImageUploaded={handleImageUploaded}
+              maxWidth={1200}
+              maxHeight={1200}
+              quality={85}
+              showPreview={false}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowUploader(false)}
+              className="w-full"
+            >
+              <Icon name="X" size={14} className="mr-1" />
+              Отменить загрузку
+            </Button>
+          </div>
+        )}
         <p className="text-xs text-muted-foreground">
-          Добавлено: {images.length}/10 изображений. Первое — главное.
+          Добавлено: {images.length}/10 изображений. Первое — главное. 
+          Изображения любого размера автоматически оптимизируются.
         </p>
         
         {images.length > 0 && (
