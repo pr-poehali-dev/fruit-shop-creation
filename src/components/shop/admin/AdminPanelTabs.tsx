@@ -281,13 +281,15 @@ const AdminPanelTabs = ({
             <span className="text-sm font-medium">Поддержка</span>
           </TabsTrigger>
         )}
-        <TabsTrigger 
-          value="couriers" 
-          className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
-        >
-          <Icon name="Truck" size={18} className="shrink-0" />
-          <span className="text-sm font-medium">Курьеры</span>
-        </TabsTrigger>
+        {(isSuperAdmin || currentUser?.is_courier) && (
+          <TabsTrigger 
+            value="couriers" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+          >
+            <Icon name="Truck" size={18} className="shrink-0" />
+            <span className="text-sm font-medium">Курьеры</span>
+          </TabsTrigger>
+        )}
         {isSuperAdmin && (
           <TabsTrigger 
             value="statistics" 
@@ -402,7 +404,7 @@ const AdminPanelTabs = ({
         </TabsContent>
       )}
 
-      {hasPermission('couriers') && (
+      {(isSuperAdmin || currentUser?.is_courier) && (
         <TabsContent value="couriers" className="mt-0">
           <CourierManagement />
         </TabsContent>
