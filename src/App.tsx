@@ -107,7 +107,11 @@ const App = () => {
         <DecorativeBranch />
         <SupportChat />
         <BrowserRouter>
-          <Suspense fallback={<LoadingScreen onComplete={() => {}} />}>
+          <Suspense fallback={
+            <div className="fixed inset-0 flex items-center justify-center bg-background">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          }>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/katalog" element={<Index />} />
