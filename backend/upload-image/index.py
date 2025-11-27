@@ -71,13 +71,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             elif img.mode != 'RGB':
                 img = img.convert('RGB')
             
-            max_size = 1920
-            if img.width > max_size or img.height > max_size:
-                img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+            # Получаем параметры оптимизации из body (если переданы)
+            max_width = body_data.get('max_width', 1920)
+            max_height = body_data.get('max_height', 1920)
+            quality = body_data.get('quality', 85)
+            
+            # Оптимизируем размер только если изображение больше лимитов
+            if img.width > max_width or img.height > max_height:
+                ratio = min(max_width / img.width, max_height / img.height)
+                new_width = int(img.width * ratio)
+                new_height = int(img.height * ratio)
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
             
             output = io.BytesIO()
-            img.save(output, format='JPEG', quality=85, optimize=True)
+            img.save(output, format='JPEG', quality=quality, optimize=True)
             image_bytes = output.getvalue()
+            
+            optimized_size = f"{img.width}x{img.height}"
             
             file_extension = 'jpg'
             
@@ -151,7 +161,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({
                 'success': True,
-                'url': public_url
+                'url': public_url,
+                'optimized_size': optimized_size
             }),
             'isBase64Encoded': False
         }

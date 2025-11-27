@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import ImageUploader from '@/components/ImageUploader';
 
 const API_CONTENT = 'https://functions.poehali.dev/56deea36-35f7-4c07-becc-dedeaa3de78d';
-const API_UPLOAD = 'https://functions.poehali.dev/84f6df49-00f5-43fd-b66e-f0f01f32e21d';
 
 interface GalleryImage {
   id: number;
@@ -25,7 +25,6 @@ const GalleryTab = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
   const [isAdding, setIsAdding] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
   const loadImages = async () => {
@@ -46,31 +45,7 @@ const GalleryTab = () => {
     loadImages();
   }, []);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch(API_UPLOAD, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        setEditImageUrl(data.url);
-        toast({ title: 'Успешно', description: 'Изображение загружено' });
-      }
-    } catch (error) {
-      toast({ title: 'Ошибка', description: 'Не удалось загрузить изображение', variant: 'destructive' });
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleSave = async (image?: GalleryImage) => {
     if (!editTitle.trim() || !editImageUrl.trim()) {
@@ -144,12 +119,17 @@ const GalleryTab = () => {
     setEditImageUrl('');
   };
 
+
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-lg font-semibold">Управление галереей</h3>
-          <p className="text-sm text-muted-foreground">Добавляйте и редактируйте фотографии галереи</p>
+          <p className="text-sm text-muted-foreground">
+            Добавляйте и редактируйте фотографии галереи. 
+            Изображения любого размера автоматически оптимизируются.
+          </p>
         </div>
         <Button onClick={startAdd}>
           <Icon name="Plus" size={16} className="mr-2" />
@@ -159,19 +139,14 @@ const GalleryTab = () => {
 
       {isAdding && (
         <Card className="p-4 space-y-3">
-          <div>
-            <label className="block text-sm font-medium mb-2">Загрузить изображение</label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleUpload}
-              disabled={isUploading}
-            />
-            {isUploading && <p className="text-sm text-muted-foreground mt-1">Загрузка...</p>}
-            {editImageUrl && (
-              <img src={editImageUrl} alt="Preview" className="mt-2 h-32 object-cover rounded" />
-            )}
-          </div>
+          <ImageUploader
+            onImageUploaded={setEditImageUrl}
+            currentImageUrl={editImageUrl}
+            maxWidth={1920}
+            maxHeight={1920}
+            quality={85}
+            showPreview={true}
+          />
           <Input
             placeholder="Название"
             value={editTitle}
@@ -197,17 +172,14 @@ const GalleryTab = () => {
           <Card key={image.id} className="overflow-hidden">
             {editingId === image.id ? (
               <div className="p-4 space-y-3">
-                <div>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUpload}
-                    disabled={isUploading}
-                  />
-                  {editImageUrl && (
-                    <img src={editImageUrl} alt="Preview" className="mt-2 h-32 w-full object-cover rounded" />
-                  )}
-                </div>
+                <ImageUploader
+                  onImageUploaded={setEditImageUrl}
+                  currentImageUrl={editImageUrl}
+                  maxWidth={1920}
+                  maxHeight={1920}
+                  quality={85}
+                  showPreview={true}
+                />
                 <Input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
