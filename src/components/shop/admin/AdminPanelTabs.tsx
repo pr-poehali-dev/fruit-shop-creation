@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import ProductsTab from './ProductsTab';
 import CategoriesTab from './CategoriesTab';
@@ -104,114 +106,210 @@ const AdminPanelTabs = ({
     isSuperAdmin
   ].filter(Boolean).length;
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
-    <Tabs defaultValue="products" className="flex gap-4">
-      <TabsList className="flex flex-col w-64 h-fit gap-1 p-2 sticky top-4">
+    <>
+      {/* Mobile menu button */}
+      <Button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="lg:hidden fixed bottom-4 right-4 z-50 h-14 w-14 rounded-full shadow-lg"
+        size="icon"
+      >
+        <Icon name={isSidebarOpen ? "X" : "Menu"} size={24} />
+      </Button>
+
+      <Tabs defaultValue="products" className="flex gap-4 relative">
+        {/* Overlay for mobile */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <TabsList className={`
+          flex flex-col w-64 h-fit gap-1 p-2 
+          fixed lg:sticky top-0 lg:top-4 left-0 bottom-0 lg:bottom-auto
+          bg-background z-50 lg:z-auto
+          transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          overflow-y-auto
+        `}>
         {hasPermission('products') && (
-          <TabsTrigger value="products" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="products" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Package" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Товары</span>
           </TabsTrigger>
         )}
         {hasPermission('categories') && (
-          <TabsTrigger value="categories" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="categories" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="FolderTree" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Категории</span>
           </TabsTrigger>
         )}
         {hasPermission('plants') && (
-          <TabsTrigger value="plants" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="plants" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Sprout" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Растения</span>
           </TabsTrigger>
         )}
         {hasPermission('users') && (
-          <TabsTrigger value="users" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="users" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Users" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Пользователи</span>
           </TabsTrigger>
         )}
         {hasPermission('orders') && (
-          <TabsTrigger value="orders" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="orders" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="ShoppingCart" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Заказы</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="referrals" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="referrals" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="UserPlus" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Рефералы</span>
           </TabsTrigger>
         )}
         {hasPermission('delivery-zones') && (
-          <TabsTrigger value="delivery-zones" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="delivery-zones" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="MapPin" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Зоны</span>
           </TabsTrigger>
         )}
         {hasPermission('loyalty') && (
-          <TabsTrigger value="loyalty" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="loyalty" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="ScanLine" size={18} className="shrink-0" />
             <span className="text-sm font-medium">QR-Сканер</span>
           </TabsTrigger>
         )}
         {hasPermission('gallery') && (
-          <TabsTrigger value="gallery" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="gallery" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Image" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Галерея</span>
           </TabsTrigger>
         )}
         {hasPermission('pages') && (
-          <TabsTrigger value="pages" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="pages" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="FileText" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Страницы</span>
           </TabsTrigger>
         )}
         {hasPermission('codes') && (
-          <TabsTrigger value="codes" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="codes" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="KeyRound" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Коды</span>
           </TabsTrigger>
         )}
         {hasPermission('settings') && (
-          <TabsTrigger value="settings" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="settings" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Settings" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Настройки</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="permissions" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="permissions" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Shield" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Права</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="logs" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="logs" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="ScrollText" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Логи</span>
           </TabsTrigger>
         )}
         {hasPermission('support') && (
-          <TabsTrigger value="support-chat" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="support-chat" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="MessageCircle" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Поддержка</span>
           </TabsTrigger>
         )}
         {hasPermission('couriers') && (
-          <TabsTrigger value="couriers" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="couriers" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="Truck" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Курьеры</span>
           </TabsTrigger>
         )}
         {isSuperAdmin && (
-          <TabsTrigger value="statistics" className="flex items-center justify-start gap-3 px-4 py-2.5 w-full">
+          <TabsTrigger 
+            value="statistics" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <Icon name="BarChart3" size={18} className="shrink-0" />
             <span className="text-sm font-medium">Статистика</span>
           </TabsTrigger>
         )}
       </TabsList>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 w-full lg:w-auto pb-20 lg:pb-0">
       <TabsContent value="products" className="mt-0">
         <ProductsTab 
           products={products}
@@ -333,6 +431,7 @@ const AdminPanelTabs = ({
       )}
       </div>
     </Tabs>
+    </>
   );
 };
 
