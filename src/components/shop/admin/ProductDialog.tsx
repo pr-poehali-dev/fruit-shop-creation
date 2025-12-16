@@ -275,6 +275,22 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
     });
   };
 
+  const handleDirectImageAdd = (url: string) => {
+    if (images.length >= 10) {
+      alert('Можно добавить максимум 10 изображений');
+      return;
+    }
+
+    setImages(prevImages => {
+      const newImage: ProductImage = {
+        image_url: url,
+        is_primary: prevImages.length === 0,
+        sort_order: prevImages.length
+      };
+      return [...prevImages, newImage];
+    });
+  };
+
   const handleAddVariant = () => {
     if (!newVariantSize.trim() || !newVariantPrice.trim()) return;
     
@@ -349,6 +365,7 @@ const ProductDialog = ({ open, onOpenChange, editingProduct, categories, onSubmi
             onNewImageUrlChange={setNewImageUrl}
             onReplaceImage={handleReplaceImage}
             onUpdateImageDimensions={handleUpdateImageDimensions}
+            onDirectImageAdd={handleDirectImageAdd}
           />
 
           <ProductVariants

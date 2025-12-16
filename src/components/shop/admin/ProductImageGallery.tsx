@@ -30,6 +30,7 @@ interface ProductImageGalleryProps {
   onNewImageUrlChange: (value: string) => void;
   onReplaceImage: (index: number, file: File) => void;
   onUpdateImageDimensions: (index: number, width: number | undefined, height: number | undefined, objectFit: string) => void;
+  onDirectImageAdd?: (url: string) => void;
 }
 
 const ProductImageGallery = ({
@@ -43,7 +44,8 @@ const ProductImageGallery = ({
   onFileUpload,
   onNewImageUrlChange,
   onReplaceImage,
-  onUpdateImageDimensions
+  onUpdateImageDimensions,
+  onDirectImageAdd
 }: ProductImageGalleryProps) => {
   const handleReplaceClick = (index: number) => {
     const input = document.createElement('input');
@@ -67,8 +69,14 @@ const ProductImageGallery = ({
 
   const handleImageUploaded = (url: string) => {
     if (url && images.length < 10) {
-      onNewImageUrlChange(url);
-      onAddImage();
+      if (onDirectImageAdd) {
+        onDirectImageAdd(url);
+      } else {
+        onNewImageUrlChange(url);
+        setTimeout(() => {
+          onAddImage();
+        }, 0);
+      }
       setShowUploader(false);
     }
   };
