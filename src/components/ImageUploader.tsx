@@ -51,6 +51,11 @@ const ImageUploader = ({
     reader.onload = async (event) => {
       try {
         const base64Image = event.target?.result as string;
+        
+        // Показываем превью сразу
+        if (showPreview) {
+          setPreviewUrl(base64Image);
+        }
 
         const response = await fetch(API_UPLOAD, {
           method: 'POST',
@@ -77,6 +82,7 @@ const ImageUploader = ({
         }
       } catch (error) {
         console.error('Upload error:', error);
+        setPreviewUrl(''); // Убираем превью при ошибке
         toast({
           title: 'Ошибка',
           description: error instanceof Error ? error.message : 'Не удалось загрузить изображение',

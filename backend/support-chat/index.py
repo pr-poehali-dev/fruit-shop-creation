@@ -155,6 +155,81 @@ def search_faq(question: str, cur, conversation_history: List[Dict[str, str]] = 
     
     return None
 
+def get_ai_response(question: str, conversation_history: List[Dict[str, str]] = None, faqs: List = None) -> Optional[str]:
+    """
+    Получает умный ответ от OpenAI с учётом истории и FAQ базы
+    """
+    try:
+        import urllib.request
+        import json
+        
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            return None
+        
+        # Формируем контекст из FAQ для модели
+        faq_context = ""
+        if faqs:
+            faq_context = "\n\nБаза знаний магазина:\n"
+            for faq in faqs[:10]:
+                faq_context += f"Q: {faq[1]}\nA: {faq[2]}\n\n"
+        
+        # Формируем историю разговора
+        messages = [
+            {
+                "role": "system",
+                "content": f"""Ты — Анфиса, дружелюбный AI-ассистент службы поддержки интернет-магазина растений и цветов "Сибирская флора". 
+
+Твоя личность:
+- Ты веселая, позитивная и всегда готова помочь
+- Используй эмодзи, но в меру (🌸🌿✨)
+- Общайся на "ты", будь близкой к клиенту
+- Если не знаешь точного ответа — честно признайся и предложи связаться с администратором
+
+Важные правила:
+- Отвечай КРАТКО (2-3 предложения максимум)
+- Если клиент явно просит оператора/администратора — сразу скажи что передашь обращение
+- Используй информацию из базы знаний, если она релевантна
+- Будь естественной, не перегружай ответ деталями
+{faq_context}"""
+            }
+        ]
+        
+        # Добавляем историю (последние 5 сообщений)
+        if conversation_history:
+            for msg in conversation_history[-5:]:
+                role = "assistant" if msg['role'] == 'bot' else "user"
+                messages.append({"role": role, "content": msg['text']})
+        
+        # Добавляем текущий вопрос
+        messages.append({"role": "user", "content": question})
+        
+        # Запрос к OpenAI API
+        data = json.dumps({
+            "model": "gpt-4o-mini",
+            "messages": messages,
+            "max_tokens": 200,
+            "temperature": 0.8
+        }).encode()
+        
+        req = urllib.request.Request(
+            'https://api.openai.com/v1/chat/completions',
+            data=data,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}'
+            }
+        )
+        
+        with urllib.request.urlopen(req, timeout=15) as response:
+            result = json.loads(response.read().decode())
+            ai_response = result['choices'][0]['message']['content'].strip()
+            return ai_response
+            
+    except Exception as e:
+        print(f"AI response error: {e}")
+        return None
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method: str = event.get('httpMethod', 'GET')
     
@@ -464,6 +539,31 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         conn.commit()
                         bot_response = faq_answer['answer']
                     else:
+                        # Пытаемся получить AI-ответ
+                        faqs = get_faqs_cached(cur)
+                        ai_response = get_ai_response(message, [{'role': h['sender'], 'text': h['message']} for h in conversation_history], faqs)
+                        
+                        if ai_response:
+                            cur.execute(
+                                "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
+                                (int(chat_id), ai_response)
+                            )
+                            bot_message_id = cur.fetchone()[0]
+                            conn.commit()
+                            bot_response = ai_response
+                            
+                            return {
+                                'statusCode': 200,
+                                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                                'body': json.dumps({
+                                    'message_id': message_id,
+                                    'bot_message_id': bot_message_id,
+                                    'bot_response': bot_response
+                                }, ensure_ascii=False),
+                                'isBase64Encoded': False
+                            }
+                        
+                        # Если AI не сработал, используем стандартную логику
                         cur.execute("""
                             SELECT COUNT(*) 
                             FROM t_p77282076_fruit_shop_creation.support_messages 
