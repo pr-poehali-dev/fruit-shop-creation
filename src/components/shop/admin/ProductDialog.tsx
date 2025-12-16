@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import ProductBasicFields from './ProductBasicFields';
 import ProductImageGallery from './ProductImageGallery';
 import ProductVariants from './ProductVariants';
-import ImageUploader from '@/components/ImageUploader';
 
 interface ProductImage {
   id?: number;

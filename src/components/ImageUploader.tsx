@@ -51,11 +51,6 @@ const ImageUploader = ({
     reader.onload = async (event) => {
       try {
         const base64Image = event.target?.result as string;
-        
-        // Показываем превью сразу
-        if (showPreview) {
-          setPreviewUrl(base64Image);
-        }
 
         const response = await fetch(API_UPLOAD, {
           method: 'POST',
@@ -145,31 +140,7 @@ const ImageUploader = ({
             : 'border-border hover:border-primary/50'
         }`}
       >
-        {!previewUrl || !showPreview ? (
-          <>
-            <Icon name="Upload" size={32} className="mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-2">
-              Перетащите изображение сюда или нажмите для выбора
-            </p>
-            <p className="text-xs text-muted-foreground mb-3">
-              Поддерживаются файлы любого размера (будут оптимизированы до {maxWidth}x{maxHeight})
-            </p>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={isUploading}
-              className="cursor-pointer"
-            />
-            {isUploading && (
-              <div className="mt-3 flex flex-col items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                <p className="text-sm text-primary font-medium">Загрузка и оптимизация...</p>
-                {fileSize && <p className="text-xs text-muted-foreground">Размер: {fileSize}</p>}
-              </div>
-            )}
-          </>
-        ) : (
+        {showPreview && previewUrl ? (
           <div className="relative">
             <img
               src={previewUrl}
@@ -208,6 +179,30 @@ const ImageUploader = ({
               </label>
             </div>
           </div>
+        ) : (
+          <>
+            <Icon name="Upload" size={32} className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mb-2">
+              Перетащите изображение сюда или нажмите для выбора
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Поддерживаются файлы любого размера (будут оптимизированы до {maxWidth}x{maxHeight})
+            </p>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={isUploading}
+              className="cursor-pointer"
+            />
+            {isUploading && (
+              <div className="mt-3 flex flex-col items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <p className="text-sm text-primary font-medium">Загрузка и оптимизация...</p>
+                {fileSize && <p className="text-xs text-muted-foreground">Размер: {fileSize}</p>}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
