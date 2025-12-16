@@ -16,7 +16,7 @@ interface ImageUploaderProps {
   showPreview?: boolean;
 }
 
-export const ImageUploader = ({
+const ImageUploader = ({
   onImageUploaded,
   currentImageUrl,
   maxWidth = 1920,

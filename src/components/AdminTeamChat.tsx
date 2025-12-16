@@ -115,7 +115,7 @@ export default function AdminTeamChat() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-40"
+        className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-[60]"
       >
         <MessageSquare size={24} />
         {unreadCount > 0 && (
@@ -128,7 +128,7 @@ export default function AdminTeamChat() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-card border rounded-lg shadow-2xl flex flex-col z-40">
+    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-card border rounded-lg shadow-2xl flex flex-col z-[60]">
       <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
         <div className="flex items-center gap-2">
           <MessageSquare size={20} />

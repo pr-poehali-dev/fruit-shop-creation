@@ -147,6 +147,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             stock = stock_val if stock_val not in [None, ''] else 'NULL'
             show_stock = 'TRUE' if body_data.get('show_stock', True) else 'FALSE'
             hide_main_price = 'TRUE' if body_data.get('hide_main_price', False) else 'FALSE'
+            is_popular = 'TRUE' if body_data.get('is_popular', False) else 'FALSE'
             expected_date = body_data.get('expected_date')
             expected_date_sql = f"'{expected_date}'" if expected_date else 'NULL'
             images = body_data.get('images', [])
