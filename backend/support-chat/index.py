@@ -131,9 +131,18 @@ def send_telegram_notification(message: str):
         pass
 
 def is_working_hours() -> bool:
-    now = datetime.utcnow()
-    moscow_hour = (now.hour + 3) % 24
-    return 6 <= moscow_hour < 19
+    """Проверяет рабочее время: 6:00-19:00 МСК (UTC+3)"""
+    from datetime import datetime, timezone, timedelta
+    
+    # Московское время (UTC+3)
+    moscow_tz = timezone(timedelta(hours=3))
+    now_moscow = datetime.now(moscow_tz)
+    current_hour = now_moscow.hour
+    
+    # Для отладки
+    print(f"Current Moscow time: {now_moscow.strftime('%Y-%m-%d %H:%M:%S %Z')}, hour: {current_hour}")
+    
+    return 6 <= current_hour < 19
 
 def get_db_connection():
     dsn = os.environ.get('DATABASE_URL')
