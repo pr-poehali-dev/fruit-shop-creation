@@ -102,7 +102,10 @@ const ImageUploader = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) uploadImage(file);
+    if (file) {
+      uploadImage(file);
+      e.target.value = ''; // Сбрасываем input для повторной загрузки
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -140,7 +143,13 @@ const ImageUploader = ({
             : 'border-border hover:border-primary/50'
         }`}
       >
-        {showPreview && previewUrl ? (
+        {isUploading ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="text-sm text-primary font-medium">Загрузка и оптимизация...</p>
+            {fileSize && <p className="text-xs text-muted-foreground">Размер: {fileSize}</p>}
+          </div>
+        ) : showPreview && previewUrl ? (
           <div className="relative">
             <img
               src={previewUrl}
@@ -152,7 +161,6 @@ const ImageUploader = ({
                 size="sm"
                 variant="outline"
                 onClick={handleRemoveImage}
-                disabled={isUploading}
               >
                 <Icon name="X" size={14} className="mr-1" />
                 Удалить
@@ -161,7 +169,6 @@ const ImageUploader = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isUploading}
                   asChild
                 >
                   <span className="cursor-pointer">
@@ -173,7 +180,6 @@ const ImageUploader = ({
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  disabled={isUploading}
                   className="hidden"
                 />
               </label>
@@ -192,16 +198,8 @@ const ImageUploader = ({
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              disabled={isUploading}
               className="cursor-pointer"
             />
-            {isUploading && (
-              <div className="mt-3 flex flex-col items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                <p className="text-sm text-primary font-medium">Загрузка и оптимизация...</p>
-                {fileSize && <p className="text-xs text-muted-foreground">Размер: {fileSize}</p>}
-              </div>
-            )}
           </>
         )}
       </div>
