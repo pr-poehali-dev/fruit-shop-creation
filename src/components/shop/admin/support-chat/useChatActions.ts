@@ -66,6 +66,7 @@ export const useChatActions = ({
           action: 'take_chat',
           chat_id: chatId,
           admin_id: userId,
+          admin_name: userName,
         }),
       });
       toast({ title: 'Чат взят в работу' });
