@@ -924,8 +924,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     
                     execute_with_retry(
                         cur,
-                        "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, admin_avatar, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, true, 1)",
-                        (int(chat_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?', admin_avatar)
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, admin_avatar, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, %s, true, 1)",
+                        (int(chat_id), int(admin_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?', admin_avatar)
                     )
                     conn.commit()
                     
