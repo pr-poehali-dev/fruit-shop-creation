@@ -179,10 +179,6 @@ def get_faqs_cached(cur) -> List:
 def search_faq(question: str, cur, conversation_history: List[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
     question_lower = question.lower().strip()
     
-    operator_keywords = ['оператор', 'администратор', 'человек', 'живой', 'сотрудник', 'менеджер', 'помощь', 'помогите', 'нужен человек', 'хочу с человеком']
-    if any(keyword in question_lower for keyword in operator_keywords):
-        return None
-    
     faqs = get_faqs_cached(cur)
     
     best_match = None
@@ -652,6 +648,63 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 message_id = cur.fetchone()[0]
                 
                 if chat_status == 'bot':
+                    # Проверяем запрос оператора ДО всего остального
+                    message_lower = message.lower().strip()
+                    operator_keywords = ['оператор', 'администратор', 'человек', 'живой', 'сотрудник', 'менеджер', 'нужен человек', 'хочу с человеком', 'нужен админ', 'позовите админ']
+                    
+                    if any(keyword in message_lower for keyword in operator_keywords):
+                        # Пользователь явно просит оператора
+                        if is_working_hours():
+                            bot_response = 'Хорошо, сейчас переведу вас на администратора! ⏳ Пожалуйста, подождите немного...'
+                            
+                            cur.execute(
+                                "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
+                                (int(chat_id), bot_response)
+                            )
+                            bot_message_id = cur.fetchone()[0]
+                            
+                            cur.execute(
+                                "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'waiting', updated_at = CURRENT_TIMESTAMP WHERE id = %s",
+                                (int(chat_id),)
+                            )
+                            conn.commit()
+                            
+                            telegram_msg = f"🔔 <b>Запрос оператора!</b>\n\n👤 От: {user_name}\n💬 Сообщение: {message[:100]}{'...' if len(message) > 100 else ''}\n\n📱 Чат ID: {chat_id}"
+                            send_telegram_notification(telegram_msg)
+                            
+                            return {
+                                'statusCode': 200,
+                                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                                'body': json.dumps({
+                                    'message_id': message_id,
+                                    'bot_message_id': bot_message_id,
+                                    'bot_response': bot_response,
+                                    'status_changed': 'waiting'
+                                }, ensure_ascii=False),
+                                'isBase64Encoded': False
+                            }
+                        else:
+                            bot_response = 'Наши администраторы сейчас отдыхают (работаем с 6:00 до 19:00 МСК) 😴\n\nВы можете:\n• Оставить вопрос здесь — ответим в рабочее время\n• Я попробую помочь сама! Задайте вопрос.'
+                            
+                            cur.execute(
+                                "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1) RETURNING id",
+                                (int(chat_id), bot_response)
+                            )
+                            bot_message_id = cur.fetchone()[0]
+                            conn.commit()
+                            
+                            return {
+                                'statusCode': 200,
+                                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                                'body': json.dumps({
+                                    'message_id': message_id,
+                                    'bot_message_id': bot_message_id,
+                                    'bot_response': bot_response
+                                }, ensure_ascii=False),
+                                'isBase64Encoded': False
+                            }
+                    
+                    # Если не запрос оператора, продолжаем обычную логику
                     cur.execute("""
                         SELECT sender_type, message 
                         FROM t_p77282076_fruit_shop_creation.support_messages 
