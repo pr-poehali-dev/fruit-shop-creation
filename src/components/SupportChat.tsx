@@ -149,7 +149,12 @@ export default function SupportChat() {
       
       if (data.chat) {
         setChat(prevChat => {
-          if (prevChat && prevChat.status !== data.chat.status) {
+          // Обновляем если изменился статус, админ или аватар
+          if (prevChat && (
+            prevChat.status !== data.chat.status ||
+            prevChat.admin_name !== data.chat.admin_name ||
+            prevChat.admin_id !== data.chat.admin_id
+          )) {
             if (data.chat.status === 'active' || data.chat.status === 'waiting') {
               setShowFaqs(false);
             }

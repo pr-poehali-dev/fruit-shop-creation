@@ -496,12 +496,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if is_guest:
                 cur.execute(
-                    "SELECT id, status, admin_id, admin_name FROM t_p77282076_fruit_shop_creation.support_chats WHERE guest_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
+                    "SELECT id, status, admin_id, admin_name, admin_avatar FROM t_p77282076_fruit_shop_creation.support_chats WHERE guest_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
                     (str(user_id),)
                 )
             else:
                 cur.execute(
-                    "SELECT id, status, admin_id, admin_name FROM t_p77282076_fruit_shop_creation.support_chats WHERE user_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
+                    "SELECT id, status, admin_id, admin_name, admin_avatar FROM t_p77282076_fruit_shop_creation.support_chats WHERE user_id = %s AND status != 'closed' ORDER BY created_at DESC LIMIT 1",
                     (int(user_id),)
                 )
             chat_row = cur.fetchone()
@@ -535,14 +535,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'id': chat_id,
                     'status': initial_status,
                     'admin_id': None,
-                    'admin_name': None
+                    'admin_name': None,
+                    'admin_avatar': None
                 }
             else:
                 chat_data = {
                     'id': chat_row[0],
                     'status': chat_row[1],
                     'admin_id': chat_row[2],
-                    'admin_name': chat_row[3]
+                    'admin_name': chat_row[3],
+                    'admin_avatar': chat_row[4] if len(chat_row) > 4 else None
                 }
             
             cur.execute("""
