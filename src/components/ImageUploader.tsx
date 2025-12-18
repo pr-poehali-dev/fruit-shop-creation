@@ -165,16 +165,19 @@ const ImageUploader = ({
                 <Icon name="X" size={14} className="mr-1" />
                 Удалить
               </Button>
-              <label>
+              <label className="cursor-pointer">
                 <Button
                   size="sm"
                   variant="outline"
-                  asChild
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
+                    input?.click();
+                  }}
                 >
-                  <span className="cursor-pointer">
-                    <Icon name="RefreshCw" size={14} className="mr-1" />
-                    Заменить
-                  </span>
+                  <Icon name="RefreshCw" size={14} className="mr-1" />
+                  Заменить
                 </Button>
                 <Input
                   type="file"
