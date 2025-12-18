@@ -21,6 +21,95 @@ def clear_faq_cache():
     _faq_cache = None
     _faq_cache_time = 0
 
+def check_inactive_chats(cur, conn):
+    """
+    Проверяет чаты на неактивность администратора (30+ минут)
+    Возвращает к Анфисе и помечает как пропущенные
+    """
+    try:
+        # Находим чаты в статусе 'active' где последнее сообщение от админа было >30 мин назад
+        cur.execute("""
+            SELECT DISTINCT c.id, c.admin_name, c.user_id, c.guest_id
+            FROM t_p77282076_fruit_shop_creation.support_chats c
+            WHERE c.status = 'active'
+            AND c.updated_at < NOW() - INTERVAL '30 minutes'
+            AND EXISTS (
+                SELECT 1 FROM t_p77282076_fruit_shop_creation.support_messages m
+                WHERE m.chat_id = c.id
+                AND m.sender_type = 'user'
+                AND m.created_at > (
+                    SELECT COALESCE(MAX(created_at), '1970-01-01'::timestamp)
+                    FROM t_p77282076_fruit_shop_creation.support_messages
+                    WHERE chat_id = c.id AND sender_type = 'admin'
+                )
+            )
+        """)
+        
+        inactive_chats = cur.fetchall()
+        
+        for chat_id, admin_name, user_id, guest_id in inactive_chats:
+            # Возвращаем к Анфисе
+            cur.execute(
+                "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'bot', admin_id = NULL, admin_name = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = %s",
+                (chat_id,)
+            )
+            
+            # Добавляем сообщение от Анфисы
+            cur.execute(
+                "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1)",
+                (chat_id, f'Администратор {admin_name} долго не отвечал, поэтому я снова с вами! 😊 Чем могу помочь?')
+            )
+            
+            # Помечаем в архиве как пропущенный (добавляем запись)
+            is_guest = guest_id is not None
+            if is_guest:
+                user_name = "Гость"
+                user_phone = None
+            elif user_id:
+                cur.execute(
+                    "SELECT full_name, phone FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                    (user_id,)
+                )
+                user_data = cur.fetchone()
+                user_name = user_data[0] if user_data else "Пользователь"
+                user_phone = user_data[1] if user_data else None
+            else:
+                user_name = "Гость"
+                user_phone = None
+            
+            # Получаем все сообщения для архива
+            cur.execute(
+                "SELECT sender_type, sender_name, message, created_at FROM t_p77282076_fruit_shop_creation.support_messages WHERE chat_id = %s ORDER BY created_at ASC",
+                (chat_id,)
+            )
+            messages = []
+            for msg in cur.fetchall():
+                messages.append({
+                    'sender_type': msg[0],
+                    'sender_name': msg[1],
+                    'message': msg[2],
+                    'created_at': msg[3].isoformat() if msg[3] else None
+                })
+            
+            # Сохраняем в архив как пропущенный
+            cur.execute(
+                """INSERT INTO t_p77282076_fruit_shop_creation.archived_chats 
+                (chat_id, user_id, user_name, user_phone, admin_id, admin_name, status, messages_json, is_guest, guest_id, is_missed)
+                VALUES (%s, %s, %s, %s, NULL, %s, 'missed', %s, %s, %s, true)""",
+                (chat_id, user_id, user_name, user_phone, admin_name, json.dumps(messages, ensure_ascii=False), is_guest, guest_id)
+            )
+            
+            conn.commit()
+            
+            # Уведомляем админа
+            telegram_msg = f"⚠️ <b>Пропущенный чат #{chat_id}</b>\n\n👤 Пользователь: {user_name}\n👨‍💼 Админ: {admin_name}\n💬 Чат возвращен к Анфисе из-за неактивности (30+ мин)"
+            send_telegram_notification(telegram_msg)
+        
+        return len(inactive_chats)
+    except Exception as e:
+        print(f"Check inactive chats error: {e}")
+        return 0
+
 def send_telegram_notification(message: str):
     try:
         bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
@@ -157,63 +246,95 @@ def search_faq(question: str, cur, conversation_history: List[Dict[str, str]] = 
 
 def get_ai_response(question: str, conversation_history: List[Dict[str, str]] = None, faqs: List = None) -> Optional[str]:
     """
-    Получает умный ответ от OpenAI с учётом истории и FAQ базы
+    Получает умный ответ от AI (OpenAI или Groq) с учётом истории и FAQ базы
+    Анфиса может отвечать на общие вопросы даже без FAQ
     """
     try:
         import urllib.request
         import json
         
-        api_key = os.environ.get('OPENAI_API_KEY')
-        if not api_key:
+        # Проверяем наличие ключей (поддержка OpenAI и Groq)
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        groq_key = os.environ.get('GROQ_API_KEY')
+        
+        if not openai_key and not groq_key:
             return None
         
-        # Формируем контекст из FAQ для модели
+        # Выбираем API
+        if groq_key:
+            api_url = 'https://api.groq.com/openai/v1/chat/completions'
+            api_key = groq_key
+            model = 'llama-3.3-70b-versatile'  # Быстрая и умная модель Groq
+        else:
+            api_url = 'https://api.openai.com/v1/chat/completions'
+            api_key = openai_key
+            model = 'gpt-4o-mini'
+        
+        # Формируем расширенный контекст из FAQ
         faq_context = ""
         if faqs:
-            faq_context = "\n\nБаза знаний магазина:\n"
-            for faq in faqs[:10]:
-                faq_context += f"Q: {faq[1]}\nA: {faq[2]}\n\n"
+            faq_context = "\n\n📚 База знаний магазина:\n"
+            for faq in faqs[:15]:  # Увеличили до 15 FAQ
+                faq_context += f"❓ {faq[1]}\n✅ {faq[2]}\n\n"
         
+        # Расширенный системный промпт с большими возможностями
+        system_prompt = f"""Ты — Анфиса, умный AI-ассистент службы поддержки интернет-магазина растений и цветов "Сибирская флора". 
+
+🌟 Твоя личность:
+- Ты веселая, позитивная, эмпатичная и всегда готова помочь
+- Используй эмодзи умеренно (🌸🌿✨💚)
+- Общайся на "ты", будь близкой и дружелюбной к клиенту
+- У тебя есть знания о растениях, цветах, уходе за ними
+- Ты можешь давать базовые советы по уходу за растениями
+- Если не уверена в специфичной информации — честно признайся и предложи связаться с администратором
+
+💡 Твои возможности:
+1. Отвечать на вопросы из базы знаний (если есть похожий вопрос)
+2. Использовать свои знания о растениях и цветах для общих вопросов
+3. Давать рекомендации по выбору растений
+4. Помогать с вопросами об уходе (полив, свет, пересадка)
+5. Объяснять процессы заказа, доставки, оплаты
+6. Быть милой собеседницей по теме растений
+
+⚠️ Важные правила:
+- Отвечай КРАТКО и по делу (2-4 предложения максимум)
+- Если клиент ЯВНО просит человека/оператора/администратора — сразу скажи что передашь обращение
+- При вопросах о КОНКРЕТНЫХ ценах, акциях, наличии — предложи связаться с менеджером
+- НЕ придумывай информацию о заказах, статусах, конкретных товарах
+- Будь естественной, не пиши как робот
+- Используй базу знаний как приоритет, но не ограничивайся только ей
+
+📖 Примеры хороших ответов:
+"Фикус любит яркий рассеянный свет и умеренный полив 1-2 раза в неделю! 🌿 Главное — не заливать. Нужна помощь с выбором?"
+"Мы доставляем по всему городу! Обычно это 1-2 дня. Хочешь узнать точную стоимость для твоего адреса?"
+"Для начинающих отлично подойдут сансевиерия, замиокулькас или потос — неубиваемые растения! 💚 Что тебя интересует?"
+{faq_context}
+
+🎯 Твоя цель: быть полезной, милой и профессиональной помощницей!"""
+
         # Формируем историю разговора
-        messages = [
-            {
-                "role": "system",
-                "content": f"""Ты — Анфиса, дружелюбный AI-ассистент службы поддержки интернет-магазина растений и цветов "Сибирская флора". 
-
-Твоя личность:
-- Ты веселая, позитивная и всегда готова помочь
-- Используй эмодзи, но в меру (🌸🌿✨)
-- Общайся на "ты", будь близкой к клиенту
-- Если не знаешь точного ответа — честно признайся и предложи связаться с администратором
-
-Важные правила:
-- Отвечай КРАТКО (2-3 предложения максимум)
-- Если клиент явно просит оператора/администратора — сразу скажи что передашь обращение
-- Используй информацию из базы знаний, если она релевантна
-- Будь естественной, не перегружай ответ деталями
-{faq_context}"""
-            }
-        ]
+        messages = [{"role": "system", "content": system_prompt}]
         
-        # Добавляем историю (последние 5 сообщений)
+        # Добавляем историю (последние 6 сообщений для лучшего контекста)
         if conversation_history:
-            for msg in conversation_history[-5:]:
+            for msg in conversation_history[-6:]:
                 role = "assistant" if msg['role'] == 'bot' else "user"
                 messages.append({"role": role, "content": msg['text']})
         
         # Добавляем текущий вопрос
         messages.append({"role": "user", "content": question})
         
-        # Запрос к OpenAI API
+        # Запрос к API
         data = json.dumps({
-            "model": "gpt-4o-mini",
+            "model": model,
             "messages": messages,
-            "max_tokens": 200,
-            "temperature": 0.8
+            "max_tokens": 250,  # Увеличили для более полных ответов
+            "temperature": 0.7,  # Снизили для более точных ответов
+            "top_p": 0.9
         }).encode()
         
         req = urllib.request.Request(
-            'https://api.openai.com/v1/chat/completions',
+            api_url,
             data=data,
             headers={
                 'Content-Type': 'application/json',
@@ -221,7 +342,7 @@ def get_ai_response(question: str, conversation_history: List[Dict[str, str]] = 
             }
         )
         
-        with urllib.request.urlopen(req, timeout=15) as response:
+        with urllib.request.urlopen(req, timeout=20) as response:
             result = json.loads(response.read().decode())
             ai_response = result['choices'][0]['message']['content'].strip()
             return ai_response
@@ -251,6 +372,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         if method == 'GET':
+            # Проверяем неактивные чаты при каждом GET запросе
+            check_inactive_chats(cur, conn)
+            
             params = event.get('queryStringParameters') or {}
             user_id = params.get('user_id')
             admin_view = params.get('admin_view') == 'true'

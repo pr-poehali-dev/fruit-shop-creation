@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { ArchivedChat, ChatMessage } from './types';
 
@@ -46,10 +47,16 @@ export default function ArchiveView({
             <CardTitle className="flex items-center gap-2">
               <Icon name="Archive" size={20} />
               {selectedArchive.user_name || 'Гость'}
+              {selectedArchive.is_missed && (
+                <Badge variant="destructive" className="ml-2">
+                  Пропущен
+                </Badge>
+              )}
             </CardTitle>
             <div className="text-sm text-muted-foreground space-y-1">
               {selectedArchive.user_phone && <p>📱 {selectedArchive.user_phone}</p>}
               {selectedArchive.admin_name && <p>👤 Администратор: {selectedArchive.admin_name}</p>}
+              {selectedArchive.is_missed && <p className="text-destructive">⚠️ Чат пропущен из-за неактивности (30+ мин)</p>}
               <p>📅 Закрыт: {new Date(selectedArchive.closed_at).toLocaleString('ru-RU')}</p>
             </div>
           </CardHeader>
@@ -104,12 +111,21 @@ export default function ArchiveView({
     );
   }
 
+  const missedChatsCount = archivedChats.filter(c => c.is_missed).length;
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold flex items-center gap-2">
-        <Icon name="Archive" size={20} />
-        Архив чатов ({archivedChats.length})
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Icon name="Archive" size={20} />
+          Архив чатов ({archivedChats.length})
+        </h3>
+        {missedChatsCount > 0 && (
+          <Badge variant="destructive">
+            Пропущено: {missedChatsCount}
+          </Badge>
+        )}
+      </div>
 
       {archivedChats.length === 0 ? (
         <Card>
@@ -123,13 +139,22 @@ export default function ArchiveView({
           {archivedChats.map((archive) => (
             <Card
               key={archive.id}
-              className="cursor-pointer hover:border-primary transition-colors"
+              className={`cursor-pointer hover:border-primary transition-colors ${
+                archive.is_missed ? 'border-destructive/50' : ''
+              }`}
               onClick={() => onSelectArchive(archive)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="font-medium">{archive.user_name || 'Гость'}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{archive.user_name || 'Гость'}</span>
+                      {archive.is_missed && (
+                        <Badge variant="destructive" className="text-xs">
+                          Пропущен
+                        </Badge>
+                      )}
+                    </div>
                     {archive.user_phone && (
                       <div className="text-sm text-muted-foreground">📱 {archive.user_phone}</div>
                     )}

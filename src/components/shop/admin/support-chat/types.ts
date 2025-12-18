@@ -36,6 +36,7 @@ export interface ArchivedChat {
   admin_name?: string;
   closed_at: string;
   messages_json: string;
+  is_missed?: boolean;
 }
 
 export const SUPPORT_CHAT_URL = 'https://functions.poehali.dev/98c69bc9-5dec-4d0e-b5d8-8abc20d4db4d';
