@@ -503,28 +503,38 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             chat_row = cur.fetchone()
             
             if not chat_row:
+                # Определяем начальный статус: в рабочее время сразу ждем админа
+                initial_status = 'waiting' if is_working_hours() else 'bot'
+                
                 if is_guest:
                     cur.execute(
-                        "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (guest_id, status) VALUES (%s, 'bot') RETURNING id",
-                        (str(user_id),)
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (guest_id, status) VALUES (%s, %s) RETURNING id",
+                        (str(user_id), initial_status)
                     )
                 else:
                     cur.execute(
-                        "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (user_id, status) VALUES (%s, 'bot') RETURNING id",
-                        (int(user_id),)
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_chats (user_id, status) VALUES (%s, %s) RETURNING id",
+                        (int(user_id), initial_status)
                     )
                 conn.commit()
                 chat_id = cur.fetchone()[0]
                 
+                # Приветствие зависит от статуса
+                if initial_status == 'waiting':
+                    greeting = 'Здравствуйте! Ищем свободного администратора... ⏳'
+                    send_telegram_notification(f"🔔 <b>Новый чат #{chat_id}</b>\n\n👤 {'Гость' if is_guest else 'Пользователь'}\n💬 Ожидает подключения администратора")
+                else:
+                    greeting = 'Здравствуйте! Я Анфиса, бот-помощник. Чем могу помочь? 😊'
+                
                 cur.execute(
                     "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'bot', 'Анфиса', %s, true, 1)",
-                    (chat_id, 'Здравствуйте! Я Анфиса, бот-помощник. Чем могу помочь? 😊')
+                    (chat_id, greeting)
                 )
                 conn.commit()
                 
                 chat_data = {
                     'id': chat_id,
-                    'status': 'bot',
+                    'status': initial_status,
                     'admin_id': None,
                     'admin_name': None
                 }
