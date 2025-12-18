@@ -22,6 +22,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               alt="Анфиса" 
               className="w-8 h-8 rounded-full object-cover border-2 border-blue-300"
             />
+          ) : message.admin_avatar ? (
+            <img 
+              src={message.admin_avatar} 
+              alt={message.sender_name} 
+              className="w-8 h-8 rounded-full object-cover border-2 border-green-300"
+            />
           ) : (
             <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold">
               {message.sender_name?.[0] || 'A'}

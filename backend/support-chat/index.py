@@ -246,110 +246,106 @@ def search_faq(question: str, cur, conversation_history: List[Dict[str, str]] = 
 
 def get_ai_response(question: str, conversation_history: List[Dict[str, str]] = None, faqs: List = None) -> Optional[str]:
     """
-    Получает умный ответ от AI (OpenAI или Groq) с учётом истории и FAQ базы
-    Анфиса может отвечать на общие вопросы даже без FAQ
+    Умный AI-ассистент Анфиса (встроенная версия с Groq/OpenAI)
     """
     try:
         import urllib.request
         import json
         
-        # Проверяем наличие ключей (поддержка OpenAI и Groq)
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        groq_key = os.environ.get('GROQ_API_KEY')
+        # Проверяем наличие ключей
+        api_key = os.environ.get('GROQ_API_KEY') or os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            return generate_fallback_response(question)
         
-        if not openai_key and not groq_key:
-            return None
-        
-        # Выбираем API
-        if groq_key:
+        # Определяем API
+        if api_key.startswith('gsk_'):
             api_url = 'https://api.groq.com/openai/v1/chat/completions'
-            api_key = groq_key
-            model = 'llama-3.3-70b-versatile'  # Быстрая и умная модель Groq
+            model = 'llama-3.3-70b-versatile'
         else:
             api_url = 'https://api.openai.com/v1/chat/completions'
-            api_key = openai_key
             model = 'gpt-4o-mini'
         
-        # Формируем расширенный контекст из FAQ
-        faq_context = ""
-        if faqs:
-            faq_context = "\n\n📚 База знаний магазина:\n"
-            for faq in faqs[:15]:  # Увеличили до 15 FAQ
-                faq_context += f"❓ {faq[1]}\n✅ {faq[2]}\n\n"
+        # Системный промпт
+        system_prompt = """Ты — Анфиса, дружелюбный AI-ассистент флорариума "Сибирская флора". 
+
+ТВОЯ РОЛЬ:
+- Помогай клиентам выбрать растения и флорариумы
+- Консультируй по уходу за растениями
+- Отвечай на вопросы о доставке, оплате, режиме работы
+
+ИНФОРМАЦИЯ О МАГАЗИНЕ:
+- Режим работы: 6:00-19:00 МСК
+- Доставка: по Красноярску 200₽ (бесплатно от 3000₽)
+- Оплата: картой онлайн, наличными курьеру
+- Специализация: флорариумы, суккуленты, кактусы, орхидеи
+
+СОВЕТЫ ПО УХОДУ:
+- Флорариумы: полив раз в 2 недели, без прямых солнечных лучей
+- Суккуленты: полив раз в неделю, любят свет
+- Орхидеи: полив 2 раза в неделю, опрыскивание
+- Кактусы: полив раз в 10 дней, много света
+
+ПРАВИЛА:
+- Отвечай кратко (2-3 предложения)
+- Используй эмодзи 🌿💚✨
+- Если не знаешь точный ответ — предложи дождаться администратора
+- При просьбе связаться с человеком — скажи что передашь администратору"""
+
+        # Формируем сообщения
+        messages = [{'role': 'system', 'content': system_prompt}]
         
-        # Расширенный системный промпт с большими возможностями
-        system_prompt = f"""Ты — Анфиса, умный AI-ассистент службы поддержки интернет-магазина растений и цветов "Сибирская флора". 
-
-🌟 Твоя личность:
-- Ты веселая, позитивная, эмпатичная и всегда готова помочь
-- Используй эмодзи умеренно (🌸🌿✨💚)
-- Общайся на "ты", будь близкой и дружелюбной к клиенту
-- У тебя есть знания о растениях, цветах, уходе за ними
-- Ты можешь давать базовые советы по уходу за растениями
-- Если не уверена в специфичной информации — честно признайся и предложи связаться с администратором
-
-💡 Твои возможности:
-1. Отвечать на вопросы из базы знаний (если есть похожий вопрос)
-2. Использовать свои знания о растениях и цветах для общих вопросов
-3. Давать рекомендации по выбору растений
-4. Помогать с вопросами об уходе (полив, свет, пересадка)
-5. Объяснять процессы заказа, доставки, оплаты
-6. Быть милой собеседницей по теме растений
-
-⚠️ Важные правила:
-- Отвечай КРАТКО и по делу (2-4 предложения максимум)
-- Если клиент ЯВНО просит человека/оператора/администратора — сразу скажи что передашь обращение
-- При вопросах о КОНКРЕТНЫХ ценах, акциях, наличии — предложи связаться с менеджером
-- НЕ придумывай информацию о заказах, статусах, конкретных товарах
-- Будь естественной, не пиши как робот
-- Используй базу знаний как приоритет, но не ограничивайся только ей
-
-📖 Примеры хороших ответов:
-"Фикус любит яркий рассеянный свет и умеренный полив 1-2 раза в неделю! 🌿 Главное — не заливать. Нужна помощь с выбором?"
-"Мы доставляем по всему городу! Обычно это 1-2 дня. Хочешь узнать точную стоимость для твоего адреса?"
-"Для начинающих отлично подойдут сансевиерия, замиокулькас или потос — неубиваемые растения! 💚 Что тебя интересует?"
-{faq_context}
-
-🎯 Твоя цель: быть полезной, милой и профессиональной помощницей!"""
-
-        # Формируем историю разговора
-        messages = [{"role": "system", "content": system_prompt}]
-        
-        # Добавляем историю (последние 6 сообщений для лучшего контекста)
         if conversation_history:
             for msg in conversation_history[-6:]:
-                role = "assistant" if msg['role'] == 'bot' else "user"
-                messages.append({"role": role, "content": msg['text']})
+                role = 'assistant' if msg.get('role') == 'bot' else 'user'
+                messages.append({'role': role, 'content': msg.get('text', '')})
         
-        # Добавляем текущий вопрос
-        messages.append({"role": "user", "content": question})
+        messages.append({'role': 'user', 'content': question})
         
         # Запрос к API
         data = json.dumps({
-            "model": model,
-            "messages": messages,
-            "max_tokens": 250,  # Увеличили для более полных ответов
-            "temperature": 0.7,  # Снизили для более точных ответов
-            "top_p": 0.9
+            'model': model,
+            'messages': messages,
+            'temperature': 0.7,
+            'max_tokens': 300
         }).encode()
         
         req = urllib.request.Request(
             api_url,
             data=data,
             headers={
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {api_key}'
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json'
             }
         )
         
-        with urllib.request.urlopen(req, timeout=20) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             result = json.loads(response.read().decode())
-            ai_response = result['choices'][0]['message']['content'].strip()
-            return ai_response
+            return result['choices'][0]['message']['content'].strip()
             
     except Exception as e:
-        print(f"AI response error: {e}")
-        return None
+        print(f"AI error: {e}")
+        return generate_fallback_response(question)
+
+def generate_fallback_response(question: str) -> str:
+    """Резервные ответы без AI"""
+    q = question.lower()
+    
+    if any(w in q for w in ['доставка', 'привезти', 'курьер']):
+        return "Доставка по Красноярску — 200₽, бесплатно от 3000₽! 🚚 Доставляем за 1-3 дня."
+    
+    if any(w in q for w in ['оплат', 'карт', 'налич']):
+        return "Принимаем оплату картой онлайн и наличными курьеру! 💳"
+    
+    if any(w in q for w in ['уход', 'полив', 'ухаживать']):
+        return "Флорариумы неприхотливы! 🌿 Поливать раз в 2 недели, избегать прямых солнечных лучей."
+    
+    if any(w in q for w in ['цена', 'сколько', 'стоимость']):
+        return "Флорариумы от 800₽ до 5000₽. 💰 Сейчас уточню у администратора!"
+    
+    if any(w in q for w in ['режим', 'работаете', 'часы']):
+        return "Работаем с 6:00 до 19:00 МСК! 🕐"
+    
+    return "Спасибо за вопрос! 🌿 Передам администратору (работаем 6:00-19:00 МСК)."
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     method: str = event.get('httpMethod', 'GET')
@@ -548,7 +544,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             conn.commit()
             
             cur.execute("""
-                SELECT id, sender_type, sender_name, message, created_at, is_read
+                SELECT id, sender_type, sender_name, message, created_at, is_read, admin_avatar
                 FROM t_p77282076_fruit_shop_creation.support_messages
                 WHERE chat_id = %s
                 ORDER BY created_at ASC
@@ -560,7 +556,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'sender_name': row[2],
                 'message': row[3],
                 'created_at': row[4].isoformat() if row[4] else None,
-                'is_read': row[5]
+                'is_read': row[5],
+                'admin_avatar': row[6]
             } for row in cur.fetchall()]
             
             return {
@@ -808,14 +805,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cur.execute(
-                    "SELECT full_name FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                    "SELECT full_name, profile_picture_url FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
                     (int(admin_id),)
                 )
-                admin_name = cur.fetchone()[0]
+                admin_data = cur.fetchone()
+                admin_name = admin_data[0]
+                admin_avatar = admin_data[1] if admin_data[1] else None
                 
                 cur.execute(
-                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, true, 1)",
-                    (int(chat_id), int(admin_id), admin_name, message)
+                    "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, admin_avatar, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, %s, true, 1)",
+                    (int(chat_id), int(admin_id), admin_name, message, admin_avatar)
                 )
                 
                 cur.execute(
@@ -838,21 +837,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 try:
                     execute_with_retry(
                         cur,
-                        "SELECT full_name FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                        "SELECT full_name, profile_picture_url FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
                         (int(admin_id),)
                     )
-                    admin_name = cur.fetchone()[0]
+                    admin_data = cur.fetchone()
+                    admin_name = admin_data[0]
+                    admin_avatar = admin_data[1] if admin_data[1] else None
                     
                     execute_with_retry(
                         cur,
-                        "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'active', admin_id = %s, admin_name = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s",
-                        (int(admin_id), admin_name, int(chat_id))
+                        "UPDATE t_p77282076_fruit_shop_creation.support_chats SET status = 'active', admin_id = %s, admin_name = %s, admin_avatar = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s",
+                        (int(admin_id), admin_name, admin_avatar, int(chat_id))
                     )
                     
                     execute_with_retry(
                         cur,
-                        "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, true, 1)",
-                        (int(chat_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?')
+                        "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_name, message, admin_avatar, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, true, 1)",
+                        (int(chat_id), admin_name, f'Здравствуйте! На связи {admin_name}. Чем могу помочь?', admin_avatar)
                     )
                     conn.commit()
                     

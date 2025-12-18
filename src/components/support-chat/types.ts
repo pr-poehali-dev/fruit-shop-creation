@@ -7,6 +7,7 @@ export interface Message {
   message: string;
   created_at: string;
   is_read: boolean;
+  admin_avatar?: string;
 }
 
 export interface FAQ {
@@ -20,4 +21,5 @@ export interface Chat {
   status: 'bot' | 'waiting' | 'active' | 'closed';
   admin_id?: number;
   admin_name?: string;
+  admin_avatar?: string;
 }
