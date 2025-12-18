@@ -877,12 +877,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     }
                 
                 cur.execute(
-                    "SELECT full_name, profile_picture_url FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                    "SELECT full_name, avatar FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
                     (int(admin_id),)
                 )
                 admin_data = cur.fetchone()
-                admin_name = admin_data[0]
-                admin_avatar = admin_data[1] if admin_data[1] else None
+                admin_name = admin_data[0] if admin_data else 'Администратор'
+                admin_avatar = admin_data[1] if admin_data and len(admin_data) > 1 and admin_data[1] else None
                 
                 cur.execute(
                     "INSERT INTO t_p77282076_fruit_shop_creation.support_messages (chat_id, sender_type, sender_id, sender_name, message, admin_avatar, is_read, ticket_id) VALUES (%s, 'admin', %s, %s, %s, %s, true, 1)",
@@ -909,12 +909,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 try:
                     execute_with_retry(
                         cur,
-                        "SELECT full_name, profile_picture_url FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
+                        "SELECT full_name, avatar FROM t_p77282076_fruit_shop_creation.users WHERE id = %s",
                         (int(admin_id),)
                     )
                     admin_data = cur.fetchone()
-                    admin_name = admin_data[0]
-                    admin_avatar = admin_data[1] if admin_data[1] else None
+                    admin_name = admin_data[0] if admin_data else 'Администратор'
+                    admin_avatar = admin_data[1] if admin_data and len(admin_data) > 1 and admin_data[1] else None
                     
                     execute_with_retry(
                         cur,
