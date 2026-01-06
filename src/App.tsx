@@ -15,6 +15,7 @@ import HolidayBanner from "./components/HolidayBanner";
 import HolidayCalendar from "./components/HolidayCalendar";
 import CalendarAdmin from "./components/CalendarAdmin";
 import { useVisitorTracking } from "./hooks/useVisitorTracking";
+import { getHolidaySettings } from "@/utils/holidaySettings";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -51,7 +52,6 @@ const App = () => {
 
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
         e.preventDefault();
-        const { getHolidaySettings } = await import('@/utils/holidaySettings');
         const settings = getHolidaySettings();
         if (settings.enabled && settings.activeHoliday) {
           setShowCalendarAdmin(settings.activeHoliday);
