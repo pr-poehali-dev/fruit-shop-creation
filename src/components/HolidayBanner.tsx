@@ -1,28 +1,23 @@
 import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import { getHolidaySettings } from '@/utils/holidaySettings';
 
 interface HolidayBannerProps {
   onOpenCalendar: (holiday: 'feb23' | 'march8') => void;
 }
 
 const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
-  const [activeHoliday, setActiveHoliday] = useState<'feb23' | 'march8' | null>(null);
+  const [settings, setSettings] = useState(getHolidaySettings());
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentDay = today.getDate();
-
-    if (currentMonth === 2 && currentDay >= 16 && currentDay <= 23) {
-      setActiveHoliday('feb23');
-    } else if (currentMonth === 3 && currentDay >= 1 && currentDay <= 8) {
-      setActiveHoliday('march8');
-    }
+    const currentSettings = getHolidaySettings();
+    setSettings(currentSettings);
 
     const dismissed = localStorage.getItem('holiday_banner_dismissed');
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
+      const today = new Date();
       if (today.toDateString() === dismissedDate.toDateString()) {
         setIsVisible(false);
       }
@@ -34,7 +29,9 @@ const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
     localStorage.setItem('holiday_banner_dismissed', new Date().toISOString());
   };
 
-  if (!activeHoliday || !isVisible) return null;
+  if (!settings.enabled || !settings.showBanner || !settings.activeHoliday || !isVisible) return null;
+
+  const activeHoliday = settings.activeHoliday;
 
   const config = {
     feb23: {

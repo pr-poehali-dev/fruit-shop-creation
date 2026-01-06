@@ -20,6 +20,7 @@ import OrdersStatsCard from './OrdersStatsCard';
 import CourierManagement from './CourierManagement';
 import StatisticsTab from './StatisticsTab';
 import ReferralStatsTab from './ReferralStatsTab';
+import HolidaySettingsTab from './HolidaySettingsTab';
 import { Product, Category, User } from './types';
 
 interface AdminPanelTabsProps {
@@ -299,6 +300,15 @@ const AdminPanelTabs = ({
             <span className="text-sm font-medium">Статистика</span>
           </TabsTrigger>
         )}
+        {isSuperAdmin && (
+          <TabsTrigger 
+            value="holidays" 
+            className="flex items-center justify-start gap-3 px-4 py-2.5 w-full"
+          >
+            <Icon name="Calendar" size={18} className="shrink-0" />
+            <span className="text-sm font-medium">Праздники</span>
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <div className="flex-1 min-w-0 w-full lg:w-auto pb-20 lg:pb-0">
@@ -438,6 +448,12 @@ const AdminPanelTabs = ({
       {isSuperAdmin && (
         <TabsContent value="referrals" className="mt-0">
           <ReferralStatsTab />
+        </TabsContent>
+      )}
+
+      {isSuperAdmin && (
+        <TabsContent value="holidays" className="mt-0">
+          <HolidaySettingsTab />
         </TabsContent>
       )}
       </div>

@@ -51,14 +51,12 @@ const App = () => {
 
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
         e.preventDefault();
-        const today = new Date();
-        const month = today.getMonth() + 1;
-        if (month === 2) {
-          setShowCalendarAdmin('feb23');
-        } else if (month === 3) {
-          setShowCalendarAdmin('march8');
+        const { getHolidaySettings } = await import('@/utils/holidaySettings');
+        const settings = getHolidaySettings();
+        if (settings.enabled && settings.activeHoliday) {
+          setShowCalendarAdmin(settings.activeHoliday);
         } else {
-          setShowCalendarAdmin('feb23');
+          alert('Праздничная тема не активирована. Включите её в админ-панели.');
         }
       }
     };
