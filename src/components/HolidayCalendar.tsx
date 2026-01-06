@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import { getHolidaySettings } from '@/utils/holidaySettings';
 
 interface Prize {
   id: string;
@@ -86,8 +87,8 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
   };
 
   const getDaysCount = () => {
-    const diff = config.endDate.getTime() - config.startDate.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1;
+    const settings = getHolidaySettings();
+    return settings.calendarDays[holiday] || 8;
   };
 
   const getPrizes = (): Prize[] => {
@@ -202,28 +203,37 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
               const opened = dayData.opened;
 
               return (
-                <button
-                  key={dayData.day}
-                  onClick={() => openDay(dayData)}
-                  disabled={!available || opened}
-                  className={`
-                    aspect-square rounded-xl flex items-center justify-center text-2xl font-bold
-                    transition-all transform hover:scale-105 relative
-                    ${opened ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg' : ''}
-                    ${available && !opened ? `${config.colors.accent} text-white hover:shadow-xl cursor-pointer` : ''}
-                    ${!available ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''}
-                  `}
-                >
-                  {opened ? (
-                    <Icon name="Gift" size={32} />
-                  ) : (
-                    <span>{dayData.day}</span>
-                  )}
+                <div key={dayData.day} className="relative group">
+                  <button
+                    onClick={() => openDay(dayData)}
+                    disabled={!available || opened}
+                    className={`
+                      w-full aspect-square rounded-xl flex items-center justify-center text-2xl font-bold
+                      transition-all transform hover:scale-105 relative
+                      ${opened ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg' : ''}
+                      ${available && !opened ? `${config.colors.accent} text-white hover:shadow-xl cursor-pointer` : ''}
+                      ${!available ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''}
+                    `}
+                  >
+                    {opened ? (
+                      <Icon name="Gift" size={32} />
+                    ) : (
+                      <span>{dayData.day}</span>
+                    )}
+                    
+                    {available && !opened && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+                    )}
+                  </button>
                   
-                  {available && !opened && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+                  {opened && (
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-xl">
+                      <div className="font-semibold mb-1">{dayData.prize.name}</div>
+                      <div className="text-gray-300">{dayData.prize.description}</div>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                    </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>

@@ -10,6 +10,7 @@ interface HolidayThemesTabProps {
   onToggleCalendar: (enabled: boolean) => void;
   onToggleBanner: (enabled: boolean) => void;
   onOpenCalendarAdmin: (holiday: 'feb23' | 'march8') => void;
+  onSetCalendarDays: (holiday: 'feb23' | 'march8', days: number) => void;
 }
 
 const HolidayThemesTab = ({
@@ -18,7 +19,8 @@ const HolidayThemesTab = ({
   onDisableHoliday,
   onToggleCalendar,
   onToggleBanner,
-  onOpenCalendarAdmin
+  onOpenCalendarAdmin,
+  onSetCalendarDays
 }: HolidayThemesTabProps) => {
   const holidayConfig = {
     feb23: {
@@ -146,6 +148,27 @@ const HolidayThemesTab = ({
                 checked={settings.showBanner}
                 onCheckedChange={onToggleBanner}
               />
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <Icon name="CalendarDays" size={24} className="text-primary" />
+                <div>
+                  <h4 className="font-semibold">Количество дней календаря</h4>
+                  <p className="text-sm text-gray-600">Сколько дней будет доступно для открытия</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={settings.calendarDays?.[settings.activeHoliday] || 8}
+                  onChange={(e) => onSetCalendarDays(settings.activeHoliday!, parseInt(e.target.value) || 8)}
+                  className="w-20 px-3 py-2 border rounded-lg text-center font-semibold focus:ring-2 focus:ring-primary outline-none"
+                />
+                <span className="text-sm text-gray-600">дней</span>
+              </div>
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from '@/components/ui/icon';
-import { getHolidaySettings, enableHoliday, disableHoliday, toggleCalendar, toggleBanner } from '@/utils/holidaySettings';
+import { getHolidaySettings, enableHoliday, disableHoliday, toggleCalendar, toggleBanner, setCalendarDays } from '@/utils/holidaySettings';
 import CalendarAdmin from '@/components/CalendarAdmin';
 import HolidayCalendar from '@/components/HolidayCalendar';
 import HolidayThemesTab from './HolidayThemesTab';
@@ -34,6 +34,12 @@ const HolidaySettingsTab = () => {
 
   const handleToggleBanner = (enabled: boolean) => {
     toggleBanner(enabled);
+    refreshSettings();
+  };
+
+  const handleSetCalendarDays = (holiday: 'feb23' | 'march8', days: number) => {
+    setCalendarDays(holiday, days);
+    localStorage.removeItem(`calendar_${holiday}`);
     refreshSettings();
   };
 
@@ -101,6 +107,7 @@ const HolidaySettingsTab = () => {
           onToggleCalendar={handleToggleCalendar}
           onToggleBanner={handleToggleBanner}
           onOpenCalendarAdmin={setShowCalendarAdmin}
+          onSetCalendarDays={handleSetCalendarDays}
         />
       )}
 
