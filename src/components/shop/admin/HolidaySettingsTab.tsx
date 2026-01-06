@@ -62,59 +62,66 @@ const HolidaySettingsTab = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${settings.enabled && settings.activeHoliday ? holidayConfig[settings.activeHoliday].color : 'from-gray-300 to-gray-400'} flex items-center justify-center text-2xl`}>
-                {settings.enabled && settings.activeHoliday ? holidayConfig[settings.activeHoliday].emoji : '🎉'}
-              </div>
-              <div>
-                <h3 className="font-semibold">
-                  {settings.enabled && settings.activeHoliday ? holidayConfig[settings.activeHoliday].name : 'Праздничная тема отключена'}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {settings.enabled && settings.activeHoliday ? holidayConfig[settings.activeHoliday].description : 'Выберите праздник для активации'}
-                </p>
-              </div>
-            </div>
-            {settings.enabled && (
-              <Button onClick={handleDisableHoliday} variant="destructive" size="sm">
-                <Icon name="X" size={16} className="mr-2" />
-                Отключить
-              </Button>
-            )}
-          </div>
-
-          {!settings.enabled && (
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Icon name="Sparkles" size={20} />
+              Выбрать праздничную тему
+            </h3>
             <div className="grid md:grid-cols-2 gap-4">
-              {Object.entries(holidayConfig).map(([key, config]) => (
-                <Card key={key} className="cursor-pointer hover:shadow-lg transition-shadow border-2">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${config.color} flex items-center justify-center text-4xl`}>
+              {Object.entries(holidayConfig).map(([key, config]) => {
+                const isActive = settings.enabled && settings.activeHoliday === key;
+                return (
+                  <Card 
+                    key={key} 
+                    className={`transition-all ${isActive ? 'border-4 shadow-xl' : 'border-2 hover:shadow-lg'}`}
+                    style={isActive ? { borderColor: key === 'feb23' ? '#2563eb' : '#ec4899' } : {}}
+                  >
+                    <CardHeader>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${config.color} flex items-center justify-center text-5xl shadow-lg ${isActive ? 'animate-pulse' : ''}`}>
                           {config.emoji}
                         </div>
-                        <div>
-                          <CardTitle className="text-xl">{config.name}</CardTitle>
-                          <CardDescription>{config.description}</CardDescription>
+                        <div className="flex-1">
+                          <CardTitle className="text-2xl flex items-center gap-2">
+                            {config.name}
+                            {isActive && (
+                              <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                                <Icon name="Check" size={12} className="mr-1" />
+                                Активно
+                              </span>
+                            )}
+                          </CardTitle>
+                          <CardDescription className="text-base">{config.description}</CardDescription>
                         </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      onClick={() => handleEnableHoliday(key as 'feb23' | 'march8')} 
-                      className="w-full"
-                      size="lg"
-                    >
-                      <Icon name="Sparkles" size={18} className="mr-2" />
-                      Активировать
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {!isActive ? (
+                        <Button 
+                          onClick={() => handleEnableHoliday(key as 'feb23' | 'march8')} 
+                          className={`w-full bg-gradient-to-r ${config.color} hover:opacity-90 text-white`}
+                          size="lg"
+                        >
+                          <Icon name="Sparkles" size={18} className="mr-2" />
+                          Активировать тему
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={handleDisableHoliday} 
+                          variant="outline" 
+                          className="w-full border-2"
+                          size="lg"
+                        >
+                          <Icon name="X" size={18} className="mr-2" />
+                          Отключить тему
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {settings.enabled && settings.activeHoliday && (
             <div className="space-y-4">
