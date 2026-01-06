@@ -360,6 +360,78 @@ const HolidaySettingsTab = () => {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Предпросмотр призов */}
+                {(() => {
+                  const prizes = localStorage.getItem(`prizes_${settings.activeHoliday}`);
+                  if (!prizes) return null;
+                  
+                  const prizeList = JSON.parse(prizes);
+                  if (prizeList.length === 0) return null;
+
+                  return (
+                    <Card className="border-2">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Icon name="Eye" size={20} />
+                          Предпросмотр настроенных призов
+                        </CardTitle>
+                        <CardDescription>
+                          Список всех призов для календаря «{holidayConfig[settings.activeHoliday].name}»
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {prizeList.map((prize: any, index: number) => (
+                            <div
+                              key={prize.id || index}
+                              className={`p-4 rounded-lg border-2 bg-gradient-to-br ${
+                                settings.activeHoliday === 'feb23'
+                                  ? 'from-blue-50 to-green-50 border-blue-200'
+                                  : 'from-pink-50 to-purple-50 border-pink-200'
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${holidayConfig[settings.activeHoliday].color} flex items-center justify-center flex-shrink-0`}>
+                                  <Icon name={prize.icon as any} size={24} className="text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-sm mb-1 truncate">{prize.name}</h4>
+                                  <p className="text-xs text-gray-600 line-clamp-2">{prize.description}</p>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {prize.value && (
+                                      <span className="px-2 py-0.5 bg-white/80 text-xs rounded-full font-semibold">
+                                        {prize.value}%
+                                      </span>
+                                    )}
+                                    {prize.requiresLoyaltyCard && (
+                                      <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                                        💳
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-4 text-center">
+                          <p className="text-sm text-gray-600 mb-3">
+                            Всего призов: <span className="font-semibold">{prizeList.length}</span>
+                          </p>
+                          <Button
+                            onClick={() => setShowCalendarAdmin(settings.activeHoliday!)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Icon name="Pencil" size={16} className="mr-2" />
+                            Редактировать список призов
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
               </div>
             )}
           </CardContent>
@@ -539,6 +611,65 @@ const HolidaySettingsTab = () => {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Предпросмотр календарей */}
+            {settings.enabled && settings.activeHoliday && (() => {
+              const calendar = localStorage.getItem(`calendar_${settings.activeHoliday}`);
+              if (!calendar) return null;
+
+              const days = JSON.parse(calendar);
+              const config = holidayConfig[settings.activeHoliday];
+
+              return (
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Icon name="Eye" size={20} />
+                      Предпросмотр календаря «{config.name}»
+                    </CardTitle>
+                    <CardDescription>
+                      Так клиенты видят календарь на сайте
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className={`p-6 rounded-xl bg-gradient-to-br ${config.color} bg-opacity-10`}>
+                      <div className="text-center mb-4">
+                        <div className="text-5xl mb-2">{config.emoji}</div>
+                        <h3 className="text-xl font-bold text-gray-800">{config.name}</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-4 md:grid-cols-8 gap-2 max-w-3xl mx-auto">
+                        {days.map((day: any) => (
+                          <div
+                            key={day.day}
+                            className={`
+                              aspect-square rounded-lg flex items-center justify-center text-lg font-bold
+                              ${day.opened 
+                                ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg' 
+                                : `bg-gradient-to-br ${config.color} text-white`
+                              }
+                            `}
+                            title={day.opened ? `Открыт: ${day.prize.name}` : `День ${day.day}`}
+                          >
+                            {day.opened ? (
+                              <Icon name="Gift" size={20} />
+                            ) : (
+                              <span>{day.day}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 text-center">
+                        <p className="text-sm text-gray-600">
+                          {days.filter((d: any) => d.opened).length} из {days.length} дней открыто
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
