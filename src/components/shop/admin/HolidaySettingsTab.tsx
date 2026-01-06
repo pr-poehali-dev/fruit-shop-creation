@@ -603,7 +603,8 @@ const HolidaySettingsTab = () => {
                             >
                               <Icon name="RotateCcw" size={16} className="mr-2" />
                               Обнулить
-                          </Button>
+                            </Button>
+                          </div>
                         </div>
                       </>
                     );
