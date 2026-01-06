@@ -10,6 +10,7 @@ import LoadingScreen from "./components/LoadingScreen";
 import DecorativeBranch from "./components/DecorativeBranch";
 import SupportChat from "./components/SupportChat";
 import NetworkStatus from "./components/NetworkStatus";
+import ShareButton from "./components/ShareButton";
 import { useVisitorTracking } from "./hooks/useVisitorTracking";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -106,6 +107,7 @@ const App = () => {
         <InstallPrompt />
         <DecorativeBranch />
         <SupportChat />
+        <ShareButton />
         <BrowserRouter>
           <Suspense fallback={
             <div className="fixed inset-0 flex items-center justify-center bg-background">
