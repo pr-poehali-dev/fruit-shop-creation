@@ -5,11 +5,13 @@ import { Switch } from '@/components/ui/switch';
 import Icon from '@/components/ui/icon';
 import { getHolidaySettings, saveHolidaySettings, enableHoliday, disableHoliday, toggleCalendar, toggleBanner } from '@/utils/holidaySettings';
 import CalendarAdmin from '@/components/CalendarAdmin';
+import HolidayCalendar from '@/components/HolidayCalendar';
 
 const HolidaySettingsTab = () => {
   const [settings, setSettings] = useState(getHolidaySettings());
   const [showCalendarAdmin, setShowCalendarAdmin] = useState<'feb23' | 'march8' | null>(null);
   const [activeTab, setActiveTab] = useState<'themes' | 'prizes' | 'calendar'>('themes');
+  const [showCalendarPreview, setShowCalendarPreview] = useState<'feb23' | 'march8' | null>(null);
 
   const refreshSettings = () => {
     setSettings(getHolidaySettings());
@@ -488,31 +490,42 @@ const HolidaySettingsTab = () => {
                             </div>
                           )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="space-y-2">
                           <Button
-                            onClick={() => setShowCalendarAdmin('feb23')}
-                            variant="outline"
+                            onClick={() => setShowCalendarPreview('feb23')}
+                            variant="default"
                             size="sm"
-                            className="flex-1"
+                            className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:opacity-90"
                           >
-                            <Icon name="Settings" size={16} className="mr-2" />
-                            Настроить
+                            <Icon name="Eye" size={16} className="mr-2" />
+                            Открыть как клиент
                           </Button>
-                          <Button
-                            onClick={() => {
-                              if (confirm('Обнулить календарь "23 Февраля" для всех пользователей?')) {
-                                localStorage.removeItem('calendar_feb23');
-                                alert('Календарь обнулён!');
-                                setSettings({ ...settings });
-                              }
-                            }}
-                            variant="destructive"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Icon name="RotateCcw" size={16} className="mr-2" />
-                            Обнулить
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => setShowCalendarAdmin('feb23')}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Icon name="Settings" size={16} className="mr-2" />
+                              Настроить
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                if (confirm('Обнулить календарь "23 Февраля" для всех пользователей?')) {
+                                  localStorage.removeItem('calendar_feb23');
+                                  alert('Календарь обнулён!');
+                                  setSettings({ ...settings });
+                                }
+                              }}
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Icon name="RotateCcw" size={16} className="mr-2" />
+                              Обнулить
+                            </Button>
+                          </div>
                         </div>
                       </>
                     );
@@ -556,30 +569,40 @@ const HolidaySettingsTab = () => {
                             </div>
                           )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="space-y-2">
                           <Button
-                            onClick={() => setShowCalendarAdmin('march8')}
-                            variant="outline"
+                            onClick={() => setShowCalendarPreview('march8')}
+                            variant="default"
                             size="sm"
-                            className="flex-1"
+                            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90"
                           >
-                            <Icon name="Settings" size={16} className="mr-2" />
-                            Настроить
+                            <Icon name="Eye" size={16} className="mr-2" />
+                            Открыть как клиент
                           </Button>
-                          <Button
-                            onClick={() => {
-                              if (confirm('Обнулить календарь "8 Марта" для всех пользователей?')) {
-                                localStorage.removeItem('calendar_march8');
-                                alert('Календарь обнулён!');
-                                setSettings({ ...settings });
-                              }
-                            }}
-                            variant="destructive"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Icon name="RotateCcw" size={16} className="mr-2" />
-                            Обнулить
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => setShowCalendarAdmin('march8')}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Icon name="Settings" size={16} className="mr-2" />
+                              Настроить
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                if (confirm('Обнулить календарь "8 Марта" для всех пользователей?')) {
+                                  localStorage.removeItem('calendar_march8');
+                                  alert('Календарь обнулён!');
+                                  setSettings({ ...settings });
+                                }
+                              }}
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Icon name="RotateCcw" size={16} className="mr-2" />
+                              Обнулить
                           </Button>
                         </div>
                       </>
@@ -693,6 +716,14 @@ const HolidaySettingsTab = () => {
         <CalendarAdmin
           holiday={showCalendarAdmin}
           onClose={() => setShowCalendarAdmin(null)}
+        />
+      )}
+
+      {showCalendarPreview && (
+        <HolidayCalendar
+          holiday={showCalendarPreview}
+          onClose={() => setShowCalendarPreview(null)}
+          testMode={true}
         />
       )}
     </div>

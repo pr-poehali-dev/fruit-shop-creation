@@ -14,19 +14,34 @@ const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
     const currentSettings = getHolidaySettings();
     setSettings(currentSettings);
 
-    const dismissed = localStorage.getItem('holiday_banner_dismissed');
+    // Проверяем, был ли баннер скрыт для текущего праздника
+    const dismissedKey = `holiday_banner_dismissed_${currentSettings.activeHoliday}`;
+    const dismissed = localStorage.getItem(dismissedKey);
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
       const today = new Date();
-      if (today.toDateString() === dismissedDate.toDateString()) {
+      // Скрываем баннер только на 1 час, затем показываем снова
+      const hoursPassed = (today.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60);
+      if (hoursPassed < 1) {
         setIsVisible(false);
       }
     }
+
+    // Обновляем настройки каждые 5 секунд (если администратор изменил)
+    const interval = setInterval(() => {
+      const updatedSettings = getHolidaySettings();
+      setSettings(updatedSettings);
+      setIsVisible(true); // Сбрасываем видимость при изменении настроек
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const dismissBanner = () => {
     setIsVisible(false);
-    localStorage.setItem('holiday_banner_dismissed', new Date().toISOString());
+    // Сохраняем время закрытия для конкретного праздника
+    const dismissedKey = `holiday_banner_dismissed_${settings.activeHoliday}`;
+    localStorage.setItem(dismissedKey, new Date().toISOString());
   };
 
   if (!settings.enabled || !settings.showBanner || !settings.activeHoliday || !isVisible) return null;
