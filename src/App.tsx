@@ -14,6 +14,7 @@ import ShareButton from "./components/ShareButton";
 import HolidayBanner from "./components/HolidayBanner";
 import HolidayCalendar from "./components/HolidayCalendar";
 import CalendarAdmin from "./components/CalendarAdmin";
+import HolidayDebugPanel from "./components/HolidayDebugPanel";
 import { useVisitorTracking } from "./hooks/useVisitorTracking";
 import { getHolidaySettings } from "@/utils/holidaySettings";
 
@@ -148,6 +149,7 @@ const App = () => {
         <DecorativeBranch />
         <SupportChat />
         <ShareButton />
+        <HolidayDebugPanel />
         <HolidayBanner onOpenCalendar={(holiday) => setShowCalendar(holiday)} />
         {showCalendar && (
           <HolidayCalendar
