@@ -11,6 +11,9 @@ import DecorativeBranch from "./components/DecorativeBranch";
 import SupportChat from "./components/SupportChat";
 import NetworkStatus from "./components/NetworkStatus";
 import ShareButton from "./components/ShareButton";
+import HolidayBanner from "./components/HolidayBanner";
+import HolidayCalendar from "./components/HolidayCalendar";
+import CalendarAdmin from "./components/CalendarAdmin";
 import { useVisitorTracking } from "./hooks/useVisitorTracking";
 
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -24,6 +27,45 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useVisitorTracking();
+  const [showCalendar, setShowCalendar] = useState<'feb23' | 'march8' | null>(null);
+  const [showCalendarAdmin, setShowCalendarAdmin] = useState<'feb23' | 'march8' | null>(null);
+  const [testMode, setTestMode] = useState(false);
+
+  useEffect(() => {
+    let clickCount = 0;
+    let clickTimer: NodeJS.Timeout;
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'H' || e.key === 'h' || e.key === 'Р' || e.key === 'р') {
+        clickCount++;
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+
+        if (clickCount === 5) {
+          setTestMode(prev => !prev);
+          const message = !testMode ? '🎁 Тестовый режим календаря активирован!' : 'Тестовый режим отключен';
+          alert(message);
+          clickCount = 0;
+        }
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'K') {
+        e.preventDefault();
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        if (month === 2) {
+          setShowCalendarAdmin('feb23');
+        } else if (month === 3) {
+          setShowCalendarAdmin('march8');
+        } else {
+          setShowCalendarAdmin('feb23');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [testMode]);
   
   useEffect(() => {
     const clearCacheIfNeeded = () => {
@@ -108,6 +150,20 @@ const App = () => {
         <DecorativeBranch />
         <SupportChat />
         <ShareButton />
+        <HolidayBanner onOpenCalendar={(holiday) => setShowCalendar(holiday)} />
+        {showCalendar && (
+          <HolidayCalendar
+            holiday={showCalendar}
+            onClose={() => setShowCalendar(null)}
+            testMode={testMode}
+          />
+        )}
+        {showCalendarAdmin && (
+          <CalendarAdmin
+            holiday={showCalendarAdmin}
+            onClose={() => setShowCalendarAdmin(null)}
+          />
+        )}
         <BrowserRouter>
           <Suspense fallback={
             <div className="fixed inset-0 flex items-center justify-center bg-background">
