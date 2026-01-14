@@ -149,11 +149,7 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
       return false;
     }
 
-    const today = new Date();
-    const dayDate = new Date(config.startDate);
-    dayDate.setDate(config.startDate.getDate() + day - 1);
-
-    return today >= dayDate && today <= config.endDate;
+    return true;
   };
 
   const openDay = (dayData: CalendarDay) => {
@@ -165,12 +161,13 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
       return;
     }
 
+    setSelectedDay({ ...dayData, opened: true });
+    
     const updatedCalendar = calendar.map(d =>
       d.day === dayData.day ? { ...d, opened: true } : d
     );
     setCalendar(updatedCalendar);
     localStorage.setItem(`calendar_${holiday}`, JSON.stringify(updatedCalendar));
-    setSelectedDay(dayData);
   };
 
   const getLoyaltyCard = () => {
