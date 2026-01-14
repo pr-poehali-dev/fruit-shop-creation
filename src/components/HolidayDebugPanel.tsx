@@ -11,8 +11,24 @@ const HolidayDebugPanel = () => {
   };
 
   useEffect(() => {
+    const handleSettingsChange = (e: CustomEvent) => {
+      setSettings(e.detail);
+    };
+
+    const handleStorageChange = () => {
+      refreshSettings();
+    };
+
+    window.addEventListener('holiday-settings-changed', handleSettingsChange as EventListener);
+    window.addEventListener('storage', handleStorageChange);
+    
     const interval = setInterval(refreshSettings, 1000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      window.removeEventListener('holiday-settings-changed', handleSettingsChange as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleEnable = (holiday: 'feb23' | 'march8') => {

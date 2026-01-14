@@ -155,12 +155,21 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
   const openDay = (dayData: CalendarDay) => {
     if (dayData.opened || !canOpenDay(dayData.day)) return;
 
+    const today = new Date().toDateString();
+    const lastOpened = localStorage.getItem(`calendar_last_opened_${holiday}`);
+    
+    if (lastOpened === today) {
+      alert('Вы уже открыли подарок сегодня! Приходите завтра за новым сюрпризом 🎁');
+      return;
+    }
+
     if (dayData.prize.requiresLoyaltyCard && !hasLoyaltyCard) {
       setShowLoyaltyPrompt(true);
       setSelectedDay(dayData);
       return;
     }
 
+    localStorage.setItem(`calendar_last_opened_${holiday}`, today);
     setSelectedDay({ ...dayData, opened: true });
     
     const updatedCalendar = calendar.map(d =>

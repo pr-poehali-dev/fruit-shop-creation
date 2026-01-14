@@ -14,28 +14,47 @@ const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
     const currentSettings = getHolidaySettings();
     setSettings(currentSettings);
 
-    // Проверяем, был ли баннер скрыт для текущего праздника
     const dismissedKey = `holiday_banner_dismissed_${currentSettings.activeHoliday}`;
     const dismissed = localStorage.getItem(dismissedKey);
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
       const today = new Date();
-      // Скрываем баннер только на 1 час, затем показываем снова
       const hoursPassed = (today.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60);
       if (hoursPassed < 1) {
         setIsVisible(false);
       }
     }
 
-    // Обновляем настройки каждые 5 секунд (если администратор изменил)
-    const interval = setInterval(() => {
+    const handleSettingsChange = (e: CustomEvent) => {
+      setSettings(e.detail);
+      setIsVisible(true);
+    };
+
+    const handleStorageChange = () => {
       const updatedSettings = getHolidaySettings();
       setSettings(updatedSettings);
-      setIsVisible(true); // Сбрасываем видимость при изменении настроек
+      setIsVisible(true);
+    };
+
+    window.addEventListener('holiday-settings-changed', handleSettingsChange as EventListener);
+    window.addEventListener('storage', handleStorageChange);
+
+    const interval = setInterval(() => {
+      const updatedSettings = getHolidaySettings();
+      const currentJson = JSON.stringify(settings);
+      const updatedJson = JSON.stringify(updatedSettings);
+      if (currentJson !== updatedJson) {
+        setSettings(updatedSettings);
+        setIsVisible(true);
+      }
     }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      window.removeEventListener('holiday-settings-changed', handleSettingsChange as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [settings]);
 
   const dismissBanner = () => {
     setIsVisible(false);

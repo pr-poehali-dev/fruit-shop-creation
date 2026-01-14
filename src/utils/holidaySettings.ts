@@ -10,8 +10,18 @@ export interface HolidaySettings {
 }
 
 const STORAGE_KEY = 'holiday_settings';
+const CACHE_KEY = 'holiday_settings_cache';
+const CACHE_DURATION = 10000;
 
 export const getHolidaySettings = (): HolidaySettings => {
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_DURATION) {
+      return data;
+    }
+  }
+
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) {
     const settings = JSON.parse(stored);
@@ -35,6 +45,10 @@ export const getHolidaySettings = (): HolidaySettings => {
 
 export const saveHolidaySettings = (settings: HolidaySettings): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  localStorage.setItem(CACHE_KEY, JSON.stringify({
+    data: settings,
+    timestamp: Date.now()
+  }));
 };
 
 export const enableHoliday = (holiday: 'feb23' | 'march8'): void => {
@@ -44,6 +58,7 @@ export const enableHoliday = (holiday: 'feb23' | 'march8'): void => {
   settings.showBanner = true;
   settings.calendarEnabled = true;
   saveHolidaySettings(settings);
+  window.dispatchEvent(new CustomEvent('holiday-settings-changed', { detail: settings }));
 };
 
 export const disableHoliday = (): void => {
@@ -53,22 +68,26 @@ export const disableHoliday = (): void => {
   settings.showBanner = false;
   settings.calendarEnabled = false;
   saveHolidaySettings(settings);
+  window.dispatchEvent(new CustomEvent('holiday-settings-changed', { detail: settings }));
 };
 
 export const toggleCalendar = (enabled: boolean): void => {
   const settings = getHolidaySettings();
   settings.calendarEnabled = enabled;
   saveHolidaySettings(settings);
+  window.dispatchEvent(new CustomEvent('holiday-settings-changed', { detail: settings }));
 };
 
 export const toggleBanner = (enabled: boolean): void => {
   const settings = getHolidaySettings();
   settings.showBanner = enabled;
   saveHolidaySettings(settings);
+  window.dispatchEvent(new CustomEvent('holiday-settings-changed', { detail: settings }));
 };
 
 export const setCalendarDays = (holiday: 'feb23' | 'march8', days: number): void => {
   const settings = getHolidaySettings();
   settings.calendarDays[holiday] = days;
   saveHolidaySettings(settings);
+  window.dispatchEvent(new CustomEvent('holiday-settings-changed', { detail: settings }));
 };
