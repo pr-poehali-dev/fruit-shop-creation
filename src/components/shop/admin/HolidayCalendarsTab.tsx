@@ -60,6 +60,49 @@ const HolidayCalendarsTab = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {settings.enabled && settings.activeHoliday && (() => {
+          const calendar = localStorage.getItem(`calendar_${settings.activeHoliday}`);
+          const config = holidayConfig[settings.activeHoliday as 'feb23' | 'march8'];
+          
+          if (!calendar) return null;
+          
+          const days = JSON.parse(calendar);
+          
+          return (
+            <Card className="border-2 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon name="LayoutGrid" size={20} />
+                  Превью календаря: {config.name}
+                </CardTitle>
+                <CardDescription>
+                  Так видят календарь пользователи
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+                  {days.map((day: any) => (
+                    <div
+                      key={day.day}
+                      className={`aspect-square rounded-lg flex items-center justify-center text-lg font-bold transition-all ${
+                        day.opened
+                          ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-md'
+                          : `bg-gradient-to-br ${config.color} text-white opacity-80`
+                      }`}
+                    >
+                      {day.opened ? (
+                        <Icon name="Gift" size={20} />
+                      ) : (
+                        <span>{day.day}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
+
         <div className="grid md:grid-cols-2 gap-4">
           {Object.entries(holidayConfig).map(([key, config]) => {
             const stats = getCalendarStats(key as 'feb23' | 'march8');
@@ -134,49 +177,6 @@ const HolidayCalendarsTab = ({
             );
           })}
         </div>
-
-        {settings.enabled && settings.activeHoliday && (() => {
-          const calendar = localStorage.getItem(`calendar_${settings.activeHoliday}`);
-          const config = holidayConfig[settings.activeHoliday as 'feb23' | 'march8'];
-          
-          if (!calendar) return null;
-          
-          const days = JSON.parse(calendar);
-          
-          return (
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="LayoutGrid" size={20} />
-                  Превью календаря: {config.name}
-                </CardTitle>
-                <CardDescription>
-                  Так видят календарь пользователи
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                  {days.map((day: any) => (
-                    <div
-                      key={day.day}
-                      className={`aspect-square rounded-lg flex items-center justify-center text-lg font-bold transition-all ${
-                        day.opened
-                          ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-md'
-                          : `bg-gradient-to-br ${config.color} text-white opacity-80`
-                      }`}
-                    >
-                      {day.opened ? (
-                        <Icon name="Gift" size={20} />
-                      ) : (
-                        <span>{day.day}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })()}
 
         <div className="border-t pt-6">
           <div className="flex items-center justify-between p-4 bg-red-50 border-2 border-red-200 rounded-lg">
