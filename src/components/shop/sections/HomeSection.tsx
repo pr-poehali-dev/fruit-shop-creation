@@ -150,19 +150,21 @@ const HomeSection = ({ products, onNavigate, onAddToCart, onViewDetails, favorit
       )}
       
       {/* Hero секция с градиентным фоном */}
-      <section className={`relative text-center py-20 px-6 rounded-3xl overflow-hidden ${heroContent.gradient}`}>
+      <section className={`relative text-center py-12 md:py-20 px-4 md:px-6 rounded-3xl overflow-hidden ${heroContent.gradient}`}>
         <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] ${heroContent.radial} via-transparent to-transparent`}></div>
-        <div className="relative z-10">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 text-primary">
+        <div className="relative z-10 space-y-4 md:space-y-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary leading-tight">
             {heroContent.title}
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             {heroContent.subtitle}
           </p>
-          <Button size="lg" onClick={() => onNavigate('catalog')} className="text-lg shadow-xl hover:shadow-2xl transition-shadow">
-            Перейти в каталог
-            <Icon name={heroContent.icon} size={20} className="ml-2" />
-          </Button>
+          <div className="pt-2">
+            <Button size="lg" onClick={() => onNavigate('catalog')} className="text-base md:text-lg shadow-xl hover:shadow-2xl transition-shadow">
+              Перейти в каталог
+              <Icon name={heroContent.icon} size={20} className="ml-2" />
+            </Button>
+          </div>
         </div>
       </section>
 
