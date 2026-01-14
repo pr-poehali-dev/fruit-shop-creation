@@ -263,7 +263,7 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
       </div>
 
       {selectedDay && !showLoyaltyPrompt && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center transform animate-bounce-in">
             <div className="text-7xl mb-4">{config.emoji}</div>
             <h3 className="text-2xl font-bold mb-3 text-gray-800">Поздравляем!</h3>
@@ -288,7 +288,7 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
       )}
 
       {showLoyaltyPrompt && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center">
             <div className="text-6xl mb-4">💳</div>
             <h3 className="text-2xl font-bold mb-3 text-gray-800">Нужна карта лояльности</h3>

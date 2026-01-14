@@ -34,6 +34,45 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if method == 'GET':
             params = event.get('queryStringParameters', {}) or {}
             get_api_key = params.get('api_key') == 'yandex_maps'
+            get_holiday = params.get('holiday_settings') == 'true'
+            
+            if get_holiday:
+                cur.execute("""
+                    SELECT enabled, active_holiday, show_banner, calendar_enabled, 
+                           calendar_days_feb23, calendar_days_march8, updated_at
+                    FROM t_p77282076_fruit_shop_creation.holiday_settings
+                    WHERE id = 1
+                """)
+                row = cur.fetchone()
+                
+                if row:
+                    holiday_settings = {
+                        'enabled': row['enabled'],
+                        'activeHoliday': row['active_holiday'],
+                        'showBanner': row['show_banner'],
+                        'calendarEnabled': row['calendar_enabled'],
+                        'calendarDays': {
+                            'feb23': row['calendar_days_feb23'],
+                            'march8': row['calendar_days_march8']
+                        },
+                        'updatedAt': row['updated_at'].isoformat() if row['updated_at'] else None
+                    }
+                else:
+                    holiday_settings = {
+                        'enabled': False,
+                        'activeHoliday': None,
+                        'showBanner': False,
+                        'calendarEnabled': False,
+                        'calendarDays': {'feb23': 8, 'march8': 8},
+                        'updatedAt': None
+                    }
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps(holiday_settings),
+                    'isBase64Encoded': False
+                }
             
             if get_api_key:
                 yandex_key = os.environ.get('YANDEX_MAPS_API_KEY', '')
@@ -257,6 +296,34 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'body': json.dumps({'success': True, 'settings': dict(settings)}, default=str),
                 'isBase64Encoded': False
             }
+        
+        elif method == 'POST':
+            body_data = json.loads(event.get('body', '{}'))
+            action = body_data.get('action')
+            
+            if action == 'update_holiday':
+                enabled = body_data.get('enabled', False)
+                active_holiday = body_data.get('activeHoliday')
+                show_banner = body_data.get('showBanner', False)
+                calendar_enabled = body_data.get('calendarEnabled', False)
+                calendar_days = body_data.get('calendarDays', {})
+                
+                cur.execute("""
+                    UPDATE t_p77282076_fruit_shop_creation.holiday_settings
+                    SET enabled = %s, active_holiday = %s, show_banner = %s, 
+                        calendar_enabled = %s, calendar_days_feb23 = %s, 
+                        calendar_days_march8 = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = 1
+                """, (enabled, active_holiday, show_banner, calendar_enabled,
+                      calendar_days.get('feb23', 8), calendar_days.get('march8', 8)))
+                conn.commit()
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'success': True, 'message': 'Holiday settings updated'}),
+                    'isBase64Encoded': False
+                }
         
         return {
             'statusCode': 405,
