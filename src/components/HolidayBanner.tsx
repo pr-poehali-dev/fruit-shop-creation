@@ -4,9 +4,10 @@ import { getHolidaySettings } from '@/utils/holidaySettings';
 
 interface HolidayBannerProps {
   onOpenCalendar: (holiday: 'feb23' | 'march8') => void;
+  isPrizeModalOpen?: boolean;
 }
 
-const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
+const HolidayBanner = ({ onOpenCalendar, isPrizeModalOpen = false }: HolidayBannerProps) => {
   const [settings, setSettings] = useState(getHolidaySettings());
   const [isVisible, setIsVisible] = useState(true);
 
@@ -63,7 +64,7 @@ const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
     localStorage.setItem(dismissedKey, new Date().toISOString());
   };
 
-  if (!settings.enabled || !settings.showBanner || !settings.activeHoliday || !isVisible) return null;
+  if (!settings.enabled || !settings.showBanner || !settings.activeHoliday || !isVisible || isPrizeModalOpen) return null;
 
   const activeHoliday = settings.activeHoliday;
 
@@ -109,8 +110,8 @@ const HolidayBanner = ({ onOpenCalendar }: HolidayBannerProps) => {
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${3 + Math.random() * 4}s`
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${8 + Math.random() * 8}s`
               }}
             >
               {currentConfig.particles[Math.floor(Math.random() * currentConfig.particles.length)]}

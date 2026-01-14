@@ -22,9 +22,10 @@ interface HolidayCalendarProps {
   holiday: 'feb23' | 'march8';
   onClose: () => void;
   testMode?: boolean;
+  onPrizeModalChange?: (isOpen: boolean) => void;
 }
 
-const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendarProps) => {
+const HolidayCalendar = ({ holiday, onClose, testMode = false, onPrizeModalChange }: HolidayCalendarProps) => {
   const [calendar, setCalendar] = useState<CalendarDay[]>([]);
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [hasLoyaltyCard, setHasLoyaltyCard] = useState<boolean>(false);
@@ -171,6 +172,7 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
 
     localStorage.setItem(`calendar_last_opened_${holiday}`, today);
     setSelectedDay({ ...dayData, opened: true });
+    onPrizeModalChange?.(true);
     
     const updatedCalendar = calendar.map(d =>
       d.day === dayData.day ? { ...d, opened: true } : d
@@ -278,7 +280,10 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
             </div>
 
             <button
-              onClick={() => setSelectedDay(null)}
+              onClick={() => {
+                setSelectedDay(null);
+                onPrizeModalChange?.(false);
+              }}
               className={`w-full ${config.colors.accent} text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all`}
             >
               Отлично!

@@ -31,6 +31,7 @@ const App = () => {
   const [showCalendar, setShowCalendar] = useState<'feb23' | 'march8' | null>(null);
   const [showCalendarAdmin, setShowCalendarAdmin] = useState<'feb23' | 'march8' | null>(null);
   const [testMode, setTestMode] = useState(false);
+  const [isPrizeModalOpen, setIsPrizeModalOpen] = useState(false);
 
   useEffect(() => {
     let clickCount = 0;
@@ -148,12 +149,16 @@ const App = () => {
         <SupportChat />
         <ShareButton />
         <HolidayDebugPanel />
-        <HolidayBanner onOpenCalendar={(holiday) => setShowCalendar(holiday)} />
+        <HolidayBanner 
+          onOpenCalendar={(holiday) => setShowCalendar(holiday)} 
+          isPrizeModalOpen={isPrizeModalOpen}
+        />
         {showCalendar && (
           <HolidayCalendar
             holiday={showCalendar}
             onClose={() => setShowCalendar(null)}
             testMode={testMode}
+            onPrizeModalChange={setIsPrizeModalOpen}
           />
         )}
         {showCalendarAdmin && (
