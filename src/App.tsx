@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import InstallPrompt from "./components/InstallPrompt";
 import LoadingScreen from "./components/LoadingScreen";
-import DecorativeBranch from "./components/DecorativeBranch";
+import DecorativePlants from "./components/DecorativePlants";
 import SupportChat from "./components/SupportChat";
 import NetworkStatus from "./components/NetworkStatus";
 import ShareButton from "./components/ShareButton";
@@ -146,7 +146,7 @@ const App = () => {
         <Sonner />
         <NetworkStatus />
         <InstallPrompt />
-        <DecorativeBranch />
+        <DecorativePlants />
         <SupportChat />
         <ShareButton />
         <HolidayDebugPanel />

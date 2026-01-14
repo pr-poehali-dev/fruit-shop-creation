@@ -144,6 +144,11 @@ const HolidayCalendar = ({ holiday, onClose, testMode = false }: HolidayCalendar
   const canOpenDay = (day: number): boolean => {
     if (testMode) return true;
 
+    const settings = getHolidaySettings();
+    if (!settings.enabled || settings.activeHoliday !== holiday || !settings.calendarEnabled) {
+      return false;
+    }
+
     const today = new Date();
     const dayDate = new Date(config.startDate);
     dayDate.setDate(config.startDate.getDate() + day - 1);
