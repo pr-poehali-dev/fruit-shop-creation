@@ -50,7 +50,7 @@ const DeliverySection = ({ siteSettings }: DeliverySectionProps) => {
               <>
                 <div>
                   <h4 className="font-semibold">{siteSettings?.delivery_courier_title || 'Курьерская доставка'}</h4>
-                  <p className="text-sm text-muted-foreground">{siteSettings?.delivery_courier_text || 'По Москве и области — 500 ₽'}</p>
+                  <p className="text-sm text-muted-foreground">{siteSettings?.delivery_courier_text || `По Барнаулу — ${siteSettings?.delivery_cost || '600'} ₽, на комнатные растения предзаказ не распространяется.`}</p>
                 </div>
                 <div>
                   <h4 className="font-semibold">{siteSettings?.delivery_transport_title || 'Транспортная компания'}</h4>
