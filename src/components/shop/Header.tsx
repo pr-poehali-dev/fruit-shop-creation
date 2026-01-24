@@ -91,8 +91,8 @@ const Header = ({
   };
   
   return (
-    <header className="header-height sticky top-0 z-50 bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-800 text-primary-foreground shadow-md overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+    <header className="header-height sticky top-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/40 text-foreground shadow-sm overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-green-500/5 to-teal-500/5 pointer-events-none" />
       {isNewYear && <SnowEffect />}
       
       {isNewYear && (
@@ -121,7 +121,7 @@ const Header = ({
         </>
       )}
       
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10 backdrop-blur-sm bg-background/80 rounded-lg my-2 shadow-sm border border-border/50">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink min-w-0">
           <SideMenu siteSettings={siteSettings} user={user} onSectionChange={onSectionChange} />
           <button 
