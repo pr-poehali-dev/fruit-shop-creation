@@ -38,7 +38,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             user_id = params.get('user_id')
             
             if action == 'referral_code' and user_id:
-                cur.execute(f"SELECT referral_code FROM t_p77282076_fruit_shop_creation.referral_codes WHERE user_id = {user_id}")
+                cur.execute(f"SELECT referral_code FROM referral_codes WHERE user_id = {user_id}")
                 code_result = cur.fetchone()
                 return {
                     'statusCode': 200,
@@ -53,14 +53,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 import random
                 import string
                 
-                cur.execute(f"SELECT referral_code FROM t_p77282076_fruit_shop_creation.referral_codes WHERE user_id = {user_id}")
+                cur.execute(f"SELECT referral_code FROM referral_codes WHERE user_id = {user_id}")
                 code_result = cur.fetchone()
                 
                 if code_result:
                     referral_code = code_result['referral_code']
                 else:
                     referral_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-                    cur.execute(f"INSERT INTO t_p77282076_fruit_shop_creation.referral_codes (user_id, referral_code) VALUES ({user_id}, '{referral_code}')")
+                    cur.execute(f"INSERT INTO referral_codes (user_id, referral_code) VALUES ({user_id}, '{referral_code}')")
                     conn.commit()
                 
                 cur.execute(f"""
@@ -72,8 +72,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         r.created_at,
                         u.full_name,
                         u.phone
-                    FROM t_p77282076_fruit_shop_creation.referrals r
-                    JOIN t_p77282076_fruit_shop_creation.users u ON u.id = r.referred_id
+                    FROM referrals r
+                    JOIN users u ON u.id = r.referred_id
                     WHERE r.referrer_id = {user_id}
                     ORDER BY r.created_at DESC
                 """)
@@ -95,7 +95,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 cur.execute(f"""
                     SELECT COALESCE(SUM(reward_amount), 0) as total
-                    FROM t_p77282076_fruit_shop_creation.referrals 
+                    FROM referrals 
                     WHERE referrer_id = {user_id} AND reward_given = true
                 """)
                 result = cur.fetchone()
