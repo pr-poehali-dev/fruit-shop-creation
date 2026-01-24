@@ -398,9 +398,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         COUNT(CASE WHEN r.reward_given = true THEN 1 END) as successful_referrals,
                         COUNT(CASE WHEN r.reward_given = false THEN 1 END) as pending_referrals,
                         COALESCE(SUM(CASE WHEN r.reward_given = true THEN r.reward_amount ELSE 0 END), 0) as total_earned
-                    FROM t_p77282076_fruit_shop_creation.users u
-                    LEFT JOIN t_p77282076_fruit_shop_creation.referral_codes rc ON rc.user_id = u.id
-                    LEFT JOIN t_p77282076_fruit_shop_creation.referrals r ON r.referrer_id = u.id
+                    FROM users u
+                    LEFT JOIN referral_codes rc ON rc.user_id = u.id
+                    LEFT JOIN referrals r ON r.referrer_id = u.id
                     WHERE rc.referral_code IS NOT NULL
                     GROUP BY u.id, u.phone, u.full_name, rc.referral_code
                     HAVING COUNT(r.id) > 0
@@ -427,8 +427,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                             END as order_status,
                             COALESCE(r.reward_amount, 0) as bonus_earned,
                             r.reward_given as bonus_awarded
-                        FROM t_p77282076_fruit_shop_creation.referrals r
-                        JOIN t_p77282076_fruit_shop_creation.users u ON u.id = r.referred_id
+                        FROM referrals r
+                        JOIN users u ON u.id = r.referred_id
                         WHERE r.referrer_id = {user_id}
                         ORDER BY r.created_at DESC
                     """)
@@ -496,7 +496,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             try:
                 cur.execute(
-                    f"UPDATE t_p77282076_fruit_shop_creation.users SET snow_effect_enabled = {snow_enabled} WHERE id = {user_id}"
+                    f"UPDATE users SET snow_effect_enabled = {snow_enabled} WHERE id = {user_id}"
                 )
                 conn.commit()
                 
@@ -608,7 +608,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 
                 code_escaped = referral_code.replace("'", "''")
                 cur.execute(
-                    f"INSERT INTO t_p77282076_fruit_shop_creation.referral_codes (user_id, referral_code) VALUES ({user_id}, '{code_escaped}') ON CONFLICT (referral_code) DO NOTHING RETURNING referral_code"
+                    f"INSERT INTO referral_codes (user_id, referral_code) VALUES ({user_id}, '{code_escaped}') ON CONFLICT (referral_code) DO NOTHING RETURNING referral_code"
                 )
                 conn.commit()
                 result = cur.fetchone()
@@ -1119,13 +1119,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             if referral_code_escaped:
                 cur.execute(
-                    f"SELECT user_id FROM t_p77282076_fruit_shop_creation.referral_codes WHERE referral_code = '{referral_code_escaped}'"
+                    f"SELECT user_id FROM referral_codes WHERE referral_code = '{referral_code_escaped}'"
                 )
                 referrer_row = cur.fetchone()
                 if referrer_row and referrer_row[0] != user_id:
                     referrer_id = referrer_row[0]
                     cur.execute(
-                        f"INSERT INTO t_p77282076_fruit_shop_creation.referrals (referrer_id, referred_id, referral_code, reward_amount) VALUES ({referrer_id}, {user_id}, '{referral_code_escaped}', 500.00)"
+                        f"INSERT INTO referrals (referrer_id, referred_id, referral_code, reward_amount) VALUES ({referrer_id}, {user_id}, '{referral_code_escaped}', 500.00)"
                     )
                     conn.commit()
             
