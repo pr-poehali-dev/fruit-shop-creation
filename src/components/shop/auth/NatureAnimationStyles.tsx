@@ -32,33 +32,7 @@ const NatureAnimationStyles = () => {
       .leaf-7 { top: 60%; left: 85%; animation-delay: 2.5s; }
       .leaf-8 { top: 35%; left: 15%; animation-delay: 3.5s; background: rgba(134, 239, 172, 0.8); }
       
-      .tree {
-        position: absolute;
-        bottom: 0;
-        width: 60px;
-        height: 120px;
-        background: linear-gradient(to top, rgba(6, 78, 59, 0.5), rgba(52, 211, 153, 0.4));
-        border-radius: 50% 50% 0 0;
-        animation: sway 4s ease-in-out infinite;
-      }
-      
-      .tree::before {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 12px;
-        height: 35px;
-        background: rgba(92, 64, 51, 0.7);
-        border-radius: 2px;
-      }
-      
-      .tree-1 { left: 10%; animation-delay: 0s; }
-      .tree-2 { left: 35%; height: 100px; animation-delay: 1s; }
-      .tree-3 { left: 65%; height: 140px; animation-delay: 0.5s; }
-      .tree-4 { left: 85%; height: 110px; animation-delay: 1.5s; }
-      
+
       .flower {
         position: absolute;
         bottom: 40px;
@@ -202,11 +176,7 @@ const NatureAnimationStyles = () => {
         75% { transform: translateY(-15px) rotate(270deg); }
       }
       
-      @keyframes sway {
-        0%, 100% { transform: rotate(-1deg); }
-        50% { transform: rotate(2deg); }
-      }
-      
+
       @keyframes bloom {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.15); }

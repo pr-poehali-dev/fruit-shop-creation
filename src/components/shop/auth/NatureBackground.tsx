@@ -12,10 +12,6 @@ const NatureBackground = () => {
           <div className="leaf leaf-6"></div>
           <div className="leaf leaf-7"></div>
           <div className="leaf leaf-8"></div>
-          <div className="tree tree-1"></div>
-          <div className="tree tree-2"></div>
-          <div className="tree tree-3"></div>
-          <div className="tree tree-4"></div>
           <div className="flower flower-1"></div>
           <div className="flower flower-2"></div>
           <div className="flower flower-3"></div>
