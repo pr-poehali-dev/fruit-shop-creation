@@ -95,30 +95,22 @@ export const useAuth = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
       
-      let response;
-      try {
-        response = await fetch(API_AUTH, {
-          method: 'POST',
-          mode: 'cors',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          credentials: 'omit',
-          signal: controller.signal,
-          body: JSON.stringify({
-            action,
-            phone,
-            password,
-            full_name: formData.get('full_name') || '',
-            promo_code: promoCode || null
-          })
-        });
-        clearTimeout(timeoutId);
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        throw fetchError;
-      }
+      const response = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          action,
+          phone,
+          password,
+          full_name: formData.get('full_name') || '',
+          promo_code: promoCode || null
+        })
+      });
+      
+      clearTimeout(timeoutId);
       
       const data = await response.json();
       console.log('Auth response:', { status: response.status, data });
@@ -208,29 +200,21 @@ export const useAuth = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
       
-      let response;
-      try {
-        response = await fetch(API_AUTH, {
-          method: 'POST',
-          mode: 'cors',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          credentials: 'omit',
-          signal: controller.signal,
-          body: JSON.stringify({
-            action: 'login',
-            phone,
-            password,
-            skip_admin_code: skipAdminCode
-          })
-        });
-        clearTimeout(timeoutId);
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        throw fetchError;
-      }
+      const response = await fetch(API_AUTH, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          action: 'login',
+          phone,
+          password,
+          skip_admin_code: skipAdminCode
+        })
+      });
+      
+      clearTimeout(timeoutId);
       
       const data = await response.json();
       console.log('Direct login response:', { status: response.status, data });
