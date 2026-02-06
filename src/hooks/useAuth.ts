@@ -154,7 +154,10 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Auth exception:', error);
-      onError('Не удалось подключиться к серверу');
+      const errorMessage = error instanceof Error 
+        ? `Ошибка сети: ${error.message}` 
+        : 'Не удалось подключиться к серверу. Проверьте интернет-соединение';
+      onError(errorMessage);
     }
   };
 
@@ -217,7 +220,10 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Direct login exception:', error);
-      onError('Не удалось подключиться к серверу');
+      const errorMessage = error instanceof Error 
+        ? `Ошибка сети: ${error.message}` 
+        : 'Не удалось подключиться к серверу. Проверьте интернет-соединение';
+      onError(errorMessage);
     }
   };
 
