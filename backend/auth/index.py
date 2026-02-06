@@ -9,7 +9,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     Args: event with httpMethod, body
     Returns: HTTP response with user data or error
     '''
-    import psycopg2
+    try:
+        import psycopg2
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': f'Ошибка сервера: {str(e)}'}),
+            'isBase64Encoded': False
+        }
     
     method: str = event.get('httpMethod', 'GET')
     
@@ -1081,8 +1089,24 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
     
     db_url = os.environ.get('DATABASE_URL')
-    conn = psycopg2.connect(db_url)
-    cur = conn.cursor()
+    if not db_url:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'База данных не настроена'}),
+            'isBase64Encoded': False
+        }
+    
+    try:
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+    except psycopg2.Error as e:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': f'Ошибка подключения к БД: {str(e)}'}),
+            'isBase64Encoded': False
+        }
     
     try:
         if action == 'register':
@@ -1306,6 +1330,23 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
     
+    except psycopg2.Error as db_err:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': f'Ошибка базы данных: {str(db_err)}'}),
+            'isBase64Encoded': False
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': f'Внутренняя ошибка сервера: {str(e)}'}),
+            'isBase64Encoded': False
+        }
     finally:
-        cur.close()
-        conn.close()
+        try:
+            cur.close()
+            conn.close()
+        except:
+            pass
