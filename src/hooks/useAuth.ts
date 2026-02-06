@@ -92,17 +92,33 @@ export const useAuth = () => {
       
       console.log('Auth attempt:', { action, phone, hasPassword: !!password, hasPromo: !!promoCode });
       
-      const response = await fetch(API_AUTH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action,
-          phone,
-          password,
-          full_name: formData.get('full_name') || '',
-          promo_code: promoCode || null
-        })
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      let response;
+      try {
+        response = await fetch(API_AUTH, {
+          method: 'POST',
+          mode: 'cors',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'omit',
+          signal: controller.signal,
+          body: JSON.stringify({
+            action,
+            phone,
+            password,
+            full_name: formData.get('full_name') || '',
+            promo_code: promoCode || null
+          })
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
       
       const data = await response.json();
       console.log('Auth response:', { status: response.status, data });
@@ -118,7 +134,16 @@ export const useAuth = () => {
       }
       
       if (!response.ok) {
-        const errorMsg = data.error || `Ошибка ${response.status}`;
+        let errorMsg = data.error;
+        if (response.status === 402) {
+          errorMsg = 'Сервис временно недоступен. Попробуйте позже';
+        } else if (response.status === 500) {
+          errorMsg = data.error || 'Ошибка сервера. Попробуйте позже';
+        } else if (response.status === 0) {
+          errorMsg = 'Не удалось подключиться. Проверьте интернет';
+        } else {
+          errorMsg = errorMsg || `Ошибка ${response.status}`;
+        }
         console.error('Auth failed:', errorMsg);
         onError(errorMsg);
         return;
@@ -154,9 +179,18 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Auth exception:', error);
-      const errorMessage = error instanceof Error 
-        ? `Ошибка сети: ${error.message}` 
-        : 'Не удалось подключиться к серверу. Проверьте интернет-соединение';
+      let errorMessage = 'Не удалось подключиться к серверу';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Превышено время ожидания. Попробуйте ещё раз';
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = 'Ошибка соединения. Проверьте интернет или попробуйте позже';
+        } else {
+          errorMessage = `Ошибка: ${error.message}`;
+        }
+      }
+      
       onError(errorMessage);
     }
   };
@@ -171,16 +205,32 @@ export const useAuth = () => {
     try {
       console.log('Direct login attempt:', { phone, hasPassword: !!password, skipAdminCode });
       
-      const response = await fetch(API_AUTH, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'login',
-          phone,
-          password,
-          skip_admin_code: skipAdminCode
-        })
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      let response;
+      try {
+        response = await fetch(API_AUTH, {
+          method: 'POST',
+          mode: 'cors',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'omit',
+          signal: controller.signal,
+          body: JSON.stringify({
+            action: 'login',
+            phone,
+            password,
+            skip_admin_code: skipAdminCode
+          })
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
       
       const data = await response.json();
       console.log('Direct login response:', { status: response.status, data });
@@ -196,7 +246,16 @@ export const useAuth = () => {
       }
       
       if (!response.ok) {
-        const errorMsg = data.error || `Ошибка ${response.status}`;
+        let errorMsg = data.error;
+        if (response.status === 402) {
+          errorMsg = 'Сервис временно недоступен. Попробуйте позже';
+        } else if (response.status === 500) {
+          errorMsg = data.error || 'Ошибка сервера. Попробуйте позже';
+        } else if (response.status === 0) {
+          errorMsg = 'Не удалось подключиться. Проверьте интернет';
+        } else {
+          errorMsg = errorMsg || `Ошибка ${response.status}`;
+        }
         console.error('Direct login failed:', errorMsg);
         onError(errorMsg);
         return;
@@ -220,9 +279,18 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Direct login exception:', error);
-      const errorMessage = error instanceof Error 
-        ? `Ошибка сети: ${error.message}` 
-        : 'Не удалось подключиться к серверу. Проверьте интернет-соединение';
+      let errorMessage = 'Не удалось подключиться к серверу';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Превышено время ожидания. Попробуйте ещё раз';
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = 'Ошибка соединения. Проверьте интернет или попробуйте позже';
+        } else {
+          errorMessage = `Ошибка: ${error.message}`;
+        }
+      }
+      
       onError(errorMessage);
     }
   };
