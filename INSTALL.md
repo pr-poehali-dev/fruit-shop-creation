@@ -2,7 +2,7 @@
 
 ## Что потребуется
 
-- Сервер или VPS с Linux (Ubuntu 20.04 / 22.04)
+- Сервер или VPS с **Ubuntu 24.04 LTS** (Noble Numbat)
 - 2 ГБ RAM минимум (рекомендуется 4 ГБ)
 - 20 ГБ диска
 - Открытые порты: 80 (сайт), 8000 (API), 9001 (управление файлами)
@@ -11,10 +11,32 @@
 
 ## Шаг 1. Установка Docker
 
-Войдите на сервер по SSH и выполните:
+Войдите на сервер по SSH и выполните все команды по очереди:
 
 ```bash
-curl -fsSL https://get.docker.com | sh
+# Удаляем старые версии если были
+sudo apt remove -y docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc 2>/dev/null; true
+
+# Обновляем систему и ставим зависимости
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y ca-certificates curl gnupg lsb-release
+
+# Добавляем официальный репозиторий Docker
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Устанавливаем Docker + Compose Plugin
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Добавляем текущего пользователя в группу docker (чтобы не писать sudo)
 sudo usermod -aG docker $USER
 newgrp docker
 ```
@@ -23,6 +45,12 @@ newgrp docker
 ```bash
 docker --version
 docker compose version
+```
+
+Ожидаемый вывод:
+```
+Docker version 26.x.x, build ...
+Docker Compose version v2.x.x
 ```
 
 ---
