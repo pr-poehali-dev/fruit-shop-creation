@@ -14,8 +14,11 @@
 Войдите на сервер по SSH и выполните **одну команду** — она всё сделает автоматически:
 
 ```bash
-curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER && newgrp docker
+curl -fsSL https://get.docker.com | sh
 ```
+
+> Если вы подключены как **root** (в строке написано `root@...`) — этого достаточно, root уже имеет все права.  
+> Если вы обычный пользователь — выполните дополнительно: `sudo usermod -aG docker $USER` и перелогиньтесь.
 
 Проверьте что всё установилось:
 ```bash
