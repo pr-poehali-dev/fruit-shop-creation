@@ -5,7 +5,7 @@
 - Сервер или VPS с **Ubuntu 24.04 LTS** (Noble Numbat)
 - 2 ГБ RAM минимум (рекомендуется 4 ГБ)
 - 20 ГБ диска
-- Открытые порты: 80 (сайт), 8000 (API), 9001 (управление файлами)
+- Открытые порты: 80, 443 (HTTPS), 9000, 9001 (хранилище фото)
 
 ---
 
@@ -96,13 +96,80 @@ nano .env
 
 ---
 
-## Шаг 4. Запуск
+## Шаг 4. Перенос данных из поехали.dev
 
+> Пропустите этот шаг если запускаете сайт с нуля (без данных).
+
+### 4.1 Экспорт на вашем компьютере
+
+Установите Python-зависимости:
+```bash
+pip install psycopg2-binary boto3
+```
+
+Откройте **поехали.dev → Секреты** и скопируйте значения:
+- `DATABASE_URL`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `MAIN_DB_SCHEMA`
+
+Запустите экспорт (из папки проекта):
+```bash
+DATABASE_URL="postgresql://..." \
+AWS_ACCESS_KEY_ID="..." \
+AWS_SECRET_ACCESS_KEY="..." \
+MAIN_DB_SCHEMA="t_p..._..." \
+python docker/export-from-poehali.py
+```
+
+Скрипт создаст папку `export/` с:
+- `export/database.sql` — все данные (товары, заказы, пользователи, настройки)
+- `export/files/` — все фотографии товаров
+
+### 4.2 Перенос на сервер
+
+```bash
+# Копируем папку export/ на сервер
+scp -r export/ user@ВАШ_IP:~/myshop/
+```
+
+### 4.3 Импорт на сервере
+
+Сначала запустите Docker (следующий шаг), затем вернитесь и выполните:
+
+```bash
+cd ~/myshop
+pip install psycopg2-binary boto3
+python docker/import-to-server.py
+```
+
+Скрипт спросит подтверждение и перенесёт все данные и фото в локальную базу и хранилище.
+
+---
+
+## Шаг 5. Запуск
+
+**Без домена (по IP-адресу):**
 ```bash
 docker compose up -d --build
 ```
 
-Первый запуск займёт 5–15 минут (скачивание и сборка).
+**С доменом + автоматический HTTPS (Let's Encrypt):**
+
+Сначала добавьте в `.env`:
+```
+DOMAIN=myshop.ru
+ACME_EMAIL=you@email.com
+VITE_API_BASE_URL=https://myshop.ru/api
+```
+
+Затем запустите с профилем https:
+```bash
+docker compose --profile https up -d --build
+```
+
+Traefik автоматически получит SSL-сертификат и настроит HTTPS.  
+Сертификат обновляется автоматически каждые 90 дней.
 
 Проверьте что всё работает:
 ```bash
@@ -113,11 +180,10 @@ docker compose ps
 
 ---
 
-## Шаг 5. Открыть сайт
+## Шаг 6. Открыть сайт
 
-Откройте в браузере: `http://ВАШ_IP`
-
-Если указали домен и настроили DNS — `http://ВАШ_ДОМЕН`.
+- Без домена: `http://ВАШ_IP`
+- С доменом: `https://ВАШ_ДОМЕН`
 
 ---
 
@@ -131,52 +197,6 @@ docker compose ps
 
 ---
 
-## Подключить домен (Nginx + SSL)
-
-Установите Nginx и Certbot:
-
-```bash
-sudo apt install nginx certbot python3-certbot-nginx -y
-```
-
-Создайте конфиг сайта:
-
-```bash
-sudo nano /etc/nginx/sites-available/myshop
-```
-
-Вставьте (замените `ВАШ_ДОМЕН`):
-
-```nginx
-server {
-    listen 80;
-    server_name ВАШ_ДОМЕН www.ВАШ_ДОМЕН;
-
-    location / {
-        proxy_pass http://localhost:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location /api/ {
-        proxy_pass http://localhost:8000/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-Активируйте и получите SSL:
-
-```bash
-sudo ln -s /etc/nginx/sites-available/myshop /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-sudo certbot --nginx -d ВАШ_ДОМЕН -d www.ВАШ_ДОМЕН
-```
-
----
-
 ## Обновление сайта
 
 После изменений в коде:
@@ -184,6 +204,8 @@ sudo certbot --nginx -d ВАШ_ДОМЕН -d www.ВАШ_ДОМЕН
 ```bash
 git pull
 docker compose up -d --build
+# или с HTTPS:
+docker compose --profile https up -d --build
 ```
 
 ---
@@ -220,7 +242,7 @@ docker compose down -v
 4. Перезапустите: `docker compose restart backend`
 
 В настройках Alfabank укажите URL возврата:  
-`http://ВАШ_ДОМЕН/payment/success`
+`https://ВАШ_ДОМЕН/payment/success`
 
 ---
 
@@ -242,6 +264,14 @@ docker compose down -v
 docker compose logs frontend
 docker compose logs backend
 ```
+
+**HTTPS не работает / сертификат не выдаётся:**
+```bash
+docker compose logs traefik
+```
+Убедитесь что:
+- DNS домена указывает на IP сервера
+- Порты 80 и 443 открыты в файрволе: `sudo ufw allow 80 && sudo ufw allow 443`
 
 **База данных не запустилась:**
 ```bash
