@@ -11,29 +11,10 @@
 
 ## Шаг 1. Установка Docker
 
-Войдите на сервер по SSH и выполните все команды по очереди:
+Войдите на сервер по SSH и выполните **одну команду** — она всё сделает автоматически:
 
 ```bash
-# Удаляем старые версии если были
-sudo apt remove -y docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc 2>/dev/null; true
-
-# Обновляем систему и ставим зависимости
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y ca-certificates curl gnupg lsb-release
-
-# Добавляем официальный репозиторий Docker (для Ubuntu 24.04 Noble)
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list
-
-# Устанавливаем Docker + Compose Plugin
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# Добавляем текущего пользователя в группу docker (чтобы не писать sudo)
-sudo usermod -aG docker $USER
-newgrp docker
+curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER && newgrp docker
 ```
 
 Проверьте что всё установилось:
