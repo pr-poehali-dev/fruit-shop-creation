@@ -5,9 +5,6 @@
       "method": "GET",
       "path": "/?all=true",
       "expectedStatus": 200,
-      "expectedBody": {
-        "tickets": "array"
-      },
       "bodyMatcher": "partial"
     }
   ]

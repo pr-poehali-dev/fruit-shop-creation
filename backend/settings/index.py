@@ -2,6 +2,7 @@ import json
 import os
 from typing import Dict, Any
 
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Manage site settings and information with Yandex Maps API key

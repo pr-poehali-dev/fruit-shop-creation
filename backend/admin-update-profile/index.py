@@ -4,6 +4,7 @@ import psycopg2
 import bcrypt
 from typing import Dict, Any
 
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Update user profile (name, phone, and optionally password) by admin

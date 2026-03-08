@@ -4,6 +4,7 @@ import requests
 from typing import Dict, Any
 from urllib.parse import urlencode, quote
 
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Create Alfabank payment for orders and balance top-up via Alfa Checkout API

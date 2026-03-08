@@ -3,6 +3,7 @@ import os
 import psycopg2
 from typing import Dict, Any
 
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Manage support tickets - get tickets, update status, add comments

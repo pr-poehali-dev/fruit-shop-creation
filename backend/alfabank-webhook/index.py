@@ -3,6 +3,7 @@ import os
 import requests
 from typing import Dict, Any
 
+
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Business: Handle Alfabank payment status checks and webhooks via getOrderStatusExtended.do API

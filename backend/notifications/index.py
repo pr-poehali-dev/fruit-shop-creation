@@ -4,6 +4,7 @@ Args: event с httpMethod, body, queryStringParameters; context с request_id
 Returns: HTTP response с уведомлениями пользователя
 '''
 
+
 import json
 import os
 import psycopg2

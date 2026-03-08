@@ -3,6 +3,7 @@ import os
 from typing import Dict, Any
 import urllib.parse
 import urllib.request
+
 import base64
 
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
