@@ -42,12 +42,13 @@ const HolidayBanner = ({ onOpenCalendar, isPrizeModalOpen = false }: HolidayBann
 
     const interval = setInterval(() => {
       const updatedSettings = getHolidaySettings();
-      const currentJson = JSON.stringify(settings);
-      const updatedJson = JSON.stringify(updatedSettings);
-      if (currentJson !== updatedJson) {
-        setSettings(updatedSettings);
-        setIsVisible(true);
-      }
+      setSettings(prev => {
+        if (JSON.stringify(prev) !== JSON.stringify(updatedSettings)) {
+          setIsVisible(true);
+          return updatedSettings;
+        }
+        return prev;
+      });
     }, 5000);
 
     return () => {
@@ -55,7 +56,7 @@ const HolidayBanner = ({ onOpenCalendar, isPrizeModalOpen = false }: HolidayBann
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, [settings]);
+  }, []);
 
   const dismissBanner = () => {
     setIsVisible(false);
