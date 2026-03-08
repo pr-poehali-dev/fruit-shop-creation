@@ -7,7 +7,7 @@ export const logUserAction = async (
   metadata?: any
 ) => {
   try {
-    await fetch('https://functions.poehali.dev/e5bdda57-9d9d-4506-b4a8-6a4d2bbcd778', {
+    await fetch('https://functions.poehali.dev/14c40ab2-8b60-4ccc-b428-bb824cb6871c', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
