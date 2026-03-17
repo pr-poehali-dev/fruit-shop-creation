@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {
+      "name": "Export data as SQL",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}
