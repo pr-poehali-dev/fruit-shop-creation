@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { formatDateTime } from '@/lib/dateUtils';
 
 interface Transaction {
   id: number;
@@ -85,7 +86,7 @@ const TransactionHistoryTab = ({
                 <div>
                   <p className="text-sm font-medium">{transaction.description || 'Операция'}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(transaction.created_at).toLocaleString('ru-RU')}
+                    {formatDateTime(transaction.created_at)}
                   </p>
                 </div>
               </div>

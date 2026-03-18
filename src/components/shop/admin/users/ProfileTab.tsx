@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import { logAdminAction } from '@/utils/adminLogger';
+import { formatDate } from '@/lib/dateUtils';
 
 interface User {
   id: number;
@@ -239,7 +240,7 @@ const ProfileTab = ({ selectedUser, onCancel, onUpdate }: ProfileTabProps) => {
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Дата регистрации:</span>
           <span className="font-medium">
-            {selectedUser?.created_at ? new Date(selectedUser.created_at).toLocaleDateString('ru-RU') : '-'}
+            {selectedUser?.created_at ? formatDate(selectedUser.created_at) : '-'}
           </span>
         </div>
       </div>

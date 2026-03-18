@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { formatDateTime } from '@/lib/dateUtils';
 
 interface OrderDetailsDialogProps {
   order: any;
@@ -100,7 +101,7 @@ export const OrderDetailsDialog = ({
             </div>
             <div>
               <div className="font-medium text-muted-foreground">Дата создания</div>
-              <div>{new Date(order.created_at).toLocaleString('ru-RU')}</div>
+              <div>{formatDateTime(order.created_at)}</div>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { formatDateTime } from '@/lib/dateUtils';
 
 interface OrderCardProps {
   order: any;
@@ -28,13 +29,7 @@ export const OrderCard = ({
             {order.user_name} ({order.user_phone})
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {new Date(order.created_at).toLocaleString('ru-RU', { 
-              day: '2-digit', 
-              month: '2-digit', 
-              year: 'numeric', 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
+            {formatDateTime(order.created_at)}
           </div>
         </div>
         <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:text-right">

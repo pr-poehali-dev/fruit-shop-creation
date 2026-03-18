@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { toDate } from '@/lib/dateUtils';
 
 interface OrdersStatsCardProps {
   orders: any[];
@@ -199,7 +200,7 @@ const OrdersStatsCard = ({ orders }: OrdersStatsCardProps) => {
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {ratingsData
                 .filter(o => o.ratingsStats?.total_ratings > 0)
-                .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime())
+                .sort((a, b) => toDate(b.updated_at || b.created_at).getTime() - toDate(a.updated_at || a.created_at).getTime())
                 .slice(0, 10)
                 .map((order) => (
                   <div key={order.id} className="p-3 bg-muted rounded-lg border">

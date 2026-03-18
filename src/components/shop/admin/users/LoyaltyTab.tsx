@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
+import { formatDate } from '@/lib/dateUtils';
 
 interface LoyaltyCard {
   id: number;
@@ -115,7 +116,7 @@ const LoyaltyTab = ({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Выдана:</span>
                 <span className="font-medium">
-                  {new Date(loyaltyCard.purchased_at).toLocaleDateString('ru-RU')}
+                  {formatDate(loyaltyCard.purchased_at)}
                 </span>
               </div>
               <div className="flex justify-between">

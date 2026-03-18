@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import PaymentDetailsModal from '@/components/payments/PaymentDetailsModal';
 import ApprovedPaymentDetailsModal from '@/components/payments/ApprovedPaymentDetailsModal';
 import { API_ENDPOINTS } from '@/config/api';
+import { formatDateTime } from '@/lib/dateUtils';
 
 interface AuditLog {
   id: number;
@@ -287,13 +288,7 @@ const AuditLogs = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                {new Date(log.created_at).toLocaleString('ru-RU', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                                {formatDateTime(log.created_at)}
                               </span>
                               <Button
                                 variant="ghost"

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { formatDateTime } from '@/lib/dateUtils';
 
 interface ChatMessage {
   id: number;
@@ -76,7 +77,7 @@ export default function ChatWindow({
                     <div className="text-xs font-semibold mb-1">{msg.sender_name}</div>
                     <div className="text-sm whitespace-pre-wrap">{msg.message}</div>
                     <div className="text-xs opacity-70 mt-1">
-                      {new Date(msg.created_at).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}
+                      {formatDateTime(msg.created_at)}
                     </div>
                   </div>
                 </div>

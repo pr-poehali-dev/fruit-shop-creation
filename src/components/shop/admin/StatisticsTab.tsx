@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import { formatDate } from '@/lib/dateUtils';
 
 const API_STATISTICS = 'https://functions.poehali.dev/5417d2b2-c525-4686-856d-577e2d90240c';
 
@@ -117,10 +118,7 @@ export default function StatisticsTab() {
             {statistics.daily.map((day) => (
               <div key={day.date} className="flex items-center justify-between py-2 border-b last:border-0">
                 <span className="text-sm font-medium">
-                  {new Date(day.date).toLocaleDateString('ru-RU', { 
-                    day: 'numeric',
-                    month: 'long'
-                  })}
+                  {formatDate(day.date, { day: 'numeric', month: 'long' })}
                 </span>
                 <div className="flex gap-4">
                   <span className="text-sm text-muted-foreground">

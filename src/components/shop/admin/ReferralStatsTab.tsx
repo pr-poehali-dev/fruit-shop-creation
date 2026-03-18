@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { formatDate } from '@/lib/dateUtils';
 
 interface ReferralData {
   user_id: number;
@@ -237,7 +238,7 @@ const ReferralStatsTab = () => {
                                     {ref.referred_name || ref.referred_phone}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
-                                    Регистрация: {new Date(ref.referred_at).toLocaleDateString('ru-RU')}
+                                    Регистрация: {formatDate(ref.referred_at)}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3">

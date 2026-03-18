@@ -4,6 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { ArchivedChat, ChatMessage } from './types';
+import { formatDateTime, formatTime } from '@/lib/dateUtils';
 
 interface ArchiveViewProps {
   archivedChats: ArchivedChat[];
@@ -57,7 +58,7 @@ export default function ArchiveView({
               {selectedArchive.user_phone && <p>📱 {selectedArchive.user_phone}</p>}
               {selectedArchive.admin_name && <p>👤 Администратор: {selectedArchive.admin_name}</p>}
               {selectedArchive.is_missed && <p className="text-destructive">⚠️ Чат пропущен из-за неактивности (30+ мин)</p>}
-              <p>📅 Закрыт: {new Date(selectedArchive.closed_at).toLocaleString('ru-RU')}</p>
+              <p>📅 Закрыт: {formatDateTime(selectedArchive.closed_at)}</p>
             </div>
           </CardHeader>
           <CardContent>
@@ -80,7 +81,7 @@ export default function ArchiveView({
                         {msg.sender_name}
                       </span>
                       <span className="text-xs opacity-70">
-                        {new Date(msg.created_at).toLocaleTimeString('ru-RU')}
+                        {formatTime(msg.created_at)}
                       </span>
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
@@ -162,7 +163,7 @@ export default function ArchiveView({
                       <div className="text-sm text-muted-foreground">👤 {archive.admin_name}</div>
                     )}
                     <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(archive.closed_at).toLocaleString('ru-RU')}
+                      {formatDateTime(archive.closed_at)}
                     </div>
                   </div>
                   <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
