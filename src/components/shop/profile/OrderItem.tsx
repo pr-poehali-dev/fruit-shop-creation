@@ -32,7 +32,7 @@ const OrderItem = ({ order, isExpanded, onToggle, onCancel, onPayDelivery, onPay
             <div className="min-w-0">
               <CardTitle className="text-xs sm:text-sm">Заказ #{order.id}</CardTitle>
               <CardDescription className="text-[10px] sm:text-xs">
-                {new Date(order.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}
+                {new Date(order.created_at + (order.created_at.includes('Z') || order.created_at.includes('+') ? '' : 'Z')).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', timeZone: 'Asia/Krasnoyarsk' })}
               </CardDescription>
             </div>
           </div>
